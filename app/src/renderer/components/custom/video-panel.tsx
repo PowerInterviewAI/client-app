@@ -46,6 +46,7 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
     }
 
     const [isStreaming, setIsStreaming] = useState(false);
+    const prevRttRef = useRef<number>(0);
 
     // data channel RTT helpers
     const dataChannelRef = useRef<RTCDataChannel | null>(null);
@@ -181,8 +182,22 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
                 const now = Date.now();
                 const sent = pendingPings.current.get(msg.id);
                 if (sent) {
-                  console.log('Data channel RTT', now - sent, 'ms');
+                  const rtt = now - sent;
+                  console.log('Data channel RTT', rtt, 'ms');
                   pendingPings.current.delete(msg.id);
+                  // restart audio control agent when RTT is new or jumps >50ms
+                  const prev = prevRttRef.current;
+                  if (prev === 0 || Math.abs(rtt - prev) > 50) {
+                    console.log(
+                      `RTT changed significantly (${prev} -> ${rtt}), restarting audio agent`
+                    );
+                    prevRttRef.current = rtt;
+                    electron.webRtc.restartAudioAgent(rtt).catch((e) => {
+                      console.warn('Error restarting agents after RTT change', e);
+                    });
+                  } else {
+                    prevRttRef.current = rtt;
+                  }
                 }
               } else if (msg.type === 'ping') {
                 dc.send(JSON.stringify({ type: 'pong', id: msg.id }));

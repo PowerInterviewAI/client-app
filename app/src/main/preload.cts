@@ -85,6 +85,8 @@ const electronApi = {
     getTurnCredentials: () => ipcRenderer.invoke('webrtc:turn-credentials'),
     startAgents: () => ipcRenderer.invoke('webrtc:start-agents'),
     stopAgents: () => ipcRenderer.invoke('webrtc:stop-agents'),
+    restartAudioAgent: (delayMs?: number) =>
+      ipcRenderer.invoke('webrtc:restart-audio-agent', delayMs),
     putVideoFrame: (frameData: ArrayBuffer) =>
       ipcRenderer.invoke('webrtc:put-video-frame', frameData),
   },

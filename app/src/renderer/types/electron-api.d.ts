@@ -95,6 +95,7 @@ declare global {
       getTurnCredentials: () => Promise<any>;
       startAgents: () => Promise<void>;
       stopAgents: () => Promise<void>;
+      restartAudioAgent: (delayMs?: number) => Promise<void>;
       putVideoFrame: (frameData: ArrayBuffer) => Promise<void>;
     };
 

@@ -32,6 +32,8 @@ class WebRTCService {
   private serviceActive = false;
   private vcamAgent: AgentProcess | null = null;
   private audioControlAgent: AgentProcess | null = null;
+  // store most recently used audio delay for restarts
+  private lastAudioDelayMs: number | undefined;
   private zmqPushSocket: zmq.Push | null = null;
   private frameCount = 0;
 
@@ -69,11 +71,9 @@ class WebRTCService {
     this.serviceActive = true;
 
     try {
-      await Promise.all([
-        this.startVCamAgent(),
-        this.setupZmqPushSocket(),
-        this.startAudioControlAgent(),
-      ]);
+      // Start both agents in parallel and wait for them to be ready before marking service as active
+      // Audio control agent will be started after delay if specified, so it doesn't block vcam agent startup
+      await Promise.all([this.startVCamAgent(), this.setupZmqPushSocket()]);
 
       console.log('WebRTC agents started successfully');
     } catch (error) {
@@ -119,6 +119,25 @@ class WebRTCService {
 
     this.frameCount = 0;
     console.log('WebRTC agents stopped');
+  }
+
+  /**
+   * Restart only the audio control agent, optionally specifying a new
+   * delay value.
+   */
+  async restartAudioAgent(delayMs?: number): Promise<void> {
+    if (delayMs !== undefined) {
+      this.lastAudioDelayMs = delayMs;
+    }
+    console.log(
+      'Restarting audio control agent',
+      this.lastAudioDelayMs ? `with delay ${this.lastAudioDelayMs}ms` : ''
+    );
+    if (this.audioControlAgent) {
+      await this.stopAgent(this.audioControlAgent);
+      this.audioControlAgent = null;
+    }
+    await this.startAudioControlAgent(this.lastAudioDelayMs);
   }
 
   /**
@@ -215,7 +234,7 @@ class WebRTCService {
   /**
    * Start audio control agent process
    */
-  private async startAudioControlAgent(): Promise<void> {
+  private async startAudioControlAgent(delayMs?: number): Promise<void> {
     if (this.audioControlAgent) {
       console.log('Audio control agent already running');
       return;
@@ -223,7 +242,7 @@ class WebRTCService {
 
     const config = configStore.getConfig();
     const inputDevice = config.audioInputDeviceName || 'loopback';
-    const audioDelay = AUDIO_CONTROL_DELAY_MS; // fixed delay now that config value removed
+    const audioDelay = delayMs ?? this.lastAudioDelayMs ?? AUDIO_CONTROL_DELAY_MS; // use stored value if any
 
     const { command, args: baseArgs } = this.getAudioControlAgentCommand();
 
