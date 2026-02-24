@@ -18,39 +18,29 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useVideoDevices } from '@/hooks/use-video-devices';
+import { useVbCableInputDevice, useObsCameraDevice } from '@/hooks/use-special-devices';
 import { RunningState } from '@/types/app-state';
-import { type AudioDevice } from '@/types/audio-device';
 
 import ExternalLink from '../external-link';
 
 interface VideoGroupProps {
   videoDeviceNotFound: boolean;
-  audioOutputDevices: AudioDevice[];
   getDisabled: (state: RunningState, disableOnRunning?: boolean) => boolean;
 }
 
-export function VideoGroup({
-  videoDeviceNotFound,
-  audioOutputDevices,
-  getDisabled,
-}: VideoGroupProps) {
+export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps) {
   const { runningState, appState } = useAppState();
   const { config, updateConfig } = useConfigStore();
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const previewStreamRef = useRef<MediaStream | null>(null);
   const videoDevices = useVideoDevices();
+  const obsCameraDevice = useObsCameraDevice();
+  const vbInputDevice = useVbCableInputDevice();
   const lowCredits = appState?.credits === undefined ? null : appState?.credits <= 0;
 
-  const OBS_CAMERA_PREFIX = 'OBS Virtual';
-  const obsCameraExists =
-    videoDevices.length > 0 ? videoDevices.some((d) => d.label.includes(OBS_CAMERA_PREFIX)) : true;
-
-  const VB_AUDIO_INPUT_PREFIX = 'CABLE Input (VB-Audio Virtual';
-  const vbInputExists =
-    audioOutputDevices.length > 0
-      ? audioOutputDevices.some((d) => d.name.startsWith(VB_AUDIO_INPUT_PREFIX))
-      : true;
+  const obsCameraExists = obsCameraDevice !== null;
+  const vbInputExists = vbInputDevice !== null;
 
   useEffect(() => {
     // Disable face swap if required devices are not found
@@ -72,7 +62,8 @@ export function VideoGroup({
   }, [lowCredits, config?.faceSwap, updateConfig]);
 
   const usableVideoDevices = videoDevices.filter((d) => {
-    if (d.label.toLowerCase().startsWith(OBS_CAMERA_PREFIX.toLowerCase())) return false;
+    // exclude OBS virtual camera
+    if (obsCameraDevice && d.deviceId === obsCameraDevice.deviceId) return false;
     if (d.label.toLowerCase().includes('virtual')) return false;
     return true;
   });

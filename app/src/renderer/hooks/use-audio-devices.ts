@@ -18,6 +18,7 @@ function useAudioDevices(kind: 'audioinput' | 'audiooutput', deviceType: string)
           .map((device, index) => ({
             name: device.label || `${deviceType} Device ${index + 1}`,
             index,
+            deviceId: device.deviceId,
           }));
         setDevices(filtered);
       } catch (error) {

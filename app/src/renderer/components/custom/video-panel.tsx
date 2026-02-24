@@ -1,5 +1,7 @@
 import { UserCircle2 } from 'lucide-react';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { useAudioInputDevices } from '@/hooks/use-audio-devices';
+import { useVbCableInputDevice } from '@/hooks/use-special-devices';
 import { toast } from 'sonner';
 
 import { useConfigStore } from '@/hooks/use-config-store';
@@ -24,6 +26,8 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
   ({ runningState, credits, fps = 30, jpegQuality = 0.8 }, ref) => {
     const { config } = useConfigStore();
     const videoDevices = useVideoDevices();
+    const audioInputDevices = useAudioInputDevices();
+    const audioVbInput = useVbCableInputDevice();
 
     const cameraDeviceName = config?.cameraDeviceName ?? '';
     const videoWidth = config?.videoWidth ?? 1280;
@@ -31,6 +35,7 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
 
     const [videoMessage, setVideoMessage] = useState('Video Stream');
     const videoRef = useRef<HTMLVideoElement>(null);
+    const audioRef = useRef<HTMLAudioElement>(null);
     const captureCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const captureIntervalRef = useRef<number | null>(null);
     const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -152,8 +157,8 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
         }
 
         const rtcConfig: RTCConfiguration = {
-          iceServers: [creds],
-          iceTransportPolicy: 'relay',
+          // iceServers: [creds],
+          // iceTransportPolicy: 'relay',
         };
 
         const pc = new RTCPeerConnection(rtcConfig);
@@ -231,20 +236,40 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
             };
           }
 
-          // Attach remote stream to visible video element
+          // Attach remote stream to media elements
           if (videoRef.current) {
             videoRef.current.srcObject = remoteStream;
             videoRef.current.play().catch(() => {});
             // Start capture loop to compress frames to JPEG and send to main
             startCaptureLoop();
           }
+          if (audioRef.current) {
+            audioRef.current.srcObject = remoteStream;
+            audioRef.current.play().catch(() => {});
+
+            // attempt to route audio to VB‑Cable output if available
+            if (
+              audioVbInput &&
+              audioVbInput.deviceId &&
+              typeof audioRef.current.setSinkId === 'function'
+            ) {
+              audioRef.current.setSinkId(audioVbInput.deviceId).catch((err) => {
+                console.warn('Failed to set sinkId for VB Cable audio output', err);
+              });
+            }
+          }
         };
 
-        // Find video device id from name
+        // Find device ids from config selection
         const videoDeviceId = videoDevices.find((d) => d.label === cameraDeviceName)?.deviceId;
-        console.log('Video device id', videoDevices, cameraDeviceName, videoDeviceId);
+        const audioInputName = config?.audioInputDeviceName ?? '';
+        const audioDeviceId = audioInputDevices.find((d) => d.name === audioInputName)?.deviceId;
+        console.log('Selected devices', {
+          [cameraDeviceName]: videoDeviceId,
+          [audioInputName]: audioDeviceId,
+        });
 
-        // Acquire local camera only if you still want to send local tracks to the peer
+        // Acquire local camera/microphone for sending
         const localStream = await navigator.mediaDevices.getUserMedia({
           video: {
             deviceId: videoDeviceId ? { exact: videoDeviceId } : undefined,
@@ -252,8 +277,16 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
             height: { ideal: videoHeight },
             frameRate: { ideal: fps, max: fps },
           },
-          audio: false,
+          audio: audioDeviceId
+            ? { deviceId: { exact: audioDeviceId } }
+            : { echoCancellation: false },
         });
+
+        // if there is an audio track, add it to the peer connection as well
+        const audioTrack = localStream.getAudioTracks()[0];
+        if (audioTrack) {
+          pc.addTrack(audioTrack, localStream);
+        }
 
         // Get capabilities and prefer H264 first
         const caps = RTCRtpSender.getCapabilities('video');
@@ -484,6 +517,8 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
     return (
       <div className="relative w-full h-full border rounded-xl overflow-hidden bg-white dark:bg-black shrink-0 py-0">
         <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-contain" />
+        {/* hidden audio player for remote track routed to VB Cable */}
+        <audio ref={audioRef} autoPlay hidden />
 
         {!isStreaming && (
           <div className="absolute inset-0 flex items-center justify-center bg-linear-to-b from-gray-200 to-white dark:from-orange-950/50 dark:to-orange-950/20">
