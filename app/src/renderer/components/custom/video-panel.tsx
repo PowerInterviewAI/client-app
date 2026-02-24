@@ -1,4 +1,5 @@
 import { UserCircle2 } from 'lucide-react';
+
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -6,6 +7,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import { useVideoDevices } from '@/hooks/use-video-devices';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
+import { MAX_RTT_DIFF } from '@/lib/consts';
 
 interface VideoPanelProps {
   runningState: RunningState;
@@ -182,16 +184,17 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
                 const now = Date.now();
                 const sent = pendingPings.current.get(msg.id);
                 if (sent) {
-                  const rtt = now - sent;
+                  const rtt = now - sent + (msg.frame_time ?? 0);
                   console.log('Data channel RTT', rtt, 'ms');
                   pendingPings.current.delete(msg.id);
-                  // restart audio control agent when RTT is new or jumps >50ms
+
+                  // restart audio control agent when RTT is new or jumps >MAX_RTT_DIFF
                   const prev = prevRttRef.current;
-                  if (prev === 0 || Math.abs(rtt - prev) > 50) {
+                  if (prev === 0 || Math.abs(rtt - prev) > MAX_RTT_DIFF) {
                     console.log(
                       `RTT changed significantly (${prev} -> ${rtt}), restarting audio agent`
                     );
-                    prevRttRef.current = rtt;
+                    prevRttRef.current = rtt + (msg.frame_time ?? 0);
                     electron.webRtc.restartAudioAgent(rtt).catch((e) => {
                       console.warn('Error restarting agents after RTT change', e);
                     });
