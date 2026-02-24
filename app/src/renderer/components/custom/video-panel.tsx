@@ -7,7 +7,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import { useVideoDevices } from '@/hooks/use-video-devices';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
-import { MAX_RTT_DIFF } from '@/lib/consts';
+import { MAX_AUDIO_DELAY_MS, MAX_RTT_DIFF } from '@/lib/consts';
 
 interface VideoPanelProps {
   runningState: RunningState;
@@ -160,8 +160,8 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
         }
 
         const rtcConfig: RTCConfiguration = {
-          // iceServers: [creds],
-          // iceTransportPolicy: 'relay',
+          iceServers: [creds],
+          iceTransportPolicy: 'relay',
         };
 
         const pc = new RTCPeerConnection(rtcConfig);
@@ -184,7 +184,8 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
                 const now = Date.now();
                 const sent = pendingPings.current.get(msg.id);
                 if (sent) {
-                  const rtt = now - sent + (msg.frame_time ?? 0);
+                  // Calculate RTT and check for significant changes to decide if audio agent restart is needed
+                  const rtt = Math.min(MAX_AUDIO_DELAY_MS, now - sent + (msg.frame_time ?? 0));
                   console.log('Data channel RTT', rtt, 'ms');
                   pendingPings.current.delete(msg.id);
 
