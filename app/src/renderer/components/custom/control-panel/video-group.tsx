@@ -1,4 +1,3 @@
-import { DialogDescription } from '@radix-ui/react-dialog';
 import { Ellipsis, UserLock } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -17,8 +16,8 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useObsCameraDevice, useVbCableInputDevice } from '@/hooks/use-special-devices';
 import { useVideoDevices } from '@/hooks/use-video-devices';
-import { useVbCableInputDevice, useObsCameraDevice } from '@/hooks/use-special-devices';
 import { RunningState } from '@/types/app-state';
 
 import ExternalLink from '../external-link';
