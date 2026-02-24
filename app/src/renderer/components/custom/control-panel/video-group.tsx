@@ -221,8 +221,8 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
               </div>
             ) : (
               <div className="text-sm text-green-700 dark:text-green-500 bg-green-500/10 border border-green-500/20 rounded-md p-2">
-                Resources are ready. You can use the{' '}
-                <span className="font-semibold">Face Swap</span> feature for video calls.
+                You can use the <span className="font-semibold">Face Swap</span> feature for video
+                calls.
               </div>
             )}
 
@@ -300,7 +300,7 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
 
                 <div className="grid grid-cols-2 gap-4">
                   {/* Camera Device Select */}
-                  <div>
+                  <div className="col-span-2">
                     <label className="text-xs text-muted-foreground mb-1 block">
                       Camera Device
                     </label>
