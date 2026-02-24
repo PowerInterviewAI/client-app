@@ -19,6 +19,10 @@ export function registerWebRTCHandlers() {
     await webRtcService.stopAgents();
   });
 
+  ipcMain.handle('webrtc:restart-audio-agent', async (_event, delayMs?: number) => {
+    await webRtcService.restartAudioAgent(delayMs);
+  });
+
   ipcMain.handle('webrtc:put-video-frame', async (_event, frameData: ArrayBuffer) => {
     await webRtcService.putVideoFrame(frameData);
   });

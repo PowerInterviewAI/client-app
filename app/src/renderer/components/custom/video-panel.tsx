@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useVideoDevices } from '@/hooks/use-video-devices';
+import { MAX_AUDIO_DELAY_MS, MAX_RTT_DIFF } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 
@@ -46,6 +47,12 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
     }
 
     const [isStreaming, setIsStreaming] = useState(false);
+    const prevRttRef = useRef<number>(0);
+
+    // data channel RTT helpers
+    const dataChannelRef = useRef<RTCDataChannel | null>(null);
+    const pingIntervalRef = useRef<number | null>(null);
+    const pendingPings = useRef<Map<number, number>>(new Map());
 
     const checkActiveVideoCodec = () => {
       if (!pcRef.current) return;
@@ -159,6 +166,50 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
         const pc = new RTCPeerConnection(rtcConfig);
         pcRef.current = pc;
 
+        // setup RTT data channel
+        const setupDataChannel = (pc: RTCPeerConnection) => {
+          const dc = pc.createDataChannel('rtt');
+          dataChannelRef.current = dc;
+
+          dc.onopen = () => {
+            console.log('RTT data channel open');
+            startPingLoop();
+          };
+
+          dc.onmessage = (event) => {
+            try {
+              const msg = JSON.parse(event.data as string);
+              if (msg.type === 'pong') {
+                const now = Date.now();
+                const sent = pendingPings.current.get(msg.id);
+                if (sent) {
+                  // Calculate RTT and check for significant changes to decide if audio agent restart is needed
+                  const rtt = Math.min(MAX_AUDIO_DELAY_MS, now - sent + (msg.frame_time ?? 0));
+                  console.log('Data channel RTT', rtt, 'ms');
+                  pendingPings.current.delete(msg.id);
+
+                  // restart audio control agent when RTT is new or jumps >MAX_RTT_DIFF
+                  const prev = prevRttRef.current;
+                  if (prev === 0 || Math.abs(rtt - prev) > MAX_RTT_DIFF) {
+                    console.log(
+                      `RTT changed significantly (${prev} -> ${rtt}), restarting audio agent`
+                    );
+                    prevRttRef.current = rtt;
+                    electron.webRtc.restartAudioAgent(rtt).catch((e) => {
+                      console.warn('Error restarting agents after RTT change', e);
+                    });
+                  }
+                }
+              } else if (msg.type === 'ping') {
+                dc.send(JSON.stringify({ type: 'pong', id: msg.id }));
+              }
+            } catch (err) {
+              console.warn('Error handling data channel message:', err);
+            }
+          };
+        };
+        setupDataChannel(pc);
+
         // Monitor connection state for reconnection
         pc.oniceconnectionstatechange = () => {
           console.log('ICE connection state:', pc.iceConnectionState);
@@ -205,46 +256,61 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
         // Hold the remote stream when it arrives
         const remoteStream = new MediaStream();
         pc.ontrack = (event) => {
-          // Add incoming tracks to remoteStream
+          // If the remote peer provided a full MediaStream, add all of its
+          // tracks to our `remoteStream`. Previously we only added the first
+          // track which could be audio-only and result in no video being
+          // attached to the <video> element.
           if (event.streams?.[0]) {
-            const firstTrack = event.streams[0].getTracks()[0];
-            if (firstTrack) {
-              remoteStream.addTrack(firstTrack);
-
-              // Monitor track for ended event
-              firstTrack.onended = () => {
-                console.warn('Remote video track ended, scheduling reconnect');
+            const incoming = event.streams[0];
+            incoming.getTracks().forEach((t) => {
+              try {
+                remoteStream.addTrack(t);
+              } catch (e) {
+                console.warn('Error adding remote track to stream:', e);
+              }
+              t.onended = () => {
+                console.warn('Remote track ended, scheduling reconnect');
                 if (runningState === RunningState.Running) {
                   scheduleReconnect();
                 }
               };
-            }
+            });
           } else if (event.track) {
-            remoteStream.addTrack(event.track);
-
-            // Monitor track for ended event
+            // Fallback: single track provided
+            try {
+              remoteStream.addTrack(event.track);
+            } catch (e) {
+              console.warn('Error adding remote track to stream:', e);
+            }
             event.track.onended = () => {
-              console.warn('Remote video track ended, scheduling reconnect');
+              console.warn('Remote track ended, scheduling reconnect');
               if (runningState === RunningState.Running) {
                 scheduleReconnect();
               }
             };
           }
 
-          // Attach remote stream to visible video element
+          // Attach remote stream to media elements
           if (videoRef.current) {
             videoRef.current.srcObject = remoteStream;
             videoRef.current.play().catch(() => {});
-            // Start capture loop to compress frames to JPEG and send to main
-            startCaptureLoop();
+
+            // Only run the expensive capture loop when a video track is
+            // actually present. This avoids starving the main thread when
+            // the remote side only sends audio (or during reconnects).
+            if (remoteStream.getVideoTracks().length > 0) {
+              startCaptureLoop();
+            } else {
+              stopCaptureLoop();
+            }
           }
         };
 
-        // Find video device id from name
+        // Find device ids from config selection
         const videoDeviceId = videoDevices.find((d) => d.label === cameraDeviceName)?.deviceId;
-        console.log('Video device id', videoDevices, cameraDeviceName, videoDeviceId);
+        console.log('Selected video device id', videoDeviceId);
 
-        // Acquire local camera only if you still want to send local tracks to the peer
+        // Acquire local camera for sending
         const localStream = await navigator.mediaDevices.getUserMedia({
           video: {
             deviceId: videoDeviceId ? { exact: videoDeviceId } : undefined,
@@ -331,6 +397,32 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
         // Rethrow to trigger reconnection in scheduleReconnect
         throw error;
       }
+    };
+
+    const startPingLoop = () => {
+      if (pingIntervalRef.current) return;
+
+      const sendPing = () => {
+        const dc = dataChannelRef.current;
+        if (dc && dc.readyState === 'open') {
+          const id = Date.now();
+          pendingPings.current.set(id, id);
+          dc.send(JSON.stringify({ type: 'ping', id }));
+        }
+      };
+
+      // first ping immediately
+      sendPing();
+      pingIntervalRef.current = window.setInterval(sendPing, 5000) as unknown as number;
+    };
+
+    const stopPingLoop = () => {
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+      pendingPings.current.clear();
+      dataChannelRef.current = null;
     };
 
     const startCaptureLoop = () => {
@@ -441,6 +533,9 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
 
       // stop capture loop
       stopCaptureLoop();
+
+      // stop RTT ping loop
+      stopPingLoop();
 
       setVideoMessage('Video Stream');
       setIsStreaming(false);

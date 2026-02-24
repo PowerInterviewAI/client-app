@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
-import { useAudioInputDevices, useAudioOutputDevices } from '@/hooks/use-audio-devices';
+import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useVideoDevices } from '@/hooks/use-video-devices';
@@ -37,7 +37,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
 
   const videoDevices = useVideoDevices();
   const audioInputDevices = useAudioInputDevices();
-  const audioOutputDevices = useAudioOutputDevices();
+  // audio outputs no longer required by control panel; special hooks will be used where needed
 
   if (isStealth) return null;
 
@@ -136,11 +136,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
           audioInputDeviceNotFound={audioInputDeviceNotFound}
           getDisabled={getDisabled}
         />
-        <VideoGroup
-          videoDeviceNotFound={videoDeviceNotFound}
-          audioOutputDevices={audioOutputDevices ?? []}
-          getDisabled={getDisabled}
-        />
+        <VideoGroup videoDeviceNotFound={videoDeviceNotFound} getDisabled={getDisabled} />
         <MainGroup stateConfig={{ onClick, className, icon, label }} getDisabled={getDisabled} />
         <hr className="h-6 border border-border" />
         <ToolsGroup getDisabled={getDisabled} />

@@ -24,7 +24,6 @@ export interface RuntimeConfig {
   videoWidth: number;
   videoHeight: number;
   enableFaceEnhance: boolean;
-  audioDelayMs: number;
 }
 
 // Default runtime configuration
@@ -46,7 +45,6 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   videoWidth: 1280,
   videoHeight: 720,
   enableFaceEnhance: false,
-  audioDelayMs: 300,
 };
 
 interface StoredConfig {

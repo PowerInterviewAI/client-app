@@ -1,4 +1,3 @@
-import { DialogDescription } from '@radix-ui/react-dialog';
 import { Ellipsis, UserLock } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -6,7 +5,6 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -17,40 +15,30 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useObsCameraDevice, useVbCableInputDevice } from '@/hooks/use-special-devices';
 import { useVideoDevices } from '@/hooks/use-video-devices';
 import { RunningState } from '@/types/app-state';
-import { type AudioDevice } from '@/types/audio-device';
 
 import ExternalLink from '../external-link';
 
 interface VideoGroupProps {
   videoDeviceNotFound: boolean;
-  audioOutputDevices: AudioDevice[];
   getDisabled: (state: RunningState, disableOnRunning?: boolean) => boolean;
 }
 
-export function VideoGroup({
-  videoDeviceNotFound,
-  audioOutputDevices,
-  getDisabled,
-}: VideoGroupProps) {
+export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps) {
   const { runningState, appState } = useAppState();
   const { config, updateConfig } = useConfigStore();
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const previewStreamRef = useRef<MediaStream | null>(null);
   const videoDevices = useVideoDevices();
+  const obsCameraDevice = useObsCameraDevice();
+  const vbInputDevice = useVbCableInputDevice();
   const lowCredits = appState?.credits === undefined ? null : appState?.credits <= 0;
 
-  const OBS_CAMERA_PREFIX = 'OBS Virtual';
-  const obsCameraExists =
-    videoDevices.length > 0 ? videoDevices.some((d) => d.label.includes(OBS_CAMERA_PREFIX)) : true;
-
-  const VB_AUDIO_INPUT_PREFIX = 'CABLE Input (VB-Audio Virtual';
-  const vbInputExists =
-    audioOutputDevices.length > 0
-      ? audioOutputDevices.some((d) => d.name.startsWith(VB_AUDIO_INPUT_PREFIX))
-      : true;
+  const obsCameraExists = obsCameraDevice !== null;
+  const vbInputExists = vbInputDevice !== null;
 
   useEffect(() => {
     // Disable face swap if required devices are not found
@@ -72,7 +60,8 @@ export function VideoGroup({
   }, [lowCredits, config?.faceSwap, updateConfig]);
 
   const usableVideoDevices = videoDevices.filter((d) => {
-    if (d.label.toLowerCase().startsWith(OBS_CAMERA_PREFIX.toLowerCase())) return false;
+    // exclude OBS virtual camera
+    if (obsCameraDevice && d.deviceId === obsCameraDevice.deviceId) return false;
     if (d.label.toLowerCase().includes('virtual')) return false;
     return true;
   });
@@ -232,8 +221,8 @@ export function VideoGroup({
               </div>
             ) : (
               <div className="text-sm text-green-700 dark:text-green-500 bg-green-500/10 border border-green-500/20 rounded-md p-2">
-                Resources are ready. You can use the{' '}
-                <span className="font-semibold">Face Swap</span> feature for video calls.
+                You can use the <span className="font-semibold">Face Swap</span> feature for video
+                calls.
               </div>
             )}
 
@@ -311,7 +300,7 @@ export function VideoGroup({
 
                 <div className="grid grid-cols-2 gap-4">
                   {/* Camera Device Select */}
-                  <div>
+                  <div className="col-span-2">
                     <label className="text-xs text-muted-foreground mb-1 block">
                       Camera Device
                     </label>
@@ -353,21 +342,6 @@ export function VideoGroup({
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  {/* Audio Delay */}
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Audio Sync Delay (ms)
-                    </label>
-                    <Input
-                      type="number"
-                      value={config?.audioDelayMs ?? ''}
-                      onChange={(e) => updateConfig({ audioDelayMs: Number(e.target.value) || 0 })}
-                      className="w-full h-8 px-2 text-xs border rounded-md bg-background"
-                      min={0}
-                      step={10}
-                    />
                   </div>
 
                   {/* Face Enhance Toggle */}

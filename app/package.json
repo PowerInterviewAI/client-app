@@ -1,7 +1,7 @@
 {
   "name": "power-interview",
   "private": false,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "AI-powered live interview assistant",
   "author": "Power Interview",
   "main": "electron-dist/index.js",

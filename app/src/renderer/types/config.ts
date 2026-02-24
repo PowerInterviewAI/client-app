@@ -28,5 +28,4 @@ export interface Config {
   videoWidth: number;
   videoHeight: number;
   enableFaceEnhance: boolean;
-  audioDelayMs: number;
 }
