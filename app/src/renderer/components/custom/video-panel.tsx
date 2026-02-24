@@ -188,7 +188,7 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
                 dc.send(JSON.stringify({ type: 'pong', id: msg.id }));
               }
             } catch (err) {
-              // non-json or unexpected message
+              console.warn('Error handling data channel message:', err);
             }
           };
         };

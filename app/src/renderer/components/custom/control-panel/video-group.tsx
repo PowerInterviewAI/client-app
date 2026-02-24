@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -343,21 +342,6 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  {/* Audio Delay */}
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Audio Sync Delay (ms)
-                    </label>
-                    <Input
-                      type="number"
-                      value={config?.audioDelayMs ?? ''}
-                      onChange={(e) => updateConfig({ audioDelayMs: Number(e.target.value) || 0 })}
-                      className="w-full h-8 px-2 text-xs border rounded-md bg-background"
-                      min={0}
-                      step={10}
-                    />
                   </div>
 
                   {/* Face Enhance Toggle */}

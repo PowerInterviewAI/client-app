@@ -223,7 +223,7 @@ class WebRTCService {
 
     const config = configStore.getConfig();
     const inputDevice = config.audioInputDeviceName || 'loopback';
-    const audioDelay = config.audioDelayMs || AUDIO_CONTROL_DELAY_MS;
+    const audioDelay = AUDIO_CONTROL_DELAY_MS; // fixed delay now that config value removed
 
     const { command, args: baseArgs } = this.getAudioControlAgentCommand();
 
