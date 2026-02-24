@@ -221,7 +221,7 @@ export function VideoGroup({
             </TooltipContent>
           </Tooltip>
 
-          <DialogContent className="flex flex-col w-xl p-4 gap-4">
+          <DialogContent className="flex flex-col w-md p-4 gap-4">
             <DialogTitle>Face Swap Options</DialogTitle>
             {appState?.isGpuServerLive !== true ? (
               <div className="text-sm text-yellow-700 dark:text-yellow-500 bg-yellow-500/10 border border-yellow-500/20 rounded-md p-2">
@@ -277,8 +277,8 @@ export function VideoGroup({
             )}
 
             {obsCameraExists && vbInputExists && (
-              <>
-                <DialogDescription className="text-sm text-muted-foreground">
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground">
                   <span className="font-medium">IMPORTANT:</span> During video calls, make sure to
                   select{' '}
                   <ul className="list-disc ml-5">
@@ -298,7 +298,7 @@ export function VideoGroup({
                   <span className="italic mt-1 block">
                     Do not select your physical camera or microphone for video calls.
                   </span>
-                </DialogDescription>
+                </div>
 
                 {/* Camera Preview */}
                 <video
@@ -373,7 +373,7 @@ export function VideoGroup({
                   {/* Face Enhance Toggle */}
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-sm">
-                      Face Enhance ({config?.enableFaceEnhance ? 'Enabled' : 'Disabled'})
+                      Face Enhance ({config?.enableFaceEnhance ? 'On' : 'Off'})
                     </span>
                     <Button
                       variant={config?.enableFaceEnhance ? 'default' : 'outline'}
@@ -387,7 +387,7 @@ export function VideoGroup({
                     </Button>
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </DialogContent>
         </Dialog>
