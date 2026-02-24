@@ -216,7 +216,6 @@ class WebRTCService {
    * Start audio control agent process
    */
   private async startAudioControlAgent(): Promise<void> {
-    return;
     if (this.audioControlAgent) {
       console.log('Audio control agent already running');
       return;
