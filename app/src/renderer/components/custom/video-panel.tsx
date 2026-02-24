@@ -47,6 +47,11 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
 
     const [isStreaming, setIsStreaming] = useState(false);
 
+    // data channel RTT helpers
+    const dataChannelRef = useRef<RTCDataChannel | null>(null);
+    const pingIntervalRef = useRef<number | null>(null);
+    const pendingPings = useRef<Map<number, number>>(new Map());
+
     const checkActiveVideoCodec = () => {
       if (!pcRef.current) return;
 
@@ -152,12 +157,42 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
         }
 
         const rtcConfig: RTCConfiguration = {
-          iceServers: [creds],
-          iceTransportPolicy: 'relay',
+          // iceServers: [creds],
+          // iceTransportPolicy: 'relay',
         };
 
         const pc = new RTCPeerConnection(rtcConfig);
         pcRef.current = pc;
+
+        // setup RTT data channel
+        const setupDataChannel = (pc: RTCPeerConnection) => {
+          const dc = pc.createDataChannel('rtt');
+          dataChannelRef.current = dc;
+
+          dc.onopen = () => {
+            console.log('RTT data channel open');
+            startPingLoop();
+          };
+
+          dc.onmessage = (event) => {
+            try {
+              const msg = JSON.parse(event.data as string);
+              if (msg.type === 'pong') {
+                const now = Date.now();
+                const sent = pendingPings.current.get(msg.id);
+                if (sent) {
+                  console.log('Data channel RTT', now - sent, 'ms');
+                  pendingPings.current.delete(msg.id);
+                }
+              } else if (msg.type === 'ping') {
+                dc.send(JSON.stringify({ type: 'pong', id: msg.id }));
+              }
+            } catch (err) {
+              // non-json or unexpected message
+            }
+          };
+        };
+        setupDataChannel(pc);
 
         // Monitor connection state for reconnection
         pc.oniceconnectionstatechange = () => {
@@ -348,6 +383,32 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
       }
     };
 
+    const startPingLoop = () => {
+      if (pingIntervalRef.current) return;
+
+      const sendPing = () => {
+        const dc = dataChannelRef.current;
+        if (dc && dc.readyState === 'open') {
+          const id = Date.now();
+          pendingPings.current.set(id, id);
+          dc.send(JSON.stringify({ type: 'ping', id }));
+        }
+      };
+
+      // first ping immediately
+      sendPing();
+      pingIntervalRef.current = window.setInterval(sendPing, 5000) as unknown as number;
+    };
+
+    const stopPingLoop = () => {
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+      pendingPings.current.clear();
+      dataChannelRef.current = null;
+    };
+
     const startCaptureLoop = () => {
       // avoid starting multiple loops
       if (captureIntervalRef.current) return;
@@ -456,6 +517,9 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
 
       // stop capture loop
       stopCaptureLoop();
+
+      // stop RTT ping loop
+      stopPingLoop();
 
       setVideoMessage('Video Stream');
       setIsStreaming(false);
