@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import type { AudioDevice } from '@/types/audio-device';
+
 import { useAudioOutputDevices } from './use-audio-devices';
 import { useVideoDevices } from './use-video-devices';
 
