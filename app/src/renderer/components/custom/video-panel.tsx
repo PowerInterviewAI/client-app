@@ -194,12 +194,10 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
                     console.log(
                       `RTT changed significantly (${prev} -> ${rtt}), restarting audio agent`
                     );
-                    prevRttRef.current = rtt + (msg.frame_time ?? 0);
+                    prevRttRef.current = rtt;
                     electron.webRtc.restartAudioAgent(rtt).catch((e) => {
                       console.warn('Error restarting agents after RTT change', e);
                     });
-                  } else {
-                    prevRttRef.current = rtt;
                   }
                 }
               } else if (msg.type === 'ping') {
