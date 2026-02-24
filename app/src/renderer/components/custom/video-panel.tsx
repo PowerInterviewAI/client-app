@@ -1,13 +1,12 @@
 import { UserCircle2 } from 'lucide-react';
-
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useVideoDevices } from '@/hooks/use-video-devices';
+import { MAX_AUDIO_DELAY_MS, MAX_RTT_DIFF } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
-import { MAX_AUDIO_DELAY_MS, MAX_RTT_DIFF } from '@/lib/consts';
 
 interface VideoPanelProps {
   runningState: RunningState;
