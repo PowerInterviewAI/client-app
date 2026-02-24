@@ -157,8 +157,8 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
         }
 
         const rtcConfig: RTCConfiguration = {
-          // iceServers: [creds],
-          // iceTransportPolicy: 'relay',
+          iceServers: [creds],
+          iceTransportPolicy: 'relay',
         };
 
         const pc = new RTCPeerConnection(rtcConfig);
@@ -210,26 +210,32 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
         // Hold the remote stream when it arrives
         const remoteStream = new MediaStream();
         pc.ontrack = (event) => {
-          // Add incoming tracks to remoteStream
+          // If the remote peer provided a full MediaStream, add all of its
+          // tracks to our `remoteStream`. Previously we only added the first
+          // track which could be audio-only and result in no video being
+          // attached to the <video> element.
           if (event.streams?.[0]) {
-            const firstTrack = event.streams[0].getTracks()[0];
-            if (firstTrack) {
-              remoteStream.addTrack(firstTrack);
-
-              // Monitor track for ended event
-              firstTrack.onended = () => {
-                console.warn('Remote video track ended, scheduling reconnect');
+            const incoming = event.streams[0];
+            incoming.getTracks().forEach((t) => {
+              try {
+                remoteStream.addTrack(t);
+              } catch (e) {
+                // ignore if track already exists
+              }
+              t.onended = () => {
+                console.warn('Remote track ended, scheduling reconnect');
                 if (runningState === RunningState.Running) {
                   scheduleReconnect();
                 }
               };
-            }
+            });
           } else if (event.track) {
-            remoteStream.addTrack(event.track);
-
-            // Monitor track for ended event
+            // Fallback: single track provided
+            try {
+              remoteStream.addTrack(event.track);
+            } catch (e) {}
             event.track.onended = () => {
-              console.warn('Remote video track ended, scheduling reconnect');
+              console.warn('Remote track ended, scheduling reconnect');
               if (runningState === RunningState.Running) {
                 scheduleReconnect();
               }
@@ -240,9 +246,17 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
           if (videoRef.current) {
             videoRef.current.srcObject = remoteStream;
             videoRef.current.play().catch(() => {});
-            // Start capture loop to compress frames to JPEG and send to main
-            startCaptureLoop();
+
+            // Only run the expensive capture loop when a video track is
+            // actually present. This avoids starving the main thread when
+            // the remote side only sends audio (or during reconnects).
+            if (remoteStream.getVideoTracks().length > 0) {
+              startCaptureLoop();
+            } else {
+              stopCaptureLoop();
+            }
           }
+
           if (audioRef.current) {
             audioRef.current.srcObject = remoteStream;
             audioRef.current.play().catch(() => {});
