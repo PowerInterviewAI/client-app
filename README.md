@@ -4,10 +4,10 @@
 
 **Your Personal AI-Powered Interview Coach with Real-Time Face Swap Technology**
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/PowerInterviewAI/power-interview-assistant/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](https://github.com/PowerInterviewAI/power-interview-assistant/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-📧 [Email](mailto:power-interview@protonmail.com) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/BB3mSBa9hZ)
+📧 [Email](mailto:power-interview@protonmail.com) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/TJJp5azK7Z)
 
 </div>
 
@@ -496,7 +496,7 @@ For issues, questions, or suggestions:
 - 🌐 **Website**: [https://www.powerinterviewai.com/](https://www.powerinterviewai.com/)
 - 🌐 **GitHub Pages**: [https://powerinterviewai.github.io/hero/](https://powerinterviewai.github.io/hero/)
 - 💬 **Telegram**: [https://t.me/+uQuuBdrsIYBjY2Qx](https://t.me/+uQuuBdrsIYBjY2Qx)
-- 💭 **Discord**: [https://discord.gg/BB3mSBa9hZ](https://discord.gg/BB3mSBa9hZ)
+- 💭 **Discord**: [https://discord.gg/TJJp5azK7Z](https://discord.gg/TJJp5azK7Z)
 - **GitHub**: Open an issue for bug reports and feature requests
 
 ---
@@ -505,6 +505,6 @@ For issues, questions, or suggestions:
 
 **Made to help you ace your interviews while protecting your privacy**
 
-📧 [Email](mailto:power-interview@protonmail.com) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/BB3mSBa9hZ)
+📧 [Email](mailto:power-interview@protonmail.com) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/TJJp5azK7Z)
 
 </div>
