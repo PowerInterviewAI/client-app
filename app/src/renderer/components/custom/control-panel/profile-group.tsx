@@ -73,7 +73,7 @@ export function ProfileGroup({
                   className="w-8 h-8 rounded-full object-cover border"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-md font-semibold uppercase text-muted-foreground border">
+                <div className="w-12 h-8 rounded-full bg-muted flex items-center justify-center text-md font-semibold uppercase text-muted-foreground border">
                   {config?.interviewConf?.username
                     ? config?.interviewConf?.username.charAt(0)
                     : '?'}
@@ -103,7 +103,7 @@ export function ProfileGroup({
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/payment')} disabled={disabled}>
             <CreditCard className="mr-2 h-4 w-4" />
-            Payment
+            Buy Credits
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => !disabled && onSignOut()} disabled={disabled}>
