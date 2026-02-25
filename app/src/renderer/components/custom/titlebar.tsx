@@ -42,7 +42,7 @@ export default function Titlebar() {
         style={{ WebkitAppRegion: 'drag' } as any}
         className="flex items-center gap-3 h-9 px-1 select-none bg-card border-b border-border"
       >
-        <div className="flex items-center gap-2 px-1">
+        <div className="flex flex-1 items-center gap-2 px-1">
           <img src={faviconSvg} alt="logo" className="h-5 w-5" />
 
           <div
@@ -54,20 +54,20 @@ export default function Titlebar() {
           </div>
         </div>
 
+        {appState?.isLoggedIn && appState?.credits !== undefined && (
+          <CreditsDisplay
+            credits={appState.credits!}
+            className="mr-2"
+            // eslint-disable-next-line
+            style={{ WebkitAppRegion: 'drag' } as any}
+          />
+        )}
+
         <div
           className="ml-auto flex items-center gap-1"
           // eslint-disable-next-line
           style={{ WebkitAppRegion: 'no-drag' } as any}
         >
-          {appState?.isLoggedIn && appState?.credits !== undefined && (
-            <CreditsDisplay
-              credits={appState.credits!}
-              className="mr-2"
-              // eslint-disable-next-line
-              style={{ WebkitAppRegion: 'drag' } as any}
-            />
-          )}
-
           <Tooltip>
             <TooltipTrigger asChild>
               <button
