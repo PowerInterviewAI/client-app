@@ -2,13 +2,13 @@ import { EyeOff, Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
+import CreditsDisplay from '@/components/custom/credits-display';
 import DocumentationDialog from '@/components/custom/documentation-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
-import { CREDITS_PER_MINUTE } from '@/lib/consts';
-import { cn, getElectron } from '@/lib/utils';
+import { getElectron } from '@/lib/utils';
 
 export default function Titlebar() {
   const isStealth = useIsStealthMode();
@@ -31,14 +31,6 @@ export default function Titlebar() {
   };
 
   const { appState } = useAppState();
-  const remainingCredits = appState?.credits ?? 0;
-  const availableMinutes = Math.floor(remainingCredits / CREDITS_PER_MINUTE);
-  const availableTime =
-    availableMinutes <= 0
-      ? remainingCredits > 0
-        ? 'Less than 1 min'
-        : 'No credits left'
-      : `${availableMinutes.toLocaleString()} min${availableMinutes > 1 ? 's' : ''}`;
 
   if (isStealth) return null;
 
@@ -68,20 +60,12 @@ export default function Titlebar() {
           style={{ WebkitAppRegion: 'no-drag' } as any}
         >
           {appState?.isLoggedIn && appState?.credits !== undefined && (
-            <div
-              className={cn(
-                'text-xs font-bold mr-2',
-                availableMinutes >= 5
-                  ? 'text-muted-foreground'
-                  : availableMinutes >= 1
-                    ? 'text-yellow-600 animate-pulse'
-                    : 'text-destructive animate-pulse'
-              )}
+            <CreditsDisplay
+              credits={appState.credits!}
+              className="mr-2"
               // eslint-disable-next-line
               style={{ WebkitAppRegion: 'drag' } as any}
-            >
-              {appState?.credits?.toLocaleString()} credits ({availableTime})
-            </div>
+            />
           )}
 
           <Tooltip>
