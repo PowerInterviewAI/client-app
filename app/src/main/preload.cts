@@ -119,6 +119,8 @@ const electronApi = {
 
   // Window controls
   close: () => ipcRenderer.send('window-close'),
+  minimize: () => ipcRenderer.send('window-minimize'),
+  maximize: () => ipcRenderer.send('window-maximize'),
 
   // Open external URLs in the default browser
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),

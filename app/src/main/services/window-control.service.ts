@@ -1,5 +1,6 @@
 import { BrowserWindow, screen } from 'electron';
 
+import { MIN_HEIGHT, MIN_WIDTH } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
@@ -57,9 +58,6 @@ export function setWindowBounds(bounds: WindowBounds): void {
   if (!win || win.isDestroyed()) return;
 
   try {
-    const MIN_WIDTH = 960;
-    const MIN_HEIGHT = 640;
-
     // Fill missing values from current bounds
     const current = win.getBounds();
     const newBounds = Object.assign({}, current, bounds || {});
@@ -362,5 +360,40 @@ export function toggleOpacity(): void {
     console.log(`🔄 Window opacity toggled to ${(newOpacity * 100).toFixed(0)}%`);
   } catch (err) {
     console.warn('⚠️ Opacity toggle not supported on this platform:', err);
+  }
+}
+
+// -------------------------------------------------------------
+// Basic window helpers
+// -------------------------------------------------------------
+
+/**
+ * Minimize the window if available
+ */
+export function minimize(): void {
+  if (!win || win.isDestroyed()) return;
+  try {
+    win.minimize();
+    console.log('Window minimized');
+  } catch (e) {
+    console.warn('Failed to minimize window:', e);
+  }
+}
+
+/**
+ * Maximize the window if not currently maximized, otherwise restore
+ */
+export function toggleMaximize(): void {
+  if (!win || win.isDestroyed()) return;
+  try {
+    if (win.isMaximized()) {
+      win.unmaximize();
+      console.log('Window restored from maximized');
+    } else {
+      win.maximize();
+      console.log('Window maximized');
+    }
+  } catch (e) {
+    console.warn('Failed to toggle maximize:', e);
   }
 }
