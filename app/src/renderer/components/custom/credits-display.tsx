@@ -11,12 +11,22 @@ interface CreditsDisplayProps {
 
 export default function CreditsDisplay({ credits, className, style }: CreditsDisplayProps) {
   const availableMinutes = Math.floor(credits / CREDITS_PER_MINUTE);
+
+  const formatDuration = (mins: number) => {
+    const hours = Math.floor(mins / 60);
+    const remainder = mins % 60;
+    const parts: string[] = [];
+    if (hours) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+    if (remainder) parts.push(`${remainder} min${remainder > 1 ? 's' : ''}`);
+    return parts.join(' ') || '0 mins';
+  };
+
   const availableTime =
     availableMinutes <= 0
       ? credits > 0
         ? 'Less than 1 min'
         : 'No credits left'
-      : `${availableMinutes.toLocaleString()} min${availableMinutes > 1 ? 's' : ''}`;
+      : formatDuration(availableMinutes);
 
   return (
     <div
