@@ -17,24 +17,6 @@ export function registerWindowHandlers(win: BrowserWindow): void {
     }
   });
 
-  // Minimize window
-  ipcMain.on('window-minimize', () => {
-    try {
-      windowControls.minimize();
-    } catch (err) {
-      console.warn('window-minimize handler error:', err);
-    }
-  });
-
-  // Toggle maximize/restore
-  ipcMain.on('window-maximize', () => {
-    try {
-      windowControls.toggleMaximize();
-    } catch (err) {
-      console.warn('window-maximize handler error:', err);
-    }
-  });
-
   // Set stealth mode
   ipcMain.on('set-stealth', (_event, isStealth: boolean) => {
     try {

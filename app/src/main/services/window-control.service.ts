@@ -362,38 +362,3 @@ export function toggleOpacity(): void {
     console.warn('⚠️ Opacity toggle not supported on this platform:', err);
   }
 }
-
-// -------------------------------------------------------------
-// Basic window helpers
-// -------------------------------------------------------------
-
-/**
- * Minimize the window if available
- */
-export function minimize(): void {
-  if (!win || win.isDestroyed()) return;
-  try {
-    win.minimize();
-    console.log('Window minimized');
-  } catch (e) {
-    console.warn('Failed to minimize window:', e);
-  }
-}
-
-/**
- * Maximize the window if not currently maximized, otherwise restore
- */
-export function toggleMaximize(): void {
-  if (!win || win.isDestroyed()) return;
-  try {
-    if (win.isMaximized()) {
-      win.unmaximize();
-      console.log('Window restored from maximized');
-    } else {
-      win.maximize();
-      console.log('Window maximized');
-    }
-  } catch (e) {
-    console.warn('Failed to toggle maximize:', e);
-  }
-}

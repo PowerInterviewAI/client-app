@@ -136,11 +136,6 @@ declare global {
 
     // Window controls
     close: () => void;
-    minimize: () => void;
-    /**
-     * Toggles between maximized and restored state (renderer doesn't need to remember current state)
-     */
-    maximize: () => void;
 
     // Open external URL in user's default browser
     openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
