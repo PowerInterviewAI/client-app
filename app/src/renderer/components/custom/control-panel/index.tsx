@@ -139,6 +139,8 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
         <ToolsGroup getDisabled={getDisabled} />
       </div>
 
+      <div className="w-8"></div>
+
       <RunningIndicator runningState={runningState} />
     </div>
   );
