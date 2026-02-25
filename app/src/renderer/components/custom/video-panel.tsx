@@ -146,6 +146,9 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(
     const startWebRTC = async () => {
       if (pcRef.current) return;
 
+      // reset RTT tracking on each new connection attempt
+      prevRttRef.current = 0;
+
       try {
         setVideoMessage('Waiting for processed video stream...');
 
