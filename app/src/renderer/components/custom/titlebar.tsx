@@ -97,7 +97,7 @@ export default function Titlebar() {
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Toggle theme</p>
+              <p>{isDark ? 'Light mode' : 'Dark mode'}</p>
             </TooltipContent>
           </Tooltip>
 
