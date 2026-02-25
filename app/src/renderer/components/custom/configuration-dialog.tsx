@@ -45,6 +45,16 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
   }, [isOpen, config?.interviewConf]);
 
   const handleSave = async () => {
+    // enforce required profile name and profile data
+    if (name.trim() === '') {
+      alert('Profile name is required');
+      return;
+    }
+    if (profileData.trim() === '') {
+      alert('User profile information is required');
+      return;
+    }
+
     const interviewConf = {
       photo: photo,
       username: name,
@@ -142,7 +152,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
 
             <div className="grid gap-2">
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                Profile Name
+                Profile Name <span className="text-destructive">*</span>
               </label>
               <Input
                 value={name}
@@ -154,7 +164,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
 
             <div className="grid gap-2">
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                User Profile (Required)
+                User Profile <span className="text-destructive">*</span>
               </label>
               <Textarea
                 value={profileData}
@@ -183,7 +193,12 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button size="sm" onClick={handleSave} className="bg-primary hover:bg-primary/90">
+            <Button
+              size="sm"
+              onClick={handleSave}
+              className="bg-primary hover:bg-primary/90"
+              disabled={name.trim() === '' || profileData.trim() === ''}
+            >
               Save Changes
             </Button>
           </div>
