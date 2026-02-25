@@ -89,7 +89,10 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
     const checks: { ok: boolean; message: string }[] = [
       { ok: !!config?.interviewConf, message: 'Profile is not set' },
       { ok: !!config?.interviewConf?.username, message: 'Username is not set' },
-      { ok: !!config?.interviewConf?.photo, message: 'Photo is not set' },
+      {
+        ok: !config?.faceSwap || !!config?.interviewConf?.photo,
+        message: 'Photo is not set (required for face swap)',
+      },
       { ok: !!config?.interviewConf?.profileData, message: 'Profile data is not set' },
 
       {
