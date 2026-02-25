@@ -20,10 +20,7 @@ export default function StatusPanel({ runningState, credits }: Props) {
       : `${availableMinutes.toLocaleString()} min${availableMinutes > 1 ? 's' : ''}`;
 
   return (
-    <div
-      id="status-panel"
-      className="flex items-center justify-between text-muted-foreground bg-white dark:bg-black rounded-md p-2"
-    >
+    <div id="status-panel" className="flex items-center justify-between text-muted-foreground p-1">
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <RunningIndicator runningState={runningState} />
