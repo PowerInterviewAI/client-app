@@ -70,13 +70,27 @@ export default function WindowResizer() {
         className="pointer-events-auto absolute left-0 right-0 bottom-0 h-2"
       />
 
-      {/* Corner: keep only bottom-right */}
+      {/* Corner: keep only bottom-right with dots indicator */}
       <div
         onMouseDown={(e) => startDrag(e, 'bottom-right')}
         // eslint-disable-next-line
         style={{ cursor: cursorForEdge('bottom-right'), WebkitAppRegion: 'no-drag' } as any}
-        className="pointer-events-auto absolute bottom-0 right-0 w-4 h-4"
-      />
+        className="pointer-events-auto absolute bottom-0 right-0 w-4 h-4 flex items-end justify-end p-1"
+      >
+        {/* diagonal dots to show draggable corner */}
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 4 4"
+          fill="none"
+          className="text-gray-500 -mr-0.5"
+        >
+          <circle cx="1" cy="3" r="0.5" fill="currentColor" />
+          <circle cx="2" cy="2" r="0.5" fill="currentColor" />
+          <circle cx="3" cy="1" r="0.5" fill="currentColor" />
+          <circle cx="3" cy="3" r="0.5" fill="currentColor" />
+        </svg>
+      </div>
     </div>
   );
 }
