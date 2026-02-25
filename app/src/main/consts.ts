@@ -13,7 +13,7 @@ export const TRANSCRIPT_INTER_TRANSCRIPT_GAP_MS = 5000;
 // Suggestion constants
 export const REPLY_SUGGESTION_GAP_MS = 2000;
 export const REPLY_SUGGESTION_NO_SUGGESTION = 'NO_SUGGESTION_NEEDED';
-export const CODE_SUGGESTION_MAX_SCREENSHOTS = 3;
+export const CODE_SUGGESTION_MAX_SCREENSHOTS = 4;
 
 // VCam agent constants
 export const VCAM_ZMQ_PORT = 50001;
