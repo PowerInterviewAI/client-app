@@ -1,4 +1,4 @@
-import { Moon, Sun } from 'lucide-react';
+import { EyeOff, Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
@@ -112,21 +112,7 @@ export default function Titlebar() {
                   // eslint-disable-next-line
                   style={{ WebkitAppRegion: 'no-drag' } as any}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <EyeOff className="h-4 w-4" />
                 </button>
               </TooltipTrigger>
               <TooltipContent>
