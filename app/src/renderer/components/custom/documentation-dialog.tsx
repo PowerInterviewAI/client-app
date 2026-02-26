@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { HOTKEYS } from '@/lib/hotkeys';
+import { HOTKEY_LIST,HOTKEYS } from '@/lib/hotkeys';
 
 interface DocumentationDialogProps {
   open: boolean;
@@ -49,16 +49,19 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
         <div className="py-2 overflow-auto flex-1">
           <h3 className="text-sm font-semibold mb-2">Hotkeys</h3>
           <div className="grid grid-cols-3 gap-2">
-            {HOTKEYS.map(([k, d, l]) => (
-              <React.Fragment key={`${k}-${d}`}>
-                <div className="col-span-1">
-                  <div className="px-2 py-1 rounded bg-muted text-[11px] font-semibold min-w-22.5">
-                    {k}
+            {HOTKEY_LIST.map((hk) => {
+              const info = HOTKEYS[hk];
+              return (
+                <React.Fragment key={hk}>
+                  <div className="col-span-1">
+                    <div className="px-2 py-1 rounded bg-muted text-[11px] font-semibold min-w-22.5">
+                      {info.combo}
+                    </div>
                   </div>
-                </div>
-                <div className="col-span-2 text-sm">{l}</div>
-              </React.Fragment>
-            ))}
+                  <div className="col-span-2 text-sm">{info.description}</div>
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
 

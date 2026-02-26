@@ -1,5 +1,5 @@
 import CreditsDisplay from '@/components/custom/credits-display';
-import { HOTKEYS } from '@/lib/hotkeys';
+import { HOTKEY_LIST,HOTKEYS } from '@/lib/hotkeys';
 import { RunningState } from '@/types/app-state';
 
 import { RunningIndicator } from './running-indicator';
@@ -20,12 +20,17 @@ export default function StatusPanel({ runningState, credits }: Props) {
           <CreditsDisplay credits={credits} className="ml-2" />
         </div>
         <div className="hidden sm:flex gap-x-2 gap-y-1 flex-wrap">
-          {HOTKEYS.map(([k, d]) => (
-            <div key={String(k)} className="flex items-center gap-1">
-              <div className="px-1 py-0.5 rounded bg-muted text-[11px] font-semibold">{k}</div>
-              <div className="text-[11px] font-semibold text-foreground">{d}</div>
-            </div>
-          ))}
+          {HOTKEY_LIST.map((hk) => {
+            const info = HOTKEYS[hk];
+            return (
+              <div key={hk} className="flex items-center gap-1">
+                <div className="px-1 py-0.5 rounded bg-muted text-[11px] font-semibold">
+                  {info.combo}
+                </div>
+                <div className="text-[11px] font-semibold text-foreground">{info.title}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
