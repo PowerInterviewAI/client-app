@@ -2,7 +2,7 @@
  * Payment Status Tab Component
  */
 
-import { useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { QrcodeCanvas, useQrcodeDownload } from 'react-qrcode-pretty';
 import { toast } from 'sonner';
 
@@ -17,6 +17,64 @@ import type { PaymentStatusResponse } from '@/types/payment';
 import { PaymentStatus } from '@/types/payment';
 
 import { getStatusBadgeColor, getStatusLabel } from './payment-utils';
+
+// separate memoized QR canvas to avoid redraws when parent re-renders
+interface MemoQrProps {
+  paymentUri: string;
+  setQrcode: (canvas: HTMLCanvasElement | SVGSVGElement) => void;
+  isQrcodeReady: boolean;
+  orderId: string;
+  download: (filename: string) => void;
+}
+
+const QrComponent: React.FC<MemoQrProps> = ({
+  paymentUri,
+  setQrcode,
+  isQrcodeReady,
+  orderId,
+  download,
+}) => (
+  <>
+    <QrcodeCanvas
+      value={paymentUri}
+      size={320}
+      level="Q"
+      variant={{
+        eyes: 'standard',
+        body: 'standard',
+      }}
+      color={{
+        eyes: '#312',
+        body: '#312',
+      }}
+      padding={16}
+      margin={0}
+      bgColor="#f3f1f2"
+      bgRounded
+      image={{
+        src: logoQr,
+        overlap: true,
+      }}
+      onReady={setQrcode}
+    />
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => download(`payment-${orderId}`)}
+      disabled={!isQrcodeReady}
+    >
+      Download QR Code
+    </Button>
+  </>
+);
+
+const MemoQr = memo(
+  QrComponent,
+  (prev, next) =>
+    prev.paymentUri === next.paymentUri &&
+    prev.isQrcodeReady === next.isQrcodeReady &&
+    prev.orderId === next.orderId
+);
 
 interface PaymentStatusTabProps {
   initialPaymentId?: string;
@@ -61,7 +119,9 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   }, [paymentStatus]);
 
   // Generate payment URI for wallet apps (includes amount)
-  const getPaymentUri = useCallback(() => {
+  // memoized so it only recalculates when status changes
+  const paymentUri = useMemo(() => {
+    console.log('Generating payment URI with status:', paymentStatus?.payment_status);
     if (!paymentStatus) return '';
 
     const { pay_address, pay_amount, pay_currency } = paymentStatus;
@@ -73,14 +133,14 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   }, [paymentStatus]);
 
   // Auto-check if initialPaymentId changes
-  useState(() => {
+  useEffect(() => {
     if (initialPaymentId) {
       setPaymentId(initialPaymentId);
       setTimeout(() => {
         handleCheckStatus(initialPaymentId);
       }, 100);
     }
-  });
+  }, [initialPaymentId, handleCheckStatus]);
 
   return (
     <div className="space-y-4">
@@ -167,36 +227,13 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
 
                       <TabsContent value="qr" className="mt-4">
                         <div className="flex flex-col items-center space-y-3">
-                          <QrcodeCanvas
-                            value={getPaymentUri()}
-                            size={240}
-                            level="Q"
-                            variant={{
-                              eyes: 'standard',
-                              body: 'standard',
-                            }}
-                            color={{
-                              eyes: '#000',
-                              body: '#222',
-                            }}
-                            padding={16}
-                            margin={0}
-                            bgColor="#fff"
-                            bgRounded
-                            image={{
-                              src: logoQr,
-                              overlap: true,
-                            }}
-                            onReady={setQrcode}
+                          <MemoQr
+                            paymentUri={paymentUri}
+                            setQrcode={setQrcode}
+                            isQrcodeReady={isQrcodeReady}
+                            orderId={paymentStatus.order_id}
+                            download={downloadQrcode}
                           />
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => downloadQrcode(`payment-${paymentStatus.order_id}`)}
-                            disabled={!isQrcodeReady}
-                          >
-                            Download QR Code
-                          </Button>
                           <p className="text-sm text-muted-foreground text-center">
                             Scan with your wallet app
                           </p>
