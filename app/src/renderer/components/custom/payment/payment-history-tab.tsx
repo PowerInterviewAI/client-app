@@ -87,7 +87,7 @@ export default function PaymentHistoryTab({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
+                <TableHead>Created</TableHead>
                 <TableHead>Payment ID</TableHead>
                 <TableHead>Credits</TableHead>
                 <TableHead>Amount</TableHead>
@@ -99,7 +99,8 @@ export default function PaymentHistoryTab({
               {history.map((payment) => (
                 <TableRow key={payment.payment_id}>
                   <TableCell className="text-sm">
-                    {new Date(payment.created_at).toLocaleDateString()}
+                    {new Date(payment.created_at).toLocaleDateString()}{' '}
+                    {new Date(payment.created_at).toLocaleTimeString()}
                   </TableCell>
                   <TableCell className="text-sm font-mono">{payment.payment_id}</TableCell>
                   <TableCell className="text-sm font-medium">
