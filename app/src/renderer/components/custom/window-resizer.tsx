@@ -88,7 +88,7 @@ export default function WindowResizer() {
           <circle cx="1" cy="3" r="0.5" fill="currentColor" />
           <circle cx="2" cy="2" r="0.5" fill="currentColor" />
           <circle cx="3" cy="1" r="0.5" fill="currentColor" />
-          <circle cx="3" cy="3" r="0.5" fill="currentColor" />
+          <circle cx="1" cy="1" r="0.5" fill="currentColor" />
         </svg>
       </div>
     </div>
