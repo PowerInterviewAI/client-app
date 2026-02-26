@@ -9,7 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { HOTKEY_LIST,HOTKEYS } from '@/lib/hotkeys';
+import { Hotkey, HOTKEY_LIST, HOTKEYS } from '@/lib/hotkeys';
+import { cn } from '@/lib/utils';
 
 interface DocumentationDialogProps {
   open: boolean;
@@ -54,7 +55,16 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
               return (
                 <React.Fragment key={hk}>
                   <div className="col-span-1">
-                    <div className="px-2 py-1 rounded bg-muted text-[11px] font-semibold min-w-22.5">
+                    <div
+                      className={cn(
+                        'px-2 py-1 rounded text-[11px] font-semibold min-w-22.5',
+                        hk === Hotkey.StopAll
+                          ? 'bg-destructive/80 text-primary-foreground'
+                          : hk === Hotkey.ToggleStealth
+                            ? 'bg-primary/80 text-primary-foreground'
+                            : 'bg-muted'
+                      )}
+                    >
                       {info.combo}
                     </div>
                   </div>

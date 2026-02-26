@@ -28,7 +28,7 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
   [Hotkey.ToggleStealth]: {
     combo: 'Ctrl+Shift+M',
     title: 'Toggle Stealth',
-    description: 'Toggle stealth mode on or off',
+    description: 'Toggle stealth mode ON or OFF',
   },
   [Hotkey.Opacity]: {
     combo: 'Ctrl+Shift+N',
