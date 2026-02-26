@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { type ReplySuggestion, SuggestionState } from '@/types/suggestion';
 
-import { Checkbox } from '../ui/checkbox';
+import { Checkbox } from '../../ui/checkbox';
 
 interface SuggestionsPanelProps {
   suggestions?: ReplySuggestion[];

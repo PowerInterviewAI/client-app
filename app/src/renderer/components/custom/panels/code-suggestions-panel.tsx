@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { type CodeSuggestion, SuggestionState } from '@/types/suggestion';
 
-import { Checkbox } from '../ui/checkbox';
-import { SafeMarkdown } from './safe-markdown';
+import { Checkbox } from '../../ui/checkbox';
+import { SafeMarkdown } from '../safe-markdown';
 
 interface CodeSuggestionsPanelProps {
   codeSuggestions?: CodeSuggestion[];

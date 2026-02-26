@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { Speaker, type Transcript } from '@/types/transcript';
 
-import { Checkbox } from '../ui/checkbox';
+import { Checkbox } from '../../ui/checkbox';
 
 interface TranscriptionPanelProps {
   transcripts: Transcript[];
