@@ -12,6 +12,8 @@ import {
 import { Hotkey, HOTKEY_LIST, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 
+import ExternalLink from './external-link';
+
 interface DocumentationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -44,6 +46,16 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
               Power Interview is an AI-powered assistant that enhances your interview experience
               with real-time reply suggestions, on-screen code recommendations, and an optional Face
               Swap feature.
+            </p>
+            <p className="mt-2 text-sm">
+              For full documentation, visit{' '}
+              <ExternalLink
+                href="https://www.powerinterviewai.com/doc"
+                className="text-primary underline"
+              >
+                powerinterviewai.com/doc
+              </ExternalLink>
+              .
             </p>
           </DialogDescription>
         </DialogHeader>
