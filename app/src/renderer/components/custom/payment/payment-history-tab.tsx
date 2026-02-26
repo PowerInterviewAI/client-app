@@ -96,7 +96,7 @@ export default function PaymentHistoryTab({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {history.map((payment) => (
+              {history.slice(0, 30).map((payment) => (
                 <TableRow key={payment.payment_id}>
                   <TableCell className="text-sm">
                     {new Date(payment.created_at).toLocaleDateString()}{' '}
