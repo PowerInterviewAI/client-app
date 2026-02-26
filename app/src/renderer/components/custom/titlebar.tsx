@@ -68,23 +68,6 @@ export default function Titlebar() {
           // eslint-disable-next-line
           style={{ WebkitAppRegion: 'no-drag' } as any}
         >
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => toggleTheme()}
-                aria-label="Toggle theme"
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
-              >
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{isDark ? 'Light mode' : 'Dark mode'}</p>
-            </TooltipContent>
-          </Tooltip>
-
           {appState?.isLoggedIn && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -108,6 +91,23 @@ export default function Titlebar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <button
+                onClick={() => toggleTheme()}
+                aria-label="Toggle theme"
+                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
+                // eslint-disable-next-line
+                style={{ WebkitAppRegion: 'no-drag' } as any}
+              >
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isDark ? 'Light mode' : 'Dark mode'}</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
                 onClick={() => setIsDocsOpen(true)}
                 aria-label="Documentation"
                 className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
@@ -127,7 +127,7 @@ export default function Titlebar() {
               <button
                 onClick={handleClose}
                 aria-label="Close"
-                className="h-7 w-12 flex items-center justify-center rounded hover:bg-destructive/50"
+                className="h-7 w-12 flex items-center justify-center rounded-md hover:bg-destructive/50"
                 // eslint-disable-next-line
                 style={{ WebkitAppRegion: 'no-drag' } as any}
               >
