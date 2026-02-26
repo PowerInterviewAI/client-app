@@ -87,11 +87,11 @@ export default function PaymentPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="buy" className="flex-1 overflow-auto mt-6">
+          <TabsContent value="buy" className="flex-1 mt-6">
             <BuyCreditsTab credits={remainingCredits} onPaymentCreated={handlePaymentCreated} />
           </TabsContent>
 
-          <TabsContent value="history" className="flex-1 overflow-auto mt-6">
+          <TabsContent value="history" className="flex-1 mt-6">
             <PaymentHistoryTab
               isActive={activeTab === 'history'}
               onViewPayment={handleViewPayment}
@@ -99,7 +99,7 @@ export default function PaymentPage() {
             />
           </TabsContent>
 
-          <TabsContent value="status" className="flex-1 overflow-auto mt-6">
+          <TabsContent value="status" className="flex-1 mt-6">
             <PaymentStatusTab key={statusPaymentId} initialPaymentId={statusPaymentId} />
           </TabsContent>
         </Tabs>

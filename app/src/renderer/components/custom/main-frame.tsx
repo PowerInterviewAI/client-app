@@ -39,7 +39,7 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
     >
       <div className="flex flex-col h-[calc(100vh-4px)]">
         <Titlebar />
-        <div className="flex-1 flex flex-col overflow-auto">{children}</div>
+        <div className="flex-1 flex flex-col overflow-auto hide-scrollbar">{children}</div>
       </div>
       <WindowResizer />
       <UpdateNotification />

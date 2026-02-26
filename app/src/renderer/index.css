@@ -207,6 +207,15 @@
   background: rgba(0, 0, 0, 0.03);
 }
 
+/* utility class for hiding scrollbars while retaining scrollability */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
 /* Firefox */
 :root {
   scrollbar-color: rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.03);
