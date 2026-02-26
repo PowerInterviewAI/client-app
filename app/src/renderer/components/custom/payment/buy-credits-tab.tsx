@@ -71,6 +71,8 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
   const paymentDetailsRef = useRef<HTMLDivElement>(null);
 
   const availableMinutes = Math.floor(credits / CREDITS_PER_MINUTE);
+  const availableHours = Math.floor(availableMinutes / 60);
+  const availableRemMinutes = availableMinutes % 60;
 
   const handleSelectPlan = useCallback((plan: CreditPlanInfo) => {
     setSelectedPlan(plan);
@@ -105,8 +107,19 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
         <div className="text-sm font-medium">Current Balance</div>
         <div className="text-2xl font-bold">{credits.toLocaleString()} credits</div>
         <div className="text-sm text-muted-foreground">
-          Available for ~{availableMinutes} minute{availableMinutes !== 1 ? 's' : ''} (10 credits
-          per minute)
+          Available for ~
+          {availableHours > 0 && (
+            <>
+              {availableHours} hour{availableHours !== 1 ? 's' : ''}
+              {availableRemMinutes > 0 ? ' ' : ''}
+            </>
+          )}
+          {availableRemMinutes > 0 && (
+            <>
+              {availableRemMinutes} minute{availableRemMinutes !== 1 ? 's' : ''}
+            </>
+          )}{' '}
+          (10 credits per minute)
         </div>
       </div>
 
