@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import CodeSuggestionsPanel from '@/components/custom/panels/code-suggestions-panel';
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
 import ControlPanel from '@/components/custom/control-panel';
 import { LoadingPage } from '@/components/custom/loading';
+import CodeSuggestionsPanel from '@/components/custom/panels/code-suggestions-panel';
 import ReplySuggestionsPanel from '@/components/custom/panels/reply-suggestions-panel';
-import StatusPanel from '@/components/custom/status-panel';
 import TranscriptPanel from '@/components/custom/panels/transcript-panel';
+import StatusPanel from '@/components/custom/status-panel';
 import { VideoPanel, type VideoPanelHandle } from '@/components/custom/video-panel';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
