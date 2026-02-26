@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 
+import { DialogContainerContext } from '@/components/ui/dialog';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import type { PushNotification } from '@/types/push-notification';
 
@@ -10,6 +11,10 @@ import WindowResizer from './window-resizer';
 
 export default function MainFrame({ children }: { children: React.ReactNode }) {
   const isStealth = useIsStealthMode();
+  const [container, setContainer] = React.useState<HTMLElement | null>(null);
+  const mainRef = React.useCallback((el: HTMLElement | null) => {
+    setContainer(el);
+  }, []);
 
   useEffect(() => {
     const api = window.electronAPI;
@@ -34,15 +39,18 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <main
-      className={`overflow-hidden bg-background ${isStealth ? 'border-2 border-blue-500 rounded-2xl' : 'border border-foreground/30'} `}
-    >
-      <div className="flex flex-col h-[calc(100vh-4px)]">
-        <Titlebar />
-        <div className="flex-1 flex flex-col overflow-auto hide-scrollbar">{children}</div>
-      </div>
-      <WindowResizer />
-      <UpdateNotification />
-    </main>
+    <DialogContainerContext.Provider value={container}>
+      <main
+        ref={mainRef}
+        className={`relative overflow-hidden bg-background ${isStealth ? 'border-2 border-blue-500 rounded-2xl' : 'border border-foreground/30 rounded-xl'} `}
+      >
+        <div className="flex flex-col h-[calc(100vh-4px)]">
+          <Titlebar />
+          <div className="flex-1 flex flex-col overflow-auto hide-scrollbar">{children}</div>
+        </div>
+        <WindowResizer />
+        <UpdateNotification />
+      </main>
+    </DialogContainerContext.Provider>
   );
 }
