@@ -1,4 +1,4 @@
-import { Ellipsis, Users } from 'lucide-react';
+import { Ellipsis, ScanFace } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -183,7 +183,7 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
                 updateConfig({ faceSwap: !config?.faceSwap });
               }}
             >
-              <Users className="h-4 w-4" />
+              <ScanFace className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
