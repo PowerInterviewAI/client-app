@@ -6,10 +6,10 @@ import { cn } from '@/lib/utils';
 
 // context that provides an optional default container element for portals
 // we store the element itself so consumers re-render when it becomes available
-const DialogContainerContext = React.createContext<Element | null>(null);
+const MainContainerContext = React.createContext<Element | null>(null);
 
-function useDialogContainer(): Element | null {
-  return React.useContext(DialogContainerContext);
+function useMainContainer(): Element | null {
+  return React.useContext(MainContainerContext);
 }
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
@@ -23,14 +23,14 @@ function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive
 interface DialogPortalProps extends React.ComponentProps<typeof DialogPrimitive.Portal> {
   /**
    * optional target element to render the portal into; if omitted the
-   * nearest enclosing `DialogContainerContext` value will be used, and
+   * nearest enclosing `MainContainerContext` value will be used, and
    * otherwise `document.body`.
    */
   container?: Element | null;
 }
 
 function DialogPortal({ container, ...props }: DialogPortalProps) {
-  const ctx = useDialogContainer();
+  const ctx = useMainContainer();
   const target = container ?? ctx ?? undefined;
 
   return <DialogPrimitive.Portal data-slot="dialog-portal" container={target} {...props} />;
@@ -44,7 +44,7 @@ function DialogOverlay({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
-  const container = useDialogContainer();
+  const container = useMainContainer();
   const pos = container ? 'absolute' : 'fixed';
 
   return (
@@ -74,7 +74,7 @@ function DialogContent({
   container,
   ...props
 }: DialogContentProps) {
-  const ctxContainer = useDialogContainer();
+  const ctxContainer = useMainContainer();
   const pos = (container ?? ctxContainer) ? 'absolute' : 'fixed';
 
   return (
@@ -151,7 +151,6 @@ function DialogDescription({
 export {
   Dialog,
   DialogClose,
-  DialogContainerContext,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -160,5 +159,6 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
-  useDialogContainer,
+  MainContainerContext as MainContainerContext,
+  useMainContainer,
 };

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 
-import { DialogContainerContext } from '@/components/ui/dialog';
+import { MainContainerContext } from '@/components/ui/dialog';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import type { PushNotification } from '@/types/push-notification';
 
@@ -39,7 +39,7 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <DialogContainerContext.Provider value={container}>
+    <MainContainerContext.Provider value={container}>
       <main
         ref={mainRef}
         className={`relative overflow-hidden bg-background ${isStealth ? 'border-2 border-blue-500 rounded-2xl' : 'border border-foreground/30 rounded-xl'} `}
@@ -51,6 +51,6 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
         <WindowResizer />
         <UpdateNotification />
       </main>
-    </DialogContainerContext.Provider>
+    </MainContainerContext.Provider>
   );
 }
