@@ -41,8 +41,9 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
           <DialogTitle>Power Interview {version ? `v${version}` : ''}</DialogTitle>
           <DialogDescription>
             <p>
-              Power Interview is an AI-powered tool designed to assist with technical interviews by
-              providing real-time reply suggestions and screen-based code suggestions.
+              Power Interview is an AI-powered assistant that enhances your interview experience
+              with real-time reply suggestions, on-screen code recommendations, and an optional Face
+              Swap feature.
             </p>
           </DialogDescription>
         </DialogHeader>
