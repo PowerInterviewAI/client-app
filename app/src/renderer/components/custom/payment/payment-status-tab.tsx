@@ -17,6 +17,7 @@ import type { PaymentStatusResponse } from '@/types/payment';
 import { PaymentStatus } from '@/types/payment';
 
 import { getStatusBadgeColor, getStatusLabel } from './payment-utils';
+import { Copy } from 'lucide-react';
 
 // separate memoized QR canvas to avoid redraws when parent re-renders
 interface MemoQrProps {
@@ -115,6 +116,14 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
     if (paymentStatus?.pay_address) {
       navigator.clipboard.writeText(paymentStatus.pay_address);
       toast.success('Payment address copied to clipboard');
+    }
+  }, [paymentStatus]);
+
+  const handleCopyAmount = useCallback(() => {
+    if (paymentStatus?.pay_amount != null && paymentStatus?.pay_currency) {
+      const text = `${paymentStatus.pay_amount} ${paymentStatus.pay_currency.toUpperCase()}`;
+      navigator.clipboard.writeText(text);
+      toast.success('Amount copied to clipboard');
     }
   }, [paymentStatus]);
 
@@ -249,19 +258,25 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                           <div>
                             <p className="text-sm font-medium mb-2">Payment Address</p>
                             <div className="flex gap-2 items-center">
-                              <code className="flex-1 bg-muted px-3 py-2 rounded text-sm break-all">
+                              <Button size="sm" variant="secondary" onClick={handleCopyAddress}>
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <code className="flex-1 bg-muted p-2 rounded text-sm">
                                 {paymentStatus.pay_address}
                               </code>
-                              <Button size="sm" variant="secondary" onClick={handleCopyAddress}>
-                                Copy
-                              </Button>
                             </div>
                           </div>
                           <div>
                             <p className="text-sm font-medium mb-2">Amount to Send</p>
-                            <p className="text-lg font-semibold">
-                              {paymentStatus.pay_amount} {paymentStatus.pay_currency.toUpperCase()}
-                            </p>
+                            <div className="flex gap-2 items-center">
+                              <Button size="sm" variant="secondary" onClick={handleCopyAmount}>
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <code className="flex-1 bg-muted p-2 rounded text-sm">
+                                {paymentStatus.pay_amount}{' '}
+                                {paymentStatus.pay_currency.toUpperCase()}
+                              </code>
+                            </div>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             Send exactly this amount to the address above.
