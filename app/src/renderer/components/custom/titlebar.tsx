@@ -127,7 +127,7 @@ export default function Titlebar() {
               <button
                 onClick={handleClose}
                 aria-label="Close"
-                className="h-7 w-12 flex items-center justify-center rounded-md hover:bg-destructive/50"
+                className="h-7 w-12 flex items-center justify-center rounded-lg hover:bg-destructive/50"
                 // eslint-disable-next-line
                 style={{ WebkitAppRegion: 'no-drag' } as any}
               >
