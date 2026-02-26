@@ -36,7 +36,6 @@ export function useWindowControls() {
 
   // Return no-op functions if not in Electron
   return {
-    minimize: () => {},
     close: () => {},
     resizeWindowDelta: () => {},
     setStealth: () => {},

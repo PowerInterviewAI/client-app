@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Import modules
+import { MIN_HEIGHT, MIN_WIDTH } from './consts.js';
 import { registerGlobalHotkeys, unregisterHotkeys } from './hotkeys.js';
 import { registerAppStateHandlers } from './ipc/app-state.js';
 import { registerAuthHandlers } from './ipc/auth.js';
@@ -18,14 +19,12 @@ import { registerReplySuggestionHandlers } from './ipc/reply-suggestion.js';
 import { registerToolsHandlers } from './ipc/tools.js';
 import { registerTranscriptHandlers } from './ipc/transcript.js';
 import { registerWebRTCHandlers } from './ipc/webrtc.js';
-// Import IPC handlers
 import { registerWindowHandlers } from './ipc/window.js';
 import { autoUpdaterService } from './services/auto-updater.service.js';
 import { healthCheckService } from './services/health-check.service.js';
 import { transcriptService } from './services/transcript.service.js';
 import { webRtcService } from './services/webrtc.service.js';
 import { setWindowReference } from './services/window-control.service.js';
-// Import services
 import { configStore } from './store/config.store.js';
 import { EnvUtil } from './utils/env.js';
 
@@ -66,10 +65,24 @@ if (!gotLock) {
 // CREATE WINDOW
 // -------------------------------------------------------------
 async function createWindow() {
+  // minimum size constants (already imported above)
+
+  // Load previously saved window bounds, fall back to sensible defaults
   const savedBounds = configStore.getWindowBounds() || {
     width: 1024,
     height: 640,
   };
+  console.log('Restoring window bounds:', savedBounds);
+
+  // Ensure bounds meet minimum requirements to avoid tiny or invalid windows
+  // (zero is treated as invalid because it's falsy in the earlier check)
+  if (!savedBounds.width || savedBounds.width < MIN_WIDTH) {
+    savedBounds.width = MIN_WIDTH;
+  }
+  if (!savedBounds.height || savedBounds.height < MIN_HEIGHT) {
+    savedBounds.height = MIN_HEIGHT;
+  }
+  console.log('Adjusted window bounds with minimum constraints:', savedBounds);
 
   win = new BrowserWindow({
     title: 'Power Interview',

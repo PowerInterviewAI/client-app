@@ -89,7 +89,10 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
     const checks: { ok: boolean; message: string }[] = [
       { ok: !!config?.interviewConf, message: 'Profile is not set' },
       { ok: !!config?.interviewConf?.username, message: 'Username is not set' },
-      { ok: !!config?.interviewConf?.photo, message: 'Photo is not set' },
+      {
+        ok: !config?.faceSwap || !!config?.interviewConf?.photo,
+        message: 'Photo is not set (required for face swap)',
+      },
       { ok: !!config?.interviewConf?.profileData, message: 'Profile data is not set' },
 
       {
@@ -119,10 +122,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
   };
 
   return (
-    <div
-      id="control-panel"
-      className="flex items-center justify-between gap-2 p-1 border border-border rounded-lg bg-card"
-    >
+    <div id="control-panel" className="flex items-center justify-between gap-2">
       <ProfileGroup
         config={config}
         onProfileClick={onProfileClick}
@@ -141,6 +141,8 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
         <hr className="h-6 border border-border" />
         <ToolsGroup getDisabled={getDisabled} />
       </div>
+
+      <div className="w-8"></div>
 
       <RunningIndicator runningState={runningState} />
     </div>

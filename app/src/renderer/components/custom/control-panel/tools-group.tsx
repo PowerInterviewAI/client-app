@@ -1,4 +1,4 @@
-import { BrushCleaning, Loader, Save } from 'lucide-react';
+import { Loader, Save, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             className="h-8 w-8 text-xs rounded-xl cursor-pointer"
             disabled={getDisabled(runningState) || exporting}
           >
-            <BrushCleaning className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>

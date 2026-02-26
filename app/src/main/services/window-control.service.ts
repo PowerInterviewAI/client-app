@@ -1,5 +1,6 @@
 import { BrowserWindow, screen } from 'electron';
 
+import { MIN_HEIGHT, MIN_WIDTH } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
@@ -57,9 +58,6 @@ export function setWindowBounds(bounds: WindowBounds): void {
   if (!win || win.isDestroyed()) return;
 
   try {
-    const MIN_WIDTH = 960;
-    const MIN_HEIGHT = 640;
-
     // Fill missing values from current bounds
     const current = win.getBounds();
     const newBounds = Object.assign({}, current, bounds || {});

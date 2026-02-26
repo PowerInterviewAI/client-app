@@ -4,6 +4,14 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
+// context that provides an optional default container element for portals
+// we store the element itself so consumers re-render when it becomes available
+const MainContainerContext = React.createContext<Element | null>(null);
+
+function useMainContainer(): Element | null {
+  return React.useContext(MainContainerContext);
+}
+
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
@@ -12,8 +20,20 @@ function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
-function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
+interface DialogPortalProps extends React.ComponentProps<typeof DialogPrimitive.Portal> {
+  /**
+   * optional target element to render the portal into; if omitted the
+   * nearest enclosing `MainContainerContext` value will be used, and
+   * otherwise `document.body`.
+   */
+  container?: Element | null;
+}
+
+function DialogPortal({ container, ...props }: DialogPortalProps) {
+  const ctx = useMainContainer();
+  const target = container ?? ctx ?? undefined;
+
+  return <DialogPrimitive.Portal data-slot="dialog-portal" container={target} {...props} />;
 }
 
 function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
@@ -24,11 +44,16 @@ function DialogOverlay({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+  const container = useMainContainer();
+  const pos = container ? 'absolute' : 'fixed';
+
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        pos,
+        'inset-0 z-50 bg-black/50',
         className
       )}
       {...props}
@@ -36,21 +61,31 @@ function DialogOverlay({
   );
 }
 
+interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive.Content> {
+  showCloseButton?: boolean;
+  /** container element for the portal; overrides context */
+  container?: Element | null;
+}
+
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  container,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content> & {
-  showCloseButton?: boolean;
-}) {
+}: DialogContentProps) {
+  const ctxContainer = useMainContainer();
+  const pos = (container ?? ctxContainer) ? 'absolute' : 'fixed';
+
   return (
-    <DialogPortal data-slot="dialog-portal">
+    <DialogPortal container={container} data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 flex flex-col w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg',
+          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+          pos,
+          'top-[50%] left-[50%] z-50 flex flex-col w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg',
           className
         )}
         {...props}
@@ -124,4 +159,6 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
+  MainContainerContext as MainContainerContext,
+  useMainContainer,
 };

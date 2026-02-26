@@ -113,7 +113,16 @@ class ConfigStore {
    * Save window bounds
    */
   saveWindowBounds(bounds: { x?: number; y?: number; width: number; height: number }): void {
-    this.store.set('window.bounds', bounds);
+    // sanitize before persisting: avoid saving nonsensical dimensions
+    type MaybeBounds = Partial<{ x: number; y: number; width: number; height: number }>;
+    const sanitized: MaybeBounds = { ...bounds };
+    if (!sanitized.width || sanitized.width <= 0) {
+      delete sanitized.width;
+    }
+    if (!sanitized.height || sanitized.height <= 0) {
+      delete sanitized.height;
+    }
+    this.store.set('window.bounds', sanitized);
   }
 
   /**

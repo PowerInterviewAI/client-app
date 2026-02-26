@@ -9,7 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { HOTKEYS } from '@/lib/hotkeys';
+import { Hotkey, HOTKEY_LIST, HOTKEYS } from '@/lib/hotkeys';
+import { cn } from '@/lib/utils';
 
 interface DocumentationDialogProps {
   open: boolean;
@@ -40,8 +41,9 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
           <DialogTitle>Power Interview {version ? `v${version}` : ''}</DialogTitle>
           <DialogDescription>
             <p>
-              Power Interview is an AI-powered tool designed to assist with technical interviews by
-              providing real-time reply suggestions and screen-based code suggestions.
+              Power Interview is an AI-powered assistant that enhances your interview experience
+              with real-time reply suggestions, on-screen code recommendations, and an optional Face
+              Swap feature.
             </p>
           </DialogDescription>
         </DialogHeader>
@@ -49,16 +51,28 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
         <div className="py-2 overflow-auto flex-1">
           <h3 className="text-sm font-semibold mb-2">Hotkeys</h3>
           <div className="grid grid-cols-3 gap-2">
-            {HOTKEYS.map(([k, d, l]) => (
-              <React.Fragment key={`${k}-${d}`}>
-                <div className="col-span-1">
-                  <div className="px-2 py-1 rounded bg-muted text-[11px] font-semibold min-w-22.5">
-                    {k}
+            {HOTKEY_LIST.map((hk) => {
+              const info = HOTKEYS[hk];
+              return (
+                <React.Fragment key={hk}>
+                  <div className="col-span-1">
+                    <div
+                      className={cn(
+                        'px-2 py-1 rounded text-[11px] font-semibold min-w-22.5',
+                        hk === Hotkey.StopAll
+                          ? 'bg-destructive/80 text-primary-foreground'
+                          : hk === Hotkey.ToggleStealth
+                            ? 'bg-primary/80 text-primary-foreground'
+                            : 'bg-muted'
+                      )}
+                    >
+                      {info.combo}
+                    </div>
                   </div>
-                </div>
-                <div className="col-span-2 text-sm">{l}</div>
-              </React.Fragment>
-            ))}
+                  <div className="col-span-2 text-sm">{info.description}</div>
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
 

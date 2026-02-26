@@ -4,6 +4,10 @@ export const BACKEND_BASE_URL = EnvUtil.isDev()
   ? 'http://localhost:8080'
   : 'https://api.powerinterviewai.com';
 
+// minimum allowed dimensions for window bounds
+export const MIN_WIDTH = 960;
+export const MIN_HEIGHT = 640;
+
 // Transcript agent constants
 export const TRANSCRIPT_ZMQ_PORT = 50002;
 export const TRANSCRIPT_MAX_RESTART_COUNT = 10;
@@ -13,7 +17,7 @@ export const TRANSCRIPT_INTER_TRANSCRIPT_GAP_MS = 5000;
 // Suggestion constants
 export const REPLY_SUGGESTION_GAP_MS = 2000;
 export const REPLY_SUGGESTION_NO_SUGGESTION = 'NO_SUGGESTION_NEEDED';
-export const CODE_SUGGESTION_MAX_SCREENSHOTS = 3;
+export const CODE_SUGGESTION_MAX_SCREENSHOTS = 4;
 
 // VCam agent constants
 export const VCAM_ZMQ_PORT = 50001;

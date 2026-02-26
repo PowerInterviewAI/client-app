@@ -1,4 +1,4 @@
-import { Ellipsis, UserLock } from 'lucide-react';
+import { Ellipsis, ScanFace } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -157,7 +157,7 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
   return (
     <div className="relative">
       <div
-        className={`flex items-center overflow-hidden border rounded-full ${
+        className={`flex items-center overflow-hidden rounded-full ${
           config?.faceSwap ? '' : 'text-white'
         }`}
       >
@@ -183,7 +183,7 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
                 updateConfig({ faceSwap: !config?.faceSwap });
               }}
             >
-              <UserLock className="h-4 w-4" />
+              <ScanFace className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

@@ -1,14 +1,14 @@
-import { Moon, Sun } from 'lucide-react';
+import { EyeOff, Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
+import CreditsDisplay from '@/components/custom/credits-display';
 import DocumentationDialog from '@/components/custom/documentation-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
-import { CREDITS_PER_MINUTE } from '@/lib/consts';
-import { cn, getElectron } from '@/lib/utils';
+import { getElectron } from '@/lib/utils';
 
 export default function Titlebar() {
   const isStealth = useIsStealthMode();
@@ -31,14 +31,6 @@ export default function Titlebar() {
   };
 
   const { appState } = useAppState();
-  const remainingCredits = appState?.credits ?? 0;
-  const availableMinutes = Math.floor(remainingCredits / CREDITS_PER_MINUTE);
-  const availableTime =
-    availableMinutes <= 0
-      ? remainingCredits > 0
-        ? 'Less than 1 min'
-        : 'No credits left'
-      : `${availableMinutes.toLocaleString()} min${availableMinutes > 1 ? 's' : ''}`;
 
   if (isStealth) return null;
 
@@ -50,7 +42,7 @@ export default function Titlebar() {
         style={{ WebkitAppRegion: 'drag' } as any}
         className="flex items-center gap-3 h-9 px-1 select-none bg-card border-b border-border"
       >
-        <div className="flex items-center gap-2 px-1">
+        <div className="flex flex-1 items-center gap-2 px-1">
           <img src={faviconSvg} alt="logo" className="h-5 w-5" />
 
           <div
@@ -62,26 +54,38 @@ export default function Titlebar() {
           </div>
         </div>
 
+        {appState?.isLoggedIn && appState?.credits !== undefined && (
+          <CreditsDisplay
+            credits={appState.credits!}
+            className="mr-2"
+            // eslint-disable-next-line
+            style={{ WebkitAppRegion: 'drag' } as any}
+          />
+        )}
+
         <div
           className="ml-auto flex items-center gap-1"
           // eslint-disable-next-line
           style={{ WebkitAppRegion: 'no-drag' } as any}
         >
-          {appState?.isLoggedIn && appState?.credits !== undefined && (
-            <div
-              className={cn(
-                'text-xs font-bold mr-2',
-                availableMinutes >= 5
-                  ? 'text-muted-foreground'
-                  : availableMinutes >= 1
-                    ? 'text-yellow-600 animate-pulse'
-                    : 'text-destructive animate-pulse'
-              )}
-              // eslint-disable-next-line
-              style={{ WebkitAppRegion: 'drag' } as any}
-            >
-              {appState?.credits?.toLocaleString()} credits ({availableTime})
-            </div>
+          {appState?.isLoggedIn && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleToggleStealth}
+                  aria-label="Toggle stealth mode"
+                  title="Toggle stealth mode"
+                  className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
+                  // eslint-disable-next-line
+                  style={{ WebkitAppRegion: 'no-drag' } as any}
+                >
+                  <EyeOff className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle stealth</p>
+              </TooltipContent>
+            </Tooltip>
           )}
 
           <Tooltip>
@@ -97,43 +101,9 @@ export default function Titlebar() {
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Toggle theme</p>
+              <p>{isDark ? 'Light mode' : 'Dark mode'}</p>
             </TooltipContent>
           </Tooltip>
-
-          {appState?.isLoggedIn && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleToggleStealth}
-                  aria-label="Toggle stealth mode"
-                  title="Toggle stealth mode"
-                  className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                  // eslint-disable-next-line
-                  style={{ WebkitAppRegion: 'no-drag' } as any}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Toggle stealth</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -157,7 +127,7 @@ export default function Titlebar() {
               <button
                 onClick={handleClose}
                 aria-label="Close"
-                className="h-7 w-12 flex items-center justify-center rounded hover:bg-destructive/50"
+                className="h-7 w-12 flex items-center justify-center rounded-lg hover:bg-destructive/50"
                 // eslint-disable-next-line
                 style={{ WebkitAppRegion: 'no-drag' } as any}
               >
