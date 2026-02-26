@@ -57,9 +57,9 @@ export default function PaymentPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-xl font-semibold">Payment Management</h1>
+            <h1 className="text-xl font-semibold">Buy Credits</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Manage your credits, view payment history, and check payment status
+              Buy credits, view payment history, and check payment status
             </p>
           </div>
         </div>
