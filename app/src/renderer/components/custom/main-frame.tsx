@@ -48,7 +48,7 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
           <Titlebar />
           <div className="flex-1 flex flex-col overflow-auto hide-scrollbar">{children}</div>
         </div>
-        <WindowResizer />
+        {!isStealth && <WindowResizer />}
         <UpdateNotification />
       </main>
     </MainContainerContext.Provider>
