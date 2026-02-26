@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import { QrcodeCanvas, useQrcodeDownload } from 'react-qrcode-pretty';
 import { toast } from 'sonner';
 
+import logoQr from '/logo-qr.png';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -168,21 +169,24 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                         <div className="flex flex-col items-center space-y-3">
                           <QrcodeCanvas
                             value={getPaymentUri()}
-                            size={320}
-                            level="M"
+                            size={240}
+                            level="Q"
                             variant={{
-                              eyes: 'gravity',
-                              body: 'fluid',
+                              eyes: 'standard',
+                              body: 'standard',
                             }}
                             color={{
-                              eyes: '#1e293b',
-                              body: '#334155',
+                              eyes: '#000',
+                              body: '#222',
                             }}
                             padding={16}
                             margin={0}
-                            bgColor="#eef0ff"
+                            bgColor="#fff"
                             bgRounded
-                            divider
+                            image={{
+                              src: logoQr,
+                              overlap: true,
+                            }}
                             onReady={setQrcode}
                           />
                           <Button
