@@ -83,7 +83,7 @@ export default function Titlebar() {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Toggle stealth</p>
+                <p>Toggle stealth mode (Ctrl+Shift+M)</p>
               </TooltipContent>
             </Tooltip>
           )}
