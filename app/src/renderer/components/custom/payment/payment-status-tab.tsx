@@ -2,6 +2,7 @@
  * Payment Status Tab Component
  */
 
+import { Copy } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { QrcodeCanvas, useQrcodeDownload } from 'react-qrcode-pretty';
 import { toast } from 'sonner';
@@ -17,7 +18,6 @@ import type { PaymentStatusResponse } from '@/types/payment';
 import { PaymentStatus } from '@/types/payment';
 
 import { getStatusBadgeColor, getStatusLabel } from './payment-utils';
-import { Copy } from 'lucide-react';
 
 // separate memoized QR canvas to avoid redraws when parent re-renders
 interface MemoQrProps {
