@@ -11,6 +11,7 @@ export enum Hotkey {
   ClearCaptures = 'ClearCaptures',
   SubmitCaptures = 'SubmitCaptures',
 }
+export const HOTKEY_LIST: Hotkey[] = Object.values(Hotkey);
 
 export interface HotkeyInfo {
   combo: string;
@@ -75,18 +76,3 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
     description: 'Submit prompt for code suggestions',
   },
 };
-
-// preserving original order for display
-export const HOTKEY_LIST: Hotkey[] = [
-  Hotkey.StopAll,
-  Hotkey.ToggleStealth,
-  Hotkey.Opacity,
-  Hotkey.PlaceWin,
-  Hotkey.MoveWin,
-  Hotkey.ResizeWin,
-  Hotkey.ScrollReplyPanel,
-  Hotkey.ScrollCodePanel,
-  Hotkey.Capture,
-  Hotkey.ClearCaptures,
-  Hotkey.SubmitCaptures,
-];
