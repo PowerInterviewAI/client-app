@@ -4,7 +4,7 @@
 
 **Your Personal AI-Powered Interview Coach with Real-Time Face Swap Technology**
 
-[![Version](https://img.shields.io/badge/version-1.1.4-blue.svg)](https://github.com/PowerInterviewAI/power-interview-assistant/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.1.5-blue.svg)](https://github.com/PowerInterviewAI/power-interview-assistant/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 📧 [Email](mailto:power-interview@protonmail.com) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/TJJp5azK7Z) | 🐦 [X](https://x.com/power_interview)
@@ -509,4 +509,5 @@ For issues, questions, or suggestions:
 📧 [Email](mailto:power-interview@protonmail.com) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/TJJp5azK7Z) | 🐦 [X](https://x.com/power_interview)
 
 </div>
+
 
