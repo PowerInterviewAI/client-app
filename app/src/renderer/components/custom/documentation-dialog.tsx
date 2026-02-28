@@ -50,10 +50,10 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
             <p className="mt-2 text-sm">
               For full documentation, visit{' '}
               <ExternalLink
-                href="https://www.powerinterviewai.com/doc"
+                href="https://www.powerinterviewai.com/docs"
                 className="text-primary underline"
               >
-                powerinterviewai.com/doc
+                powerinterviewai.com/docs
               </ExternalLink>
               .
             </p>
