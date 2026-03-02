@@ -2,6 +2,7 @@ import { Loader2, PauseCircle, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
+import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { type ReplySuggestion, SuggestionState } from '@/types/suggestion';
 
 import { Checkbox } from '../../ui/checkbox';
@@ -21,6 +22,7 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
   const HOTKEY_SMOOTH_THRESHOLD = 150; // ms
 
   const [autoScroll, setAutoScroll] = useState(true);
+  const isStealth = useIsStealthMode();
 
   // Track previous length, state, and content to detect actual changes
   const prevLengthRef = useRef<number>(suggestions.length);
@@ -111,15 +113,17 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
           <h3 className="font-semibold text-foreground text-xs">Reply Suggestions</h3>
         </div>
 
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Checkbox
-            checked={autoScroll}
-            onCheckedChange={(v) => setAutoScroll(v === true)}
-            className="h-4 w-4 rounded border-border bg-background text-primary"
-            aria-label="Enable auto-scroll"
-          />
-          <span className="text-xs text-muted-foreground">Auto-scroll</span>
-        </label>
+        {!isStealth && (
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Checkbox
+              checked={autoScroll}
+              onCheckedChange={(v) => setAutoScroll(v === true)}
+              className="h-4 w-4 rounded border-border bg-background text-primary"
+              aria-label="Enable auto-scroll"
+            />
+            <span className="text-xs text-muted-foreground">Auto-scroll</span>
+          </label>
+        )}
       </div>
 
       {/* Scrollable Content */}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
 import { useConfigStore } from '@/hooks/use-config-store';
+import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { Speaker, type Transcript } from '@/types/transcript';
 
 import { Checkbox } from '../../ui/checkbox';
@@ -17,6 +18,7 @@ function TranscriptPanel({ transcripts, style }: TranscriptionPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
+  const isStealth = useIsStealthMode();
 
   // Auto-scroll when 'transcripts' changes only if autoScroll is enabled
   useEffect(() => {
@@ -29,15 +31,17 @@ function TranscriptPanel({ transcripts, style }: TranscriptionPanelProps) {
       <div className="border-b border-border px-4 pt-4 pb-2 shrink-0 flex items-center justify-between gap-4">
         <h3 className="font-semibold text-foreground text-xs">Transcription</h3>
 
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Checkbox
-            checked={autoScroll}
-            onCheckedChange={(v) => setAutoScroll(v === true)}
-            className="h-4 w-4 rounded border-border bg-background"
-            aria-label="Enable auto-scroll"
-          />
-          <span className="select-none">Auto-scroll</span>
-        </label>
+        {!isStealth && (
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Checkbox
+              checked={autoScroll}
+              onCheckedChange={(v) => setAutoScroll(v === true)}
+              className="h-4 w-4 rounded border-border bg-background"
+              aria-label="Enable auto-scroll"
+            />
+            <span className="select-none">Auto-scroll</span>
+          </label>
+        )}
       </div>
 
       <div ref={containerRef} className="flex-1 overflow-y-auto mb-2">
