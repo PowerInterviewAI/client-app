@@ -2,7 +2,7 @@
  * Payment Status Tab Component
  */
 
-import { Copy } from 'lucide-react';
+import { Copy, RefreshCw } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { QrcodeCanvas, useQrcodeDownload } from 'react-qrcode-pretty';
 import { toast } from 'sonner';
@@ -86,27 +86,37 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   const [paymentId, setPaymentId] = useState(initialPaymentId);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatusResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [setQrcode, downloadQrcode, isQrcodeReady] = useQrcodeDownload('payment');
 
+  const paymentStatusRef = React.useRef<PaymentStatusResponse | null>(null);
+
   const handleCheckStatus = useCallback(
-    async (id?: string) => {
+    async (id?: string, silent = false) => {
       const checkId = id || paymentId;
       if (!checkId) return;
 
-      setLoading(true);
+      if (!silent) setLoading(true);
+      if (silent) setRefreshing(true);
       setError(null);
       try {
         const status = await getPaymentStatus(checkId);
         if (status) {
-          setPaymentStatus(status);
+          // only update state if the object really changed
+          const prev = paymentStatusRef.current;
+          if (JSON.stringify(prev) !== JSON.stringify(status)) {
+            setPaymentStatus(status);
+            paymentStatusRef.current = status;
+          }
         } else {
           setError('Payment not found');
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch payment status');
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
+        if (silent) setRefreshing(false);
       }
     },
     [paymentId, getPaymentStatus]
@@ -150,6 +160,27 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
       }, 100);
     }
   }, [initialPaymentId, handleCheckStatus]);
+
+  // poll for status every 5 seconds while we have an ID and the payment
+  // hasn't reached a terminal state. this keeps the UI up‑to‑date without
+  // requiring manual clicks.
+  useEffect(() => {
+    let interval: number | null = null;
+    const isTerminal =
+      paymentStatus !== null &&
+      [PaymentStatus.Finished, PaymentStatus.Failed, PaymentStatus.Expired].includes(
+        paymentStatus.payment_status
+      );
+
+    // only poll when there's an ID and the payment hasn't reached a final state
+    if (paymentId && !isTerminal) {
+      interval = window.setInterval(() => handleCheckStatus(undefined, true), 5000);
+    }
+
+    return () => {
+      if (interval !== null) window.clearInterval(interval);
+    };
+  }, [paymentId, paymentStatus, handleCheckStatus]);
 
   return (
     <div className="space-y-4">
@@ -196,6 +227,15 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                 </CardTitle>
                 <CardDescription className="mt-2">Order #{paymentStatus.order_id}</CardDescription>
               </div>
+              <span
+                className={cn(
+                  'flex items-center gap-1.5 text-xs text-muted-foreground transition-opacity duration-300',
+                  refreshing ? 'opacity-100' : 'opacity-0'
+                )}
+              >
+                <RefreshCw className="h-3 w-3 animate-spin" />
+                Refreshing…
+              </span>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">

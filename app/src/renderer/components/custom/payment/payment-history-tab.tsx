@@ -2,7 +2,8 @@
  * Payment History Tab Component
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Loading } from '@/components/custom/loading';
 import { Button } from '@/components/ui/button';
@@ -35,25 +36,48 @@ export default function PaymentHistoryTab({
   const { getPaymentHistory } = usePayment();
   const [history, setHistory] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchHistory = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await getPaymentHistory();
-      setHistory(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load payment history');
-    } finally {
-      setLoading(false);
-    }
-  }, [getPaymentHistory]);
+  const historyRef = useRef<PaymentHistory[]>(history);
+  useEffect(() => {
+    historyRef.current = history;
+  }, [history]);
+
+  const fetchHistory = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      if (silent) setRefreshing(true);
+      setError(null);
+      try {
+        const result = await getPaymentHistory();
+        // only update state when new data differs from the current list
+        if (JSON.stringify(result) !== JSON.stringify(historyRef.current)) {
+          setHistory(result);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load payment history');
+      } finally {
+        if (!silent) setLoading(false);
+        if (silent) setRefreshing(false);
+      }
+    },
+    [getPaymentHistory]
+  );
 
   useEffect(() => {
+    let interval: number | null = null;
+
     if (isActive) {
+      // load immediately (show spinner on first load)
       fetchHistory();
+      // background polls are silent — no spinner flash
+      interval = window.setInterval(() => fetchHistory(true), 5000);
     }
+
+    return () => {
+      if (interval !== null) window.clearInterval(interval);
+    };
   }, [isActive, fetchHistory]);
 
   return (
@@ -84,6 +108,17 @@ export default function PaymentHistoryTab({
         </Card>
       ) : (
         <div className="border rounded-lg">
+          <div className="flex items-center justify-end px-4 py-2 border-b">
+            <span
+              className={cn(
+                'flex items-center gap-1.5 text-xs text-muted-foreground transition-opacity duration-300',
+                refreshing ? 'opacity-100' : 'opacity-0'
+              )}
+            >
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              Refreshing…
+            </span>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
