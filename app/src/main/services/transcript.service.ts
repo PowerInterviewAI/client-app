@@ -210,10 +210,6 @@ class TranscriptService {
               } else {
                 this.selfPartialTranscript = transcript;
               }
-
-              // User started speaking — cancel any in-progress reply-suggestion so
-              // suggestions are not produced while the user is talking.
-              replySuggestionService.stop();
             }
           } else {
             if (isFinal) {

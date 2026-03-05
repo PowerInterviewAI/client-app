@@ -1,6 +1,14 @@
 import { Loader2, PauseCircle, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
+const MAX_QUESTION_LENGTH = 256;
+
+function truncateMiddle(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text;
+  const half = Math.floor((maxLen - 3) / 2);
+  return text.slice(0, half) + ' ... ... ... ' + text.slice(text.length - (maxLen - 3 - half));
+}
+
 import { Card } from '@/components/ui/card';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { type ReplySuggestion, SuggestionState } from '@/types/suggestion';
@@ -154,7 +162,7 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
                 )}
                 <div>
                   <div className="text-xs text-muted-foreground mb-2">
-                    <strong></strong> {s.last_question}
+                    {truncateMiddle(s.last_question, MAX_QUESTION_LENGTH)}
                   </div>
 
                   {(s.state === SuggestionState.Loading || s.state === SuggestionState.Success) && (
