@@ -16,7 +16,7 @@ from agents.shared.audio_device_service import AudioDeviceService
 # Audio configuration constants
 TARGET_SAMPLE_RATE = 16000
 AUDIO_BLOCK_DURATION = 0.2
-AUDIO_QUEUE_MAXSIZE = 5
+AUDIO_QUEUE_MAXSIZE = 2
 
 
 class AudioCapture:

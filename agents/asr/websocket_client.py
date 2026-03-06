@@ -12,7 +12,7 @@ import websockets
 from loguru import logger
 from websockets import ClientConnection
 
-from agents.asr.audio_capture import TARGET_SAMPLE_RATE, AudioCapture
+from agents.asr.audio_capture import AudioCapture
 
 # WebSocket configuration constants
 SILENCE_INTERVAL_SECONDS = 10.0
@@ -89,8 +89,6 @@ class WebSocketASRClient:
     async def send_audio_loop(self, ws: ClientConnection) -> None:
         """Send audio frames to websocket."""
         logger.info("Audio send loop started")
-        loop_start = asyncio.get_event_loop().time()
-        audio_sent_secs = 0.0
         try:
             while True:
                 if self.stop_event.is_set():
@@ -98,13 +96,11 @@ class WebSocketASRClient:
                     break
 
                 try:
-                    # Get audio with timeout
                     pcm_bytes = await asyncio.wait_for(
                         self.get_next_audio(),
                         timeout=SILENCE_INTERVAL_SECONDS,
                     )
                 except TimeoutError:
-                    # Send silence frame to keep connection alive
                     try:
                         await ws.send(SILENCE_FRAME)
                         logger.debug("Sent silence frame")
@@ -113,20 +109,11 @@ class WebSocketASRClient:
                         raise
                     continue
 
-                # Send audio data
                 try:
                     await ws.send(pcm_bytes)
                 except Exception as e:
                     logger.error(f"Failed to send audio: {e}")
                     raise
-
-                # Real-time pacing: prevent sending audio faster than it is produced.
-                # Stereo PCM16 at TARGET_SAMPLE_RATE: 2 bytes/sample x 2 channels x rate
-                frame_duration = len(pcm_bytes) / (2 * 2 * TARGET_SAMPLE_RATE)
-                audio_sent_secs += frame_duration
-                ahead_by = (loop_start + audio_sent_secs) - asyncio.get_event_loop().time()
-                if ahead_by > 0:
-                    await asyncio.sleep(ahead_by)
 
         except asyncio.CancelledError:
             logger.info("Send loop cancelled")
