@@ -88,6 +88,11 @@ class WebSocketASRClient:
 
     async def send_audio_loop(self, ws: ClientConnection) -> None:
         """Send audio frames to websocket."""
+
+        logger.debug("Clearing audio queues before starting send loop")
+        self.audio_capture_l.clear_queue()
+        self.audio_capture_r.clear_queue()
+
         logger.info("Audio send loop started")
         try:
             while True:
