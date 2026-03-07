@@ -38,6 +38,7 @@ class AudioCapture:
 
         # Statistics
         self.frames_captured = 0
+        self.frames_dropped = 0
 
     def _audio_callback(
         self,
@@ -65,8 +66,12 @@ class AudioCapture:
 
             # Enqueue (drop oldest if full)
             if self.audio_queue.full():
-                with contextlib.suppress(Exception):
+                try:
                     self.audio_queue.get_nowait()
+                    self.frames_dropped += 1
+                    logger.warning(f"Audio queue full - dropped oldest frame (total_dropped={self.frames_dropped})")
+                except Exception as e:
+                    logger.debug(f"Failed to drop oldest frame from audio queue: {e}")
 
             self.audio_queue.put_nowait(data_np)
             self.frames_captured += 1

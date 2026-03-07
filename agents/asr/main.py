@@ -18,7 +18,7 @@ from agents.asr.asr_agent import ASRAgent
 # Default configuration
 DEFAULT_ZMQ_PORT = 50002
 DEFAULT_AUDIO_SOURCE = "loopback"
-DEFAULT_BACKEND_URL = "ws://localhost:8000/api/asr/streaming"
+DEFAULT_BACKEND_URL = "ws://localhost:8080/api/asr/streaming"
 
 
 def monitor_parent_process(parent_pid: int, agent: ASRAgent) -> None:
