@@ -3,7 +3,7 @@
  * Generates code suggestions using LLM based on screenshots and transcripts
  */
 
-import { desktopCapturer, screen } from 'electron';
+import { BrowserWindow, desktopCapturer, screen } from 'electron';
 import sharp from 'sharp';
 
 import { ApiClient } from '../api/client.js';
@@ -304,26 +304,26 @@ export class CodeSuggestionService {
    */
   private async captureScreenshotAsGrayscale(): Promise<Uint8Array> {
     try {
-      console.log('[CodeSuggestionService] Capturing desktop screenshots from all displays...');
+      // Identify which display the main window is currently on, so we only
+      // capture that screen rather than all displays.
+      const win = BrowserWindow.getAllWindows()[0];
+      const targetDisplay = win
+        ? screen.getDisplayMatching(win.getBounds())
+        : screen.getPrimaryDisplay();
 
-      // Determine the largest display resolution to use as thumbnail size so that
-      // desktopCapturer returns full-resolution captures for every source.
-      const displays = screen.getAllDisplays();
-      const maxDisplayWidth = Math.max(
-        ...displays.map((d) => Math.round(d.size.width * d.scaleFactor))
-      );
-      const maxDisplayHeight = Math.max(
-        ...displays.map((d) => Math.round(d.size.height * d.scaleFactor))
+      const physicalWidth = Math.round(targetDisplay.size.width * targetDisplay.scaleFactor);
+      const physicalHeight = Math.round(targetDisplay.size.height * targetDisplay.scaleFactor);
+
+      console.log(
+        `[CodeSuggestionService] Capturing display id=${targetDisplay.id} (${physicalWidth}x${physicalHeight})...`
       );
 
-      // desktopCapturer is Electron's built-in screen-capture API (used by Discord,
-      // Slack, Teams, etc.). It avoids the native-binary dependency of screenshot-desktop
-      // and handles virtual/remote displays more reliably.
+      // desktopCapturer is Electron's built-in screen-capture API.
       // A timeout guards against indefinite hangs on restricted or virtual display adapters.
       const sources = await Promise.race([
         desktopCapturer.getSources({
           types: ['screen'],
-          thumbnailSize: { width: maxDisplayWidth, height: maxDisplayHeight },
+          thumbnailSize: { width: physicalWidth, height: physicalHeight },
         }),
         new Promise<never>((_, reject) =>
           setTimeout(
@@ -337,63 +337,18 @@ export class CodeSuggestionService {
         throw new Error('No screen sources captured from any display');
       }
 
-      console.log(`[CodeSuggestionService] Captured ${sources.length} display(s)`);
+      // Match the source to the target display using display_id.
+      // Fall back to the first source if no match (e.g. on Linux where display_id may be empty).
+      const targetSource =
+        sources.find((s) => s.display_id === String(targetDisplay.id)) ?? sources[0];
 
-      // Convert each NativeImage thumbnail to a PNG Buffer for Sharp processing
-      const allScreenshots = sources.map((s) => s.thumbnail.toPNG());
+      console.log(`[CodeSuggestionService] Using source: "${targetSource.name}"`);
 
-      let combinedBuffer: Buffer;
-
-      if (allScreenshots.length === 1) {
-        // Single display - use as-is
-        combinedBuffer = allScreenshots[0];
-        console.log(`[CodeSuggestionService] Single display: ${combinedBuffer.length} bytes`);
-      } else {
-        // Multiple displays - combine horizontally
-        console.log('[CodeSuggestionService] Combining multiple displays...');
-
-        // Get image metadata for all screenshots
-        const imageInfos = await Promise.all(
-          allScreenshots.map(async (buffer) => {
-            const metadata = await sharp(buffer).metadata();
-            return { buffer, width: metadata.width!, height: metadata.height! };
-          })
-        );
-
-        // Calculate combined dimensions
-        const totalWidth = imageInfos.reduce((sum, info) => sum + info.width, 0);
-        const maxHeight = Math.max(...imageInfos.map((info) => info.height));
-
-        console.log(`[CodeSuggestionService] Combined dimensions: ${totalWidth}x${maxHeight}`);
-
-        // Create a composite image
-        const composite = sharp({
-          create: {
-            width: totalWidth,
-            height: maxHeight,
-            channels: 3,
-            background: { r: 0, g: 0, b: 0 },
-          },
-        });
-
-        // Position each screenshot horizontally
-        let leftOffset = 0;
-        const overlayInputs = imageInfos.map((info) => {
-          const input = {
-            input: info.buffer,
-            left: leftOffset,
-            top: 0,
-          };
-          leftOffset += info.width;
-          return input;
-        });
-
-        combinedBuffer = await composite.composite(overlayInputs).png().toBuffer();
-        console.log(`[CodeSuggestionService] Combined screenshot: ${combinedBuffer.length} bytes`);
-      }
+      const capturedBuffer: Buffer = targetSource.thumbnail.toPNG();
+      console.log(`[CodeSuggestionService] Captured ${capturedBuffer.length} bytes`);
 
       // Use Sharp to convert to grayscale PNG with high efficiency
-      const grayscalePngBuffer = await sharp(combinedBuffer)
+      const grayscalePngBuffer = await sharp(capturedBuffer)
         .greyscale()
         .png({
           compressionLevel: 6,
