@@ -164,7 +164,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
 
             <div className="grid gap-2">
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                User Profile <span className="text-destructive">*</span>
+                Profile <span className="text-destructive">*</span>
               </label>
               <Textarea
                 value={profileData}
@@ -176,12 +176,12 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
 
             <div className="grid gap-2">
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                Interview Context (Recommended)
+                Context (Recommended)
               </label>
               <Textarea
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Enter the interview context you are targeting. (e.g. the job description or role requirements)"
+                placeholder="Enter the context you are targeting. (e.g. the job description, role requirements or any other information)"
                 className="text-sm min-h-20 max-h-40 overflow-auto"
               />
             </div>

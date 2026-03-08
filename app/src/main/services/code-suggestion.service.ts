@@ -18,8 +18,10 @@ import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
+import { configStore } from '../store/config.store.js';
 
 interface GenerateCodeSuggestionRequest {
+  context?: string;
   user_prompt?: string;
   image_names: string[];
 }
@@ -221,6 +223,7 @@ export class CodeSuggestionService {
     const userPrompt = this.buildUserPrompt(transcripts);
 
     const payload: GenerateCodeSuggestionRequest = {
+      context: configStore.getConfig().interviewConf?.jobDescription,
       user_prompt: userPrompt,
       image_names: [...this.uploadedImageNames],
     };
