@@ -1,7 +1,7 @@
 {
   "name": "power-interview",
   "private": false,
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "AI-powered live interview assistant",
   "author": "Power Interview",
   "main": "electron-dist/index.js",
@@ -44,7 +44,6 @@
     "rehype-highlight": "^7.0.2",
     "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.1",
-    "screenshot-desktop": "^1.15.3",
     "sharp": "^0.34.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
