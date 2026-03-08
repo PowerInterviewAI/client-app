@@ -3,7 +3,7 @@
  * Generates code suggestions using LLM based on screenshots and transcripts
  */
 
-import screenshot from 'screenshot-desktop';
+import { desktopCapturer, screen } from 'electron';
 import sharp from 'sharp';
 
 import { ApiClient } from '../api/client.js';
@@ -306,11 +306,25 @@ export class CodeSuggestionService {
     try {
       console.log('[CodeSuggestionService] Capturing desktop screenshots from all displays...');
 
-      // Use screenshot-desktop to capture all displays, with a timeout to prevent
-      // indefinite hangs on devices where native screen-capture APIs can block
-      // (e.g. remote desktop sessions, VMs with virtual displays, restricted GPUs).
-      const allScreenshots = await Promise.race([
-        screenshot.all(),
+      // Determine the largest display resolution to use as thumbnail size so that
+      // desktopCapturer returns full-resolution captures for every source.
+      const displays = screen.getAllDisplays();
+      const maxDisplayWidth = Math.max(
+        ...displays.map((d) => Math.round(d.size.width * d.scaleFactor))
+      );
+      const maxDisplayHeight = Math.max(
+        ...displays.map((d) => Math.round(d.size.height * d.scaleFactor))
+      );
+
+      // desktopCapturer is Electron's built-in screen-capture API (used by Discord,
+      // Slack, Teams, etc.). It avoids the native-binary dependency of screenshot-desktop
+      // and handles virtual/remote displays more reliably.
+      // A timeout guards against indefinite hangs on restricted or virtual display adapters.
+      const sources = await Promise.race([
+        desktopCapturer.getSources({
+          types: ['screen'],
+          thumbnailSize: { width: maxDisplayWidth, height: maxDisplayHeight },
+        }),
         new Promise<never>((_, reject) =>
           setTimeout(
             () => reject(new Error(`Screenshot timed out after ${SCREENSHOT_TIMEOUT_MS}ms`)),
@@ -319,11 +333,14 @@ export class CodeSuggestionService {
         ),
       ]);
 
-      if (!allScreenshots || allScreenshots.length === 0) {
-        throw new Error('No screenshots captured from any display');
+      if (!sources || sources.length === 0) {
+        throw new Error('No screen sources captured from any display');
       }
 
-      console.log(`[CodeSuggestionService] Captured ${allScreenshots.length} display(s)`);
+      console.log(`[CodeSuggestionService] Captured ${sources.length} display(s)`);
+
+      // Convert each NativeImage thumbnail to a PNG Buffer for Sharp processing
+      const allScreenshots = sources.map((s) => s.thumbnail.toPNG());
 
       let combinedBuffer: Buffer;
 
