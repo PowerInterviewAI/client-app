@@ -21,6 +21,20 @@ RECONNECT_DELAY_SECONDS = 1.0
 MAX_RECONNECT_ATTEMPTS = 0  # 0 = infinite
 
 
+def _mix_to_stereo_pcm16(data_l: np.ndarray, data_r: np.ndarray) -> bytes:
+    """Mix two mono float32 arrays into interleaved stereo PCM16 bytes.
+
+    Runs in a thread-pool executor to avoid blocking the asyncio event loop.
+    """
+    n = min(len(data_l), len(data_r))
+    pcm16_l = (data_l[:n] * 32767).astype(np.int16)
+    pcm16_r = (data_r[:n] * 32767).astype(np.int16)
+    stereo = np.empty((pcm16_l.size + pcm16_r.size,), dtype=np.int16)
+    stereo[0::2] = pcm16_l
+    stereo[1::2] = pcm16_r
+    return stereo.tobytes()
+
+
 class WebSocketASRClient:
     """WebSocket client for streaming audio to ASR backend."""
 
@@ -61,30 +75,17 @@ class WebSocketASRClient:
             data_l = self.audio_capture_l.get_frame_nowait()
             data_r = self.audio_capture_r.get_frame_nowait()
 
+            # No audio available from either channel - sleep 0 for other tasks and check again
             if data_l is None and data_r is None:
-                await asyncio.sleep(0.01)  # No audio available, wait briefly before retrying
-                continue  # No audio available, will trigger silence frame in send loop
+                await asyncio.sleep(0)
+                continue
 
             if data_l is None:
                 data_l = np.zeros_like(data_r)
             if data_r is None:
                 data_r = np.zeros_like(data_l)
 
-            # Ensure same length (important!)
-            n = min(len(data_l), len(data_r))
-            data_l = data_l[:n]
-            data_r = data_r[:n]
-
-            # Convert to PCM16
-            pcm16_l = (data_l * 32767).astype(np.int16)
-            pcm16_r = (data_r * 32767).astype(np.int16)
-
-            # Mix to stereo (interleaved L/R samples)
-            stereo = np.empty((pcm16_l.size + pcm16_r.size,), dtype=np.int16)
-            stereo[0::2] = pcm16_l
-            stereo[1::2] = pcm16_r
-
-            return stereo.tobytes()
+            return _mix_to_stereo_pcm16(data_l, data_r)
 
     async def send_audio_loop(self, ws: ClientConnection) -> None:
         """Send audio frames to websocket."""
