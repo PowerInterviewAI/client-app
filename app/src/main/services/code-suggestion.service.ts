@@ -108,10 +108,10 @@ export class CodeSuggestionService {
       codeSuggestions: this.getSuggestions(true),
     });
 
-    // Capture screenshot from main window
-    const imageBytes = await this.captureScreenshotAsGrayscale();
-
     try {
+      // Capture screenshot from main window
+      const imageBytes = await this.captureScreenshotAsGrayscale();
+
       // Create FormData for file upload
       const formData = new FormData();
       const blob = new Blob([new Uint8Array(imageBytes)], { type: 'image/png' });
@@ -127,10 +127,15 @@ export class CodeSuggestionService {
       // Update app state
       appStateService.updateState({ codeSuggestions: this.getSuggestions() });
     } catch (error) {
-      console.error('[CodeSuggestionService] Failed to upload image:', error);
-      throw error;
+      console.error('[CodeSuggestionService] Failed to capture/upload image:', error);
+      // Reset uploading state so UI is not stuck in loading
+      appStateService.updateState({ codeSuggestions: this.getSuggestions() });
+      pushNotificationService.pushNotification({
+        type: 'error',
+        message: 'Screenshot capture failed. Please try again.',
+      });
     } finally {
-      // Release lock
+      // Release lock — always reached now regardless of capture or upload failure
       actionLockService.release(ActionType.ScreenshotCapture);
     }
   }
@@ -297,8 +302,19 @@ export class CodeSuggestionService {
     try {
       console.log('[CodeSuggestionService] Capturing desktop screenshots from all displays...');
 
-      // Use screenshot-desktop to capture all displays
-      const allScreenshots = await screenshot.all();
+      // Use screenshot-desktop to capture all displays, with a timeout to prevent
+      // indefinite hangs on devices where native screen-capture APIs can block
+      // (e.g. remote desktop sessions, VMs with virtual displays, restricted GPUs).
+      const SCREENSHOT_TIMEOUT_MS = 30_000;
+      const allScreenshots = await Promise.race([
+        screenshot.all(),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`Screenshot timed out after ${SCREENSHOT_TIMEOUT_MS}ms`)),
+            SCREENSHOT_TIMEOUT_MS
+          )
+        ),
+      ]);
 
       if (!allScreenshots || allScreenshots.length === 0) {
         throw new Error('No screenshots captured from any display');
