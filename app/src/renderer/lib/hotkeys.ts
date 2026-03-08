@@ -8,8 +8,9 @@ export enum Hotkey {
   ScrollReplyPanel = 'ScrollReplyPanel',
   ScrollCodePanel = 'ScrollCodePanel',
   Capture = 'Capture',
-  ClearCaptures = 'ClearCaptures',
   SubmitCaptures = 'SubmitCaptures',
+  ClearCaptures = 'ClearCaptures',
+  CaptureAndSubmit = 'CaptureAndSubmit',
 }
 export const HOTKEY_LIST: Hotkey[] = Object.values(Hotkey);
 
@@ -51,28 +52,33 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
     description: 'Resize window in the specified direction',
   },
   [Hotkey.ScrollReplyPanel]: {
-    combo: 'Ctrl+Shift+J / K',
+    combo: 'Ctrl+Shift+J / K / L',
     title: 'Scroll Reply Panel',
-    description: 'Scroll Down/Up in the interview reply suggestions panel',
+    description: 'Scroll Down/Up/End in the interview reply suggestions panel',
   },
   [Hotkey.ScrollCodePanel]: {
-    combo: 'Ctrl+Shift+U / I',
+    combo: 'Ctrl+Shift+U / I / O',
     title: 'Scroll Code Panel',
-    description: 'Scroll Down/Up in the coding test suggestions panel',
+    description: 'Scroll Down/Up/End in the coding test suggestions panel',
   },
   [Hotkey.Capture]: {
-    combo: 'Ctrl+Alt+Shift+P',
+    combo: 'Ctrl+Shift+F9',
     title: 'Capture',
     description: 'Take a screenshot for code suggestions',
   },
+  [Hotkey.SubmitCaptures]: {
+    combo: 'Ctrl+Shift+F10',
+    title: 'Submit Captures',
+    description: 'Submit prompt for code suggestions',
+  },
   [Hotkey.ClearCaptures]: {
-    combo: 'Ctrl+Alt+Shift+X',
+    combo: 'Ctrl+Shift+F11',
     title: 'Clear Captures',
     description: 'Clear pending screenshots for code suggestions',
   },
-  [Hotkey.SubmitCaptures]: {
-    combo: 'Ctrl+Alt+Shift+Enter',
-    title: 'Submit Captures',
-    description: 'Submit prompt for code suggestions',
+  [Hotkey.CaptureAndSubmit]: {
+    combo: 'Ctrl+Shift+F12',
+    title: 'Capture and Submit',
+    description: 'Take a screenshot and submit prompt for code suggestions',
   },
 };
