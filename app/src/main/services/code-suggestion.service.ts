@@ -7,7 +7,11 @@ import screenshot from 'screenshot-desktop';
 import sharp from 'sharp';
 
 import { ApiClient } from '../api/client.js';
-import { BACKEND_BASE_URL, CODE_SUGGESTION_MAX_SCREENSHOTS } from '../consts.js';
+import {
+  BACKEND_BASE_URL,
+  CODE_SUGGESTION_MAX_SCREENSHOTS,
+  SCREENSHOT_TIMEOUT_MS,
+} from '../consts.js';
 import { CodeSuggestion, RunningState, SuggestionState, Transcript } from '../types/app-state.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { UuidUtil } from '../utils/uuid.js';
@@ -305,7 +309,6 @@ export class CodeSuggestionService {
       // Use screenshot-desktop to capture all displays, with a timeout to prevent
       // indefinite hangs on devices where native screen-capture APIs can block
       // (e.g. remote desktop sessions, VMs with virtual displays, restricted GPUs).
-      const SCREENSHOT_TIMEOUT_MS = 30_000;
       const allScreenshots = await Promise.race([
         screenshot.all(),
         new Promise<never>((_, reject) =>
