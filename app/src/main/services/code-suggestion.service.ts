@@ -12,13 +12,13 @@ import {
   CODE_SUGGESTION_MAX_SCREENSHOTS,
   SCREENSHOT_TIMEOUT_MS,
 } from '../consts.js';
+import { configStore } from '../store/config.store.js';
 import { CodeSuggestion, RunningState, SuggestionState, Transcript } from '../types/app-state.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
-import { configStore } from '../store/config.store.js';
 
 interface GenerateCodeSuggestionRequest {
   context?: string;

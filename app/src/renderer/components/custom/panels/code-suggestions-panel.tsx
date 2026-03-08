@@ -77,11 +77,17 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
     if (typeof window === 'undefined' || !window?.electronAPI?.onHotkeyScroll) return;
 
     const unsubscribe = window.electronAPI.onHotkeyScroll(
-      (section: string, direction: 'up' | 'down') => {
+      (section: string, direction: 'up' | 'down' | 'end') => {
         if (section !== '1') return; // only handle for code suggestions section
 
         const container = containerRef.current;
         if (!container) return;
+
+        // choose scroll behavior based on direction
+        if (direction === 'end') {
+          container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+          return;
+        }
 
         const distance = Math.max(Math.round(container.clientHeight * 0.5), 100);
         const top = direction === 'up' ? -distance : distance;

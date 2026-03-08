@@ -5,7 +5,10 @@ import { useEffect } from 'react';
  * @param section - The section to listen for ('0' for interview suggestions, '1' for code suggestions)
  * @param onScroll - Callback function to handle scroll events
  */
-export function useHotkeyScroll(section: string, onScroll: (direction: 'up' | 'down') => void) {
+export function useHotkeyScroll(
+  section: string,
+  onScroll: (direction: 'up' | 'down' | 'end') => void
+) {
   useEffect(() => {
     // Check if electronAPI is available (running in Electron)
     if (typeof window !== 'undefined' && window.electronAPI?.onHotkeyScroll) {

@@ -80,42 +80,51 @@ export function registerGlobalHotkeys(): void {
   globalShortcut.register('Control+Super+Shift+Right', () => resizeWindowByArrow('right'));
   globalShortcut.register('Control+Super+Shift+Left', () => resizeWindowByArrow('left'));
 
-  // Scroll reply suggestions: Ctrl+Shift+K (up) / Ctrl+Shift+J (down)
+  // Scroll reply suggestions: Ctrl+Shift+K (up) / Ctrl+Shift+J (down) / Ctrl+Shift+L (end)
   globalShortcut.register('Control+Shift+K', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) {
-      w.webContents.send('hotkey-scroll', '0', 'up');
-    }
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '0', 'up');
   });
   globalShortcut.register('Control+Shift+J', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) {
-      w.webContents.send('hotkey-scroll', '0', 'down');
-    }
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '0', 'down');
+  });
+  globalShortcut.register('Control+Shift+L', () => {
+    const w = BrowserWindow.getAllWindows()[0];
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '0', 'end');
   });
 
-  // Scroll code suggestions: Ctrl+Shift+I (up) / Ctrl+Shift+U (down)
+  // Scroll code suggestions: Ctrl+Shift+I (up) / Ctrl+Shift+U (down) / Ctrl+Shift+O (end)
   globalShortcut.register('Control+Shift+I', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) {
-      w.webContents.send('hotkey-scroll', '1', 'up');
-    }
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '1', 'up');
   });
   globalShortcut.register('Control+Shift+U', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) {
-      w.webContents.send('hotkey-scroll', '1', 'down');
-    }
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '1', 'down');
+  });
+  globalShortcut.register('Control+Shift+O', () => {
+    const w = BrowserWindow.getAllWindows()[0];
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '1', 'end');
   });
 
-  // Code suggestion operations: Ctrl+Alt+Shift+P (screenshot), X (clear), Enter (submit)
-  globalShortcut.register('Control+Alt+Shift+P', async () => {
+  // Code suggestion operations: F9=Capture, F10=Submit, F11=Clear, F12=Capture+Submit
+  globalShortcut.register('Control+Shift+F9', async () => {
     await codeSuggestionService.captureScreenshot();
   });
-  globalShortcut.register('Control+Alt+Shift+X', async () => {
+  globalShortcut.register('Control+Shift+F11', async () => {
     await codeSuggestionService.clearImages();
   });
-  globalShortcut.register('Control+Alt+Shift+Enter', async () => {
+  globalShortcut.register('Control+Shift+F10', async () => {
+    await codeSuggestionService.startGenerateSuggestion();
+  });
+  globalShortcut.register('Control+Shift+F12', async () => {
+    try {
+      await codeSuggestionService.captureScreenshot();
+    } catch (err) {
+      // capture failed; log and continue to attempt suggestion if there are any images
+      console.error('[Hotkeys] capture+submit: screenshot error', err);
+    }
     await codeSuggestionService.startGenerateSuggestion();
   });
 
@@ -126,11 +135,12 @@ export function registerGlobalHotkeys(): void {
   console.log('  Ctrl+Shift+1-9: Place window (numpad layout)');
   console.log('  Ctrl+Alt+Shift+Arrow: Move window');
   console.log('  Ctrl+Win+Shift+Arrow: Resize window');
-  console.log('  Ctrl+Shift+J / K: Scroll interview suggestions (J down, K up)');
-  console.log('  Ctrl+Shift+U / I: Scroll code suggestions (U down, I up)');
-  console.log('  Ctrl+Alt+Shift+P: Capture screenshot (renderer action)');
-  console.log('  Ctrl+Alt+Shift+X: Clear screenshots (renderer action)');
-  console.log('  Ctrl+Alt+Shift+Enter: Submit (renderer action)');
+  console.log('  Ctrl+Shift+J / K / L: Scroll interview suggestions (J down, K up, L end)');
+  console.log('  Ctrl+Shift+U / I / O: Scroll code suggestions (U down, I up, O end)');
+  console.log('  Ctrl+Shift+F9: Capture screenshot for code suggestion');
+  console.log('  Ctrl+Shift+F10: Submit code suggestion');
+  console.log('  Ctrl+Shift+F11: Clear code captures');
+  console.log('  Ctrl+Shift+F12: Capture + submit code suggestion (combo)');
 }
 
 /**

@@ -86,11 +86,17 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
     if (typeof window === 'undefined' || !window?.electronAPI?.onHotkeyScroll) return;
 
     const unsubscribe = window.electronAPI.onHotkeyScroll(
-      (section: string, direction: 'up' | 'down') => {
+      (section: string, direction: 'up' | 'down' | 'end') => {
         if (section !== '0') return; // only handle for interview suggestions section
 
         const container = containerRef.current;
         if (!container) return;
+
+        if (direction === 'end') {
+          // scroll to bottom where latest suggestion lives
+          scrollToLatest('smooth');
+          return;
+        }
 
         const distance = Math.max(Math.round(container.clientHeight * 0.5), 100);
         const top = direction === 'up' ? -distance : distance;

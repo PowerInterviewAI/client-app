@@ -1,7 +1,7 @@
 {
   "name": "power-interview",
   "private": false,
-  "version": "1.1.11",
+  "version": "1.1.12",
   "description": "AI-powered live interview assistant",
   "author": "Power Interview",
   "main": "electron-dist/index.js",
@@ -56,7 +56,6 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@types/screenshot-desktop": "^1.15.0",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",

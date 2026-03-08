@@ -77,15 +77,16 @@ Operate discreetly during interviews:
 - **Opacity Control** (`Ctrl+Shift+N`): Toggle window opacity for discreet viewing in stealth mode
 - **Window Positioning** (`Ctrl+Shift+1-9`): Quick window placement (numpad layout)
 - **Scroll Controls**:
-  - `Ctrl+Shift+J/K`: Scroll interview suggestions
-  - `Ctrl+Shift+U/I`: Scroll code suggestions
+  - `Ctrl+Shift+J/K/L`: Scroll interview suggestions (down/up/end)
+  - `Ctrl+Shift+U/I/O`: Scroll code suggestions (down/up/end)
 - **Window Management**:
   - `Ctrl+Alt+Shift+Arrow`: Move window
   - `Ctrl+Win+Shift+Arrow`: Resize window
 - **Code Suggestion Controls**:
-  - `Ctrl+Alt+Shift+P`: Take screenshot for code suggestions
-  - `Ctrl+Alt+Shift+Enter`: Submit screenshots
-  - `Ctrl+Alt+Shift+X`: Clear screenshots
+  - `Ctrl+Shift+F9`: Take screenshot for code suggestions
+  - `Ctrl+Shift+F10`: Submit screenshots
+  - `Ctrl+Shift+F11`: Clear screenshots
+  - `Ctrl+Shift+F12`: Capture and submit code suggestion in one step
 
 ### Smart Configuration
 
