@@ -5,6 +5,7 @@ export enum Hotkey {
   PlaceWin = 'PlaceWin',
   MoveWin = 'MoveWin',
   ResizeWin = 'ResizeWin',
+  ZoomInOutReset = 'ZoomInOutReset',
   ScrollReplyPanel = 'ScrollReplyPanel',
   ScrollCodePanel = 'ScrollCodePanel',
   Capture = 'Capture',
@@ -50,6 +51,11 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
     combo: 'Ctrl+Win+Shift+Arrow',
     title: 'Resize Win',
     description: 'Resize window in the specified direction',
+  },
+  [Hotkey.ZoomInOutReset]: {
+    combo: 'Ctrl+Shift+= / Ctrl+Shift+- / Ctrl+Shift+0',
+    title: 'Zoom In/Out/Reset',
+    description: 'Adjust or reset UI zoom level',
   },
   [Hotkey.ScrollReplyPanel]: {
     combo: 'Ctrl+Shift+J / K / L',

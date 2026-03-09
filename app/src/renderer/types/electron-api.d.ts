@@ -139,6 +139,15 @@ declare global {
     // Window controls
     close: () => void;
 
+    // Zoom controls
+    zoom: {
+      increase: () => void;
+      decrease: () => void;
+      reset: () => void;
+      getFactor: () => Promise<number>;
+      onChange: (callback: (percent: number) => void) => () => void;
+    };
+
     // Open external URL in user's default browser
     openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
 

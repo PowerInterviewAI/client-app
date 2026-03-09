@@ -5,7 +5,7 @@ export const BACKEND_BASE_URL = EnvUtil.isDev()
   : 'https://api.powerinterviewai.com';
 
 // minimum allowed dimensions for window bounds
-export const MIN_WIDTH = 720;
+export const MIN_WIDTH = 760;
 export const MIN_HEIGHT = 480;
 
 // Transcript agent constants
@@ -29,3 +29,8 @@ export const VCAM_RESTART_DELAY_MS = 2000;
 export const AUDIO_CONTROL_MAX_RESTART_COUNT = 10;
 export const AUDIO_CONTROL_RESTART_DELAY_MS = 2000;
 export const AUDIO_CONTROL_DELAY_MS = 300; // Default audio delay
+
+// Zoom feature constants
+export const ZOOM_STEP = 0.1; // factor increment/decrement
+export const ZOOM_MIN_FACTOR = 0.5;
+export const ZOOM_MAX_FACTOR = 3.0;

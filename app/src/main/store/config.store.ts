@@ -51,6 +51,7 @@ interface StoredConfig {
   window?: {
     bounds?: { x: number; y: number; width: number; height: number };
     stealth?: boolean;
+    zoomFactor?: number;
   };
   runtime?: Partial<RuntimeConfig>;
 }
@@ -137,6 +138,20 @@ class ConfigStore {
    */
   setStealth(enabled: boolean): void {
     this.store.set('window.stealth', enabled);
+  }
+
+  /**
+   * Get stored zoom factor (1 if not set)
+   */
+  getZoomFactor(): number {
+    return this.store.get('window.zoomFactor', 1) as number;
+  }
+
+  /**
+   * Persist zoom factor
+   */
+  saveZoomFactor(factor: number): void {
+    this.store.set('window.zoomFactor', factor);
   }
 }
 

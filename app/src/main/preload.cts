@@ -120,6 +120,19 @@ const electronApi = {
   // Window controls
   close: () => ipcRenderer.send('window-close'),
 
+  // Zoom controls
+  zoom: {
+    increase: () => ipcRenderer.send('zoom-in'),
+    decrease: () => ipcRenderer.send('zoom-out'),
+    reset: () => ipcRenderer.send('zoom-reset'),
+    getFactor: () => ipcRenderer.invoke('zoom:get-factor'),
+    onChange: (callback: (percent: number) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, percent: number) => callback(percent);
+      ipcRenderer.on('zoom-level-changed', handler);
+      return () => ipcRenderer.removeListener('zoom-level-changed', handler);
+    },
+  },
+
   // Open external URLs in the default browser
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
 

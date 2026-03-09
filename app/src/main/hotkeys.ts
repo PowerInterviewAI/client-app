@@ -1,5 +1,6 @@
 import { BrowserWindow, globalShortcut } from 'electron';
-
+import * as zoomService from './services/zoom.service.js';
+import { ZOOM_STEP } from './consts.js';
 import { codeSuggestionService } from './services/code-suggestion.service.js';
 import {
   moveWindowByArrow,
@@ -30,6 +31,29 @@ export function registerGlobalHotkeys(): void {
 
   // Opacity toggle (Ctrl+Shift+N): toggle opacity when in stealth mode
   globalShortcut.register('Control+Shift+N', () => toggleOpacity());
+
+  // Zoom hotkeys: Ctrl+Shift+= (zoom in), Ctrl+Shift+- (zoom out), Ctrl+Shift+0 (reset)
+  globalShortcut.register('Control+Shift+=', () => {
+    try {
+      zoomService.adjustZoom(ZOOM_STEP);
+    } catch (e) {
+      console.warn('hotkey zoom in failed', e);
+    }
+  });
+  globalShortcut.register('Control+Shift+-', () => {
+    try {
+      zoomService.adjustZoom(-ZOOM_STEP);
+    } catch (e) {
+      console.warn('hotkey zoom out failed', e);
+    }
+  });
+  globalShortcut.register('Control+Shift+0', () => {
+    try {
+      zoomService.resetZoom();
+    } catch (e) {
+      console.warn('hotkey zoom reset failed', e);
+    }
+  });
 
   // Window positioning hotkeys (Ctrl+Shift+1-9)
   // Map numpad-style positions: 7 8 9
@@ -129,6 +153,9 @@ export function registerGlobalHotkeys(): void {
   });
 
   console.log('🎹 Global hotkeys registered:');
+  console.log('  Ctrl+Shift+= : Zoom in');
+  console.log('  Ctrl+Shift+- : Zoom out');
+  console.log('  Ctrl+Shift+0 : Reset zoom');
   console.log('  Ctrl+Shift+Q: Stop assistant');
   console.log('  Ctrl+Shift+M: Toggle stealth mode');
   console.log('  Ctrl+Shift+N: Toggle opacity (stealth only)');

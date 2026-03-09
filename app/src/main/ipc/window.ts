@@ -8,12 +8,37 @@ import { appStateService } from '../services/app-state.service.js';
 import { pushNotificationService } from '../services/push-notification.service.js';
 import * as windowControls from '../services/window-control.service.js';
 import { setWindowBounds } from '../services/window-control.service.js';
+import * as zoomService from '../services/zoom.service.js';
+import { ZOOM_STEP } from '../consts.js';
 
 export function registerWindowHandlers(win: BrowserWindow): void {
   // Close window
   ipcMain.on('window-close', () => {
     if (win && !win.isDestroyed()) {
       win.close();
+    }
+  });
+
+  // Zoom IPC handlers (used by renderer titlebar and hotkeys)
+  ipcMain.on('zoom-in', () => {
+    try {
+      zoomService.adjustZoom(ZOOM_STEP);
+    } catch (e) {
+      console.warn('zoom-in handler error', e);
+    }
+  });
+  ipcMain.on('zoom-out', () => {
+    try {
+      zoomService.adjustZoom(-ZOOM_STEP);
+    } catch (e) {
+      console.warn('zoom-out handler error', e);
+    }
+  });
+  ipcMain.on('zoom-reset', () => {
+    try {
+      zoomService.resetZoom();
+    } catch (e) {
+      console.warn('zoom-reset handler error', e);
     }
   });
 
@@ -46,6 +71,16 @@ export function registerWindowHandlers(win: BrowserWindow): void {
       windowControls.toggleStealth();
     } catch (err) {
       console.warn('window-toggle-stealth handler error:', err);
+    }
+  });
+
+  // Provide current zoom factor when requested
+  ipcMain.handle('zoom:get-factor', () => {
+    try {
+      return zoomService.getZoomFactor();
+    } catch (e) {
+      console.warn('zoom:get-factor handler error', e);
+      return 1;
     }
   });
 

@@ -75,6 +75,7 @@ Operate discreetly during interviews:
 - **Stop Assistant** (`Ctrl+Shift+Q`): Stop the assistant
 - **Stealth Mode** (`Ctrl+Shift+M`): Toggle stealth mode
 - **Opacity Control** (`Ctrl+Shift+N`): Toggle window opacity for discreet viewing in stealth mode
+- **Zoom In/Out** (`Ctrl+Shift+=` / `Ctrl+Shift+-` / `Ctrl+Shift+0`): Adjust or reset UI zoom level
 - **Window Positioning** (`Ctrl+Shift+1-9`): Quick window placement (numpad layout)
 - **Scroll Controls**:
   - `Ctrl+Shift+J/K/L`: Scroll interview suggestions (down/up/end)

@@ -25,6 +25,7 @@ import { healthCheckService } from './services/health-check.service.js';
 import { transcriptService } from './services/transcript.service.js';
 import { webRtcService } from './services/webrtc.service.js';
 import { setWindowReference } from './services/window-control.service.js';
+import { setWindowReference as setZoomWindowReference } from './services/zoom.service.js';
 import { configStore } from './store/config.store.js';
 import { EnvUtil } from './utils/env.js';
 
@@ -119,6 +120,8 @@ async function createWindow() {
 
   // Set window reference for window controls
   setWindowReference(win);
+  // also give the zoom service a reference so it can adjust the webcontents
+  setZoomWindowReference(win);
 
   win.on('close', () => {
     if (win) {
