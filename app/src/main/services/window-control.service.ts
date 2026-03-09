@@ -221,7 +221,6 @@ export function resizeWindowByArrow(direction: ResizeDirection): void {
   }
 
   setWindowBounds(updated);
-  console.log(updated, win.getBounds()); // get updated bounds after resize
   console.log(`🔄 Window resized ${direction} by ${resizeAmount}px`);
 }
 
