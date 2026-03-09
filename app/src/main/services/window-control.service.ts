@@ -253,7 +253,7 @@ export function enableStealth(): void {
     win.setFocusable(false);
 
     // Make the window semi-transparent
-    win.setOpacity(0.85);
+    win.setOpacity(0.9);
 
     _stealth = true;
     try {
@@ -352,7 +352,7 @@ export function toggleOpacity(): void {
   try {
     const current = win.getOpacity();
     const LOW = 0.2;
-    const HIGH = 0.85;
+    const HIGH = 0.9;
 
     // If roughly at HIGH, switch to LOW, otherwise switch to HIGH
     const newOpacity = Math.abs(current - HIGH) < 0.05 ? LOW : HIGH;
