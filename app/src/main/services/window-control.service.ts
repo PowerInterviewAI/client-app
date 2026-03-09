@@ -9,6 +9,26 @@ import { pushNotificationService } from './push-notification.service.js';
 let win: BrowserWindow | null = null;
 let _stealth = configStore.getStealth();
 
+// helper: return the display the window mostly occupies (fallback to primary)
+function getCurrentDisplay(): Electron.Display {
+  if (win && !win.isDestroyed()) {
+    try {
+      const b = win.getBounds();
+      const d = screen.getDisplayMatching(b);
+      if (d) return d;
+    } catch {
+      // fall through
+    }
+  }
+  return screen.getPrimaryDisplay();
+}
+
+// helper: return scale factor for current display (>=1)
+function getScaleFactor(): number {
+  const display = getCurrentDisplay();
+  return display.scaleFactor || 1;
+}
+
 // Ensure stealth is disabled by default on load
 try {
   configStore.setStealth(false);
@@ -88,8 +108,12 @@ export function setWindowBounds(bounds: WindowBounds): void {
 export function moveWindowToCorner(corner: WindowPosition): void {
   if (!win || win.isDestroyed()) return;
 
-  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+  // use the display the window currently occupies; this matches the
+  // user's request to operate on the screen where the window is placed.
+  const display = getCurrentDisplay();
+  const { width: screenWidth, height: screenHeight } = display.workAreaSize;
   const { width: winWidth, height: winHeight } = win.getBounds();
+  const { x: displayX, y: displayY } = display.bounds;
 
   let x = 0,
     y = 0;
@@ -140,7 +164,7 @@ export function moveWindowToCorner(corner: WindowPosition): void {
       y = Math.floor((screenHeight - winHeight) / 2);
   }
 
-  setWindowBounds({ x, y, width: winWidth, height: winHeight });
+  setWindowBounds({ x: x + displayX, y: y + displayY, width: winWidth, height: winHeight });
   console.log(`🔄 Window moved to ${corner}`);
 }
 
@@ -162,7 +186,8 @@ export function moveWindowByArrow(direction: ResizeDirection): void {
   if (!win || win.isDestroyed()) return;
 
   const bounds = win.getBounds();
-  const moveAmount = 20; // pixels to move
+  // pixels to move; scale so movement feels consistent across DPIs
+  const moveAmount = Math.round(20 * getScaleFactor());
 
   switch (direction) {
     case 'up':
@@ -190,12 +215,13 @@ export function resizeWindowByArrow(direction: ResizeDirection): void {
   if (!win || win.isDestroyed()) return;
 
   const bounds = win.getBounds();
-  const resizeAmount = 20; // pixels to resize
+  // pixels to resize; scale by display DPI
+  const resizeAmount = Math.round(20 * getScaleFactor());
 
   switch (direction) {
     case 'up':
       // Decrease height (shrink upward)
-      bounds.height = Math.max(200, bounds.height - resizeAmount);
+      bounds.height = Math.max(Math.round(200 * getScaleFactor()), bounds.height - resizeAmount);
       break;
     case 'down':
       // Increase height (grow downward)
@@ -203,7 +229,7 @@ export function resizeWindowByArrow(direction: ResizeDirection): void {
       break;
     case 'left':
       // Decrease width (shrink leftward)
-      bounds.width = Math.max(300, bounds.width - resizeAmount);
+      bounds.width = Math.max(Math.round(300 * getScaleFactor()), bounds.width - resizeAmount);
       break;
     case 'right':
       // Increase width (grow rightward)
