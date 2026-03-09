@@ -47,6 +47,13 @@ app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 
+// Force Chrome to treat all displays as 100% scale.  Some high‑DPI
+// environments previously caused the app to be rendered at 2× or higher
+// and the code already had dpi‑aware logic; disabling scaling entirely
+// makes sizes consistent regardless of platform settings.
+app.commandLine.appendSwitch('high-dpi-support', '1');
+app.commandLine.appendSwitch('force-device-scale-factor', '1');
+
 // -------------------------------------------------------------
 // SINGLE INSTANCE LOCK
 // -------------------------------------------------------------

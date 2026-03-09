@@ -74,32 +74,19 @@ export function getWindowReference(): BrowserWindow | null {
 /**
  * Set window bounds with minimum size enforcement
  */
-export function setWindowBounds(bounds: WindowBounds): void {
+export function setWindowBounds(bounds: Partial<WindowBounds>): void {
   if (!win || win.isDestroyed()) return;
 
-  try {
-    // Fill missing values from current bounds
-    const current = win.getBounds();
-    const newBounds = Object.assign({}, current, bounds || {});
-
-    // Ensure minimums
-    if (newBounds.width < MIN_WIDTH) {
-      newBounds.width = MIN_WIDTH;
-    }
-    if (newBounds.height < MIN_HEIGHT) {
-      newBounds.height = MIN_HEIGHT;
-    }
-
-    win.setBounds(newBounds);
-  } catch (err) {
-    console.warn('setWindowBounds error:', err);
-    // Fallback to original behaviour if anything goes wrong
-    try {
-      win.setBounds(bounds);
-    } catch (e) {
-      console.warn('Fallback setBounds also failed:', e);
-    }
+  // Fill missing values from current bounds
+  // Ensure minimums
+  if (bounds.width !== undefined && bounds.width < MIN_WIDTH) {
+    bounds.width = MIN_WIDTH;
   }
+  if (bounds.height !== undefined && bounds.height < MIN_HEIGHT) {
+    bounds.height = MIN_HEIGHT;
+  }
+
+  win.setBounds(bounds);
 }
 
 /**
@@ -164,7 +151,7 @@ export function moveWindowToCorner(corner: WindowPosition): void {
       y = Math.floor((screenHeight - winHeight) / 2);
   }
 
-  setWindowBounds({ x: x + displayX, y: y + displayY, width: winWidth, height: winHeight });
+  setWindowBounds({ x: x + displayX, y: y + displayY });
   console.log(`🔄 Window moved to ${corner}`);
 }
 
@@ -187,24 +174,25 @@ export function moveWindowByArrow(direction: ResizeDirection): void {
 
   const bounds = win.getBounds();
   // pixels to move; scale so movement feels consistent across DPIs
-  const moveAmount = Math.round(20 * getScaleFactor());
+  const moveAmount = 20;
 
+  const updated: Partial<WindowBounds> = {};
   switch (direction) {
     case 'up':
-      bounds.y = bounds.y - moveAmount;
+      updated.y = bounds.y - moveAmount;
       break;
     case 'down':
-      bounds.y = bounds.y + moveAmount;
+      updated.y = bounds.y + moveAmount;
       break;
     case 'left':
-      bounds.x = bounds.x - moveAmount;
+      updated.x = bounds.x - moveAmount;
       break;
     case 'right':
-      bounds.x = bounds.x + moveAmount;
+      updated.x = bounds.x + moveAmount;
       break;
   }
 
-  setWindowBounds(bounds);
+  setWindowBounds(updated);
   console.log(`🔄 Window moved ${direction} by ${moveAmount}px`);
 }
 
@@ -216,28 +204,30 @@ export function resizeWindowByArrow(direction: ResizeDirection): void {
 
   const bounds = win.getBounds();
   // pixels to resize; scale by display DPI
-  const resizeAmount = Math.round(20 * getScaleFactor());
+  const resizeAmount = 20;
 
+  const updated: Partial<WindowBounds> = {};
   switch (direction) {
     case 'up':
       // Decrease height (shrink upward)
-      bounds.height = Math.max(Math.round(200 * getScaleFactor()), bounds.height - resizeAmount);
+      updated.height = Math.max(MIN_HEIGHT, bounds.height - resizeAmount);
       break;
     case 'down':
       // Increase height (grow downward)
-      bounds.height = bounds.height + resizeAmount;
+      updated.height = bounds.height + resizeAmount;
       break;
     case 'left':
       // Decrease width (shrink leftward)
-      bounds.width = Math.max(Math.round(300 * getScaleFactor()), bounds.width - resizeAmount);
+      updated.width = Math.max(MIN_WIDTH, bounds.width - resizeAmount);
       break;
     case 'right':
       // Increase width (grow rightward)
-      bounds.width = bounds.width + resizeAmount;
+      updated.width = bounds.width + resizeAmount;
       break;
   }
 
-  setWindowBounds(bounds);
+  setWindowBounds(updated);
+  console.log(updated, win.getBounds()); // get updated bounds after resize
   console.log(`🔄 Window resized ${direction} by ${resizeAmount}px`);
 }
 
