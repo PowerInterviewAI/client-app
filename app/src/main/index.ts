@@ -88,8 +88,7 @@ async function createWindow() {
   win = new BrowserWindow({
     title: 'Power Interview',
     ...savedBounds,
-    transparent: true,
-    frame: false,
+    titleBarStyle: 'hidden',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
