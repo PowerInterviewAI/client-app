@@ -99,6 +99,9 @@ async function createWindow() {
     },
   });
 
+  // Set minimum size of the window to prevent it from being resized too small
+  win.setMinimumSize(MIN_WIDTH, MIN_HEIGHT);
+
   // Remove the default application menu and hide the menu bar
   try {
     Menu.setApplicationMenu(null);
