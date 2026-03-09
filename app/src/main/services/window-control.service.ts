@@ -23,12 +23,6 @@ function getCurrentDisplay(): Electron.Display {
   return screen.getPrimaryDisplay();
 }
 
-// helper: return scale factor for current display (>=1)
-function getScaleFactor(): number {
-  const display = getCurrentDisplay();
-  return display.scaleFactor || 1;
-}
-
 // Ensure stealth is disabled by default on load
 try {
   configStore.setStealth(false);
@@ -173,7 +167,7 @@ export function moveWindowByArrow(direction: ResizeDirection): void {
   if (!win || win.isDestroyed()) return;
 
   const bounds = win.getBounds();
-  // pixels to move; scale so movement feels consistent across DPIs
+  // pixels to move
   const moveAmount = 20;
 
   const updated: Partial<WindowBounds> = {};
@@ -203,7 +197,7 @@ export function resizeWindowByArrow(direction: ResizeDirection): void {
   if (!win || win.isDestroyed()) return;
 
   const bounds = win.getBounds();
-  // pixels to resize; scale by display DPI
+  // pixels to resize
   const resizeAmount = 20;
 
   const updated: Partial<WindowBounds> = {};
