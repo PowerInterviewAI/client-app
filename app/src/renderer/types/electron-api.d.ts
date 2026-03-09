@@ -151,9 +151,6 @@ declare global {
     // Open external URL in user's default browser
     openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
 
-    // Edge resize support
-    resizeWindowDelta: (dx: number, dy: number, edge: string) => void;
-
     // Stealth control helpers
     setStealth: (isStealth: boolean) => void;
     toggleStealth: () => void;

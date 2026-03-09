@@ -8,7 +8,6 @@ import { ZOOM_STEP } from '../consts.js';
 import { appStateService } from '../services/app-state.service.js';
 import { pushNotificationService } from '../services/push-notification.service.js';
 import * as windowControls from '../services/window-control.service.js';
-import { setWindowBounds } from '../services/window-control.service.js';
 import * as zoomService from '../services/zoom.service.js';
 
 export function registerWindowHandlers(win: BrowserWindow): void {
@@ -90,38 +89,6 @@ export function registerWindowHandlers(win: BrowserWindow): void {
       windowControls.toggleOpacity();
     } catch (err) {
       console.warn('window-toggle-opacity handler error:', err);
-    }
-  });
-
-  // Handle window resize delta (edge dragging)
-  ipcMain.on('window-resize-delta', (_event, dx: number, dy: number, edge: string) => {
-    try {
-      if (!win || win.isDestroyed()) return;
-
-      const minWidth = 300;
-      const minHeight = 200;
-      const bounds = win.getBounds();
-      const nb = { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
-
-      // Only handle right/bottom/bottom-right resizes
-      if (edge.includes('right')) {
-        nb.width += dx;
-      }
-      if (edge.includes('bottom')) {
-        nb.height += dy;
-      }
-
-      // Enforce minimums
-      if (nb.width < minWidth) {
-        nb.width = minWidth;
-      }
-      if (nb.height < minHeight) {
-        nb.height = minHeight;
-      }
-
-      setWindowBounds(nb);
-    } catch (err) {
-      console.warn('window-resize-delta handler error:', err);
     }
   });
 }

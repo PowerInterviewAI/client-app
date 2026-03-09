@@ -7,7 +7,6 @@ import type { PushNotification } from '@/types/push-notification';
 
 import Titlebar from './titlebar';
 import { UpdateNotification } from './update-notification';
-import WindowResizer from './window-resizer';
 
 export default function MainFrame({ children }: { children: React.ReactNode }) {
   const isStealth = useIsStealthMode();
@@ -48,7 +47,6 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
           <Titlebar />
           <div className="flex-1 flex flex-col overflow-auto hide-scrollbar">{children}</div>
         </div>
-        {!isStealth && <WindowResizer />}
         <UpdateNotification />
       </main>
     </MainContainerContext.Provider>

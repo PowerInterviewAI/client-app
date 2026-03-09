@@ -30,7 +30,6 @@ export function useWindowControls() {
   if (typeof window !== 'undefined' && window.electronAPI) {
     return {
       close: window.electronAPI.close ?? (() => {}),
-      resizeWindowDelta: window.electronAPI.resizeWindowDelta ?? (() => {}),
       setStealth: window.electronAPI.setStealth ?? (() => {}),
       toggleStealth: window.electronAPI.toggleStealth ?? (() => {}),
       toggleOpacity: window.electronAPI.toggleOpacity ?? (() => {}),
@@ -40,7 +39,6 @@ export function useWindowControls() {
   // Return no-op functions if not in Electron
   return {
     close: () => {},
-    resizeWindowDelta: () => {},
     setStealth: () => {},
     toggleStealth: () => {},
     toggleOpacity: () => {},
