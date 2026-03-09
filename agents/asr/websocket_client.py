@@ -71,19 +71,19 @@ class WebSocketASRClient:
                 msg = "Stop requested"
                 raise asyncio.CancelledError(msg)
 
+            # If either queue is empty, wait briefly and check again to avoid busy-waiting
+            if self.audio_capture_l.is_empty() or self.audio_capture_r.is_empty():
+                await asyncio.sleep(0)  # Sleep briefly to avoid busy-waiting
+                continue
+
             # Fetch both channels concurrently
             data_l = self.audio_capture_l.get_frame_nowait()
             data_r = self.audio_capture_r.get_frame_nowait()
 
             # No audio available from either channel - sleep 0 for other tasks and check again
-            if data_l is None and data_r is None:
+            if data_l is None or data_r is None:
                 await asyncio.sleep(0)
                 continue
-
-            if data_l is None:
-                data_l = np.zeros_like(data_r)
-            if data_r is None:
-                data_r = np.zeros_like(data_l)
 
             return _mix_to_stereo_pcm16(data_l, data_r)
 
@@ -116,6 +116,7 @@ class WebSocketASRClient:
                     continue
 
                 try:
+                    # logger.debug(f"Sending audio frame: {len(pcm_bytes)} bytes, hash: {hash(pcm_bytes)}")  # noqa: E501, ERA001
                     await ws.send(pcm_bytes)
                 except Exception as e:
                     logger.error(f"Failed to send audio: {e}")

@@ -15,8 +15,8 @@ from agents.shared.audio_device_service import AudioDeviceService
 
 # Audio configuration constants
 TARGET_SAMPLE_RATE = 16000
-AUDIO_BLOCK_DURATION = 0.2
-AUDIO_QUEUE_MAXSIZE = 2
+AUDIO_BLOCK_DURATION = 0.1
+AUDIO_QUEUE_MAXSIZE = 4
 
 
 class AudioCapture:
@@ -67,9 +67,11 @@ class AudioCapture:
             # Enqueue (drop oldest if full)
             if self.audio_queue.full():
                 try:
-                    self.audio_queue.get_nowait()
-                    self.frames_dropped += 1
-                    logger.warning(f"Audio queue full - dropped oldest frame (total_dropped={self.frames_dropped})")
+                    with contextlib.suppress(Exception):
+                        while not self.audio_queue.empty():
+                            self.audio_queue.get_nowait()
+                            self.frames_dropped += 1
+                    logger.warning(f"Audio queue full - dropped oldest frame(s). Total dropped: {self.frames_dropped}")
                 except Exception as e:
                     logger.debug(f"Failed to drop oldest frame from audio queue: {e}")
 
@@ -159,6 +161,10 @@ class AudioCapture:
             except Exception as e:
                 logger.debug(f"Error terminating PyAudio: {e}")
             self.pa = None
+
+    def is_empty(self) -> bool:
+        """Check if audio queue is empty."""
+        return self.audio_queue.empty()
 
     def get_frame_nowait(self) -> np.ndarray[Any, Any] | None:
         """Get next audio frame from queue without blocking."""
