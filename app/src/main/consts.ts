@@ -5,8 +5,8 @@ export const BACKEND_BASE_URL = EnvUtil.isDev()
   : 'https://api.powerinterviewai.com';
 
 // minimum allowed dimensions for window bounds
-export const MIN_WIDTH = 960;
-export const MIN_HEIGHT = 640;
+export const MIN_WIDTH = 720;
+export const MIN_HEIGHT = 480;
 
 // Transcript agent constants
 export const TRANSCRIPT_ZMQ_PORT = 50002;
