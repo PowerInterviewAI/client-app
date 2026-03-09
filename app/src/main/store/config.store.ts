@@ -24,6 +24,11 @@ export interface RuntimeConfig {
   videoWidth: number;
   videoHeight: number;
   enableFaceEnhance: boolean;
+
+  // panel auto-scroll preferences
+  autoScrollReplySuggestions: boolean;
+  autoScrollCodeSuggestions: boolean;
+  autoScrollTranscript: boolean;
 }
 
 // Default runtime configuration
@@ -45,6 +50,11 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   videoWidth: 1280,
   videoHeight: 720,
   enableFaceEnhance: false,
+
+  // default autoscroll preferences are enabled
+  autoScrollReplySuggestions: true,
+  autoScrollCodeSuggestions: true,
+  autoScrollTranscript: true,
 };
 
 interface StoredConfig {
@@ -157,4 +167,26 @@ class ConfigStore {
 
 export const configStore = new ConfigStore();
 
-configStore.updateConfig({ faceSwap: false }); // Ensure faceSwap is initialized to false
+// ensure that newly added runtime keys have sane defaults when migrating
+// only add the scroll flags if they aren't already present in the store;
+// calling updateConfig unconditionally would reset the user's choice each
+// restart, which is why autoScroll was bouncing back to true.
+(() => {
+  // read the raw stored object so we can test for undefined values
+  // eslint-disable-next-line
+  const raw = (configStore as any).store.get('runtime') as Partial<RuntimeConfig> | undefined;
+  const migration: Partial<RuntimeConfig> = { faceSwap: false };
+  if (raw?.autoScrollReplySuggestions === undefined) {
+    migration.autoScrollReplySuggestions = true;
+  }
+  if (raw?.autoScrollCodeSuggestions === undefined) {
+    migration.autoScrollCodeSuggestions = true;
+  }
+  if (raw?.autoScrollTranscript === undefined) {
+    migration.autoScrollTranscript = true;
+  }
+  // perform migration only if there are values to set
+  if (Object.keys(migration).length > 1) {
+    configStore.updateConfig(migration);
+  }
+})(); // migration block

@@ -105,8 +105,8 @@ Tailor the experience to your needs:
 - **Health Monitoring**: Real-time backend and GPU server status checks
 - **Action Locking**: Prevents conflicting operations during critical tasks
 - **Push Notifications**: Desktop notifications for important events
-- **Auto-Scroll**: Smart scrolling for suggestions and transcripts
-- **State Persistence**: All app state maintained across page refreshes
+- **Auto-Scroll**: Smart scrolling for suggestions and transcripts (toggle state is saved per panel and restored on restart)
+- **State Persistence**: All app state maintained across page refreshes (including panel auto-scroll preferences)
 - **Audio Delay Compensation**: Configurable audio sync for perfect video/audio alignment
 
 ## Architecture

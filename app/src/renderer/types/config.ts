@@ -28,4 +28,9 @@ export interface Config {
   videoWidth: number;
   videoHeight: number;
   enableFaceEnhance: boolean;
+
+  // Panel auto-scroll preferences (persisted between sessions)
+  autoScrollReplySuggestions: boolean;
+  autoScrollCodeSuggestions: boolean;
+  autoScrollTranscript: boolean;
 }

@@ -2,6 +2,7 @@ import { File, Loader2, PauseCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
+import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { type CodeSuggestion, SuggestionState } from '@/types/suggestion';
 
@@ -19,8 +20,20 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
   const containerRef = useRef<HTMLDivElement | null>(null);
   const lastItemRef = useRef<HTMLDivElement | null>(null);
 
-  const [autoScroll, setAutoScroll] = useState(true);
+  const { config, updateConfig } = useConfigStore();
+
+  // local state mirrors persisted preference but falls back to true if config not yet loaded
+  const [autoScroll, setAutoScroll] = useState<boolean>(
+    () => config?.autoScrollCodeSuggestions ?? true
+  );
   const isStealth = useIsStealthMode();
+
+  // stay in sync when config store updates (e.g. after initial load)
+  useEffect(() => {
+    if (typeof config?.autoScrollCodeSuggestions === 'boolean') {
+      setAutoScroll(config.autoScrollCodeSuggestions);
+    }
+  }, [config?.autoScrollCodeSuggestions]);
 
   const lastHotkeyAtRef = useRef<number>(0);
   const HOTKEY_SMOOTH_THRESHOLD = 150; // ms
@@ -122,7 +135,13 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <Checkbox
               checked={autoScroll}
-              onCheckedChange={(v) => setAutoScroll(v === true)}
+              onCheckedChange={(v) => {
+                const enabled = v === true;
+                setAutoScroll(enabled);
+                updateConfig({ autoScrollCodeSuggestions: enabled }).catch((e) =>
+                  console.error('Failed to persist auto-scroll setting', e)
+                );
+              }}
               className="h-4 w-4 rounded border-border bg-background text-primary"
               aria-label="Enable auto-scroll"
             />

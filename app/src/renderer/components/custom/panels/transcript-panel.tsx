@@ -13,12 +13,18 @@ interface TranscriptionPanelProps {
 }
 
 function TranscriptPanel({ transcripts, style }: TranscriptionPanelProps) {
-  const { config } = useConfigStore();
+  const { config, updateConfig } = useConfigStore();
   const username = config?.interviewConf?.username ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [autoScroll, setAutoScroll] = useState<boolean>(() => config?.autoScrollTranscript ?? true);
   const isStealth = useIsStealthMode();
+
+  useEffect(() => {
+    if (typeof config?.autoScrollTranscript === 'boolean') {
+      setAutoScroll(config.autoScrollTranscript);
+    }
+  }, [config?.autoScrollTranscript]);
 
   // Auto-scroll when 'transcripts' changes only if autoScroll is enabled
   useEffect(() => {
@@ -35,7 +41,13 @@ function TranscriptPanel({ transcripts, style }: TranscriptionPanelProps) {
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <Checkbox
               checked={autoScroll}
-              onCheckedChange={(v) => setAutoScroll(v === true)}
+              onCheckedChange={(v) => {
+                const enabled = v === true;
+                setAutoScroll(enabled);
+                updateConfig({ autoScrollTranscript: enabled }).catch((e) =>
+                  console.error('Failed to persist auto-scroll setting', e)
+                );
+              }}
               className="h-4 w-4 rounded border-border bg-background"
               aria-label="Enable auto-scroll"
             />

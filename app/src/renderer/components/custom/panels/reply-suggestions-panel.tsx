@@ -1,6 +1,8 @@
 import { Loader2, PauseCircle, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useConfigStore } from '@/hooks/use-config-store';
+
 const MAX_QUESTION_LENGTH = 256;
 
 function truncateMiddle(text: string, maxLen: number): string {
@@ -26,11 +28,21 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
   const containerRef = useRef<HTMLDivElement | null>(null);
   const lastItemRef = useRef<HTMLDivElement | null>(null);
 
+  const { config, updateConfig } = useConfigStore();
+
   const lastHotkeyAtRef = useRef<number>(0);
   const HOTKEY_SMOOTH_THRESHOLD = 150; // ms
 
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [autoScroll, setAutoScroll] = useState<boolean>(
+    () => config?.autoScrollReplySuggestions ?? true
+  );
   const isStealth = useIsStealthMode();
+
+  useEffect(() => {
+    if (typeof config?.autoScrollReplySuggestions === 'boolean') {
+      setAutoScroll(config.autoScrollReplySuggestions);
+    }
+  }, [config?.autoScrollReplySuggestions]);
 
   // Track previous length, state, and content to detect actual changes
   const prevLengthRef = useRef<number>(suggestions.length);
@@ -131,7 +143,13 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <Checkbox
               checked={autoScroll}
-              onCheckedChange={(v) => setAutoScroll(v === true)}
+              onCheckedChange={(v) => {
+                const enabled = v === true;
+                setAutoScroll(enabled);
+                updateConfig({ autoScrollReplySuggestions: enabled }).catch((e) =>
+                  console.error('Failed to persist auto-scroll setting', e)
+                );
+              }}
               className="h-4 w-4 rounded border-border bg-background text-primary"
               aria-label="Enable auto-scroll"
             />
