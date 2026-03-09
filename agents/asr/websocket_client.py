@@ -21,7 +21,7 @@ RECONNECT_DELAY_SECONDS = 1.0
 MAX_RECONNECT_ATTEMPTS = 0  # 0 = infinite
 
 
-def _mix_to_stereo_pcm16(data_l: np.ndarray, data_r: np.ndarray) -> bytes:
+def _mix_to_stereo_pcm16(data_l: np.ndarray, data_r: np.ndarray) -> bytes:  # type: ignore  # noqa: PGH003
     """Mix two mono float32 arrays into interleaved stereo PCM16 bytes.
 
     Runs in a thread-pool executor to avoid blocking the asyncio event loop.
