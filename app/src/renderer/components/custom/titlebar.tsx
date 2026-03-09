@@ -1,5 +1,5 @@
-import { EyeOff, Moon, Sun, ZoomIn, ZoomOut, RefreshCcw } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { EyeOff, Moon, RefreshCcw, Sun, ZoomIn, ZoomOut } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
 import CreditsDisplay from '@/components/custom/credits-display';
@@ -79,7 +79,6 @@ export default function Titlebar() {
         {appState?.isLoggedIn && appState?.credits !== undefined && (
           <CreditsDisplay
             credits={appState.credits!}
-            className="mr-2"
             // eslint-disable-next-line
             style={{ WebkitAppRegion: 'drag' } as any}
           />
@@ -90,27 +89,28 @@ export default function Titlebar() {
           // eslint-disable-next-line
           style={{ WebkitAppRegion: 'no-drag' } as any}
         >
-          {appState?.isLoggedIn && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleToggleStealth}
-                  aria-label="Toggle stealth mode"
-                  title="Toggle stealth mode"
-                  className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                  // eslint-disable-next-line
-                  style={{ WebkitAppRegion: 'no-drag' } as any}
-                >
-                  <EyeOff className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Toggle stealth mode (Ctrl+Shift+M)</p>
-              </TooltipContent>
-            </Tooltip>
+          {appState?.isLoggedIn && appState?.credits !== undefined && (
+            <hr className="h-6 border border-border" />
           )}
 
           {/* zoom controls */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleZoomIn}
+                aria-label="Zoom in"
+                title="Zoom in"
+                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
+                // eslint-disable-next-line
+                style={{ WebkitAppRegion: 'no-drag' } as any}
+              >
+                <ZoomIn className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Zoom in (Ctrl+Shift+=)</p>
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -146,24 +146,28 @@ export default function Titlebar() {
               <p>Reset zoom (Ctrl+Shift+0)</p>
             </TooltipContent>
           </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleZoomIn}
-                aria-label="Zoom in"
-                title="Zoom in"
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
-              >
-                <ZoomIn className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Zoom in (Ctrl+Shift+=)</p>
-            </TooltipContent>
-          </Tooltip>
 
+          <hr className="h-6 border border-border" />
+
+          {appState?.isLoggedIn && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleToggleStealth}
+                  aria-label="Toggle stealth mode"
+                  title="Toggle stealth mode"
+                  className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
+                  // eslint-disable-next-line
+                  style={{ WebkitAppRegion: 'no-drag' } as any}
+                >
+                  <EyeOff className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle stealth mode (Ctrl+Shift+M)</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <button

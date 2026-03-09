@@ -4,12 +4,12 @@
 
 import { BrowserWindow, ipcMain } from 'electron';
 
+import { ZOOM_STEP } from '../consts.js';
 import { appStateService } from '../services/app-state.service.js';
 import { pushNotificationService } from '../services/push-notification.service.js';
 import * as windowControls from '../services/window-control.service.js';
 import { setWindowBounds } from '../services/window-control.service.js';
 import * as zoomService from '../services/zoom.service.js';
-import { ZOOM_STEP } from '../consts.js';
 
 export function registerWindowHandlers(win: BrowserWindow): void {
   // Close window

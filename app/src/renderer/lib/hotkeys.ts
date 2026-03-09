@@ -53,17 +53,17 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
     description: 'Resize window in the specified direction',
   },
   [Hotkey.ZoomInOutReset]: {
-    combo: 'Ctrl+Shift+= / Ctrl+Shift+- / Ctrl+Shift+0',
+    combo: 'Ctrl+Shift+[=, -, 0]',
     title: 'Zoom In/Out/Reset',
     description: 'Adjust or reset UI zoom level',
   },
   [Hotkey.ScrollReplyPanel]: {
-    combo: 'Ctrl+Shift+J / K / L',
+    combo: 'Ctrl+Shift+[J, K, L]',
     title: 'Scroll Reply Panel',
     description: 'Scroll Down/Up/End in the interview reply suggestions panel',
   },
   [Hotkey.ScrollCodePanel]: {
-    combo: 'Ctrl+Shift+U / I / O',
+    combo: 'Ctrl+Shift+[U, I, O]',
     title: 'Scroll Code Panel',
     description: 'Scroll Down/Up/End in the coding test suggestions panel',
   },

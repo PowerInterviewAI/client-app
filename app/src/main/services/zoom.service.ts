@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
-import { ZOOM_MAX_FACTOR, ZOOM_MIN_FACTOR, ZOOM_STEP } from '../consts.js';
+
+import { ZOOM_MAX_FACTOR, ZOOM_MIN_FACTOR } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 
 let win: BrowserWindow | null = null;

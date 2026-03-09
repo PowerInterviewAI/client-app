@@ -1,5 +1,5 @@
 import { BrowserWindow, globalShortcut } from 'electron';
-import * as zoomService from './services/zoom.service.js';
+
 import { ZOOM_STEP } from './consts.js';
 import { codeSuggestionService } from './services/code-suggestion.service.js';
 import {
@@ -10,6 +10,7 @@ import {
   toggleStealth,
   WindowPosition,
 } from './services/window-control.service.js';
+import * as zoomService from './services/zoom.service.js';
 
 /**
  * Register global hotkeys for window management and navigation
