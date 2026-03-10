@@ -2,7 +2,7 @@ import { Keyboard } from 'lucide-react';
 
 import CreditsDisplay from '@/components/custom/credits-display';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Hotkey, HOTKEY_LIST, HOTKEYS, HOTKEY_GROUPS } from '@/lib/hotkeys';
+import { Hotkey, HOTKEY_GROUPS, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 
