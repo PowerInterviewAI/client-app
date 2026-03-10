@@ -49,7 +49,6 @@ export interface CodeSuggestion {
 export interface AppState {
   isRunning: boolean;
   isStealth: boolean;
-  isRecording: boolean;
   isBackendLive: boolean;
   isGpuServerLive: boolean;
   isLoggedIn: boolean | null;

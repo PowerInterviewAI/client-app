@@ -47,7 +47,7 @@ export default function ZoomControl() {
             onClick={handleZoomReset}
             aria-label="Reset zoom"
             title="Reset zoom"
-            className="h-7 w-14 flex items-center justify-center rounded hover:bg-muted"
+            className="h-7 w-16 flex items-center justify-center rounded hover:bg-muted"
             // eslint-disable-next-line
             style={{ WebkitAppRegion: 'no-drag' } as any}
           >

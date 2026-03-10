@@ -3,13 +3,19 @@
  * Central manager for application runtime state shared across main process
  */
 
-import { AppState, CodeSuggestion, ReplySuggestion, RunningState } from '../types/app-state.js';
+import {
+  AppState,
+  CodeSuggestion,
+  ReplySuggestion,
+  RunningState,
+  Speaker,
+  SuggestionState,
+} from '../types/app-state.js';
 import { getWindowReference } from './window-control.service.js';
 
 const DEFAULT_STATE: AppState = {
   isRunning: false,
   isStealth: false,
-  isRecording: false,
   isBackendLive: false,
   isGpuServerLive: false,
   isLoggedIn: false,
@@ -24,7 +30,36 @@ export class AppStateService {
   private state: AppState;
 
   constructor() {
-    this.state = { ...DEFAULT_STATE };
+    const tstampNow = Date.now();
+    this.state = {
+      ...DEFAULT_STATE,
+      //
+      transcripts: [
+        {
+          timestamp: tstampNow,
+          text: 'Transcripts will be here',
+          speaker: Speaker.Other,
+          isFinal: false,
+          endTimestamp: tstampNow + 5000,
+        },
+      ],
+      replySuggestions: [
+        {
+          timestamp: tstampNow,
+          last_question: 'Interviewer question will be here',
+          answer: 'Suggested answer will be here',
+          state: SuggestionState.Success,
+        },
+      ],
+      codeSuggestions: [
+        {
+          timestamp: tstampNow,
+          image_urls: [null, null, null, null],
+          suggestion_content: 'Code suggestion will be here',
+          state: SuggestionState.Success,
+        },
+      ],
+    };
   }
 
   getState(): AppState {

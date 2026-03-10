@@ -1,4 +1,4 @@
-import { File, Loader2, PauseCircle } from 'lucide-react';
+import { File, ImageUp, Loader2, PauseCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -177,15 +177,15 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
                             <img
                               key={i}
                               src={url}
-                              className="h-12 w-16 object-cover rounded-md border-2 border-blue-400 bg-muted"
+                              className="h-12 w-16 object-cover rounded-md border border-blue-400 bg-muted"
                               alt={`thumb-${i}`}
                             />
                           ) : (
                             <div
                               key={i}
-                              className="h-12 w-16 flex items-center justify-center rounded-md border-2 border-blue-400 bg-muted"
+                              className="h-12 w-16 flex items-center justify-center rounded-md border border-blue-400 bg-muted"
                             >
-                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                              <ImageUp className="h-4 w-4 text-muted-foreground" />
                             </div>
                           )
                         )}
