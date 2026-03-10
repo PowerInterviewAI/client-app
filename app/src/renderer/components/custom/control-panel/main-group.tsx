@@ -55,7 +55,7 @@ export function MainGroup({ stateConfig, getDisabled }: MainGroupProps) {
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Start/Stop Assistant</p>
+        <p>Start/Stop Assistant - {label}</p>
       </TooltipContent>
     </Tooltip>
   );

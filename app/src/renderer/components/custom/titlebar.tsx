@@ -4,7 +4,6 @@ import { useState } from 'react';
 import faviconSvg from '/favicon.svg';
 import CreditsDisplay from '@/components/custom/credits-display';
 import DocumentationDialog from '@/components/custom/documentation-dialog';
-import ZoomControl from '@/components/custom/zoom-control';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
@@ -69,13 +68,10 @@ export default function Titlebar() {
           style={{ WebkitAppRegion: 'no-drag' } as any}
         >
           {appState?.isLoggedIn && appState?.credits !== undefined && (
-            <hr className="h-6 border border-border" />
+            <>
+              <hr className="h-6 border border-border" />
+            </>
           )}
-
-          {/* zoom controls */}
-          <ZoomControl />
-
-          <hr className="h-6 border border-border" />
 
           {appState?.isLoggedIn && (
             <Tooltip>

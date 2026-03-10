@@ -9,7 +9,7 @@ import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useVideoDevices } from '@/hooks/use-video-devices';
 import { RunningState } from '@/types/app-state';
 
-import RunningIndicator from '../running-indicator';
+import ZoomControl from '../zoom-control';
 import { AudioGroup } from './audio-group';
 import { MainGroup } from './main-group';
 import { ProfileGroup } from './profile-group';
@@ -67,7 +67,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
       onClick: async () => {
         await stopAssistant();
       },
-      className: 'bg-destructive hover:bg-destructive/90',
+      className: 'bg-destructive hover:bg-destructive/90 animate-pulse',
       icon: <Square className="h-3.5 w-3.5" />,
       label: 'Stop',
     },
@@ -122,7 +122,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
   };
 
   return (
-    <div id="control-panel" className="flex items-center justify-between gap-2">
+    <div id="control-panel" className="flex items-center justify-between gap-2 pr-2">
       <ProfileGroup
         config={config}
         onProfileClick={onProfileClick}
@@ -144,7 +144,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
 
       <div className="w-8"></div>
 
-      <RunningIndicator runningState={runningState} />
+      <ZoomControl />
     </div>
   );
 }

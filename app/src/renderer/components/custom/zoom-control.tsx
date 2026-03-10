@@ -40,7 +40,26 @@ export default function ZoomControl() {
   };
 
   return (
-    <>
+    <div className="flex items-center gap-1">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handleZoomReset}
+            aria-label="Reset zoom"
+            title="Reset zoom"
+            className="h-7 w-14 flex items-center justify-center rounded hover:bg-muted"
+            // eslint-disable-next-line
+            style={{ WebkitAppRegion: 'no-drag' } as any}
+          >
+            <RefreshCcw className="h-4 w-4" />
+            <span className="ml-1 text-xs">{zoomPercent}%</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Reset zoom (Ctrl+Shift+0)</p>
+        </TooltipContent>
+      </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <button
@@ -76,25 +95,6 @@ export default function ZoomControl() {
           <p>Zoom out (Ctrl+Shift+-)</p>
         </TooltipContent>
       </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={handleZoomReset}
-            aria-label="Reset zoom"
-            title="Reset zoom"
-            className="h-7 w-14 flex items-center justify-center rounded hover:bg-muted"
-            // eslint-disable-next-line
-            style={{ WebkitAppRegion: 'no-drag' } as any}
-          >
-            <RefreshCcw className="h-4 w-4" />
-            <span className="ml-1 text-xs">{zoomPercent}%</span>
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Reset zoom (Ctrl+Shift+0)</p>
-        </TooltipContent>
-      </Tooltip>
-    </>
+    </div>
   );
 }
