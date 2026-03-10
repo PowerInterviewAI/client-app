@@ -1,4 +1,4 @@
-import { Loader, Save, Trash2 } from 'lucide-react';
+import { Loader, RotateCcw, RotateCcwSquare, Save, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -13,15 +13,15 @@ interface ToolsGroupProps {
 
 export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   const { runningState } = useAppState();
-  const { exporting, exportTranscript, clearAll } = useTools();
+  const { exporting, exportTranscript, setPlaceholderData } = useTools();
 
-  const onClearAll = async () => {
+  const onResetAll = async () => {
     try {
-      await clearAll();
-      toast.success('Everything cleared successfully');
+      await setPlaceholderData();
+      toast.success('Everything reset successfully');
     } catch (error) {
       console.error(error);
-      toast.error('Failed to clear');
+      toast.error('Failed to reset');
     }
   };
 
@@ -41,16 +41,16 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
         <TooltipTrigger asChild>
           <Button
             variant="secondary"
-            onClick={onClearAll}
+            onClick={onResetAll}
             size="sm"
             className="h-8 w-8 text-xs rounded-xl cursor-pointer"
             disabled={getDisabled(runningState) || exporting}
           >
-            <Trash2 className="h-4 w-4" />
+            <RotateCcw className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Clear All</p>
+          <p>Reset All</p>
         </TooltipContent>
       </Tooltip>
       <Tooltip>

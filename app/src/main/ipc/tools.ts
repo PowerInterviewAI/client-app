@@ -9,4 +9,7 @@ export function registerToolsHandlers() {
   ipcMain.handle('tools:clear-all', async () => {
     await toolsService.clearAll();
   });
+  ipcMain.handle('tools:set-placeholder-data', async () => {
+    await toolsService.setPlaceholderData();
+  });
 }

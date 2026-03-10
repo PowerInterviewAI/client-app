@@ -110,6 +110,10 @@ class ToolsService {
     replySuggestionService.clear();
     codeSuggestionService.clear();
   }
+
+  async setPlaceholderData(): Promise<void> {
+    appStateService.setPlaceholderState();
+  }
 }
 
 export const toolsService = new ToolsService();

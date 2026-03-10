@@ -108,6 +108,7 @@ declare global {
     tools: {
       exportTranscript: () => Promise<string>;
       clearAll: () => Promise<void>;
+      setPlaceholderData: () => Promise<void>;
     };
 
     // Auto-updater management

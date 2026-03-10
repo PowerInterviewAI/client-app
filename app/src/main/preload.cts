@@ -103,6 +103,7 @@ const electronApi = {
   tools: {
     exportTranscript: () => ipcRenderer.invoke('tools:export-transcript'),
     clearAll: () => ipcRenderer.invoke('tools:clear-all'),
+    setPlaceholderData: () => ipcRenderer.invoke('tools:set-placeholder-data'),
   },
 
   // Auto-updater management

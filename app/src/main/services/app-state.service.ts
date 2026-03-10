@@ -30,10 +30,15 @@ export class AppStateService {
   private state: AppState;
 
   constructor() {
+    this.state = { ...DEFAULT_STATE };
+    this.setPlaceholderState();
+  }
+
+  setPlaceholderState() {
     const tstampNow = Date.now();
     this.state = {
-      ...DEFAULT_STATE,
-      //
+      ...this.state,
+      // Set placeholder data to make it easier to visualize the UI during development
       transcripts: [
         {
           timestamp: tstampNow,

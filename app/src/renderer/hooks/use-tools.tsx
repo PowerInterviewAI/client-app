@@ -29,9 +29,18 @@ export default function useTools() {
     await electron.tools.clearAll();
   };
 
+  const setPlaceholderData = async () => {
+    const electron = getElectron();
+    if (!electron) {
+      throw new Error('Electron API not available');
+    }
+    await electron.tools.setPlaceholderData();
+  };
+
   return {
     exporting,
     exportTranscript,
     clearAll,
+    setPlaceholderData,
   } as const;
 }
