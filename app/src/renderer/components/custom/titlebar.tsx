@@ -1,9 +1,10 @@
-import { EyeOff, Moon, RefreshCcw, Sun, ZoomIn, ZoomOut } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { EyeOff, Moon, Sun } from 'lucide-react';
+import { useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
 import CreditsDisplay from '@/components/custom/credits-display';
 import DocumentationDialog from '@/components/custom/documentation-dialog';
+import ZoomControl from '@/components/custom/zoom-control';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
@@ -18,28 +19,6 @@ export default function Titlebar() {
   const handleClose = () => {
     const api = window.electronAPI;
     if (api?.close) api.close();
-  };
-
-  const [zoomPercent, setZoomPercent] = useState(100);
-  useEffect(() => {
-    const api = window.electronAPI;
-    if (!api?.zoom) return;
-    api.zoom
-      .getFactor()
-      .then((f) => setZoomPercent(Math.round(f * 100)))
-      .catch(() => {});
-    const cleanup = api.zoom.onChange((p) => setZoomPercent(p));
-    return cleanup;
-  }, []);
-
-  const handleZoomIn = () => {
-    window.electronAPI?.zoom.increase();
-  };
-  const handleZoomOut = () => {
-    window.electronAPI?.zoom.decrease();
-  };
-  const handleZoomReset = () => {
-    window.electronAPI?.zoom.reset();
   };
 
   const [isDocsOpen, setIsDocsOpen] = useState(false);
@@ -94,58 +73,7 @@ export default function Titlebar() {
           )}
 
           {/* zoom controls */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleZoomIn}
-                aria-label="Zoom in"
-                title="Zoom in"
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
-              >
-                <ZoomIn className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Zoom in (Ctrl+Shift+=)</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleZoomOut}
-                aria-label="Zoom out"
-                title="Zoom out"
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
-              >
-                <ZoomOut className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Zoom out (Ctrl+Shift+-)</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleZoomReset}
-                aria-label="Reset zoom"
-                title="Reset zoom"
-                className="h-7 w-14 flex items-center justify-center rounded hover:bg-muted"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
-              >
-                <RefreshCcw className="h-4 w-4" />
-                <span className="ml-1 text-xs">{zoomPercent}%</span>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset zoom (Ctrl+Shift+0)</p>
-            </TooltipContent>
-          </Tooltip>
+          <ZoomControl />
 
           <hr className="h-6 border border-border" />
 
