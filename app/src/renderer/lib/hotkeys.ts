@@ -15,6 +15,34 @@ export enum Hotkey {
 }
 export const HOTKEY_LIST: Hotkey[] = Object.values(Hotkey);
 
+/**
+ * Groups of hotkeys organized by functional area.  Useful for display
+ * in menus or tooltips where related shortcuts should be clustered.
+ */
+export type HotkeyGroup = {
+  label: string;
+  keys: Hotkey[];
+};
+
+export const HOTKEY_GROUPS: HotkeyGroup[] = [
+  {
+    label: 'General',
+    keys: [Hotkey.StopAll, Hotkey.ToggleStealth, Hotkey.Opacity],
+  },
+  {
+    label: 'Window Management',
+    keys: [Hotkey.PlaceWin, Hotkey.MoveWin, Hotkey.ResizeWin, Hotkey.ZoomInOutReset],
+  },
+  {
+    label: 'Scroll Panels',
+    keys: [Hotkey.ScrollReplyPanel, Hotkey.ScrollCodePanel],
+  },
+  {
+    label: 'Code Suggestions',
+    keys: [Hotkey.Capture, Hotkey.SubmitCaptures, Hotkey.ClearCaptures, Hotkey.CaptureAndSubmit],
+  },
+];
+
 export interface HotkeyInfo {
   combo: string;
   title: string;
@@ -39,17 +67,17 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
   },
   [Hotkey.PlaceWin]: {
     combo: 'Ctrl+Shift+1-9',
-    title: 'Place Win',
+    title: 'Place Window',
     description: 'Place window in a specific corner, side, or center',
   },
   [Hotkey.MoveWin]: {
     combo: 'Ctrl+Alt+Shift+Arrow',
-    title: 'Move Win',
+    title: 'Move Window',
     description: 'Move window in the specified direction',
   },
   [Hotkey.ResizeWin]: {
     combo: 'Ctrl+Win+Shift+Arrow',
-    title: 'Resize Win',
+    title: 'Resize Window',
     description: 'Resize window in the specified direction',
   },
   [Hotkey.ZoomInOutReset]: {
