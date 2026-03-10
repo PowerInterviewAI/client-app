@@ -34,7 +34,7 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
   },
   [Hotkey.Opacity]: {
     combo: 'Ctrl+Shift+N',
-    title: 'Opacity',
+    title: 'Toggle Opacity',
     description: 'Toggle window opacity in stealth mode',
   },
   [Hotkey.PlaceWin]: {

@@ -1,4 +1,7 @@
+import { Keyboard } from 'lucide-react';
+
 import CreditsDisplay from '@/components/custom/credits-display';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Hotkey, HOTKEY_LIST, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
@@ -15,35 +18,44 @@ export default function StatusPanel({ runningState, credits }: Props) {
 
   return (
     <div id="status-panel" className="flex items-center justify-between text-muted-foreground p-1">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <RunningIndicator runningState={runningState} />
-          <CreditsDisplay credits={credits} className="ml-2" />
-        </div>
-        <div className="hidden sm:flex gap-x-2 gap-y-1 flex-wrap">
-          {HOTKEY_LIST.map((hk) => {
-            const info = HOTKEYS[hk];
-            return (
-              <div key={hk} className="flex items-center gap-1">
-                {/* <div className="px-1 py-0.5 rounded bg-muted text-[11px] font-semibold"> */}
-                <div
-                  className={cn(
-                    'px-1 py-0.5 rounded text-[11px] font-semibold',
-                    hk === Hotkey.StopAll
-                      ? 'bg-destructive/80 text-destructive-foreground'
-                      : hk === Hotkey.ToggleStealth
-                        ? 'bg-primary/80 text-primary-foreground'
-                        : 'bg-muted'
-                  )}
-                >
-                  {info.combo}
+      <RunningIndicator runningState={runningState} />
+      <CreditsDisplay credits={credits} className="ml-2" />
+      <div className="flex-1" />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className="h-6 flex items-center justify-center rounded hover:bg-muted text-xs font-medium gap-1 px-2"
+            aria-label="Hotkeys"
+            title="Show keyboard shortcuts"
+          >
+            <Keyboard className="h-4 w-4" /> Show Hotkeys
+          </button>
+        </TooltipTrigger>
+        <TooltipContent sideOffset={4} className="w-2xl rounded-md p-2">
+          <div className="grid grid-cols-3 gap-1">
+            {HOTKEY_LIST.map((hk) => {
+              const info = HOTKEYS[hk];
+              return (
+                <div key={hk} className="flex items-center gap-1">
+                  <div
+                    className={cn(
+                      'px-1 py-0.5 rounded text-[11px] font-semibold',
+                      hk === Hotkey.StopAll
+                        ? 'bg-destructive/80 text-destructive-foreground'
+                        : hk === Hotkey.ToggleStealth
+                          ? 'bg-primary/80 text-primary-foreground'
+                          : 'bg-muted text-foreground'
+                    )}
+                  >
+                    {info.combo}
+                  </div>
+                  <div className="text-[11px] font-semibold text-background">{info.title}</div>
                 </div>
-                <div className="text-[11px] font-semibold text-foreground">{info.title}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              );
+            })}
+          </div>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 }
