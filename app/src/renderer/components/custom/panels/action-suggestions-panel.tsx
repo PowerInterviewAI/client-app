@@ -1,10 +1,18 @@
-import { File, ImageUp, Loader2, PauseCircle } from 'lucide-react';
+import { ImageUp, Loader2, PauseCircle, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { type ActionSuggestion, SuggestionState } from '@/types/suggestion';
+
+// when a question is too long we truncate it in the middle to keep the UI compact
+const MAX_QUESTION_LENGTH = 256;
+function truncateMiddle(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text;
+  const half = Math.floor((maxLen - 3) / 2);
+  return text.slice(0, half) + ' ... ... ... ' + text.slice(text.length - (maxLen - 3 - half));
+}
 
 import { Checkbox } from '../../ui/checkbox';
 import { SafeMarkdown } from '../safe-markdown';
@@ -44,9 +52,7 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
     actionSuggestions.length > 0 ? actionSuggestions[actionSuggestions.length - 1].state : null
   );
   const prevLastContentRef = useRef<string>(
-    actionSuggestions.length > 0
-      ? actionSuggestions[actionSuggestions.length - 1].suggestion_content
-      : ''
+    actionSuggestions.length > 0 ? actionSuggestions[actionSuggestions.length - 1].answer : ''
   );
 
   const scrollToLatest = (behavior: ScrollBehavior = 'smooth') => {
@@ -61,7 +67,7 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
     const currentLength = actionSuggestions.length;
     const lastSuggestion = actionSuggestions[currentLength - 1];
     const currentLastState = lastSuggestion?.state ?? null;
-    const currentLastContent = lastSuggestion?.suggestion_content ?? '';
+    const currentLastContent = lastSuggestion?.answer ?? '';
 
     // Only scroll when:
     // 1. A new item is added (length increased)
@@ -170,8 +176,15 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
                 ref={idx === actionSuggestions.length - 1 ? lastItemRef : null}
                 className="flex flex-col gap-3 pb-3 border-b border-border/40 last:border-0"
               >
-                <div className="flex shrink-0">
-                  {s.image_urls && s.image_urls.length > 0 ? (
+                {s.last_question && s.last_question.trim() !== '' && (
+                  <div className="flex text-xs text-muted-foreground">
+                    <Zap className="h-4 w-4 mt-px text-accent shrink-0 mr-2" />
+                    <span>{truncateMiddle(s.last_question, MAX_QUESTION_LENGTH)}</span>
+                  </div>
+                )}
+
+                {s.image_urls && s.image_urls.length > 0 ? (
+                  <div className="flex shrink-0">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-2 overflow-x-auto">
                         {s.image_urls.map((url, i) =>
@@ -200,27 +213,23 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
                         </div>
                       )}
                     </div>
-                  ) : (
+                  </div>
+                ) : (
+                  (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) && (
                     <div className="flex items-center gap-2">
-                      <div className="h-12 w-16 flex items-center justify-center rounded-md bg-muted">
-                        <File className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Generating</span>
                       </div>
-                      {(s.state === SuggestionState.Pending ||
-                        s.state === SuggestionState.Loading) && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Generating</span>
-                        </div>
-                      )}
                     </div>
-                  )}
-                </div>
+                  )
+                )}
 
                 <div className="flex-1">
                   {(s.state === SuggestionState.Loading || s.state === SuggestionState.Success) && (
                     <div className="text-sm text-foreground/90 leading-relaxed">
                       <div className="text-sm">
-                        <SafeMarkdown content={s.suggestion_content} />
+                        <SafeMarkdown content={s.answer} />
                       </div>
                     </div>
                   )}

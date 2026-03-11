@@ -59,8 +59,9 @@ export class AppStateService {
       actionSuggestions: [
         {
           timestamp: tstampNow,
+          last_question: 'Interviewer questions will be here',
+          answer: 'Triggered suggestions will be here',
           image_urls: [null, null, null, null],
-          suggestion_content: 'Triggered suggestions will be here',
           state: SuggestionState.Success,
         },
       ],

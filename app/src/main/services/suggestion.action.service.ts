@@ -9,13 +9,19 @@ import sharp from 'sharp';
 import { ApiClient } from '../api/client.js';
 import { ACTION_SUGGESTION_MAX_CAPTURES, ACTION_TIMEOUT_MS, BACKEND_BASE_URL } from '../consts.js';
 import { configStore } from '../store/config.store.js';
-import { ActionSuggestion, RunningState, SuggestionState, Transcript } from '../types/app-state.js';
+import {
+  ActionSuggestion,
+  RunningState,
+  Speaker,
+  SuggestionState,
+  Transcript,
+} from '../types/app-state.js';
+import { GenerateActionSuggestionRequest } from '../types/suggestion.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
-import { GenerateActionSuggestionRequest } from '../types/suggestion.js';
 
 export class ActionSuggestionService {
   private apiClient: ApiClient = new ApiClient();
@@ -30,6 +36,17 @@ export class ActionSuggestionService {
   /**
    * Get all suggestions with pending prompt if images are uploaded
    */
+  // helper: return most recent finalized transcript spoken by interviewer
+  private getLastInterviewerQuestion(transcripts: Transcript[]): string {
+    for (let i = transcripts.length - 1; i >= 0; i--) {
+      const t = transcripts[i];
+      if (t.speaker === Speaker.Other && t.isFinal) {
+        return t.text;
+      }
+    }
+    return '';
+  }
+
   getSuggestions(isUploading: boolean = false, includePrompt: boolean = true): ActionSuggestion[] {
     let suggestionsArray = Array.from(this.suggestions.values());
 
@@ -37,19 +54,24 @@ export class ActionSuggestionService {
       return suggestionsArray;
     }
 
+    const appState = appStateService.getState();
+    const lastQuestion = this.getLastInterviewerQuestion(appState.transcripts);
+
     if (isUploading) {
       const pendingPrompt: ActionSuggestion = {
         timestamp: DateTimeUtil.now(),
+        last_question: lastQuestion,
+        answer: '',
         image_urls: [...this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)), null],
-        suggestion_content: '',
         state: SuggestionState.Uploading,
       };
       suggestionsArray = [...suggestionsArray, pendingPrompt];
     } else if (this.uploadedImageNames.length > 0) {
       const pendingPrompt: ActionSuggestion = {
         timestamp: DateTimeUtil.now(),
+        last_question: lastQuestion,
+        answer: '',
         image_urls: this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)),
-        suggestion_content: '',
         state: SuggestionState.Idle,
       };
       suggestionsArray = [...suggestionsArray, pendingPrompt];
@@ -198,10 +220,14 @@ export class ActionSuggestionService {
     };
 
     // Create initial suggestion
+    // determine the most recent interviewer question (other speaker & final)
+    const lastQuestion = this.getLastInterviewerQuestion(transcripts);
+
     const suggestion: ActionSuggestion = {
       timestamp,
+      last_question: lastQuestion,
+      answer: '',
       image_urls: this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)),
-      suggestion_content: '',
       state: SuggestionState.Pending,
     };
     this.setSuggestion(timestamp, suggestion);
@@ -240,7 +266,7 @@ export class ActionSuggestionService {
 
           if (value) {
             const chunk = decoder.decode(value, { stream: true });
-            suggestion.suggestion_content += chunk;
+            suggestion.answer += chunk;
             suggestion.state = SuggestionState.Loading;
             this.setSuggestion(timestamp, suggestion);
           }

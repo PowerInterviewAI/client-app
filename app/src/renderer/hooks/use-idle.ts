@@ -4,7 +4,8 @@ import { RunningState } from '@/types/app-state';
 
 import { useAppState } from './use-app-state';
 
-const IDLE_MS = 10 * 60 * 1000; // 10 minutes
+// const IDLE_MS = 10 * 60 * 1000; // 10 minutes
+const IDLE_MS = 30 * 1000;
 
 export function useIdleDetector() {
   const timeout = useRef<number | null>(null);

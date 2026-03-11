@@ -156,7 +156,7 @@ const components: Components = {
     void ordered;
     void node;
     return (
-      <li className="my-1" {...props}>
+      <li className="my-1 font-semibold" {...props}>
         {children}
       </li>
     );
@@ -164,7 +164,7 @@ const components: Components = {
   p: function MarkdownP({ children, node, ...props }: PProps) {
     void node;
     return (
-      <p className="my-2" {...props}>
+      <p className="my-2 font-semibold" {...props}>
         {children}
       </p>
     );

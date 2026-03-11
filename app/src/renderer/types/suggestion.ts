@@ -16,7 +16,8 @@ export interface LiveSuggestion {
 
 export interface ActionSuggestion {
   timestamp: number;
+  last_question: string;
+  answer: string;
   image_urls: string[];
-  suggestion_content: string;
   state: SuggestionState;
 }
