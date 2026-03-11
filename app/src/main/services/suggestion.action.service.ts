@@ -15,13 +15,7 @@ import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
-
-interface GenerateActionSuggestionRequest {
-  profile_data: string;
-  context: string;
-  transcripts: Transcript[];
-  image_names: string[];
-}
+import { GenerateActionSuggestionRequest } from '../types/suggestion.js';
 
 export class ActionSuggestionService {
   private apiClient: ApiClient = new ApiClient();

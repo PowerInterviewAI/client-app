@@ -9,16 +9,10 @@ import { ApiClient } from '../api/client.js';
 import { LIVE_SUGGESTION_NO_SUGGESTION } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { LiveSuggestion, Speaker, SuggestionState, Transcript } from '../types/app-state.js';
+import { GenerateLiveSuggestionRequest } from '../types/suggestion.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { appStateService } from './app-state.service.js';
-
-interface GenerateLiveSuggestionRequest {
-  username: string;
-  profile_data: string;
-  context: string;
-  transcripts: Transcript[];
-}
 
 class LiveSuggestionService {
   private apiClient: ApiClient = new ApiClient();
@@ -71,7 +65,6 @@ class LiveSuggestionService {
     try {
       const conf = configStore.getConfig();
       const requestBody: GenerateLiveSuggestionRequest = {
-        username: conf.interviewConf.username,
         profile_data: conf.interviewConf.profileData,
         context: conf.interviewConf.jobDescription,
         transcripts: transcripts,
