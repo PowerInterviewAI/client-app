@@ -122,7 +122,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
   };
 
   return (
-    <div id="control-panel" className="flex items-center justify-between gap-2 pr-2">
+    <div id="control-panel" className="flex items-center justify-between gap-2 pr-2 pb-0.5">
       <ProfileGroup
         config={config}
         onProfileClick={onProfileClick}
