@@ -65,7 +65,7 @@ export function ProfileGroup({
             size="sm"
             className="rounded-md hover:bg-muted h-10"
           >
-            <div className="max-w-32 overflow-hidden flex items-center gap-2 text-foreground">
+            <div className="max-w-36 overflow-hidden flex items-center gap-2 text-foreground">
               {config?.interviewConf?.photo ? (
                 <img
                   src={config?.interviewConf?.photo}
