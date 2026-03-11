@@ -1,4 +1,4 @@
-import { Transcript } from './app-state';
+import { Transcript } from './app-state.js';
 
 export interface GenerateLiveSuggestionRequest {
   profile_data: string;
