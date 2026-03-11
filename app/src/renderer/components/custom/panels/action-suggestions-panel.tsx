@@ -189,13 +189,13 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
 
                 <div>
                   {s.last_question && s.last_question.trim() !== '' && (
-                    <div className="flex text-xs text-muted-foreground">
+                    <div className="flex text-xs text-muted-foreground mb-2">
                       <span>{truncateMiddle(s.last_question, MAX_QUESTION_LENGTH)}</span>
                     </div>
                   )}
 
                   {s.image_urls && s.image_urls.length > 0 && (
-                    <div className="flex shrink-0 my-2">
+                    <div className="flex shrink-0 mb-2">
                       <div className="flex gap-2 overflow-x-auto">
                         {s.image_urls.map((url, i) =>
                           url ? (
