@@ -55,10 +55,11 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
     actionSuggestions.length > 0 ? actionSuggestions[actionSuggestions.length - 1].answer : ''
   );
 
+  // scroll the final list item into view at the top of the container
   const scrollToLatest = (behavior: ScrollBehavior = 'smooth') => {
-    const container = containerRef.current;
-    if (!container) return;
-    container.scrollTo({ top: container.scrollHeight, behavior });
+    const last = lastItemRef.current;
+    if (!last) return;
+    last.scrollIntoView({ behavior, block: 'start', inline: 'nearest' });
   };
 
   useEffect(() => {
@@ -106,7 +107,8 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
 
         // choose scroll behavior based on direction
         if (direction === 'end') {
-          container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+          // jump to bottom where the most recent element lives
+          scrollToLatest('smooth');
           return;
         }
 
