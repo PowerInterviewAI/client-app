@@ -60,7 +60,8 @@ export class AppStateService {
         {
           timestamp: tstampNow,
           last_question: 'Interviewer questions will be here',
-          answer: 'Triggered suggestions will be here',
+          answer:
+            'Triggered suggestions will be here. For example, reply suggestion, coding test solution, diagram descriptions, etc.',
           image_urls: [null, null, null, null],
           state: SuggestionState.Success,
         },

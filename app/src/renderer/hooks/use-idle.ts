@@ -4,8 +4,7 @@ import { RunningState } from '@/types/app-state';
 
 import { useAppState } from './use-app-state';
 
-// const IDLE_MS = 10 * 60 * 1000; // 10 minutes
-const IDLE_MS = 30 * 1000;
+const IDLE_MS = 10 * 60 * 1000; // 10 minutes
 
 export function useIdleDetector() {
   const timeout = useRef<number | null>(null);
@@ -30,7 +29,8 @@ export function useIdleDetector() {
   };
 
   useEffect(() => {
-    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart'];
+    // include wheel/scroll activity as user interaction
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel'];
 
     events.forEach((evt) => window.addEventListener(evt, reset, { passive: true }));
 
