@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
 import ControlPanel from '@/components/custom/control-panel';
+import { IdleOverlay } from '@/components/custom/idle-overlay';
 import { LoadingPage } from '@/components/custom/loading';
-import CodeSuggestionsPanel from '@/components/custom/panels/code-suggestions-panel';
-import ReplySuggestionsPanel from '@/components/custom/panels/reply-suggestions-panel';
+import ActionSuggestionsPanel from '@/components/custom/panels/action-suggestions-panel';
+import LiveSuggestionsPanel from '@/components/custom/panels/live-suggestions-panel';
 import TranscriptPanel from '@/components/custom/panels/transcript-panel';
 import StatusPanel from '@/components/custom/status-panel';
 import { VideoPanel, type VideoPanelHandle } from '@/components/custom/video-panel';
@@ -13,21 +14,25 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useIdleDetector } from '@/hooks/use-idle';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { RunningState } from '@/types/app-state';
-import { type CodeSuggestion, type ReplySuggestion } from '@/types/suggestion';
+import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
 import { type Transcript } from '@/types/transcript';
 
 export default function MainPage() {
   const { logout } = useAuth();
+
+  // idle timer/watchdog
+  useIdleDetector();
   const navigate = useNavigate();
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { config, isLoading: configLoading, loadConfig } = useConfigStore();
   const { setVideoPanelRef, stopAssistant } = useAssistantService();
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
-  const [replySuggestions, setReplySuggestions] = useState<ReplySuggestion[]>([]);
-  const [codeSuggestions, setCodeSuggestions] = useState<CodeSuggestion[]>([]);
+  const [liveSuggestions, setLiveSuggestions] = useState<LiveSuggestion[]>([]);
+  const [actionSuggestions, setActionSuggestions] = useState<ActionSuggestion[]>([]);
   const videoPanelRef = useRef<VideoPanelHandle>(null);
   const [transcriptHeight, setTranscriptHeight] = useState<number | null>(null);
   const [suggestionHeight, setSuggestionHeight] = useState<number | null>(null);
@@ -58,14 +63,14 @@ export default function MainPage() {
     loadConfig();
   }, [loadConfig]);
 
-  const hasReplySuggestions = replySuggestions.length > 0;
-  const hasCodeSuggestions = codeSuggestions.length > 0;
+  const hasLiveSuggestions = liveSuggestions.length > 0;
+  const hasActionSuggestions = actionSuggestions.length > 0;
   const hasTranscripts = transcripts.length > 0;
   const hideVideoPanel = !config?.faceSwap;
-  const hideTranscriptPanel = hasCodeSuggestions && !hasTranscripts;
+  const hideTranscriptPanel = hasActionSuggestions && !hasTranscripts;
 
-  const hasSuggestions = hasReplySuggestions || hasCodeSuggestions;
-  const suggestionPanelCount = (hasReplySuggestions ? 1 : 0) + (hasCodeSuggestions ? 1 : 0);
+  const hasSuggestions = hasLiveSuggestions || hasActionSuggestions;
+  const suggestionPanelCount = (hasLiveSuggestions ? 1 : 0) + (hasActionSuggestions ? 1 : 0);
 
   // stable compute function so other effects can trigger a recompute
   // include `suggestionPanelCount` in deps to avoid stale closure
@@ -122,8 +127,8 @@ export default function MainPage() {
   useEffect(() => {
     computeAvailable();
   }, [
-    hasCodeSuggestions,
-    hasReplySuggestions,
+    hasActionSuggestions,
+    hasLiveSuggestions,
     hasTranscripts,
     hideVideoPanel,
     hideTranscriptPanel,
@@ -164,15 +169,15 @@ export default function MainPage() {
     }
   }, [appState?.transcripts]);
   useEffect(() => {
-    if (appState?.replySuggestions && appState.replySuggestions !== replySuggestions) {
-      setReplySuggestions(appState.replySuggestions);
+    if (appState?.liveSuggestions && appState.liveSuggestions !== liveSuggestions) {
+      setLiveSuggestions(appState.liveSuggestions);
     }
-  }, [appState?.replySuggestions]);
+  }, [appState?.liveSuggestions]);
   useEffect(() => {
-    if (appState?.codeSuggestions && appState.codeSuggestions !== codeSuggestions) {
-      setCodeSuggestions(appState.codeSuggestions);
+    if (appState?.actionSuggestions && appState.actionSuggestions !== actionSuggestions) {
+      setActionSuggestions(appState.actionSuggestions);
     }
-  }, [appState?.codeSuggestions]);
+  }, [appState?.actionSuggestions]);
 
   // Redirect to login if not logged in
   const _redirectedToLogin = useRef(false);
@@ -225,13 +230,16 @@ export default function MainPage() {
         </div>
 
         {/* Right Column: Main Suggestions Panel */}
-        {(hasReplySuggestions || hasCodeSuggestions) && (
+        {(hasLiveSuggestions || hasActionSuggestions) && (
           <div className="flex-1 flex flex-col gap-1 h-full overflow-auto">
-            {hasCodeSuggestions && (
-              <CodeSuggestionsPanel codeSuggestions={codeSuggestions} style={suggestionStyle} />
+            {hasActionSuggestions && (
+              <ActionSuggestionsPanel
+                actionSuggestions={actionSuggestions}
+                style={suggestionStyle}
+              />
             )}
-            {hasReplySuggestions && (
-              <ReplySuggestionsPanel suggestions={replySuggestions} style={suggestionStyle} />
+            {hasLiveSuggestions && (
+              <LiveSuggestionsPanel suggestions={liveSuggestions} style={suggestionStyle} />
             )}
           </div>
         )}
@@ -251,6 +259,7 @@ export default function MainPage() {
       )}
 
       <ConfigurationDialog isOpen={isProfileOpen} onOpenChange={setIsProfileOpen} />
+      <IdleOverlay />
     </div>
   );
 }

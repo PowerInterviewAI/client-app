@@ -6,8 +6,8 @@ import { ApiClient } from '../api/client.js';
 import { configStore } from '../store/config.store.js';
 import { Speaker, Transcript } from '../types/app-state.js';
 import { appStateService } from './app-state.service.js';
-import { codeSuggestionService } from './code-suggestion.service.js';
-import { replySuggestionService } from './reply-suggestion.service.js';
+import { actionSuggestionService } from './suggestion.action.service.js';
+import { liveSuggestionService } from './suggestion.live.service.js';
 import { transcriptService } from './transcript.service.js';
 
 interface GenerateSummarizeRequest {
@@ -37,7 +37,7 @@ class ToolsService {
     // Prepare request data
     const username = configStore.getConfig().interviewConf.username;
     const transcripts = appStateService.getState().transcripts;
-    const suggestions = appStateService.getState().replySuggestions;
+    const suggestions = appStateService.getState().liveSuggestions;
 
     // Call the API to generate the summary text
     const response = await this.apiClient.post<string>('/api/llm/summarize', {
@@ -107,8 +107,8 @@ class ToolsService {
   async clearAll(): Promise<void> {
     // Clear in-memory state
     transcriptService.clear();
-    replySuggestionService.clear();
-    codeSuggestionService.clear();
+    liveSuggestionService.clear();
+    actionSuggestionService.clear();
   }
 
   async setPlaceholderData(): Promise<void> {

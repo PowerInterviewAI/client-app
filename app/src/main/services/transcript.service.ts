@@ -10,7 +10,7 @@ import * as zmq from 'zeromq';
 
 import {
   BACKEND_BASE_URL,
-  REPLY_SUGGESTION_GAP_MS,
+  LIVE_SUGGESTION_GAP_MS,
   TRANSCRIPT_INTER_TRANSCRIPT_GAP_MS,
   TRANSCRIPT_MAX_RESTART_COUNT,
   TRANSCRIPT_RESTART_DELAY_MS,
@@ -20,7 +20,7 @@ import { configStore } from '../store/config.store.js';
 import { Speaker, Transcript } from '../types/app-state.js';
 import { EnvUtil } from '../utils/env.js';
 import { appStateService } from './app-state.service.js';
-import { replySuggestionService } from './reply-suggestion.service.js';
+import { liveSuggestionService } from './suggestion.live.service.js';
 
 interface AgentProcess {
   process: ChildProcess;
@@ -264,19 +264,19 @@ class TranscriptService {
           // Determine the last final SELF transcript (if any)
           const lastSelf = cleaned.filter((t) => t.speaker === Speaker.Self).slice(-1)[0];
 
-          // Generate reply suggestions
+          // Generate suggestions
           // - Do NOT generate while the user is currently speaking (self partial exists)
           // - Skip generating if the most recent SELF final is too recent (within gap)
           if (transcript.speaker === Speaker.Other && transcript.isFinal) {
             if (this.selfPartialTranscript) {
-              console.log('Skipping reply-suggestion: SELF partial active');
+              console.log('Skipping suggestion: SELF partial active');
             } else {
               const skipDueToRecentSelf =
                 !!lastSelf &&
                 lastSelf.isFinal &&
-                new Date().getTime() - lastSelf.endTimestamp <= REPLY_SUGGESTION_GAP_MS;
+                new Date().getTime() - lastSelf.endTimestamp <= LIVE_SUGGESTION_GAP_MS;
               if (!skipDueToRecentSelf) {
-                await replySuggestionService.startGenerateSuggestion(cleaned);
+                await liveSuggestionService.startGenerateSuggestion(cleaned);
               } else {
                 console.log('Skipping suggestion generation due to recent self transcript');
               }

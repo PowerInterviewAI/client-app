@@ -1,7 +1,7 @@
 import { BrowserWindow, globalShortcut } from 'electron';
 
 import { ZOOM_STEP } from './consts.js';
-import { codeSuggestionService } from './services/code-suggestion.service.js';
+import { actionSuggestionService } from './services/suggestion.action.service.js';
 import {
   moveWindowByArrow,
   moveWindowToCorner,
@@ -105,7 +105,7 @@ export function registerGlobalHotkeys(): void {
   globalShortcut.register('Control+Super+Shift+Right', () => resizeWindowByArrow('right'));
   globalShortcut.register('Control+Super+Shift+Left', () => resizeWindowByArrow('left'));
 
-  // Scroll reply suggestions: Ctrl+Shift+K (up) / Ctrl+Shift+J (down) / Ctrl+Shift+L (end)
+  // Scroll live suggestions: Ctrl+Shift+K (up) / Ctrl+Shift+J (down) / Ctrl+Shift+L (end)
   globalShortcut.register('Control+Shift+K', () => {
     const w = BrowserWindow.getAllWindows()[0];
     if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '0', 'up');
@@ -119,7 +119,7 @@ export function registerGlobalHotkeys(): void {
     if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '0', 'end');
   });
 
-  // Scroll code suggestions: Ctrl+Shift+I (up) / Ctrl+Shift+U (down) / Ctrl+Shift+O (end)
+  // Scroll action suggestions: Ctrl+Shift+I (up) / Ctrl+Shift+U (down) / Ctrl+Shift+O (end)
   globalShortcut.register('Control+Shift+I', () => {
     const w = BrowserWindow.getAllWindows()[0];
     if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '1', 'up');
@@ -133,24 +133,28 @@ export function registerGlobalHotkeys(): void {
     if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '1', 'end');
   });
 
-  // Code suggestion operations: F9=Capture, F10=Submit, F11=Clear, F12=Capture+Submit
+  // Action suggestion operations:
+  // F9  - Capture screenshot
+  // F10 - Clear captures
+  // F11 - Trigger suggestion (no additional screenshot)
+  // F12 - Capture then trigger
   globalShortcut.register('Control+Shift+F9', async () => {
-    await codeSuggestionService.captureScreenshot();
-  });
-  globalShortcut.register('Control+Shift+F11', async () => {
-    await codeSuggestionService.clearImages();
+    await actionSuggestionService.captureScreenshot();
   });
   globalShortcut.register('Control+Shift+F10', async () => {
-    await codeSuggestionService.startGenerateSuggestion();
+    await actionSuggestionService.clearImages();
+  });
+  globalShortcut.register('Control+Shift+F11', async () => {
+    await actionSuggestionService.startGenerateSuggestion();
   });
   globalShortcut.register('Control+Shift+F12', async () => {
     try {
-      await codeSuggestionService.captureScreenshot();
+      await actionSuggestionService.captureScreenshot();
     } catch (err) {
       // capture failed; log and continue to attempt suggestion if there are any images
       console.error('[Hotkeys] capture+submit: screenshot error', err);
     }
-    await codeSuggestionService.startGenerateSuggestion();
+    await actionSuggestionService.startGenerateSuggestion();
   });
 
   console.log('🎹 Global hotkeys registered:');
@@ -164,11 +168,11 @@ export function registerGlobalHotkeys(): void {
   console.log('  Ctrl+Alt+Shift+Arrow: Move window');
   console.log('  Ctrl+Win+Shift+Arrow: Resize window');
   console.log('  Ctrl+Shift+J / K / L: Scroll interview suggestions (J down, K up, L end)');
-  console.log('  Ctrl+Shift+U / I / O: Scroll code suggestions (U down, I up, O end)');
-  console.log('  Ctrl+Shift+F9: Capture screenshot for code suggestion');
-  console.log('  Ctrl+Shift+F10: Submit code suggestion');
-  console.log('  Ctrl+Shift+F11: Clear code captures');
-  console.log('  Ctrl+Shift+F12: Capture + submit code suggestion (combo)');
+  console.log('  Ctrl+Shift+U / I / O: Scroll action suggestions (U down, I up, O end)');
+  console.log('  Ctrl+Shift+F9: Capture screenshot for triggered suggestion');
+  console.log('  Ctrl+Shift+F10: Clear captured screenshots');
+  console.log('  Ctrl+Shift+F11: Trigger suggestion (no screenshot)');
+  console.log('  Ctrl+Shift+F12: Capture + trigger suggestion (combo)');
 }
 
 /**

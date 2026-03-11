@@ -51,16 +51,16 @@ Stay on top of the conversation with live ASR (Automatic Speech Recognition):
 
 Get instant, context-aware help during interviews:
 
-#### Reply Suggestions
+#### Live Suggestions
 
 - **Personalized Responses**: AI generates answers based on your CV, job description, and conversation
 - **Streaming Responses**: Real-time suggestions as the conversation unfolds
 - **Context-Aware**: Takes into account the full interview context
 - **Natural Language**: Human-like responses tailored to your profile
 
-#### Code Suggestions
+#### Action Suggestions
 
-- **Screenshot Analysis**: Captures your screen to understand coding problems
+- **Screenshot Analysis**: Captures your screen to understand problems requiring action suggestions
 - **Multi-Image Support**: Analyzes up to 3 screenshots for comprehensive context
 - **LLM-Powered**: Advanced language models generate optimal solutions
 - **Syntax Highlighting**: Code rendered with proper highlighting for readability
@@ -87,7 +87,7 @@ Operate discreetly during interviews:
   - `Ctrl+Shift+F9`: Take screenshot for code suggestions
   - `Ctrl+Shift+F10`: Submit screenshots
   - `Ctrl+Shift+F11`: Clear screenshots
-  - `Ctrl+Shift+F12`: Capture and submit code suggestion in one step
+  - `Ctrl+Shift+F12`: Capture and submit action suggestion in one step
 
 ### Smart Configuration
 

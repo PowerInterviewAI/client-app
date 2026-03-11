@@ -1,4 +1,4 @@
-import { type CodeSuggestion, type ReplySuggestion } from './suggestion';
+import { type ActionSuggestion, type LiveSuggestion } from './suggestion';
 import { type Transcript } from './transcript';
 
 export enum RunningState {
@@ -13,8 +13,9 @@ export interface AppState {
   isBackendLive: boolean;
   isGpuServerLive: boolean;
   runningState: RunningState;
+  isAppIdle: boolean;
   transcripts: Transcript[];
-  replySuggestions: ReplySuggestion[];
-  codeSuggestions: CodeSuggestion[];
+  liveSuggestions: LiveSuggestion[];
+  actionSuggestions: ActionSuggestion[];
   credits?: number;
 }

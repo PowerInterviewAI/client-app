@@ -7,14 +7,14 @@ export enum SuggestionState {
   Error = 'error',
 }
 
-export interface ReplySuggestion {
+export interface LiveSuggestion {
   timestamp: number;
   last_question: string;
   answer: string;
   state: SuggestionState;
 }
 
-export interface CodeSuggestion {
+export interface ActionSuggestion {
   timestamp: number;
   image_urls: string[];
   suggestion_content: string;

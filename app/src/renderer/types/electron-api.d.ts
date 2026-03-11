@@ -77,14 +77,14 @@ declare global {
       stop: () => Promise<void>;
     };
 
-    // Reply suggestion management
-    replySuggestion: {
+    // Live suggestion management
+    liveSuggestion: {
       clear: () => Promise<void>;
       stop: () => Promise<void>;
     };
 
-    // Code suggestion management
-    codeSuggestion: {
+    // Action suggestion management
+    actionSuggestion: {
       clear: () => Promise<void>;
       stop: () => Promise<void>;
     };

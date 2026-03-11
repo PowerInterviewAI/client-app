@@ -1,35 +1,32 @@
 /**
- * Code Suggestion Service
- * Generates code suggestions using LLM based on screenshots and transcripts
+ * Action Suggestion Service
+ * Generates action suggestions using LLM based on screenshots and transcripts
  */
 
 import { BrowserWindow, desktopCapturer, screen } from 'electron';
 import sharp from 'sharp';
 
 import { ApiClient } from '../api/client.js';
-import {
-  BACKEND_BASE_URL,
-  CODE_SUGGESTION_MAX_SCREENSHOTS,
-  SCREENSHOT_TIMEOUT_MS,
-} from '../consts.js';
+import { ACTION_SUGGESTION_MAX_CAPTURES, ACTION_TIMEOUT_MS, BACKEND_BASE_URL } from '../consts.js';
 import { configStore } from '../store/config.store.js';
-import { CodeSuggestion, RunningState, SuggestionState, Transcript } from '../types/app-state.js';
+import { ActionSuggestion, RunningState, SuggestionState, Transcript } from '../types/app-state.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
 
-interface GenerateCodeSuggestionRequest {
-  context?: string;
-  user_prompt?: string;
+interface GenerateActionSuggestionRequest {
+  profile_data: string;
+  context: string;
+  transcripts: Transcript[];
   image_names: string[];
 }
 
-export class CodeSuggestionService {
+export class ActionSuggestionService {
   private apiClient: ApiClient = new ApiClient();
   private uploadedImageNames: string[] = [];
-  private suggestions: Map<number, CodeSuggestion> = new Map();
+  private suggestions: Map<number, ActionSuggestion> = new Map();
   private abortMap: Map<string, boolean> = new Map();
 
   // --------------------------
@@ -39,7 +36,7 @@ export class CodeSuggestionService {
   /**
    * Get all suggestions with pending prompt if images are uploaded
    */
-  getSuggestions(isUploading: boolean = false, includePrompt: boolean = true): CodeSuggestion[] {
+  getSuggestions(isUploading: boolean = false, includePrompt: boolean = true): ActionSuggestion[] {
     let suggestionsArray = Array.from(this.suggestions.values());
 
     if (!includePrompt) {
@@ -47,7 +44,7 @@ export class CodeSuggestionService {
     }
 
     if (isUploading) {
-      const pendingPrompt: CodeSuggestion = {
+      const pendingPrompt: ActionSuggestion = {
         timestamp: DateTimeUtil.now(),
         image_urls: [...this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)), null],
         suggestion_content: '',
@@ -55,7 +52,7 @@ export class CodeSuggestionService {
       };
       suggestionsArray = [...suggestionsArray, pendingPrompt];
     } else if (this.uploadedImageNames.length > 0) {
-      const pendingPrompt: CodeSuggestion = {
+      const pendingPrompt: ActionSuggestion = {
         timestamp: DateTimeUtil.now(),
         image_urls: this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)),
         suggestion_content: '',
@@ -80,7 +77,7 @@ export class CodeSuggestionService {
     }
 
     this.uploadedImageNames = [];
-    appStateService.updateState({ codeSuggestions: this.getSuggestions() });
+    appStateService.updateState({ actionSuggestions: this.getSuggestions() });
   }
 
   /**
@@ -96,10 +93,10 @@ export class CodeSuggestionService {
     }
 
     // Enforce maximum screenshots limit
-    if (this.uploadedImageNames.length >= CODE_SUGGESTION_MAX_SCREENSHOTS) {
+    if (this.uploadedImageNames.length >= ACTION_SUGGESTION_MAX_CAPTURES) {
       pushNotificationService.pushNotification({
         type: 'warning',
-        message: `Maximum of ${CODE_SUGGESTION_MAX_SCREENSHOTS} screenshots reached. Please clear images and try again.`,
+        message: `Maximum of ${ACTION_SUGGESTION_MAX_CAPTURES} screenshots reached. Please clear images and try again.`,
       });
       return;
     }
@@ -111,7 +108,7 @@ export class CodeSuggestionService {
 
     // Update app state
     appStateService.updateState({
-      codeSuggestions: this.getSuggestions(true),
+      actionSuggestions: this.getSuggestions(true),
     });
 
     try {
@@ -131,11 +128,11 @@ export class CodeSuggestionService {
       this.uploadedImageNames.push(response.data);
 
       // Update app state
-      appStateService.updateState({ codeSuggestions: this.getSuggestions() });
+      appStateService.updateState({ actionSuggestions: this.getSuggestions() });
     } catch (error) {
-      console.error('[CodeSuggestionService] Failed to capture/upload image:', error);
+      console.error('[ActionSuggestionService] Failed to capture/upload image:', error);
       // Reset uploading state so UI is not stuck in loading
-      appStateService.updateState({ codeSuggestions: this.getSuggestions() });
+      appStateService.updateState({ actionSuggestions: this.getSuggestions() });
       pushNotificationService.pushNotification({
         type: 'error',
         message: 'Screenshot capture failed. Please try again.',
@@ -159,7 +156,7 @@ export class CodeSuggestionService {
     }
 
     // Try to acquire lock
-    if (!actionLockService.tryAcquire(ActionType.CodeSuggestion)) {
+    if (!actionLockService.tryAcquire(ActionType.CaptureSuggestion)) {
       return;
     }
 
@@ -170,7 +167,7 @@ export class CodeSuggestionService {
         message: 'No uploaded images to generate suggestion from',
       });
       // Release lock since we're not generating
-      actionLockService.release(ActionType.CodeSuggestion);
+      actionLockService.release(ActionType.CaptureSuggestion);
       return;
     }
 
@@ -196,23 +193,9 @@ export class CodeSuggestionService {
   // Private Methods
   // --------------------------
 
-  /**
-   * Build user prompt from transcripts
-   */
-  private buildUserPrompt(transcripts?: Transcript[]): string | undefined {
-    if (!transcripts || transcripts.length === 0) {
-      return undefined;
-    }
-
-    const parts = transcripts.map(
-      (t) => `[${new Date(t.timestamp).toLocaleString()}] ${t.speaker}: ${t.text}`
-    );
-    return parts.join('\n');
-  }
-
-  private setSuggestion(timestamp: number, suggestion: CodeSuggestion): void {
+  private setSuggestion(timestamp: number, suggestion: ActionSuggestion): void {
     this.suggestions.set(timestamp, suggestion);
-    appStateService.updateState({ codeSuggestions: this.getSuggestions(false, false) });
+    appStateService.updateState({ actionSuggestions: this.getSuggestions(false, false) });
   }
 
   /**
@@ -220,16 +203,16 @@ export class CodeSuggestionService {
    */
   private async generateSuggestion(taskId: string, transcripts?: Transcript[]): Promise<void> {
     const timestamp = DateTimeUtil.now();
-    const userPrompt = this.buildUserPrompt(transcripts);
 
-    const payload: GenerateCodeSuggestionRequest = {
+    const payload: GenerateActionSuggestionRequest = {
+      profile_data: configStore.getConfig().interviewConf?.profileData || '',
       context: configStore.getConfig().interviewConf?.jobDescription,
-      user_prompt: userPrompt,
+      transcripts: transcripts || [],
       image_names: [...this.uploadedImageNames],
     };
 
     // Create initial suggestion
-    const suggestion: CodeSuggestion = {
+    const suggestion: ActionSuggestion = {
       timestamp,
       image_urls: this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)),
       suggestion_content: '',
@@ -241,7 +224,7 @@ export class CodeSuggestionService {
     this.uploadedImageNames = [];
 
     try {
-      const stream = await this.apiClient.postStream('api/llm/code-suggestion', payload);
+      const stream = await this.apiClient.postStream('api/llm/action-suggestion', payload);
       if (!stream) {
         throw new Error('Failed to get stream response');
       }
@@ -263,7 +246,7 @@ export class CodeSuggestionService {
           if (this.abortMap.get(taskId)) {
             this.abortMap.delete(taskId);
 
-            console.info('[CodeSuggestionService] Code suggestion generation stopped by user');
+            console.info('[ActionSuggestionService] Action suggestion generation stopped by user');
             suggestion.state = SuggestionState.Stopped;
             this.setSuggestion(timestamp, suggestion);
             return;
@@ -286,12 +269,12 @@ export class CodeSuggestionService {
         reader.releaseLock();
       }
     } catch (error) {
-      console.error('[CodeSuggestionService] Failed to generate code suggestion:', error);
+      console.error('[ActionSuggestionService] Failed to generate action suggestion:', error);
       suggestion.state = SuggestionState.Error;
       this.setSuggestion(timestamp, suggestion);
     } finally {
       // Release lock when generation completes
-      actionLockService.release(ActionType.CodeSuggestion);
+      actionLockService.release(ActionType.CaptureSuggestion);
     }
   }
 
@@ -318,7 +301,7 @@ export class CodeSuggestionService {
       const physicalHeight = Math.round(targetDisplay.size.height * targetDisplay.scaleFactor);
 
       console.log(
-        `[CodeSuggestionService] Capturing display id=${targetDisplay.id} (${physicalWidth}x${physicalHeight})...`
+        `[ActionSuggestionService] Capturing display id=${targetDisplay.id} (${physicalWidth}x${physicalHeight})...`
       );
 
       // desktopCapturer is Electron's built-in screen-capture API.
@@ -330,8 +313,8 @@ export class CodeSuggestionService {
         }),
         new Promise<never>((_, reject) =>
           setTimeout(
-            () => reject(new Error(`Screenshot timed out after ${SCREENSHOT_TIMEOUT_MS}ms`)),
-            SCREENSHOT_TIMEOUT_MS
+            () => reject(new Error(`Screenshot timed out after ${ACTION_TIMEOUT_MS}ms`)),
+            ACTION_TIMEOUT_MS
           )
         ),
       ]);
@@ -345,10 +328,10 @@ export class CodeSuggestionService {
       const targetSource =
         sources.find((s) => s.display_id === String(targetDisplay.id)) ?? sources[0];
 
-      console.log(`[CodeSuggestionService] Using source: "${targetSource.name}"`);
+      console.log(`[ActionSuggestionService] Using source: "${targetSource.name}"`);
 
       const capturedBuffer: Buffer = targetSource.thumbnail.toPNG();
-      console.log(`[CodeSuggestionService] Captured ${capturedBuffer.length} bytes`);
+      console.log(`[ActionSuggestionService] Captured ${capturedBuffer.length} bytes`);
 
       // Use Sharp to convert to grayscale PNG with high efficiency
       const grayscalePngBuffer = await sharp(capturedBuffer)
@@ -360,12 +343,12 @@ export class CodeSuggestionService {
         .toBuffer();
 
       console.log(
-        `[CodeSuggestionService] Converted to grayscale: ${grayscalePngBuffer.length} bytes`
+        `[ActionSuggestionService] Converted to grayscale: ${grayscalePngBuffer.length} bytes`
       );
 
       return new Uint8Array(grayscalePngBuffer);
     } catch (error) {
-      console.error('[CodeSuggestionService] Failed to capture screenshot:', error);
+      console.error('[ActionSuggestionService] Failed to capture screenshot:', error);
       throw new Error(
         `Screenshot capture failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -380,7 +363,7 @@ export class CodeSuggestionService {
     this.suggestions.clear();
     this.uploadedImageNames = [];
     // Update app state
-    appStateService.updateState({ codeSuggestions: [] });
+    appStateService.updateState({ actionSuggestions: [] });
   }
 
   async stop(): Promise<void> {
@@ -388,4 +371,4 @@ export class CodeSuggestionService {
   }
 }
 
-export const codeSuggestionService = new CodeSuggestionService();
+export const actionSuggestionService = new ActionSuggestionService();

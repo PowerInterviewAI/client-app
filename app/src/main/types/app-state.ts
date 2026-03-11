@@ -32,14 +32,14 @@ export interface Transcript {
   endTimestamp: number;
 }
 
-export interface ReplySuggestion {
+export interface LiveSuggestion {
   timestamp: number;
   last_question: string;
   answer: string;
   state: SuggestionState;
 }
 
-export interface CodeSuggestion {
+export interface ActionSuggestion {
   timestamp: number;
   image_urls: (string | null)[];
   suggestion_content: string;
@@ -47,14 +47,14 @@ export interface CodeSuggestion {
 }
 
 export interface AppState {
-  isRunning: boolean;
   isStealth: boolean;
   isBackendLive: boolean;
   isGpuServerLive: boolean;
   isLoggedIn: boolean | null;
   runningState: RunningState;
+  isAppIdle: boolean;
   transcripts: Transcript[];
-  replySuggestions: ReplySuggestion[];
-  codeSuggestions: CodeSuggestion[];
+  liveSuggestions: LiveSuggestion[];
+  actionSuggestions: ActionSuggestion[];
   credits?: number;
 }

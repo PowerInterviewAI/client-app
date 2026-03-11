@@ -26,8 +26,8 @@ export interface RuntimeConfig {
   enableFaceEnhance: boolean;
 
   // panel auto-scroll preferences
-  autoScrollReplySuggestions: boolean;
-  autoScrollCodeSuggestions: boolean;
+  autoScrollLiveSuggestions: boolean;
+  autoScrollActionSuggestions: boolean;
   autoScrollTranscript: boolean;
 }
 
@@ -52,8 +52,8 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   enableFaceEnhance: false,
 
   // default autoscroll preferences are enabled
-  autoScrollReplySuggestions: true,
-  autoScrollCodeSuggestions: true,
+  autoScrollLiveSuggestions: true,
+  autoScrollActionSuggestions: true,
   autoScrollTranscript: true,
 };
 
@@ -176,11 +176,11 @@ export const configStore = new ConfigStore();
   // eslint-disable-next-line
   const raw = (configStore as any).store.get('runtime') as Partial<RuntimeConfig> | undefined;
   const migration: Partial<RuntimeConfig> = { faceSwap: false };
-  if (raw?.autoScrollReplySuggestions === undefined) {
-    migration.autoScrollReplySuggestions = true;
+  if (raw?.autoScrollLiveSuggestions === undefined) {
+    migration.autoScrollLiveSuggestions = true;
   }
-  if (raw?.autoScrollCodeSuggestions === undefined) {
-    migration.autoScrollCodeSuggestions = true;
+  if (raw?.autoScrollActionSuggestions === undefined) {
+    migration.autoScrollActionSuggestions = true;
   }
   if (raw?.autoScrollTranscript === undefined) {
     migration.autoScrollTranscript = true;

@@ -15,10 +15,10 @@ export const TRANSCRIPT_RESTART_DELAY_MS = 2000;
 export const TRANSCRIPT_INTER_TRANSCRIPT_GAP_MS = 5000;
 
 // Suggestion constants
-export const REPLY_SUGGESTION_GAP_MS = 2000;
-export const REPLY_SUGGESTION_NO_SUGGESTION = 'NO_SUGGESTION_NEEDED';
-export const CODE_SUGGESTION_MAX_SCREENSHOTS = 4;
-export const SCREENSHOT_TIMEOUT_MS = 30_000; // 30 seconds
+export const LIVE_SUGGESTION_GAP_MS = 2000;
+export const LIVE_SUGGESTION_NO_SUGGESTION = 'NO_SUGGESTION_NEEDED';
+export const ACTION_SUGGESTION_MAX_CAPTURES = 4;
+export const ACTION_TIMEOUT_MS = 30_000; // 30 seconds
 
 // VCam agent constants
 export const VCAM_ZMQ_PORT = 50001;

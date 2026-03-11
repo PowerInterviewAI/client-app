@@ -1,13 +1,13 @@
 /**
  * Action Lock Service
- * Manages blocking of long-running code suggestion actions (screenshot capture, suggestion generation)
+ * Manages blocking of long-running action suggestion actions (screenshot capture, suggestion generation)
  */
 
 import { pushNotificationService } from './push-notification.service.js';
 
 export enum ActionType {
   ScreenshotCapture = 'screenshot_capture',
-  CodeSuggestion = 'code_suggestion',
+  CaptureSuggestion = 'capture_suggestion',
 }
 
 class ActionLockService {
@@ -55,7 +55,7 @@ class ActionLockService {
   private notifyBlocked(requestedAction: ActionType, runningAction: ActionType): void {
     const actionNames: Record<ActionType, string> = {
       [ActionType.ScreenshotCapture]: 'Screenshot capture',
-      [ActionType.CodeSuggestion]: 'Code suggestion generation',
+      [ActionType.CaptureSuggestion]: 'Action suggestion generation',
     };
 
     const requested = actionNames[requestedAction];

@@ -87,8 +87,8 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       // Stop assistant services
       await Promise.all([
         electron.transcription.stop(),
-        electron.replySuggestion.stop(),
-        electron.codeSuggestion.stop(),
+        electron.liveSuggestion.stop(),
+        electron.actionSuggestion.stop(),
       ]);
 
       electron.setStealth(false); // Ensure stealth mode is turned off when stopping assistant

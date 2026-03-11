@@ -76,8 +76,15 @@ export class HealthCheckService {
   private startClientLoop(): void {
     (async () => {
       while (this.running) {
+        const state = appStateService.getState();
+        // if the app is idle we halt client pings until user wakes it
+        if (state.isAppIdle) {
+          await safeSleep(SUCCESS_INTERVAL);
+          continue;
+        }
+
         // skip if not logged in
-        if (!appStateService.getState().isLoggedIn) {
+        if (!state.isLoggedIn) {
           await safeSleep(FAILURE_INTERVAL);
           continue;
         }
@@ -103,8 +110,15 @@ export class HealthCheckService {
   private startGpuLoop(): void {
     (async () => {
       while (this.running) {
+        const state = appStateService.getState();
+        // if the app is idle we halt GPU pings until user wakes it
+        if (state.isAppIdle) {
+          await safeSleep(1);
+          continue;
+        }
+
         // skip if not logged in
-        if (!appStateService.getState().isLoggedIn) {
+        if (!state.isLoggedIn) {
           await safeSleep(FAILURE_INTERVAL);
           continue;
         }

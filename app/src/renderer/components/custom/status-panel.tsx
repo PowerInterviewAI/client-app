@@ -35,7 +35,7 @@ export default function StatusPanel({ runningState, credits }: Props) {
           <div className="space-y-2">
             {HOTKEY_GROUPS.map((group) => (
               <div key={group.label}>
-                <div className="text-[12px] font-semibold text-background mb-1 uppercase">
+                <div className="text-[10px] font-semibold text-background mb-1 uppercase">
                   {group.label}
                 </div>
                 <div className="grid grid-cols-3 gap-1">

@@ -4,9 +4,9 @@
  */
 
 import {
+  ActionSuggestion,
   AppState,
-  CodeSuggestion,
-  ReplySuggestion,
+  LiveSuggestion,
   RunningState,
   Speaker,
   SuggestionState,
@@ -14,15 +14,15 @@ import {
 import { getWindowReference } from './window-control.service.js';
 
 const DEFAULT_STATE: AppState = {
-  isRunning: false,
   isStealth: false,
   isBackendLive: false,
   isGpuServerLive: false,
   isLoggedIn: false,
   runningState: RunningState.Idle,
+  isAppIdle: false,
   transcripts: [],
-  replySuggestions: [],
-  codeSuggestions: [],
+  liveSuggestions: [],
+  actionSuggestions: [],
   credits: undefined,
 };
 
@@ -48,19 +48,19 @@ export class AppStateService {
           endTimestamp: tstampNow + 5000,
         },
       ],
-      replySuggestions: [
+      liveSuggestions: [
         {
           timestamp: tstampNow,
-          last_question: 'Interviewer question will be here',
-          answer: 'Suggested answer will be here',
+          last_question: 'Interviewer questions will be here',
+          answer: 'Suggested answers will be here in real-time',
           state: SuggestionState.Success,
         },
       ],
-      codeSuggestions: [
+      actionSuggestions: [
         {
           timestamp: tstampNow,
           image_urls: [null, null, null, null],
-          suggestion_content: 'Code suggestion will be here',
+          suggestion_content: 'Triggered suggestions will be here',
           state: SuggestionState.Success,
         },
       ],
@@ -90,13 +90,13 @@ export class AppStateService {
     }
   }
 
-  addReplySuggestion(s: ReplySuggestion): void {
-    this.state = { ...this.state, replySuggestions: [...this.state.replySuggestions, s] };
+  addLiveSuggestion(s: LiveSuggestion): void {
+    this.state = { ...this.state, liveSuggestions: [...this.state.liveSuggestions, s] };
     this.notifyRenderer();
   }
 
-  addCodeSuggestion(s: CodeSuggestion): void {
-    this.state = { ...this.state, codeSuggestions: [...this.state.codeSuggestions, s] };
+  addActionSuggestion(s: ActionSuggestion): void {
+    this.state = { ...this.state, actionSuggestions: [...this.state.actionSuggestions, s] };
     this.notifyRenderer();
   }
 }

@@ -30,7 +30,7 @@ export interface Config {
   enableFaceEnhance: boolean;
 
   // Panel auto-scroll preferences (persisted between sessions)
-  autoScrollReplySuggestions: boolean;
-  autoScrollCodeSuggestions: boolean;
+  autoScrollLiveSuggestions: boolean;
+  autoScrollActionSuggestions: boolean;
   autoScrollTranscript: boolean;
 }

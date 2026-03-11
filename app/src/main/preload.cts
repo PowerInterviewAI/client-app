@@ -67,16 +67,16 @@ const electronApi = {
     stop: () => ipcRenderer.invoke('transcription:stop'),
   },
 
-  // Reply suggestion management
-  replySuggestion: {
-    clear: () => ipcRenderer.invoke('reply-suggestion:clear'),
-    stop: () => ipcRenderer.invoke('reply-suggestion:stop'),
+  // Live suggestion management
+  liveSuggestion: {
+    clear: () => ipcRenderer.invoke('live-suggestion:clear'),
+    stop: () => ipcRenderer.invoke('live-suggestion:stop'),
   },
 
-  // Code suggestion management
-  codeSuggestion: {
-    clear: () => ipcRenderer.invoke('code-suggestion:clear'),
-    stop: () => ipcRenderer.invoke('code-suggestion:stop'),
+  // Action suggestion management
+  actionSuggestion: {
+    clear: () => ipcRenderer.invoke('action-suggestion:clear'),
+    stop: () => ipcRenderer.invoke('action-suggestion:stop'),
   },
 
   // Media management

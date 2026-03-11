@@ -25,20 +25,20 @@ import { CreditPlan } from '@/types/payment';
 const planFeatures: Record<CreditPlan, string[]> = {
   [CreditPlan.Starter]: [
     'Real-time transcription',
-    'AI reply suggestions',
+    'Live suggestions',
     'Code assistance',
     'Face swap feature',
   ],
   [CreditPlan.Pro]: [
     'Real-time transcription',
-    'AI reply suggestions',
+    'Live suggestions',
     'Code assistance',
     'Face swap feature',
     'Priority support',
   ],
   [CreditPlan.Enterprise]: [
     'Real-time transcription',
-    'AI reply suggestions',
+    'Live suggestions',
     'Code assistance',
     'Face swap feature',
     'Priority support',

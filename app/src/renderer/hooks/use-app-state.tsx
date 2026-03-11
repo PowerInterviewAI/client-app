@@ -36,9 +36,10 @@ class AppStateManager {
       isBackendLive: raw.isBackendLive,
       isGpuServerLive: raw.isGpuServerLive,
       runningState: raw.runningState,
+      isAppIdle: raw.isAppIdle ?? false,
       transcripts: raw.transcripts ?? [],
-      replySuggestions: raw.replySuggestions ?? [],
-      codeSuggestions: raw.codeSuggestions ?? [],
+      liveSuggestions: raw.liveSuggestions ?? [],
+      actionSuggestions: raw.actionSuggestions ?? [],
       credits: raw.credits,
     };
   }

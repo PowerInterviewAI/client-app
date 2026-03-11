@@ -13,16 +13,16 @@ function truncateMiddle(text: string, maxLen: number): string {
 
 import { Card } from '@/components/ui/card';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
-import { type ReplySuggestion, SuggestionState } from '@/types/suggestion';
+import { type LiveSuggestion, SuggestionState } from '@/types/suggestion';
 
 import { Checkbox } from '../../ui/checkbox';
 
 interface SuggestionsPanelProps {
-  suggestions?: ReplySuggestion[];
+  suggestions?: LiveSuggestion[];
   style?: React.CSSProperties;
 }
 
-function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProps) {
+function LiveSuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProps) {
   const hasItems = suggestions.length > 0;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -34,15 +34,15 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
   const HOTKEY_SMOOTH_THRESHOLD = 150; // ms
 
   const [autoScroll, setAutoScroll] = useState<boolean>(
-    () => config?.autoScrollReplySuggestions ?? true
+    () => config?.autoScrollLiveSuggestions ?? true
   );
   const isStealth = useIsStealthMode();
 
   useEffect(() => {
-    if (typeof config?.autoScrollReplySuggestions === 'boolean') {
-      setAutoScroll(config.autoScrollReplySuggestions);
+    if (typeof config?.autoScrollLiveSuggestions === 'boolean') {
+      setAutoScroll(config.autoScrollLiveSuggestions);
     }
-  }, [config?.autoScrollReplySuggestions]);
+  }, [config?.autoScrollLiveSuggestions]);
 
   // Track previous length, state, and content to detect actual changes
   const prevLengthRef = useRef<number>(suggestions.length);
@@ -136,7 +136,7 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
       {/* Header */}
       <div className="border-b border-border px-4 pt-4 pb-2 shrink-0 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <h3 className="font-semibold text-foreground text-xs">Reply Suggestions</h3>
+          <h3 className="font-semibold text-foreground text-xs">Live Suggestions</h3>
         </div>
 
         {!isStealth && (
@@ -146,7 +146,7 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
               onCheckedChange={(v) => {
                 const enabled = v === true;
                 setAutoScroll(enabled);
-                updateConfig({ autoScrollReplySuggestions: enabled }).catch((e) =>
+                updateConfig({ autoScrollLiveSuggestions: enabled }).catch((e) =>
                   console.error('Failed to persist auto-scroll setting', e)
                 );
               }}
@@ -224,4 +224,4 @@ function ReplySuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProp
   );
 }
 
-export default React.memo(ReplySuggestionsPanel);
+export default React.memo(LiveSuggestionsPanel);

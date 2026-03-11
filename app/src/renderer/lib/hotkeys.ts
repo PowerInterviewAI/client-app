@@ -6,12 +6,12 @@ export enum Hotkey {
   MoveWin = 'MoveWin',
   ResizeWin = 'ResizeWin',
   ZoomInOutReset = 'ZoomInOutReset',
-  ScrollReplyPanel = 'ScrollReplyPanel',
-  ScrollCodePanel = 'ScrollCodePanel',
+  ScrollLiveSuggestionPanel = 'ScrollLiveSuggestionPanel',
+  ScrollActionSuggestionPanel = 'ScrollActionSuggestionPanel',
   Capture = 'Capture',
-  SubmitCaptures = 'SubmitCaptures',
   ClearCaptures = 'ClearCaptures',
-  CaptureAndSubmit = 'CaptureAndSubmit',
+  TriggerWithoutCaptures = 'TriggerWithoutCaptures',
+  TriggerWithCaptures = 'TriggerWithCaptures',
 }
 export const HOTKEY_LIST: Hotkey[] = Object.values(Hotkey);
 
@@ -35,11 +35,16 @@ export const HOTKEY_GROUPS: HotkeyGroup[] = [
   },
   {
     label: 'Scroll Panels',
-    keys: [Hotkey.ScrollReplyPanel, Hotkey.ScrollCodePanel],
+    keys: [Hotkey.ScrollLiveSuggestionPanel, Hotkey.ScrollActionSuggestionPanel],
   },
   {
-    label: 'Code Suggestions',
-    keys: [Hotkey.Capture, Hotkey.SubmitCaptures, Hotkey.ClearCaptures, Hotkey.CaptureAndSubmit],
+    label: 'Triggered Suggestions',
+    keys: [
+      Hotkey.Capture,
+      Hotkey.ClearCaptures,
+      Hotkey.TriggerWithoutCaptures,
+      Hotkey.TriggerWithCaptures,
+    ],
   },
 ];
 
@@ -85,34 +90,35 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
     title: 'Zoom In/Out/Reset',
     description: 'Adjust or reset UI zoom level',
   },
-  [Hotkey.ScrollReplyPanel]: {
+  [Hotkey.ScrollLiveSuggestionPanel]: {
     combo: 'Ctrl+Shift+[J, K, L]',
-    title: 'Scroll Reply Panel',
-    description: 'Scroll Down/Up/End in the interview reply suggestions panel',
+    title: 'Scroll Live Panel',
+    description: 'Scroll Down/Up/End in the live suggestions panel',
   },
-  [Hotkey.ScrollCodePanel]: {
+  [Hotkey.ScrollActionSuggestionPanel]: {
     combo: 'Ctrl+Shift+[U, I, O]',
-    title: 'Scroll Code Panel',
-    description: 'Scroll Down/Up/End in the coding test suggestions panel',
+    title: 'Scroll Triggered Panel',
+    description: 'Scroll Down/Up/End in the triggered suggestions panel',
   },
   [Hotkey.Capture]: {
     combo: 'Ctrl+Shift+F9',
-    title: 'Capture',
-    description: 'Take a screenshot for code suggestions',
-  },
-  [Hotkey.SubmitCaptures]: {
-    combo: 'Ctrl+Shift+F10',
-    title: 'Submit Captures',
-    description: 'Submit prompt for code suggestions',
+    title: 'Capture Screen',
+    description: 'Take a screenshot for triggered suggestions',
   },
   [Hotkey.ClearCaptures]: {
-    combo: 'Ctrl+Shift+F11',
+    combo: 'Ctrl+Shift+F10',
     title: 'Clear Captures',
-    description: 'Clear pending screenshots for code suggestions',
+    description: 'Clear captured screenshots',
   },
-  [Hotkey.CaptureAndSubmit]: {
+  [Hotkey.TriggerWithoutCaptures]: {
+    combo: 'Ctrl+Shift+F11',
+    title: 'Trigger without Captures',
+    description: 'Generate suggestion without captures',
+  },
+  [Hotkey.TriggerWithCaptures]: {
     combo: 'Ctrl+Shift+F12',
-    title: 'Capture and Submit',
-    description: 'Take a screenshot and submit prompt for code suggestions',
+    title: 'Trigger with Captures',
+    description:
+      'Generate suggestion referencing screen captures. If no captures exist, attempts to take one before generating.',
   },
 };

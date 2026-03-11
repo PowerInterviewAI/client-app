@@ -4,18 +4,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
-import { type CodeSuggestion, SuggestionState } from '@/types/suggestion';
+import { type ActionSuggestion, SuggestionState } from '@/types/suggestion';
 
 import { Checkbox } from '../../ui/checkbox';
 import { SafeMarkdown } from '../safe-markdown';
 
-interface CodeSuggestionsPanelProps {
-  codeSuggestions?: CodeSuggestion[];
+interface ActionSuggestionsPanelProps {
+  actionSuggestions?: ActionSuggestion[];
   style?: React.CSSProperties;
 }
 
-function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPanelProps) {
-  const hasItems = codeSuggestions.length > 0;
+function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggestionsPanelProps) {
+  const hasItems = actionSuggestions.length > 0;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const lastItemRef = useRef<HTMLDivElement | null>(null);
@@ -24,27 +24,29 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
 
   // local state mirrors persisted preference but falls back to true if config not yet loaded
   const [autoScroll, setAutoScroll] = useState<boolean>(
-    () => config?.autoScrollCodeSuggestions ?? true
+    () => config?.autoScrollActionSuggestions ?? true
   );
   const isStealth = useIsStealthMode();
 
   // stay in sync when config store updates (e.g. after initial load)
   useEffect(() => {
-    if (typeof config?.autoScrollCodeSuggestions === 'boolean') {
-      setAutoScroll(config.autoScrollCodeSuggestions);
+    if (typeof config?.autoScrollActionSuggestions === 'boolean') {
+      setAutoScroll(config.autoScrollActionSuggestions);
     }
-  }, [config?.autoScrollCodeSuggestions]);
+  }, [config?.autoScrollActionSuggestions]);
 
   const lastHotkeyAtRef = useRef<number>(0);
   const HOTKEY_SMOOTH_THRESHOLD = 150; // ms
 
   // Track previous length, state, and content to detect actual changes
-  const prevLengthRef = useRef<number>(codeSuggestions.length);
+  const prevLengthRef = useRef<number>(actionSuggestions.length);
   const prevLastStateRef = useRef<SuggestionState | null>(
-    codeSuggestions.length > 0 ? codeSuggestions[codeSuggestions.length - 1].state : null
+    actionSuggestions.length > 0 ? actionSuggestions[actionSuggestions.length - 1].state : null
   );
   const prevLastContentRef = useRef<string>(
-    codeSuggestions.length > 0 ? codeSuggestions[codeSuggestions.length - 1].suggestion_content : ''
+    actionSuggestions.length > 0
+      ? actionSuggestions[actionSuggestions.length - 1].suggestion_content
+      : ''
   );
 
   const scrollToLatest = (behavior: ScrollBehavior = 'smooth') => {
@@ -56,8 +58,8 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
   useEffect(() => {
     if (!autoScroll) return;
 
-    const currentLength = codeSuggestions.length;
-    const lastSuggestion = codeSuggestions[currentLength - 1];
+    const currentLength = actionSuggestions.length;
+    const lastSuggestion = actionSuggestions[currentLength - 1];
     const currentLastState = lastSuggestion?.state ?? null;
     const currentLastContent = lastSuggestion?.suggestion_content ?? '';
 
@@ -83,7 +85,7 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
     prevLengthRef.current = currentLength;
     prevLastStateRef.current = currentLastState;
     prevLastContentRef.current = currentLastContent;
-  }, [codeSuggestions, autoScroll]);
+  }, [actionSuggestions, autoScroll]);
 
   // Listen for hotkey scroll events from Electron main process
   useEffect(() => {
@@ -91,7 +93,7 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
 
     const unsubscribe = window.electronAPI.onHotkeyScroll(
       (section: string, direction: 'up' | 'down' | 'end') => {
-        if (section !== '1') return; // only handle for code suggestions section
+        if (section !== '1') return; // only handle for action suggestions section
 
         const container = containerRef.current;
         if (!container) return;
@@ -128,7 +130,7 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
       {/* Header */}
       <div className="border-b border-border px-4 pt-4 pb-2 shrink-0 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <h3 className="font-semibold text-foreground text-xs">Code Suggestions</h3>
+          <h3 className="font-semibold text-foreground text-xs">Triggered Suggestions</h3>
         </div>
 
         {!isStealth && (
@@ -138,7 +140,7 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
               onCheckedChange={(v) => {
                 const enabled = v === true;
                 setAutoScroll(enabled);
-                updateConfig({ autoScrollCodeSuggestions: enabled }).catch((e) =>
+                updateConfig({ autoScrollActionSuggestions: enabled }).catch((e) =>
                   console.error('Failed to persist auto-scroll setting', e)
                 );
               }}
@@ -155,17 +157,17 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
         {!hasItems && (
           <div className="flex items-center justify-center h-full text-center p-4">
             <div>
-              <p className="text-sm text-muted-foreground">No code suggestions yet</p>
+              <p className="text-sm text-muted-foreground">No action suggestions yet</p>
             </div>
           </div>
         )}
 
         {hasItems && (
           <div className="p-4 space-y-3">
-            {codeSuggestions.map((s, idx) => (
+            {actionSuggestions.map((s, idx) => (
               <div
                 key={idx}
-                ref={idx === codeSuggestions.length - 1 ? lastItemRef : null}
+                ref={idx === actionSuggestions.length - 1 ? lastItemRef : null}
                 className="flex flex-col gap-3 pb-3 border-b border-border/40 last:border-0"
               >
                 <div className="flex shrink-0">
@@ -247,4 +249,4 @@ function CodeSuggestionsPanel({ codeSuggestions = [], style }: CodeSuggestionsPa
   );
 }
 
-export default React.memo(CodeSuggestionsPanel);
+export default React.memo(ActionSuggestionsPanel);

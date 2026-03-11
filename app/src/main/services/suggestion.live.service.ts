@@ -1,28 +1,28 @@
 /**
- * Reply Suggestion Service
- * Generates natural language reply suggestions for interviews
+ * Suggestion Service
+ * Generates natural language suggestions for interviews
  *
  * Based on the Python equivalent with threading and streaming support
  */
 
 import { ApiClient } from '../api/client.js';
-import { REPLY_SUGGESTION_NO_SUGGESTION } from '../consts.js';
+import { LIVE_SUGGESTION_NO_SUGGESTION } from '../consts.js';
 import { configStore } from '../store/config.store.js';
-import { ReplySuggestion, Speaker, SuggestionState, Transcript } from '../types/app-state.js';
+import { LiveSuggestion, Speaker, SuggestionState, Transcript } from '../types/app-state.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { appStateService } from './app-state.service.js';
 
-interface GenerateReplySuggestionRequest {
+interface GenerateLiveSuggestionRequest {
   username: string;
   profile_data: string;
-  job_description: string;
+  context: string;
   transcripts: Transcript[];
 }
 
-class ReplySuggestionService {
+class LiveSuggestionService {
   private apiClient: ApiClient = new ApiClient();
-  private suggestions: Map<number, ReplySuggestion> = new Map();
+  private suggestions: Map<number, LiveSuggestion> = new Map();
   private abortMap: Map<string, boolean> = new Map();
 
   /**
@@ -32,20 +32,20 @@ class ReplySuggestionService {
     this.stopRunningTasks();
     this.suggestions.clear();
     // Update app state
-    appStateService.updateState({ replySuggestions: [] });
+    appStateService.updateState({ liveSuggestions: [] });
   }
 
-  private apendSuggestion(timestamp: number, suggestion: ReplySuggestion): void {
+  private apendSuggestion(timestamp: number, suggestion: LiveSuggestion): void {
     if (
       suggestion.answer.length > 0 &&
-      REPLY_SUGGESTION_NO_SUGGESTION.startsWith(suggestion.answer)
+      LIVE_SUGGESTION_NO_SUGGESTION.startsWith(suggestion.answer)
     ) {
       this.suggestions.delete(timestamp);
     } else {
       this.suggestions.set(timestamp, suggestion);
     }
     appStateService.updateState({
-      replySuggestions: Array.from(this.suggestions.values()),
+      liveSuggestions: Array.from(this.suggestions.values()),
     });
   }
 
@@ -58,7 +58,7 @@ class ReplySuggestionService {
     }
 
     const timestamp = DateTimeUtil.now();
-    const suggestion: ReplySuggestion = {
+    const suggestion: LiveSuggestion = {
       timestamp,
       last_question: transcripts[transcripts.length - 1].text,
       answer: '',
@@ -70,17 +70,17 @@ class ReplySuggestionService {
 
     try {
       const conf = configStore.getConfig();
-      const requestBody: GenerateReplySuggestionRequest = {
+      const requestBody: GenerateLiveSuggestionRequest = {
         username: conf.interviewConf.username,
         profile_data: conf.interviewConf.profileData,
-        job_description: conf.interviewConf.jobDescription,
+        context: conf.interviewConf.jobDescription,
         transcripts: transcripts,
       };
 
-      const response = await this.apiClient.postStream('/api/llm/reply-suggestion', requestBody);
+      const response = await this.apiClient.postStream('/api/llm/live-suggestion', requestBody);
 
       if (!response) {
-        throw new Error('No response from reply suggestion API');
+        throw new Error('No response from suggestion API');
       }
 
       const reader = response.getReader();
@@ -165,4 +165,4 @@ class ReplySuggestionService {
   }
 }
 
-export const replySuggestionService = new ReplySuggestionService();
+export const liveSuggestionService = new LiveSuggestionService();
