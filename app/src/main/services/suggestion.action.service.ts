@@ -140,8 +140,10 @@ export class ActionSuggestionService {
   /**
    * Generate code suggestion asynchronously
    */
-  async startGenerateSuggestion(transcripts?: Transcript[]): Promise<void> {
-    if (appStateService.getState().runningState !== RunningState.Running) {
+  async startGenerateSuggestion(): Promise<void> {
+    const appState = appStateService.getState();
+
+    if (appState.runningState !== RunningState.Running) {
       pushNotificationService.pushNotification({
         type: 'warning',
         message: 'Cannot generate suggestion when assistant is not running',
@@ -154,24 +156,13 @@ export class ActionSuggestionService {
       return;
     }
 
-    // If there are no uploaded images, there is nothing to suggest from
-    if (this.uploadedImageNames.length === 0) {
-      pushNotificationService.pushNotification({
-        type: 'warning',
-        message: 'No uploaded images to generate suggestion from',
-      });
-      // Release lock since we're not generating
-      actionLockService.release(ActionType.CaptureSuggestion);
-      return;
-    }
-
     // Cancel any current task
     this.stopRunningTasks();
 
     // Start new generation
     const taskId = UuidUtil.generate();
     this.abortMap.set(taskId, false);
-    this.generateSuggestion(taskId, transcripts);
+    this.generateSuggestion(taskId, appState.transcripts);
   }
 
   /**
@@ -195,13 +186,14 @@ export class ActionSuggestionService {
   /**
    * Generate code suggestion and stream response
    */
-  private async generateSuggestion(taskId: string, transcripts?: Transcript[]): Promise<void> {
+  private async generateSuggestion(taskId: string, transcripts: Transcript[]): Promise<void> {
     const timestamp = DateTimeUtil.now();
+    const conf = configStore.getConfig();
 
     const payload: GenerateActionSuggestionRequest = {
-      profile_data: configStore.getConfig().interviewConf?.profileData || '',
-      context: configStore.getConfig().interviewConf?.jobDescription,
-      transcripts: transcripts || [],
+      profile_data: conf.interviewConf.profileData,
+      context: conf.interviewConf.jobDescription,
+      transcripts: transcripts,
       image_names: [...this.uploadedImageNames],
     };
 
