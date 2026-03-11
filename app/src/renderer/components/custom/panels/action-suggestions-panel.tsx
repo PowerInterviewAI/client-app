@@ -176,18 +176,26 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
               <div
                 key={idx}
                 ref={idx === actionSuggestions.length - 1 ? lastItemRef : null}
-                className="flex flex-col gap-3 pb-3 border-b border-border/40 last:border-0"
+                className="flex gap-3 pb-3 border-b border-border/40 last:border-0"
               >
-                {s.last_question && s.last_question.trim() !== '' && (
-                  <div className="flex text-xs text-muted-foreground">
-                    <Zap className="h-4 w-4 mt-px text-accent shrink-0 mr-2" />
-                    <span>{truncateMiddle(s.last_question, MAX_QUESTION_LENGTH)}</span>
-                  </div>
+                {idx === actionSuggestions.length - 1 &&
+                (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) ? (
+                  <Loader2 className="h-4 w-4 mt-px text-accent shrink-0 animate-spin" />
+                ) : s.state === SuggestionState.Stopped ? (
+                  <PauseCircle className="h-4 w-4 mt-px text-muted-foreground shrink-0" />
+                ) : (
+                  <Zap className="h-4 w-4 mt-px text-accent shrink-0" />
                 )}
 
-                {s.image_urls && s.image_urls.length > 0 ? (
-                  <div className="flex shrink-0">
-                    <div className="flex items-center gap-2">
+                <div>
+                  {s.last_question && s.last_question.trim() !== '' && (
+                    <div className="flex text-xs text-muted-foreground">
+                      <span>{truncateMiddle(s.last_question, MAX_QUESTION_LENGTH)}</span>
+                    </div>
+                  )}
+
+                  {s.image_urls && s.image_urls.length > 0 && (
+                    <div className="flex shrink-0 my-2">
                       <div className="flex gap-2 overflow-x-auto">
                         {s.image_urls.map((url, i) =>
                           url ? (
@@ -207,47 +215,32 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
                           )
                         )}
                       </div>
-                      {(s.state === SuggestionState.Pending ||
-                        s.state === SuggestionState.Loading) && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Generating</span>
+                    </div>
+                  )}
+
+                  <div className="flex-1">
+                    {(s.state === SuggestionState.Loading ||
+                      s.state === SuggestionState.Success) && (
+                      <div className="text-sm text-foreground/90 leading-relaxed">
+                        <div className="text-sm">
+                          <SafeMarkdown content={s.answer} />
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
+
+                    {s.state === SuggestionState.Stopped && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                        <PauseCircle className="h-4 w-4" />
+                        <span>Suggestion canceled</span>
+                      </div>
+                    )}
+
+                    {s.state === SuggestionState.Error && (
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-md p-2 mt-1">
+                        <p className="text-xs text-destructive">Failed to generate</p>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) && (
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Generating</span>
-                      </div>
-                    </div>
-                  )
-                )}
-
-                <div className="flex-1">
-                  {(s.state === SuggestionState.Loading || s.state === SuggestionState.Success) && (
-                    <div className="text-sm text-foreground/90 leading-relaxed">
-                      <div className="text-sm">
-                        <SafeMarkdown content={s.answer} />
-                      </div>
-                    </div>
-                  )}
-
-                  {s.state === SuggestionState.Stopped && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                      <PauseCircle className="h-4 w-4" />
-                      <span>Suggestion canceled</span>
-                    </div>
-                  )}
-
-                  {s.state === SuggestionState.Error && (
-                    <div className="bg-destructive/10 border border-destructive/20 rounded-md p-2 mt-1">
-                      <p className="text-xs text-destructive">Failed to generate</p>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
