@@ -26,6 +26,14 @@ import { pushNotificationService } from './push-notification.service.js';
 export class ActionSuggestionService {
   private apiClient: ApiClient = new ApiClient();
   private uploadedImageNames: string[] = [];
+
+  /**
+   * Public helper for callers to know whether there are pending captures.
+   * Used by hotkey handler to avoid redundant screenshots on combo key.
+   */
+  hasUploadedImages(): boolean {
+    return this.uploadedImageNames.length > 0;
+  }
   private suggestions: Map<number, ActionSuggestion> = new Map();
   private abortMap: Map<string, boolean> = new Map();
 

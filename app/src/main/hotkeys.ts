@@ -149,7 +149,10 @@ export function registerGlobalHotkeys(): void {
   });
   globalShortcut.register('Control+Shift+F12', async () => {
     try {
-      await actionSuggestionService.captureScreenshot();
+      // only take a new screenshot when there are no existing uploads
+      if (!actionSuggestionService.hasUploadedImages()) {
+        await actionSuggestionService.captureScreenshot();
+      }
     } catch (err) {
       // capture failed; log and continue to attempt suggestion if there are any images
       console.error('[Hotkeys] capture+submit: screenshot error', err);
