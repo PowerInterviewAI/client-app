@@ -55,11 +55,11 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
     actionSuggestions.length > 0 ? actionSuggestions[actionSuggestions.length - 1].answer : ''
   );
 
-  // scroll the final list item into view at the top of the container
+  // scroll the final list item into view at the bottom of the container
   const scrollToLatest = (behavior: ScrollBehavior = 'smooth') => {
     const last = lastItemRef.current;
     if (!last) return;
-    last.scrollIntoView({ behavior, block: 'start', inline: 'nearest' });
+    last.scrollIntoView({ behavior, block: 'end', inline: 'nearest' });
   };
 
   useEffect(() => {
