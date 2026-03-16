@@ -41,15 +41,15 @@ class WebSocketASRClient:
     def __init__(
         self,
         backend_url: str,
-        audio_capture_l: AudioCapture,
-        audio_capture_r: AudioCapture,
+        audio_capture_loopback: AudioCapture,
+        audio_capture_mic: AudioCapture,
         on_partial: Callable[[str, str], None] | None = None,
         on_final: Callable[[str, str], None] | None = None,
         session_token: str | None = None,
     ) -> None:
         self.backend_url = backend_url
-        self.audio_capture_l = audio_capture_l
-        self.audio_capture_r = audio_capture_r
+        self.audio_capture_loopback = audio_capture_loopback
+        self.audio_capture_mic = audio_capture_mic
         self.on_partial = on_partial
         self.on_final = on_final
         self.session_token = session_token
@@ -72,27 +72,33 @@ class WebSocketASRClient:
                 raise asyncio.CancelledError(msg)
 
             # If either queue is empty, wait briefly and check again to avoid busy-waiting
-            if self.audio_capture_l.is_empty() or self.audio_capture_r.is_empty():
+            if self.audio_capture_loopback.is_empty() or self.audio_capture_mic.is_empty():
                 await asyncio.sleep(0)  # Sleep briefly to avoid busy-waiting
                 continue
 
             # Fetch both channels concurrently
-            data_l = self.audio_capture_l.get_frame_nowait()
-            data_r = self.audio_capture_r.get_frame_nowait()
+            data_loopback = self.audio_capture_loopback.get_frame_nowait()
+            data_mic = self.audio_capture_mic.get_frame_nowait()
 
-            # No audio available from either channel - sleep 0 for other tasks and check again
-            if data_l is None or data_r is None:
+            # No audio available from mic channel - sleep 0 for other tasks and check again
+            if data_mic is None:
+                logger.warning("No audio from mic channel; waiting for data")
                 await asyncio.sleep(0)
                 continue
 
-            return _mix_to_stereo_pcm16(data_l, data_r)
+            # If loopback channel is empty, use silence for that channel
+            if data_loopback is None:
+                logger.warning("No audio from loopback channel; using silence")
+                data_loopback = np.zeros_like(data_mic)
+
+            return _mix_to_stereo_pcm16(data_loopback, data_mic)
 
     async def send_audio_loop(self, ws: ClientConnection) -> None:
         """Send audio frames to websocket."""
 
         logger.debug("Clearing audio queues before starting send loop")
-        self.audio_capture_l.clear_queue()
-        self.audio_capture_r.clear_queue()
+        self.audio_capture_loopback.clear_queue()
+        self.audio_capture_mic.clear_queue()
 
         logger.info("Audio send loop started")
         try:
@@ -183,8 +189,8 @@ class WebSocketASRClient:
         logger.info(f"Connecting to backend websocket: {self.backend_url}")
 
         try:
-            self.audio_capture_l.clear_queue()
-            self.audio_capture_r.clear_queue()
+            self.audio_capture_loopback.clear_queue()
+            self.audio_capture_mic.clear_queue()
 
             # Prepare headers for authenticated connection if token provided
             additional_headers: dict[str, str] = {}

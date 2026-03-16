@@ -36,7 +36,7 @@ class ASRAgent:
 
         # Components
         self.audio_capture_loopback = AudioCapture()
-        self.audio_capture = AudioCapture(audio_source=audio_source)
+        self.audio_capture_mic = AudioCapture(audio_source=audio_source)
 
         self.zmq_publisher = ZMQPublisher(port=zmq_port)
         self.ws_client: WebSocketASRClient | None = None
@@ -60,8 +60,8 @@ class ASRAgent:
         # Create WebSocket client once
         self.ws_client = WebSocketASRClient(
             backend_url=self.backend_url,
-            audio_capture_l=self.audio_capture_loopback,
-            audio_capture_r=self.audio_capture,
+            audio_capture_loopback=self.audio_capture_loopback,
+            audio_capture_mic=self.audio_capture_mic,
             on_partial=self._on_partial_transcript,
             on_final=self._on_final_transcript,
             session_token=self.session_token,
@@ -84,7 +84,7 @@ class ASRAgent:
             logger.error("Failed to initialize loopback audio capture")
             return False
 
-        if not self.audio_capture.start():
+        if not self.audio_capture_mic.start():
             logger.error("Failed to initialize audio capture")
             self.audio_capture_loopback.stop()
             return False
@@ -93,7 +93,7 @@ class ASRAgent:
         if not self.zmq_publisher.connect():
             logger.error("Failed to initialize ZeroMQ")
             self.audio_capture_loopback.stop()
-            self.audio_capture.stop()
+            self.audio_capture_mic.stop()
             return False
 
         # Start WebSocket thread
@@ -128,7 +128,7 @@ class ASRAgent:
 
         # Clean up resources
         self.audio_capture_loopback.stop()
-        self.audio_capture.stop()
+        self.audio_capture_mic.stop()
         self.zmq_publisher.disconnect()
 
         logger.info("ASR Agent stopped")
@@ -137,7 +137,7 @@ class ASRAgent:
         """Print statistics."""
         ws_transcripts = self.ws_client.transcripts_received if self.ws_client else 0
         logger.info(
-            f"Stats - Audio: {self.audio_capture.frames_captured} frames | "
+            f"Stats - Audio: {self.audio_capture_mic.frames_captured} frames | "
             f"Transcripts: {ws_transcripts} received, {self.zmq_publisher.published_count} published | "
             f"ZMQ failures: {self.zmq_publisher.failed_count}"
         )
