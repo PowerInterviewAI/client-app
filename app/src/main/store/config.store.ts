@@ -76,6 +76,7 @@ class ConfigStore {
         runtime: DEFAULT_RUNTIME_CONFIG,
       },
     });
+    this.updateConfig({ faceSwap: false }); // ensure new keys have defaults on first run
   }
 
   /**
