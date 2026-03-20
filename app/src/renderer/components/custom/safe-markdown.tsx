@@ -112,7 +112,7 @@ const components: Components = {
     return (
       <pre
         className={cn(
-          'rounded-md bg-muted/60 p-3 text-xs leading-relaxed font-mono whitespace-pre-wrap',
+          'rounded-md bg-muted/60 p-3 text-xs leading-tight font-mono whitespace-pre-wrap',
           className
         )}
         {...props}
@@ -125,8 +125,11 @@ const components: Components = {
     void node;
     const isInline = inline === true;
     const codeClass = isInline
-      ? cn('font-mono rounded bg-muted/60 px-1 py-0.5 text-[0.85em]', className)
-      : cn('font-mono whitespace-pre-wrap break-words', className);
+      ? cn('font-mono font-bold leading-tight rounded bg-muted/60 px-1 py-0.5', className)
+      : cn(
+          'font-mono font-bold leading-tight whitespace-pre-wrap break-words text-[1.2em]',
+          className
+        );
 
     return (
       <code className={codeClass} {...props}>
