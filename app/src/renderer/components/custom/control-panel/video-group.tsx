@@ -41,6 +41,13 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
   const vbInputExists = vbInputDevice !== null;
 
   useEffect(() => {
+    if (sessionStorage.getItem('videoDialogOpenAfterReload') === 'true') {
+      setIsVideoDialogOpen(true);
+      sessionStorage.removeItem('videoDialogOpenAfterReload');
+    }
+  }, []);
+
+  useEffect(() => {
     // Disable face swap if required devices are not found
     if (!obsCameraExists && config?.faceSwap) {
       updateConfig({ faceSwap: false });
@@ -329,6 +336,9 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
                       onValueChange={(v) => {
                         const [w, h] = v.split('x').map(Number);
                         updateConfig({ videoWidth: w, videoHeight: h });
+                        // Ensure dialog stays open after reload (resolution applies)
+                        sessionStorage.setItem('videoDialogOpenAfterReload', 'true');
+                        setTimeout(() => window.location.reload(), 50);
                       }}
                     >
                       <SelectTrigger className="h-8 w-full text-xs">
