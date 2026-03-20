@@ -49,7 +49,7 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   cameraDeviceName: '',
   videoWidth: 1280,
   videoHeight: 720,
-  enableFaceEnhance: false,
+  enableFaceEnhance: true,
 
   // default autoscroll preferences are enabled
   autoScrollLiveSuggestions: true,
