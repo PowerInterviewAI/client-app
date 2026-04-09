@@ -1,3 +1,5 @@
+import type { LLMConfig } from './llm';
+
 export interface InterviewConf {
   photo: string;
   username: string;
@@ -28,6 +30,7 @@ export interface Config {
   videoWidth: number;
   videoHeight: number;
   enableFaceEnhance: boolean;
+  llmConf: LLMConfig | null;
 
   // Panel auto-scroll preferences (persisted between sessions)
   autoScrollLiveSuggestions: boolean;

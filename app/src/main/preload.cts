@@ -47,6 +47,12 @@ const electronApi = {
     getCredits: () => ipcRenderer.invoke('payment:get-credits'),
   },
 
+  // LLM management
+  llm: {
+    listModels: () => ipcRenderer.invoke('llm:list-models'),
+    validate: (config: any) => ipcRenderer.invoke('llm:validate', config),
+  },
+
   // App state management
   appState: {
     get: () => ipcRenderer.invoke('app:get-state'),
