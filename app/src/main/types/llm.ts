@@ -1,7 +1,6 @@
 import { Transcript } from './app-state.js';
 
 export enum LLMProvider {
-  NONE = 'none',
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GROQ = 'groq',
