@@ -38,8 +38,9 @@ class ASRAgent:
         self.audio_capture_loopback = AudioCapture()
         self.audio_capture_mic = AudioCapture(audio_source=audio_source)
 
+        self.ws_client_loopback: WebSocketASRClient | None = None
+        self.ws_client_mic: WebSocketASRClient | None = None
         self.zmq_publisher = ZMQPublisher(port=zmq_port)
-        self.ws_client: WebSocketASRClient | None = None
 
         # Control
         self.running = False
@@ -47,29 +48,54 @@ class ASRAgent:
         # Threads
         self.ws_thread: threading.Thread | None = None
 
-    def _on_partial_transcript(self, channel_id: str, text: str) -> None:
-        """Callback for partial transcripts."""
-        self.zmq_publisher.publish(channel_id, text, is_final=False)
+    def _on_partial_loopback(self, text: str) -> None:
+        """Callback for loopback partial transcripts."""
+        self.zmq_publisher.publish("ch_0", text, is_final=False)
 
-    def _on_final_transcript(self, channel_id: str, text: str) -> None:
-        """Callback for final transcripts."""
-        self.zmq_publisher.publish(channel_id, text, is_final=True)
+    def _on_final_loopback(self, text: str) -> None:
+        """Callback for loopback final transcripts."""
+        self.zmq_publisher.publish("ch_0", text, is_final=True)
+
+    def _on_partial_mic(self, text: str) -> None:
+        """Callback for mic partial transcripts."""
+        self.zmq_publisher.publish("ch_1", text, is_final=False)
+
+    def _on_final_mic(self, text: str) -> None:
+        """Callback for mic final transcripts."""
+        self.zmq_publisher.publish("ch_1", text, is_final=True)
+
+    async def start_connections_async(self) -> None:
+        if self.ws_client_loopback is None or self.ws_client_mic is None:
+            logger.error("WebSocket clients not initialized")
+            return
+
+        await asyncio.gather(
+            self.ws_client_mic.connect_with_retry(),
+            self.ws_client_loopback.connect_with_retry(),
+        )
 
     def _websocket_thread_func(self) -> None:
         """WebSocket thread function with reconnection logic."""
         # Create WebSocket client once
-        self.ws_client = WebSocketASRClient(
+        self.ws_client_loopback = WebSocketASRClient(
             backend_url=self.backend_url,
-            audio_capture_loopback=self.audio_capture_loopback,
-            audio_capture_mic=self.audio_capture_mic,
-            on_partial=self._on_partial_transcript,
-            on_final=self._on_final_transcript,
+            audio_capture=self.audio_capture_loopback,
+            on_partial=self._on_partial_loopback,
+            on_final=self._on_final_loopback,
+            session_token=self.session_token,
+        )
+        self.ws_client_mic = WebSocketASRClient(
+            backend_url=self.backend_url,
+            audio_capture=self.audio_capture_mic,
+            on_partial=self._on_partial_mic,
+            on_final=self._on_final_mic,
             session_token=self.session_token,
         )
 
         # Run with automatic reconnection
+
         try:
-            asyncio.run(self.ws_client.connect_with_retry())
+            asyncio.run(self.start_connections_async())
         except Exception as e:
             logger.error(f"WebSocket thread error: {e}")
 
@@ -116,8 +142,10 @@ class ASRAgent:
         self.running = False
 
         # Signal WebSocket client to stop (will disable reconnection)
-        if self.ws_client:
-            self.ws_client.stop()
+        if self.ws_client_mic:
+            self.ws_client_mic.stop()
+        if self.ws_client_loopback:
+            self.ws_client_loopback.stop()
 
         # Wait for WebSocket thread to finish
         if self.ws_thread and self.ws_thread.is_alive():
@@ -135,7 +163,7 @@ class ASRAgent:
 
     def print_stats(self) -> None:
         """Print statistics."""
-        ws_transcripts = self.ws_client.transcripts_received if self.ws_client else 0
+        ws_transcripts = self.ws_client_mic.transcripts_received if self.ws_client_mic else 0
         logger.info(
             f"Stats - Audio: {self.audio_capture_mic.frames_captured} frames | "
             f"Transcripts: {ws_transcripts} received, {self.zmq_publisher.published_count} published | "
