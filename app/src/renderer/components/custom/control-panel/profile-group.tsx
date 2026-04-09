@@ -63,7 +63,7 @@ export function ProfileGroup({
             disabled={disabled}
             variant="ghost"
             size="sm"
-            className="rounded-md hover:bg-muted h-10"
+            className="rounded-md hover:bg-muted"
           >
             <div className="max-w-36 overflow-hidden flex items-center gap-2 text-foreground">
               {/* {config?.interviewConf?.photo ? (
