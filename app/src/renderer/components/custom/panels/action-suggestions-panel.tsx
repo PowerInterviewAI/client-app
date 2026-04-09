@@ -171,7 +171,7 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
         )}
 
         {hasItems && (
-          <div className="p-4 space-y-3">
+          <div className="p-2 space-y-3">
             {actionSuggestions.map((s, idx) => (
               <div
                 key={idx}
