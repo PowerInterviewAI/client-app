@@ -52,7 +52,7 @@ export function AudioGroup({
             <Button
               variant="secondary"
               size="icon"
-              className="h-8 w-12 border-none rounded-full"
+              className="h-8 w-8 border-none rounded-xl"
               disabled={getDisabled(runningState)}
               onClick={() => setOpen(true)}
             >
