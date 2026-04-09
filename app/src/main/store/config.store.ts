@@ -4,6 +4,7 @@
  */
 
 import ElectronStore from 'electron-store';
+import { LLMConfig } from '../types/llm.js';
 
 // Runtime configuration (matches Config type in frontend)
 export interface RuntimeConfig {
@@ -24,6 +25,8 @@ export interface RuntimeConfig {
   videoWidth: number;
   videoHeight: number;
   enableFaceEnhance: boolean;
+
+  llmConf: LLMConfig | null;
 
   // panel auto-scroll preferences
   autoScrollLiveSuggestions: boolean;
@@ -50,6 +53,8 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   videoWidth: 1280,
   videoHeight: 720,
   enableFaceEnhance: true,
+
+  llmConf: null,
 
   // default autoscroll preferences are enabled
   autoScrollLiveSuggestions: true,
