@@ -28,7 +28,6 @@ def build_asr_agent() -> None:
         f"python -m nuitka {asr_main} "
         "--standalone "
         "--include-package=agents.asr "
-        "--include-package=agents.shared "
         "--include-package=websockets "
         "--follow-imports "
         f"--output-dir={build_dir} "

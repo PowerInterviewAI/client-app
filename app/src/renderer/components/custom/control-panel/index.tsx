@@ -14,7 +14,6 @@ import { AudioGroup } from './audio-group';
 import { MainGroup } from './main-group';
 import { ProfileGroup } from './profile-group';
 import { ToolsGroup } from './tools-group';
-import { VideoGroup } from './video-group';
 
 interface ControlPanelProps {
   assistantState: RunningState;
@@ -136,7 +135,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
           audioInputDeviceNotFound={audioInputDeviceNotFound}
           getDisabled={getDisabled}
         />
-        <VideoGroup videoDeviceNotFound={videoDeviceNotFound} getDisabled={getDisabled} />
+        {/* <VideoGroup videoDeviceNotFound={videoDeviceNotFound} getDisabled={getDisabled} /> */}
         <MainGroup stateConfig={{ onClick, className, icon, label }} getDisabled={getDisabled} />
         <hr className="h-6 border border-border" />
         <ToolsGroup getDisabled={getDisabled} />

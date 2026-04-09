@@ -93,7 +93,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
 
         <div className="flex-1 overflow-auto p-2">
           <div className="space-y-5">
-            <div className="flex flex-col justify-center">
+            <div className="hidden flex-col justify-center">
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
                 Profile Photo
               </label>
@@ -152,7 +152,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
 
             <div className="grid gap-2">
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                Profile Name <span className="text-destructive">*</span>
+                Full Name <span className="text-destructive">*</span>
               </label>
               <Input
                 value={name}

@@ -18,12 +18,10 @@ import { registerActionSuggestionHandlers } from './ipc/suggestion.action.js';
 import { registerLiveSuggestionHandlers } from './ipc/suggestion.live.js';
 import { registerToolsHandlers } from './ipc/tools.js';
 import { registerTranscriptHandlers } from './ipc/transcript.js';
-import { registerWebRTCHandlers } from './ipc/webrtc.js';
 import { registerWindowHandlers } from './ipc/window.js';
 import { autoUpdaterService } from './services/auto-updater.service.js';
 import { healthCheckService } from './services/health-check.service.js';
 import { transcriptService } from './services/transcript.service.js';
-import { webRtcService } from './services/webrtc.service.js';
 import { setWindowReference } from './services/window-control.service.js';
 import { setWindowReference as setZoomWindowReference } from './services/zoom.service.js';
 import { configStore } from './store/config.store.js';
@@ -165,7 +163,6 @@ app.whenReady().then(async () => {
   registerTranscriptHandlers();
   registerLiveSuggestionHandlers();
   registerActionSuggestionHandlers();
-  registerWebRTCHandlers();
   registerToolsHandlers();
   registerAutoUpdaterHandlers();
   registerExternalHandlers();
@@ -199,7 +196,6 @@ app.whenReady().then(async () => {
 app.on('will-quit', async () => {
   // Stop all services
   await transcriptService.stop();
-  await webRtcService.stopAgents();
   healthCheckService.stop();
 
   unregisterHotkeys();

@@ -89,18 +89,6 @@ declare global {
       stop: () => Promise<void>;
     };
 
-    // WebRTC management
-    webRtc: {
-      // eslint-disable-next-line
-      offer: (any) => Promise<any>;
-      // eslint-disable-next-line
-      getTurnCredentials: () => Promise<any>;
-      startAgents: () => Promise<void>;
-      stopAgents: () => Promise<void>;
-      restartAudioAgent: (delayMs?: number) => Promise<void>;
-      putVideoFrame: (frameData: ArrayBuffer) => Promise<void>;
-    };
-
     // Push notification listener
     onPushNotification: (callback: (notification: PushNotification) => void) => () => void;
 

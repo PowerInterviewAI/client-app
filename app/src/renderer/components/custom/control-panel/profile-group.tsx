@@ -66,7 +66,7 @@ export function ProfileGroup({
             className="rounded-md hover:bg-muted h-10"
           >
             <div className="max-w-36 overflow-hidden flex items-center gap-2 text-foreground">
-              {config?.interviewConf?.photo ? (
+              {/* {config?.interviewConf?.photo ? (
                 <img
                   src={config?.interviewConf?.photo}
                   alt="Profile preview"
@@ -78,7 +78,7 @@ export function ProfileGroup({
                     ? config?.interviewConf?.username.charAt(0)
                     : '?'}
                 </div>
-              )}
+              )} */}
               <p className="text-sm font-medium truncate">
                 {config?.interviewConf?.username ?? '?'}
               </p>
