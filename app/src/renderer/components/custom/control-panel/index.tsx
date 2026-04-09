@@ -121,7 +121,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
   };
 
   return (
-    <div id="control-panel" className="flex items-center justify-between gap-2 pr-2 pb-0.5">
+    <div id="control-panel" className="flex items-center justify-between gap-2 pr-1 pb-0.5">
       <ProfileGroup
         config={config}
         onProfileClick={onProfileClick}
@@ -141,7 +141,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
         <ToolsGroup getDisabled={getDisabled} />
       </div>
 
-      <div className="w-8"></div>
+      <div className="w-2"></div>
 
       <ZoomControl />
     </div>

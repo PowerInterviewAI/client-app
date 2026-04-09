@@ -80,7 +80,7 @@ export default function MainPage() {
     let status = document.getElementById('status-panel')?.getBoundingClientRect().height || 0;
     let control = document.getElementById('control-panel')?.getBoundingClientRect().height || 0;
     let video = document.getElementById('video-panel')?.getBoundingClientRect().height || 0;
-    const extra = 12; // spacing/padding between elements
+    const extra = 8; // spacing/padding between elements
 
     if (status > 0) status += 4; // account for border
     if (control > 0) control += 4; // account for border
