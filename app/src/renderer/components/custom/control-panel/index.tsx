@@ -58,7 +58,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
       label: 'Start',
     },
     [RunningState.Starting]: {
-      onClick: () => {},
+      onClick: () => { },
       className: 'bg-blue-600 hover:bg-blue-600/90',
       icon: <Ellipsis className="h-3.5 w-3.5 animate-pulse" />,
       label: 'Starting...',
@@ -72,7 +72,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
       label: 'Stop',
     },
     [RunningState.Stopping]: {
-      onClick: () => {},
+      onClick: () => { },
       className: 'bg-destructive hover:bg-destructive/90',
       icon: <Ellipsis className="h-3.5 w-3.5 animate-pulse" />,
       label: 'Stopping...',
@@ -139,11 +139,8 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
         <LLMGroup getDisabled={getDisabled} />
         {/* <VideoGroup videoDeviceNotFound={videoDeviceNotFound} getDisabled={getDisabled} /> */}
         <MainGroup stateConfig={{ onClick, className, icon, label }} getDisabled={getDisabled} />
-        <hr className="h-6 border border-border" />
         <ToolsGroup getDisabled={getDisabled} />
       </div>
-
-      <div className="w-2"></div>
 
       <ZoomControl />
     </div>
