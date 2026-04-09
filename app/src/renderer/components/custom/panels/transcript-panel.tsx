@@ -33,7 +33,7 @@ function TranscriptPanel({ transcripts, style }: TranscriptionPanelProps) {
   }, [transcripts, autoScroll]);
 
   return (
-    <Card className="relative flex flex-col h-full bg-card p-0 rounded-md" style={style}>
+    <Card className="relative flex flex-col h-full bg-card p-0 rounded-md gap-2" style={style}>
       <div className="border-b border-border p-2 shrink-0 flex items-center justify-between gap-4">
         <h3 className="font-semibold text-foreground text-xs">Transcription</h3>
 
