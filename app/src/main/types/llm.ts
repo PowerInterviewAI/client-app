@@ -17,10 +17,10 @@ export enum LLMModality {
 
 export interface LLMModelInfo {
   id: string;
-  provider: string;
+  provider: LLMProvider;
   name: string;
   description: string;
-  modalities: string[];
+  modalities: LLMModality[];
   vision_capable: boolean;
   context_window: number;
   max_output_tokens: number;
