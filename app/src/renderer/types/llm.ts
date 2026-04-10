@@ -2,6 +2,7 @@ export enum LLMProvider {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GROQ = 'groq',
+  GOOGLE = 'google',
 }
 
 export interface LLMConfig {

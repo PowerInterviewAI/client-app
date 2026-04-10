@@ -4,6 +4,7 @@ export enum LLMProvider {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GROQ = 'groq',
+  GOOGLE = 'google',
 }
 
 export enum LLMModality {

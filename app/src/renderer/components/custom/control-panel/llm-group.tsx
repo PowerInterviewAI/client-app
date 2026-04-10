@@ -30,6 +30,7 @@ const PROVIDER_LABELS: Record<LLMProvider, string> = {
   [LLMProvider.OPENAI]: 'OpenAI',
   [LLMProvider.ANTHROPIC]: 'Anthropic',
   [LLMProvider.GROQ]: 'Groq',
+  [LLMProvider.GOOGLE]: 'Google',
 };
 
 export function LLMGroup({ getDisabled }: LLMGroupProps) {
@@ -97,10 +98,8 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
   }, [open, config?.llmConf]);
 
   useEffect(() => {
-    if (!availableModels.length) {
-      setModel('');
-      return;
-    }
+    // Keep persisted model while models are still loading on first open.
+    if (!availableModels.length) return;
     if (!availableModels.includes(model)) {
       setModel(availableModels[0]);
     }
@@ -259,13 +258,13 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
             Configure your own LLM provider and API key.
           </DialogDescription>
 
-          <div className="flex items-center justify-between rounded-md border px-3 py-2">
+          <div className="flex items-center justify-between rounded-md border pl-3 pr-2 py-2">
             <p className="text-sm">Use my own API key</p>
             <Button
               type="button"
               variant={useOwnApiKey ? 'default' : 'outline'}
               size="sm"
-              className="w-16"
+              className="w-16 h-6 text-xs"
               onClick={() => setUseOwnApiKey((prev) => !prev)}
             >
               {useOwnApiKey ? 'On' : 'Off'}
