@@ -254,7 +254,7 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="flex flex-col w-[24rem] p-4 gap-3">
           <DialogTitle>LLM Options</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
+          <DialogDescription className="text-xs text-muted-foreground">
             <p>Connect your own LLM provider and API key for full control.</p>
             <p>If you prefer to use our hosted models, we’ll automatically provide them based on your available credits: <strong>GPT-5.4</strong> is active while you have a balance, switching to <strong>Llama-4-Scout (17B)</strong> once credits are exhausted.</p>
           </DialogDescription>
