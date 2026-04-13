@@ -32,7 +32,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
@@ -54,7 +54,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.platform }}
-          path: release/**
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/*.yml
+            release/*.yaml
+            release/*.blockmap
           if-no-files-found: error
 
   publish:
@@ -92,4 +98,11 @@ jobs:
           else
             gh release create "$TAG" --title "$TITLE" --notes "Manual cross-platform build artifacts."
           fi
-          find release-artifacts -type f -print0 | xargs -0 -r gh release upload "$TAG" --clobber
+          while IFS= read -r -d '' file; do
+            echo "Uploading $(basename "$file")"
+            gh release upload "$TAG" "$file" --clobber
+          done < <(
+            find release-artifacts -type f \
+              \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' -o -name '*.yml' -o -name '*.yaml' -o -name '*.blockmap' \) \
+              -print0
+          )
