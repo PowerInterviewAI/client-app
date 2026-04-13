@@ -44,7 +44,10 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
 
       // Start transcription services
       await electron.transcription.start();
-      await liveTranscriptionService.start(config?.audioInputDeviceName ?? '');
+      await liveTranscriptionService.start(
+        config?.audioInputDeviceName ?? '',
+        config?.sessionToken ?? ''
+      );
 
       // Sleep 3 seconds to ensure the assistant has fully started before allowing stop actions
       await new Promise((resolve) => setTimeout(resolve, 3000));

@@ -109,9 +109,10 @@ class LiveTranscriptionService {
   private loopbackStream: MediaStream | null = null;
   private channels: AudioWsStream[] = [];
 
-  async start(audioInputDeviceName: string): Promise<void> {
+  async start(audioInputDeviceName: string, sessionToken: string): Promise<void> {
     const electron = getElectron();
     if (!electron) throw new Error('Electron API not available');
+    await electron.transcription.setSessionToken(sessionToken);
 
     const micDeviceId = await this.resolveMicDeviceId(audioInputDeviceName);
     this.micStream = await navigator.mediaDevices.getUserMedia({

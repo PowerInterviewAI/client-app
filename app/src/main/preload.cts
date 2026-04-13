@@ -71,6 +71,7 @@ const electronApi = {
     stop: () => ipcRenderer.invoke('transcription:stop'),
     ingest: (payload: { channel: 'ch_0' | 'ch_1'; type: 'partial' | 'final'; text: string }) =>
       ipcRenderer.invoke('transcription:ingest', payload),
+    setSessionToken: (token: string) => ipcRenderer.invoke('transcription:set-session-token', token),
     enableLoopbackAudio: () => ipcRenderer.invoke('enable-loopback-audio'),
     disableLoopbackAudio: () => ipcRenderer.invoke('disable-loopback-audio'),
   },

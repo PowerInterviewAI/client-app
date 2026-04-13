@@ -1,6 +1,7 @@
-import { ipcMain } from 'electron';
+import { ipcMain, session } from 'electron';
 import loopbackPkg from 'electron-audio-loopback';
 
+import { BACKEND_BASE_URL } from '../consts.js';
 import { transcriptService } from '../services/transcript.service.js';
 
 let loopbackInitialized = false;
@@ -24,5 +25,19 @@ export function registerTranscriptHandlers() {
   });
   ipcMain.handle('transcription:ingest', async (_event, payload) => {
     await transcriptService.ingest(payload?.channel, payload?.type, payload?.text);
+  });
+  ipcMain.handle('transcription:set-session-token', async (_event, sessionToken: string) => {
+    if (!sessionToken) return;
+    const url = BACKEND_BASE_URL.replace(/^ws/i, 'http');
+    const isSecure = url.startsWith('https://');
+    await session.defaultSession.cookies.set({
+      url,
+      name: 'session_token',
+      value: sessionToken,
+      secure: isSecure,
+      httpOnly: false,
+      sameSite: isSecure ? 'no_restriction' : 'lax',
+      path: '/',
+    });
   });
 }

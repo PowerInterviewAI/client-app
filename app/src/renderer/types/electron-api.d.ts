@@ -89,6 +89,7 @@ declare global {
         type: 'partial' | 'final';
         text: string;
       }) => Promise<void>;
+      setSessionToken: (token: string) => Promise<void>;
       enableLoopbackAudio: () => Promise<void>;
       disableLoopbackAudio: () => Promise<void>;
     };
