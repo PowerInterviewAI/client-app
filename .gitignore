@@ -1,15 +1,3 @@
-# Python cache and artifacts
-/.ruff_cache
-/.mypy_cache
-/.pytest_cache
-__pycache__
-
-# Virtual environment
-/venv
-
 # Build outputs
 /dist
 /build
-
-# Generated files
-/nuitka-crash-report.xml

@@ -48,7 +48,6 @@
     "sharp": "^0.34.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "zeromq": "^6.5.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
@@ -122,17 +121,6 @@
       ],
       "shortcutName": "Power Interview",
       "artifactName": "PowerInterview-Setup-${version}.exe"
-    },
-    "extraFiles": [
-      {
-        "from": "../build/agents/dist/",
-        "to": "agents",
-        "filter": [
-          "**/*",
-          "!*.build",
-          "!*.build/**/*"
-        ]
-      }
-    ]
+    }
   }
 }

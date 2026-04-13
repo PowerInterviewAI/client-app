@@ -72,10 +72,6 @@ Power Interview follows a **client-server architecture**.
 * Zustand + React Query
 * Handles UI and orchestration
 
-### Python Agents (Local)
-
-* ASR Agent for audio capture and routing
-
 ### Backend Services
 
 * AI/LLM Service for suggestions
@@ -84,7 +80,6 @@ Power Interview follows a **client-server architecture**.
 
 ### Communication
 
-* ZeroMQ (local IPC)
 * WebSocket (real-time)
 * REST API
 
@@ -93,7 +88,6 @@ Power Interview follows a **client-server architecture**.
 ### Prerequisites
 
 * Node.js v18+
-* Python 3.12
 
 ### Installation
 
@@ -103,9 +97,6 @@ cd power-interview-assistant
 
 cd app
 npm install
-
-cd ..
-pip install -r requirements.txt
 ```
 
 ### Run
@@ -157,20 +148,15 @@ npm run start
 
 ### Backend
 
-* Python 3.12
-* PyAudio
-* ZeroMQ
 * WebSocket
 
 ## Project Structure
 
 ```
 power-interview-client/
-├── agents/
 ├── app/
 ├── build/
-├── scripts/
-└── requirements.txt
+└── scripts/
 ```
 
 ## Legal Disclaimer

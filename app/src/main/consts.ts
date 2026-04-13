@@ -8,10 +8,7 @@ export const BACKEND_BASE_URL = EnvUtil.isDev()
 export const MIN_WIDTH = 760;
 export const MIN_HEIGHT = 480;
 
-// Transcript agent constants
-export const TRANSCRIPT_ZMQ_PORT = 50002;
-export const TRANSCRIPT_MAX_RESTART_COUNT = 10;
-export const TRANSCRIPT_RESTART_DELAY_MS = 2000;
+// Transcript constants
 export const TRANSCRIPT_INTER_TRANSCRIPT_GAP_MS = 5000;
 
 // Suggestion constants
