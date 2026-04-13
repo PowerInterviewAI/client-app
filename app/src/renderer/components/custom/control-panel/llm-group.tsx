@@ -255,7 +255,8 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
         <DialogContent className="flex flex-col w-[24rem] p-4 gap-3">
           <DialogTitle>LLM Options</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Configure your own LLM provider and API key.
+            <p>Connect your own LLM provider and API key for full control.</p>
+            <p>If you prefer to use our hosted models, we’ll automatically provide them based on your available credits: <strong>GPT-5.4</strong> is active while you have a balance, switching to <strong>Llama-4-Scout (17B)</strong> once credits are exhausted.</p>
           </DialogDescription>
 
           <div className="flex items-center justify-between rounded-md border pl-3 pr-2 py-2">
