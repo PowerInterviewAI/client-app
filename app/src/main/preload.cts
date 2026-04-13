@@ -71,8 +71,8 @@ const electronApi = {
     stop: () => ipcRenderer.invoke('transcription:stop'),
     ingest: (payload: { channel: 'ch_0' | 'ch_1'; type: 'partial' | 'final'; text: string }) =>
       ipcRenderer.invoke('transcription:ingest', payload),
-    enableLoopbackAudio: () => ipcRenderer.invoke('transcription:loopback-enable'),
-    disableLoopbackAudio: () => ipcRenderer.invoke('transcription:loopback-disable'),
+    enableLoopbackAudio: () => ipcRenderer.invoke('enable-loopback-audio'),
+    disableLoopbackAudio: () => ipcRenderer.invoke('disable-loopback-audio'),
   },
 
   // Live suggestion management

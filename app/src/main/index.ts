@@ -30,6 +30,9 @@ import { EnvUtil } from './utils/env.js';
 
 let win: BrowserWindow | null = null;
 
+// Must run before app is ready so built-in loopback IPC handlers are registered.
+initializeAudioLoopback();
+
 // Ensure the application name is set (used by native dialogs/title fallbacks)
 try {
   if (typeof app.setName === 'function') {
@@ -156,8 +159,6 @@ async function createWindow() {
 // APP LIFECYCLE
 // -------------------------------------------------------------
 app.whenReady().then(async () => {
-  initializeAudioLoopback();
-
   // Register all IPC handlers
   registerConfigHandlers();
   registerAppStateHandlers();

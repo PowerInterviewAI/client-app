@@ -1,13 +1,10 @@
 import { ipcMain } from 'electron';
-import {
-  disableLoopbackAudio,
-  enableLoopbackAudio,
-  initMain as initAudioLoopback,
-} from 'electron-audio-loopback';
+import loopbackPkg from 'electron-audio-loopback';
 
 import { transcriptService } from '../services/transcript.service.js';
 
 let loopbackInitialized = false;
+const { initMain: initAudioLoopback } = loopbackPkg;
 
 export function initializeAudioLoopback() {
   if (loopbackInitialized) return;
@@ -27,11 +24,5 @@ export function registerTranscriptHandlers() {
   });
   ipcMain.handle('transcription:ingest', async (_event, payload) => {
     await transcriptService.ingest(payload?.channel, payload?.type, payload?.text);
-  });
-  ipcMain.handle('transcription:loopback-enable', async () => {
-    await enableLoopbackAudio();
-  });
-  ipcMain.handle('transcription:loopback-disable', async () => {
-    await disableLoopbackAudio();
   });
 }

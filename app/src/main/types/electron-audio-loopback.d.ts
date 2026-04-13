@@ -1,5 +1,10 @@
 declare module 'electron-audio-loopback' {
-  export function initMain(): void;
-  export function enableLoopbackAudio(): Promise<void>;
-  export function disableLoopbackAudio(): Promise<void>;
+  interface LoopbackPackage {
+    initMain: () => void;
+    enableLoopbackAudio: () => Promise<void>;
+    disableLoopbackAudio: () => Promise<void>;
+  }
+
+  const loopbackPackage: LoopbackPackage;
+  export default loopbackPackage;
 }
