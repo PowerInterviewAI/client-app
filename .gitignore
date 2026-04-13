@@ -1,15 +1,32 @@
-# Python cache and artifacts
-/.ruff_cache
-/.mypy_cache
-/.pytest_cache
-__pycache__
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Virtual environment
-/venv
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
 
-# Build outputs
-/dist
-/build
+node_modules
+dist
+dist-ssr
+electron-dist
+release
+*.local
 
-# Generated files
-/nuitka-crash-report.xml
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

@@ -1,6 +1,3 @@
 {
-  "python.testing.pytestArgs": ["engine_test", "-s"],
-  "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true,
   "editor.formatOnSave": true
 }
