@@ -58,28 +58,9 @@ Stay on top of the conversation with live ASR:
 ### Smart Configuration
 
 * Profile management (CV, job description, etc.)
-
 * Audio device selection
-
 * Language support (English)
-
 * Persistent settings
-
-* Profile management (CV, job description, etc.)
-
-* Audio device selection
-
-* Language support (English)
-
-* Persistent settings
-
-### Advanced Features
-
-* Health monitoring
-* Action locking
-* Push notifications
-* Auto-scroll
-* State persistence
 
 ## Architecture
 
