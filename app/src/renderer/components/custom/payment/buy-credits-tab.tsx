@@ -23,20 +23,9 @@ import { CreditPlan } from '@/types/payment';
 
 // Plan features configuration
 const planFeatures: Record<CreditPlan, string[]> = {
-  [CreditPlan.Starter]: ['Real-time transcription', 'Live suggestions', 'Code assistance'],
-  [CreditPlan.Pro]: [
-    'Real-time transcription',
-    'Live suggestions',
-    'Code assistance',
-    'Priority support',
-  ],
-  [CreditPlan.Enterprise]: [
-    'Real-time transcription',
-    'Live suggestions',
-    'Code assistance',
-    'Priority support',
-    'Dedicated account manager',
-  ],
+  [CreditPlan.Starter]: [],
+  [CreditPlan.Pro]: [],
+  [CreditPlan.Enterprise]: [],
 };
 
 const planNames: Record<CreditPlan, string> = {
@@ -155,7 +144,7 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                     </div>
                   )}
 
-                  <CardHeader className={cn(isPro && 'pt-8')}>
+                  <CardHeader>
                     <CardTitle className="text-2xl">{planName}</CardTitle>
                     <CardDescription>{planDescription}</CardDescription>
                     <div className="mt-4">
@@ -171,25 +160,9 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                   </CardHeader>
 
                   <CardContent className="flex-1 pt-0">
-                    <ul className="space-y-3">
-                      <li className="flex items-start">
-                        <Check className="mr-2 h-5 w-5 shrink-0 text-primary" />
-                        <span className="text-sm">
-                          {plan.credits.toLocaleString()} credits (~{minutes.toLocaleString()}{' '}
-                          minutes)
-                        </span>
-                      </li>
-                      {features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <Check className="mr-2 h-5 w-5 shrink-0 text-primary" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
                     <Button
                       className={cn(
-                        'mt-6 w-full cursor-pointer',
+                        'mt-2 w-full cursor-pointer',
                         isPro
                           ? ''
                           : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
