@@ -11,11 +11,17 @@ on:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build ${{ matrix.platform }} on ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            platform: win
+            build_command: npx electron-builder --win --x64 --publish never
+          - os: macos-latest
+            platform: mac
+            build_command: npx electron-builder --mac --publish never
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -26,26 +32,64 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Build Electron main process
+        run: npm run electron:build-main
+
+      - name: Build renderer assets
+        run: npm run build
+
       - name: Build release packages
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ "${{ inputs.publish }}" = "true" ]; then
-            npx electron-builder --publish always
-          else
-            npx electron-builder --publish never
-          fi
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: ${{ matrix.build_command }}
         shell: bash
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.os }}
+          name: release-${{ matrix.platform }}
           path: release/**
           if-no-files-found: error
+
+  publish:
+    if: ${{ inputs.publish }}
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Prepare release metadata
+        id: meta
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          TITLE="Release ${TAG}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; uploading artifacts."
+          else
+            gh release create "$TAG" --title "$TITLE" --notes "Manual cross-platform build artifacts."
+          fi
+          find release-artifacts -type f -print0 | xargs -0 -r gh release upload "$TAG" --clobber
