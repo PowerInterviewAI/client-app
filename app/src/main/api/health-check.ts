@@ -21,7 +21,6 @@ export class HealthCheckApi extends ApiClient {
   async pingClient(): Promise<ApiResponse<ClientPingResponse>> {
     const appState = appStateService.getState();
     return this.post<ClientPingResponse>('/api/health-check/ping-client', {
-      is_gpu_alive: appState.isGpuServerLive,
       is_assistant_running: appState.runningState === RunningState.Running,
     } as ClientPingRequest);
   }

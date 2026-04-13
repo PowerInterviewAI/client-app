@@ -33,7 +33,6 @@ Power Interview is a privacy-first AI assistant designed to help you ace technic
 Transform your video appearance during live interviews with advanced face swap technology:
 
 - **Virtual Camera Integration**: Seamlessly replaces your face with your chosen photo
-- **WebRTC Streaming**: Low-latency, high-quality video processing
 - **Face Enhancement**: Optional AI-powered face enhancement for natural-looking results
 - **OBS Virtual Camera Support**: Professional-grade virtual camera output
 - **Configurable Settings**: Adjust video resolution, quality, and audio sync
@@ -124,8 +123,6 @@ Power Interview follows a **client-server architecture** where the desktop appli
 ### Python Agents (Local)
 
 - **ASR Agent**: Real-time audio capture and transcription routing
-- **VCam Agent**: Virtual camera frame capture and streaming
-- **Audio Control Agent**: Audio device management and routing
 
 ### Backend Services (Online)
 
@@ -138,7 +135,6 @@ Power Interview follows a **client-server architecture** where the desktop appli
 
 - **ZeroMQ**: High-performance inter-process communication between local agents
 - **WebSocket**: Real-time streaming between client and backend services
-- **WebRTC**: Low-latency video streaming for face swap processing
 - **REST API**: Configuration and data management
 
 ## Getting Started
@@ -444,9 +440,6 @@ All sensitive data is stored locally using Electron Store with encryption:
 power-interview-client/
 ├── agents/                  # Python agents
 │   ├── asr/                # Automatic Speech Recognition
-│   ├── audio_control/      # Audio device management
-│   ├── vcam/               # Virtual camera with face swap
-│   └── shared/             # Shared utilities
 ├── app/                    # Electron application
 │   ├── src/
 │   │   ├── main/          # Electron main process

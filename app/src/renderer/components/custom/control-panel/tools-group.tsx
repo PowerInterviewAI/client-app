@@ -18,7 +18,6 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   const onResetAll = async () => {
     try {
       await setPlaceholderData();
-      toast.success('Everything reset successfully');
     } catch (error) {
       console.error(error);
       toast.error('Failed to reset');

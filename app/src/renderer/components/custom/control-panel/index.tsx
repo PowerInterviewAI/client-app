@@ -11,10 +11,10 @@ import { RunningState } from '@/types/app-state';
 
 import ZoomControl from '../zoom-control';
 import { AudioGroup } from './audio-group';
+import { LLMGroup } from './llm-group';
 import { MainGroup } from './main-group';
 import { ProfileGroup } from './profile-group';
 import { ToolsGroup } from './tools-group';
-import { VideoGroup } from './video-group';
 
 interface ControlPanelProps {
   assistantState: RunningState;
@@ -58,7 +58,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
       label: 'Start',
     },
     [RunningState.Starting]: {
-      onClick: () => {},
+      onClick: () => { },
       className: 'bg-blue-600 hover:bg-blue-600/90',
       icon: <Ellipsis className="h-3.5 w-3.5 animate-pulse" />,
       label: 'Starting...',
@@ -72,7 +72,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
       label: 'Stop',
     },
     [RunningState.Stopping]: {
-      onClick: () => {},
+      onClick: () => { },
       className: 'bg-destructive hover:bg-destructive/90',
       icon: <Ellipsis className="h-3.5 w-3.5 animate-pulse" />,
       label: 'Stopping...',
@@ -122,7 +122,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
   };
 
   return (
-    <div id="control-panel" className="flex items-center justify-between gap-2 pr-2 pb-0.5">
+    <div id="control-panel" className="flex items-center justify-between gap-2 pr-1 pb-0.5">
       <ProfileGroup
         config={config}
         onProfileClick={onProfileClick}
@@ -136,13 +136,11 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
           audioInputDeviceNotFound={audioInputDeviceNotFound}
           getDisabled={getDisabled}
         />
-        <VideoGroup videoDeviceNotFound={videoDeviceNotFound} getDisabled={getDisabled} />
+        <LLMGroup getDisabled={getDisabled} />
+        {/* <VideoGroup videoDeviceNotFound={videoDeviceNotFound} getDisabled={getDisabled} /> */}
         <MainGroup stateConfig={{ onClick, className, icon, label }} getDisabled={getDisabled} />
-        <hr className="h-6 border border-border" />
         <ToolsGroup getDisabled={getDisabled} />
       </div>
-
-      <div className="w-8"></div>
 
       <ZoomControl />
     </div>

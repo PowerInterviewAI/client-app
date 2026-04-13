@@ -47,7 +47,7 @@ export function MainGroup({ stateConfig, getDisabled }: MainGroupProps) {
         <Button
           onClick={handleStartStopClick}
           size="sm"
-          className={`h-8 w-16 text-xs font-medium rounded-full cursor-pointer ${className}`}
+          className={`h-8 w-12 text-xs font-medium rounded-xl cursor-pointer ${className}`}
           disabled={getDisabled(runningState, false)}
         >
           {icon}

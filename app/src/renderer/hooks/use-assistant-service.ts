@@ -37,14 +37,8 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       const config = useConfigStore.getState().config;
       const { videoPanelRef } = get();
 
-      // Start WebRTC if face swap is enabled
+      // Do something here for face swap
       if (config?.faceSwap && videoPanelRef?.current) {
-        try {
-          await Promise.all([videoPanelRef.current.startWebRTC(), electron.webRtc.startAgents()]);
-        } catch (error) {
-          console.error('Failed to start WebRTC or agents:', error);
-          throw new Error('Failed to start face swap services');
-        }
       }
 
       // Start transcription services
@@ -78,11 +72,9 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       const config = useConfigStore.getState().config;
       const { videoPanelRef } = get();
 
-      // Stop WebRTC if face swap is enabled
+      // Do something here for face swap
       if (config?.faceSwap && videoPanelRef?.current) {
-        videoPanelRef.current.stopWebRTC();
       }
-      await electron.webRtc.stopAgents();
 
       // Stop assistant services
       await Promise.all([

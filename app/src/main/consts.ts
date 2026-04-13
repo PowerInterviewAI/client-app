@@ -20,16 +20,6 @@ export const LIVE_SUGGESTION_NO_SUGGESTION = 'NO_SUGGESTION_NEEDED';
 export const ACTION_SUGGESTION_MAX_CAPTURES = 4;
 export const ACTION_TIMEOUT_MS = 30_000; // 30 seconds
 
-// VCam agent constants
-export const VCAM_ZMQ_PORT = 50001;
-export const VCAM_MAX_RESTART_COUNT = 10;
-export const VCAM_RESTART_DELAY_MS = 2000;
-
-// Audio control agent constants
-export const AUDIO_CONTROL_MAX_RESTART_COUNT = 10;
-export const AUDIO_CONTROL_RESTART_DELAY_MS = 2000;
-export const AUDIO_CONTROL_DELAY_MS = 300; // Default audio delay
-
 // Zoom feature constants
 export const ZOOM_STEP = 0.1; // factor increment/decrement
 export const ZOOM_MIN_FACTOR = 0.5;

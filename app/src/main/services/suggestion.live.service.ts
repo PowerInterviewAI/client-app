@@ -5,17 +5,17 @@
  * Based on the Python equivalent with threading and streaming support
  */
 
-import { ApiClient } from '../api/client.js';
+import { LLMApi } from '../api/llm.js';
 import { LIVE_SUGGESTION_NO_SUGGESTION } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { LiveSuggestion, Speaker, SuggestionState, Transcript } from '../types/app-state.js';
-import { GenerateLiveSuggestionRequest } from '../types/suggestion.js';
+import { GenerateLiveSuggestionRequest } from '../types/llm.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { appStateService } from './app-state.service.js';
 
 class LiveSuggestionService {
-  private apiClient: ApiClient = new ApiClient();
+  private llmApi: LLMApi = new LLMApi();
   private suggestions: Map<number, LiveSuggestion> = new Map();
   private abortMap: Map<string, boolean> = new Map();
 
@@ -65,13 +65,13 @@ class LiveSuggestionService {
     try {
       const conf = configStore.getConfig();
       const requestBody: GenerateLiveSuggestionRequest = {
+        config: conf.llmConf,
         profile_data: conf.interviewConf.profileData,
         context: conf.interviewConf.jobDescription,
         transcripts: transcripts,
       };
 
-      const response = await this.apiClient.postStream('/api/llm/live-suggestion', requestBody);
-
+      const response = await this.llmApi.generateLiveSuggestions(requestBody);
       if (!response) {
         throw new Error('No response from suggestion API');
       }

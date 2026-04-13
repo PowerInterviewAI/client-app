@@ -47,6 +47,12 @@ const electronApi = {
     getCredits: () => ipcRenderer.invoke('payment:get-credits'),
   },
 
+  // LLM management
+  llm: {
+    listModels: () => ipcRenderer.invoke('llm:list-models'),
+    validate: (config: any) => ipcRenderer.invoke('llm:validate', config),
+  },
+
   // App state management
   appState: {
     get: () => ipcRenderer.invoke('app:get-state'),
@@ -77,18 +83,6 @@ const electronApi = {
   actionSuggestion: {
     clear: () => ipcRenderer.invoke('action-suggestion:clear'),
     stop: () => ipcRenderer.invoke('action-suggestion:stop'),
-  },
-
-  // Media management
-  webRtc: {
-    offer: (offer: any) => ipcRenderer.invoke('webrtc:offer', offer),
-    getTurnCredentials: () => ipcRenderer.invoke('webrtc:turn-credentials'),
-    startAgents: () => ipcRenderer.invoke('webrtc:start-agents'),
-    stopAgents: () => ipcRenderer.invoke('webrtc:stop-agents'),
-    restartAudioAgent: (delayMs?: number) =>
-      ipcRenderer.invoke('webrtc:restart-audio-agent', delayMs),
-    putVideoFrame: (frameData: ArrayBuffer) =>
-      ipcRenderer.invoke('webrtc:put-video-frame', frameData),
   },
 
   // Listen for pushed notifications main

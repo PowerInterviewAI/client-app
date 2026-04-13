@@ -132,9 +132,12 @@ function LiveSuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProps
   }, [containerRef]);
 
   return (
-    <Card className="relative flex flex-col w-full h-full bg-card p-0" style={style}>
+    <Card
+      className="relative flex flex-col w-full h-full bg-card p-0 rounded-md gap-2"
+      style={style}
+    >
       {/* Header */}
-      <div className="border-b border-border px-4 pt-4 pb-2 shrink-0 flex items-center justify-between gap-4">
+      <div className="border-b border-border p-2 shrink-0 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <h3 className="font-semibold text-foreground text-xs">Live Suggestions</h3>
         </div>
@@ -169,7 +172,7 @@ function LiveSuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProps
         )}
 
         {hasItems && (
-          <div className="p-4 space-y-3">
+          <div className="p-2 space-y-3">
             {suggestions.map((s, idx) => (
               <div
                 key={idx}

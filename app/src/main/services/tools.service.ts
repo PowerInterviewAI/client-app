@@ -2,21 +2,17 @@ import { convertMarkdownToDocx } from '@mohtasham/md-to-docx';
 import { dialog } from 'electron';
 import fs from 'fs/promises';
 
-import { ApiClient } from '../api/client.js';
 import { configStore } from '../store/config.store.js';
-import { Speaker, Transcript } from '../types/app-state.js';
+import { Speaker } from '../types/app-state.js';
 import { appStateService } from './app-state.service.js';
 import { actionSuggestionService } from './suggestion.action.service.js';
 import { liveSuggestionService } from './suggestion.live.service.js';
 import { transcriptService } from './transcript.service.js';
-
-interface GenerateSummarizeRequest {
-  username: string;
-  transcripts: Transcript[];
-}
+import { LLMApi } from '../api/llm.js';
+import { GenerateSummarizeRequest } from '../types/llm.js';
 
 class ToolsService {
-  private apiClient: ApiClient = new ApiClient();
+  private llmApi: LLMApi = new LLMApi();
 
   private generateFilename(): string {
     const d = new Date();
@@ -40,7 +36,8 @@ class ToolsService {
     const suggestions = appStateService.getState().liveSuggestions;
 
     // Call the API to generate the summary text
-    const response = await this.apiClient.post<string>('/api/llm/summarize', {
+    const response = await this.llmApi.generateSummary({
+      config: configStore.getConfig().llmConf,
       username,
       transcripts,
     } as GenerateSummarizeRequest);

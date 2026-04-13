@@ -16,15 +16,16 @@ import {
   SuggestionState,
   Transcript,
 } from '../types/app-state.js';
-import { GenerateActionSuggestionRequest } from '../types/suggestion.js';
+import { GenerateActionSuggestionRequest } from '../types/llm.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
+import { LLMApi } from '../api/llm.js';
 
 export class ActionSuggestionService {
-  private apiClient: ApiClient = new ApiClient();
+  private llmApi: LLMApi = new LLMApi();
   private uploadedImageNames: string[] = [];
 
   /**
@@ -145,7 +146,7 @@ export class ActionSuggestionService {
       formData.append('image_file', blob, 'screenshot.png');
 
       // Upload image to backend
-      const response = await this.apiClient.postFormData<string>('/api/llm/upload-image', formData);
+      const response = await this.llmApi.uploadImage(formData);
       if (response.error || !response.data) {
         throw new Error(`Upload failed: ${response.error?.message || 'No filename returned'}`);
       }
@@ -221,6 +222,7 @@ export class ActionSuggestionService {
     const conf = configStore.getConfig();
 
     const payload: GenerateActionSuggestionRequest = {
+      config: conf.llmConf,
       profile_data: conf.interviewConf.profileData,
       context: conf.interviewConf.jobDescription,
       transcripts: transcripts,
@@ -244,7 +246,7 @@ export class ActionSuggestionService {
     this.uploadedImageNames = [];
 
     try {
-      const stream = await this.apiClient.postStream('api/llm/action-suggestion', payload);
+      const stream = await this.llmApi.generateActionSuggestionStream(payload);
       if (!stream) {
         throw new Error('Failed to get stream response');
       }

@@ -4,9 +4,7 @@ import time
 from datetime import datetime
 
 from scripts.build_asr_agent import build_asr_agent
-from scripts.build_audio_control_agent import build_audio_control_agent
 from scripts.build_electron_app import build_electron_app
-from scripts.build_vcam_agent import build_vcam_agent
 
 
 def main() -> None:
@@ -23,10 +21,6 @@ def main() -> None:
         print("\n📦 Building Agents...\n")  # noqa: T201
         print("\n⚡ Building ASR Agent...\n")  # noqa: T201
         build_asr_agent()
-        print("\n⚡ Building VCam Agent...\n")  # noqa: T201
-        build_vcam_agent()
-        print("\n⚡ Building Audio Control Agent...\n")  # noqa: T201
-        build_audio_control_agent()
 
         # Build Electron app
         print("\n⚡ Building Electron App...\n")  # noqa: T201

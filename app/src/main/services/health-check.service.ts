@@ -36,7 +36,6 @@ export class HealthCheckService {
 
     this.startBackendLoop();
     this.startClientLoop();
-    this.startGpuLoop();
   }
 
   /**
@@ -102,46 +101,6 @@ export class HealthCheckService {
         }
 
         await safeSleep(nextInterval);
-      }
-    })();
-  }
-
-  /** GPU ping loop, triggers wakeup if needed */
-  private startGpuLoop(): void {
-    (async () => {
-      while (this.running) {
-        const state = appStateService.getState();
-        // if the app is idle we halt GPU pings until user wakes it
-        if (state.isAppIdle) {
-          await safeSleep(1);
-          continue;
-        }
-
-        // skip if not logged in
-        if (!state.isLoggedIn) {
-          await safeSleep(FAILURE_INTERVAL);
-          continue;
-        }
-
-        let gpuServerLive = false;
-        try {
-          // ping GPU server
-          const gpuPingResult = await this.client.pingGpuServer();
-          gpuServerLive = gpuPingResult.status === 200;
-
-          // attempt wakeup if GPU not live
-          if (!gpuServerLive) {
-            console.log('[HealthCheckService] GPU not live, attempting wakeup');
-            await this.client.wakeupGpuServer();
-          }
-        } catch (error) {
-          console.error('[HealthCheckService] GPU ping/wakeup error:', error);
-        }
-
-        appStateService.updateState({ isGpuServerLive: gpuServerLive });
-
-        const next = gpuServerLive ? SUCCESS_INTERVAL : FAILURE_INTERVAL;
-        await safeSleep(next);
       }
     })();
   }

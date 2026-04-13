@@ -1,5 +1,6 @@
 import type { AppState } from './app-state';
 import type { Config } from './config';
+import type { LLMConfig, LLMConfigValidationResult, LLMModelInfo } from './llm';
 import type {
   AvailableCurrency,
   CreatePaymentRequest,
@@ -61,6 +62,14 @@ declare global {
       getCredits: () => Promise<{ success: boolean; credits?: number; error?: string }>;
     };
 
+    // LLM management
+    llm: {
+      listModels: () => Promise<{ success: boolean; data?: LLMModelInfo[]; error?: string }>;
+      validate: (
+        config: LLMConfig | null
+      ) => Promise<{ success: boolean; data?: LLMConfigValidationResult; error?: string }>;
+    };
+
     // App state management
     appState: {
       get: () => Promise<AppState>;
@@ -87,18 +96,6 @@ declare global {
     actionSuggestion: {
       clear: () => Promise<void>;
       stop: () => Promise<void>;
-    };
-
-    // WebRTC management
-    webRtc: {
-      // eslint-disable-next-line
-      offer: (any) => Promise<any>;
-      // eslint-disable-next-line
-      getTurnCredentials: () => Promise<any>;
-      startAgents: () => Promise<void>;
-      stopAgents: () => Promise<void>;
-      restartAudioAgent: (delayMs?: number) => Promise<void>;
-      putVideoFrame: (frameData: ArrayBuffer) => Promise<void>;
     };
 
     // Push notification listener

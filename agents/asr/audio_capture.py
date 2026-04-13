@@ -11,10 +11,10 @@ import pyaudiowpatch as pyaudio
 from loguru import logger
 from scipy.signal import resample_poly
 
-from agents.shared.audio_device_service import AudioDeviceService
+from agents.asr.audio_device_service import AudioDeviceService
 
 # Audio configuration constants
-TARGET_SAMPLE_RATE = 16000
+TARGET_SAMPLE_RATE = 16_000
 AUDIO_BLOCK_DURATION = 0.1
 AUDIO_QUEUE_MAXSIZE = 4
 
