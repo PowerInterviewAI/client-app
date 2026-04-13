@@ -2,6 +2,7 @@ import { getElectron } from '@/lib/utils';
 
 const SAMPLE_RATE = 16000;
 const PROCESSOR_BUFFER_SIZE = 4096;
+const MAX_WS_BUFFERED_BYTES = 512 * 1024;
 const BACKEND_BASE_URL = import.meta.env.DEV ? 'http://localhost:8080' : 'https://api.powerinterviewai.com';
 const STREAMING_URL = `${BACKEND_BASE_URL.replace('http', 'ws')}/api/asr/streaming`;
 
@@ -12,6 +13,7 @@ class AudioWsStream {
   private ctx: AudioContext | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
   private processor: ScriptProcessorNode | null = null;
+  private monitorGain: GainNode | null = null;
   private active = false;
 
   constructor(
@@ -53,15 +55,19 @@ class AudioWsStream {
     this.ctx = new AudioContext();
     this.source = this.ctx.createMediaStreamSource(this.stream);
     this.processor = this.ctx.createScriptProcessor(PROCESSOR_BUFFER_SIZE, 1, 1);
+    this.monitorGain = this.ctx.createGain();
+    this.monitorGain.gain.value = 0;
     this.processor.onaudioprocess = (event) => {
       if (!this.active || this.ws?.readyState !== WebSocket.OPEN) return;
+      if ((this.ws?.bufferedAmount ?? 0) > MAX_WS_BUFFERED_BYTES) return;
       const float32 = event.inputBuffer.getChannelData(0);
       const pcm16 = this.convertTo16kPcm(float32, this.ctx?.sampleRate ?? SAMPLE_RATE);
       this.ws?.send(pcm16);
     };
 
     this.source.connect(this.processor);
-    this.processor.connect(this.ctx.destination);
+    this.processor.connect(this.monitorGain);
+    this.monitorGain.connect(this.ctx.destination);
     this.active = true;
   }
 
@@ -69,8 +75,10 @@ class AudioWsStream {
     this.active = false;
     this.processor?.disconnect();
     this.source?.disconnect();
+    this.monitorGain?.disconnect();
     this.processor = null;
     this.source = null;
+    this.monitorGain = null;
 
     if (this.ctx && this.ctx.state !== 'closed') {
       await this.ctx.close();

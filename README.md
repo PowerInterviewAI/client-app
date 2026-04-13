@@ -94,15 +94,12 @@ Power Interview follows a **client-server architecture**.
 ```bash
 git clone https://github.com/PowerInterviewAI/power-interview-assistant
 cd power-interview-assistant
-
-cd app
 npm install
 ```
 
 ### Run
 
 ```bash
-cd app
 npm run start
 ```
 
@@ -154,9 +151,9 @@ npm run start
 
 ```
 power-interview-client/
-├── app/
+├── src/
+├── public/
 ├── build/
-└── scripts/
 ```
 
 ## Legal Disclaimer

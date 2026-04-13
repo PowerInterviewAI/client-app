@@ -95,7 +95,7 @@
     ],
     "directories": {
       "buildResources": "build",
-      "output": "../dist"
+      "output": "release"
     },
     "win": {
       "target": [
@@ -107,6 +107,12 @@
         }
       ],
       "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "nsis": {
       "oneClick": false,
