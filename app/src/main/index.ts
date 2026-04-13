@@ -18,7 +18,7 @@ import { registerPaymentHandlers } from './ipc/payment.js';
 import { registerActionSuggestionHandlers } from './ipc/suggestion.action.js';
 import { registerLiveSuggestionHandlers } from './ipc/suggestion.live.js';
 import { registerToolsHandlers } from './ipc/tools.js';
-import { registerTranscriptHandlers } from './ipc/transcript.js';
+import { initializeAudioLoopback, registerTranscriptHandlers } from './ipc/transcript.js';
 import { registerWindowHandlers } from './ipc/window.js';
 import { autoUpdaterService } from './services/auto-updater.service.js';
 import { healthCheckService } from './services/health-check.service.js';
@@ -156,6 +156,8 @@ async function createWindow() {
 // APP LIFECYCLE
 // -------------------------------------------------------------
 app.whenReady().then(async () => {
+  initializeAudioLoopback();
+
   // Register all IPC handlers
   registerConfigHandlers();
   registerAppStateHandlers();

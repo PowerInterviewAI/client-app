@@ -1,8 +1,6 @@
 // Tell TypeScript to compile this file as CommonJS despite package.json "type": "module"
 // This is the standard approach for Electron preload scripts
-import { clear } from 'console';
 import { contextBridge, ipcRenderer } from 'electron';
-import { get } from 'http';
 
 // Build the API object once so it can be exposed under multiple names
 const electronApi = {
@@ -71,6 +69,10 @@ const electronApi = {
     clear: () => ipcRenderer.invoke('transcription:clear'),
     start: () => ipcRenderer.invoke('transcription:start'),
     stop: () => ipcRenderer.invoke('transcription:stop'),
+    ingest: (payload: { channel: 'ch_0' | 'ch_1'; type: 'partial' | 'final'; text: string }) =>
+      ipcRenderer.invoke('transcription:ingest', payload),
+    enableLoopbackAudio: () => ipcRenderer.invoke('transcription:loopback-enable'),
+    disableLoopbackAudio: () => ipcRenderer.invoke('transcription:loopback-disable'),
   },
 
   // Live suggestion management

@@ -5,6 +5,7 @@ import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 
 import { useConfigStore } from './use-config-store';
+import { liveTranscriptionService } from '@/services/live-transcription.service';
 
 interface AssistantService {
   error: string | null;
@@ -43,6 +44,7 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
 
       // Start transcription services
       await electron.transcription.start();
+      await liveTranscriptionService.start(config?.audioInputDeviceName ?? '');
 
       // Sleep 3 seconds to ensure the assistant has fully started before allowing stop actions
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -78,6 +80,7 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
 
       // Stop assistant services
       await Promise.all([
+        liveTranscriptionService.stop(),
         electron.transcription.stop(),
         electron.liveSuggestion.stop(),
         electron.actionSuggestion.stop(),

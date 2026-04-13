@@ -84,6 +84,13 @@ declare global {
       clear: () => Promise<void>;
       start: () => Promise<void>;
       stop: () => Promise<void>;
+      ingest: (payload: {
+        channel: 'ch_0' | 'ch_1';
+        type: 'partial' | 'final';
+        text: string;
+      }) => Promise<void>;
+      enableLoopbackAudio: () => Promise<void>;
+      disableLoopbackAudio: () => Promise<void>;
     };
 
     // Live suggestion management
