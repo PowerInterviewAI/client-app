@@ -6,7 +6,7 @@
 
 🌐 **Website**: [https://www.powerinterviewai.com](https://www.powerinterviewai.com)
 
-[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)](https://github.com/PowerInterviewAI/power-interview-assistant/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)](https://github.com/PowerInterviewAI/client/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 📧 [Email](mailto:power-interview@protonmail.com) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/TJJp5azK7Z) | 🐦 [X](https://x.com/power_interview)
@@ -92,8 +92,8 @@ Power Interview follows a **client-server architecture**.
 ### Installation
 
 ```bash
-git clone https://github.com/PowerInterviewAI/power-interview-assistant
-cd power-interview-assistant
+git clone https://github.com/PowerInterviewAI/client
+cd client
 npm install
 ```
 
