@@ -58,4 +58,5 @@ export interface AppState {
   liveSuggestions: LiveSuggestion[];
   actionSuggestions: ActionSuggestion[];
   credits?: number;
+  providedLLMModel?: string;
 }

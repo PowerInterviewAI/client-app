@@ -11,15 +11,16 @@ import { RunningIndicator } from './running-indicator';
 type Props = {
   runningState: RunningState;
   credits: number;
+  llmModel: string;
 };
 
-export default function StatusPanel({ runningState, credits }: Props) {
+export default function StatusPanel({ runningState, llmModel, credits }: Props) {
   // calculate and formatting handled by CreditsDisplay component
 
   return (
     <div id="status-panel" className="flex items-center justify-between text-muted-foreground p-1">
       <RunningIndicator runningState={runningState} />
-      <CreditsDisplay credits={credits} className="ml-2" />
+      <CreditsDisplay credits={credits} llmModel={llmModel} className="ml-2" />
       <div className="flex-1" />
       <Tooltip>
         <TooltipTrigger asChild>

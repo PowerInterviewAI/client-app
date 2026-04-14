@@ -41,6 +41,7 @@ class AppStateManager {
       liveSuggestions: raw.liveSuggestions ?? [],
       actionSuggestions: raw.actionSuggestions ?? [],
       credits: raw.credits,
+      providedLLMModel: raw.providedLLMModel,
     };
   }
 
