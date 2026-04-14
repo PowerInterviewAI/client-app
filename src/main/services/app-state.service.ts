@@ -54,6 +54,7 @@ export class AppStateService {
           last_question: 'Interviewer questions will be here',
           answer: 'Suggested answers will be here in real-time',
           state: SuggestionState.Success,
+          error: '',
         },
       ],
       actionSuggestions: [
@@ -64,6 +65,7 @@ export class AppStateService {
             'Triggered suggestions will be here. For example, reply suggestion, coding test solution, diagram descriptions, etc.',
           image_urls: [null, null, null, null],
           state: SuggestionState.Success,
+          error: '',
         },
       ],
     };

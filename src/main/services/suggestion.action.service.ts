@@ -7,6 +7,7 @@ import { BrowserWindow, desktopCapturer, screen } from 'electron';
 import sharp from 'sharp';
 
 import { ApiClient } from '../api/client.js';
+import { ApiRequestError } from '../api/client.js';
 import { ACTION_SUGGESTION_MAX_CAPTURES, ACTION_TIMEOUT_MS, BACKEND_BASE_URL } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import {
@@ -73,6 +74,7 @@ export class ActionSuggestionService {
         answer: '',
         image_urls: [...this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)), null],
         state: SuggestionState.Uploading,
+        error: '',
       };
       suggestionsArray = [...suggestionsArray, pendingPrompt];
     } else if (this.uploadedImageNames.length > 0) {
@@ -82,6 +84,7 @@ export class ActionSuggestionService {
         answer: '',
         image_urls: this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)),
         state: SuggestionState.Idle,
+        error: '',
       };
       suggestionsArray = [...suggestionsArray, pendingPrompt];
     }
@@ -239,6 +242,7 @@ export class ActionSuggestionService {
       answer: '',
       image_urls: this.uploadedImageNames.map((name) => this.getBackendImageUrl(name)),
       state: SuggestionState.Pending,
+      error: '',
     };
     this.setSuggestion(timestamp, suggestion);
 
@@ -293,6 +297,7 @@ export class ActionSuggestionService {
     } catch (error) {
       console.error('[ActionSuggestionService] Failed to generate action suggestion:', error);
       suggestion.state = SuggestionState.Error;
+      suggestion.error = this.getSuggestionErrorMessage(error);
       this.setSuggestion(timestamp, suggestion);
     } finally {
       // Release lock when generation completes
@@ -305,6 +310,17 @@ export class ActionSuggestionService {
    */
   private getBackendImageUrl(imageName: string): string {
     return `${BACKEND_BASE_URL}/api/llm/get-thumb/${imageName}`;
+  }
+
+  private getSuggestionErrorMessage(error: unknown): string {
+    if (error instanceof ApiRequestError) {
+      const content =
+        typeof error.content === 'string' && error.content.length > 0
+          ? error.content
+          : JSON.stringify(error.content ?? {});
+      return `status=${error.status}; content=${content}`;
+    }
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**

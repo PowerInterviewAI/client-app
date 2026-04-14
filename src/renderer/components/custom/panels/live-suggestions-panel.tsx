@@ -180,7 +180,7 @@ function LiveSuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProps
                 className="flex gap-3 pb-3 border-b border-border/40 last:border-0"
               >
                 {idx === suggestions.length - 1 &&
-                (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) ? (
+                  (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) ? (
                   <Loader2 className="h-4 w-4 mt-px text-accent shrink-0 animate-spin" />
                 ) : s.state === SuggestionState.Stopped ? (
                   <PauseCircle className="h-4 w-4 mt-px text-muted-foreground shrink-0" />
@@ -206,7 +206,7 @@ function LiveSuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProps
 
                   {s.state === SuggestionState.Error && (
                     <div className="bg-destructive/10 border border-destructive/20 rounded-md p-2 mt-1">
-                      <p className="text-xs text-destructive">Failed to generate</p>
+                      <p className="text-xs text-destructive">{s.error}</p>
                     </div>
                   )}
 

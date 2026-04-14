@@ -6,6 +6,7 @@
  */
 
 import { LLMApi } from '../api/llm.js';
+import { ApiRequestError } from '../api/client.js';
 import { LIVE_SUGGESTION_NO_SUGGESTION } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { LiveSuggestion, Speaker, SuggestionState, Transcript } from '../types/app-state.js';
@@ -57,6 +58,7 @@ class LiveSuggestionService {
       last_question: transcripts[transcripts.length - 1].text,
       answer: '',
       state: SuggestionState.Pending,
+      error: '',
     };
 
     // Append initial suggestion
@@ -110,12 +112,24 @@ class LiveSuggestionService {
       } finally {
         reader.releaseLock();
       }
-    } catch {
-      console.error('Failed to generate suggestion');
+    } catch (error) {
+      console.error('Failed to generate suggestion', error);
       suggestion.state = SuggestionState.Error;
+      suggestion.error = this.getSuggestionErrorMessage(error);
 
       this.apendSuggestion(timestamp, suggestion);
     }
+  }
+
+  private getSuggestionErrorMessage(error: unknown): string {
+    if (error instanceof ApiRequestError) {
+      const content =
+        typeof error.content === 'string' && error.content.length > 0
+          ? error.content
+          : JSON.stringify(error.content ?? {});
+      return `status=${error.status}; content=${content}`;
+    }
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**
