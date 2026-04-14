@@ -3,6 +3,10 @@ import { getElectron } from '@/lib/utils';
 const SAMPLE_RATE = 16000;
 const PROCESSOR_BUFFER_SIZE = 4096;
 const MAX_WS_BUFFERED_BYTES = 512 * 1024;
+const WS_OPEN_TIMEOUT_MS = 5000;
+const WS_RETRY_MAX_ATTEMPTS = 5;
+const WS_RETRY_BASE_DELAY_MS = 1000;
+const WS_RETRY_MAX_DELAY_MS = 8000;
 const BACKEND_BASE_URL = import.meta.env.DEV ? 'http://localhost:8080' : 'https://api.powerinterviewai.com';
 const STREAMING_URL = `${BACKEND_BASE_URL.replace('http', 'ws')}/api/asr/streaming`;
 
@@ -15,6 +19,8 @@ class AudioWsStream {
   private processor: ScriptProcessorNode | null = null;
   private monitorGain: GainNode | null = null;
   private active = false;
+  private stopping = false;
+  private reconnectTimer: number | null = null;
 
   constructor(
     private readonly channel: Channel,
@@ -27,30 +33,8 @@ class AudioWsStream {
   ) {}
 
   async start() {
-    this.ws = new WebSocket(STREAMING_URL);
-    await new Promise<void>((resolve, reject) => {
-      if (!this.ws) return reject(new Error('WebSocket not initialized'));
-      this.ws.onopen = () => resolve();
-      this.ws.onerror = () => reject(new Error(`Failed to open websocket for ${this.channel}`));
-    });
-
-    this.ws.onmessage = (event) => {
-      if (typeof event.data !== 'string') return;
-      try {
-        const result = JSON.parse(event.data);
-        const type = result?.type;
-        const text = String(result?.content ?? '').trim();
-        if ((type === 'partial' || type === 'final') && text) {
-          this.onTranscript({
-            channel: this.channel,
-            type,
-            text,
-          }).catch((error) => console.error('Failed to ingest transcript:', error));
-        }
-      } catch (error) {
-        console.error('Failed to parse transcript event:', error);
-      }
-    };
+    this.stopping = false;
+    await this.connectWithRetry();
 
     this.ctx = new AudioContext();
     this.source = this.ctx.createMediaStreamSource(this.stream);
@@ -73,6 +57,11 @@ class AudioWsStream {
 
   async stop() {
     this.active = false;
+    this.stopping = true;
+    if (this.reconnectTimer !== null) {
+      window.clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     this.processor?.disconnect();
     this.source?.disconnect();
     this.monitorGain?.disconnect();
@@ -89,6 +78,112 @@ class AudioWsStream {
       this.ws.close();
     }
     this.ws = null;
+  }
+
+  private async connectWithRetry(): Promise<void> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < WS_RETRY_MAX_ATTEMPTS; attempt++) {
+      if (this.stopping) {
+        throw new Error(`WebSocket connection stopped for ${this.channel}`);
+      }
+      try {
+        await this.connectWebSocket();
+        return;
+      } catch (error) {
+        lastError = error;
+        const delayMs = Math.min(
+          WS_RETRY_BASE_DELAY_MS * Math.pow(2, attempt),
+          WS_RETRY_MAX_DELAY_MS
+        );
+        console.warn(
+          `[LiveTranscription] WebSocket connect failed for ${this.channel} (attempt ${attempt + 1}/${WS_RETRY_MAX_ATTEMPTS}), retrying in ${delayMs}ms`,
+          error
+        );
+        await this.sleep(delayMs);
+      }
+    }
+
+    throw lastError instanceof Error
+      ? lastError
+      : new Error(`Failed to open websocket for ${this.channel}`);
+  }
+
+  private connectWebSocket(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const ws = new WebSocket(STREAMING_URL);
+      this.ws = ws;
+      let settled = false;
+
+      const timeoutId = window.setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        try {
+          ws.close();
+        } catch {
+          // noop
+        }
+        reject(new Error(`WebSocket open timed out for ${this.channel}`));
+      }, WS_OPEN_TIMEOUT_MS);
+
+      ws.onopen = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        this.bindWebSocketHandlers(ws);
+        resolve();
+      };
+
+      ws.onerror = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        reject(new Error(`Failed to open websocket for ${this.channel}`));
+      };
+    });
+  }
+
+  private bindWebSocketHandlers(ws: WebSocket): void {
+    ws.onmessage = (event) => {
+      if (typeof event.data !== 'string') return;
+      try {
+        const result = JSON.parse(event.data);
+        const type = result?.type;
+        const text = String(result?.content ?? '').trim();
+        if ((type === 'partial' || type === 'final') && text) {
+          this.onTranscript({
+            channel: this.channel,
+            type,
+            text,
+          }).catch((error) => console.error('Failed to ingest transcript:', error));
+        }
+      } catch (error) {
+        console.error('Failed to parse transcript event:', error);
+      }
+    };
+
+    ws.onclose = () => {
+      if (this.stopping || !this.active) return;
+      this.scheduleReconnect();
+    };
+  }
+
+  private scheduleReconnect(): void {
+    if (this.reconnectTimer !== null || this.stopping) return;
+    this.reconnectTimer = window.setTimeout(async () => {
+      this.reconnectTimer = null;
+      if (this.stopping || !this.active) return;
+      try {
+        await this.connectWithRetry();
+        console.info(`[LiveTranscription] Reconnected websocket for ${this.channel}`);
+      } catch (error) {
+        console.error(`[LiveTranscription] Reconnect failed for ${this.channel}:`, error);
+        this.scheduleReconnect();
+      }
+    }, WS_RETRY_BASE_DELAY_MS);
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
   }
 
   private convertTo16kPcm(input: Float32Array, inputRate: number): Int16Array {
