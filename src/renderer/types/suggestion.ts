@@ -12,6 +12,7 @@ export interface LiveSuggestion {
   last_question: string;
   answer: string;
   state: SuggestionState;
+  error: string;
 }
 
 export interface ActionSuggestion {
@@ -20,4 +21,5 @@ export interface ActionSuggestion {
   answer: string;
   image_urls: string[];
   state: SuggestionState;
+  error: string;
 }

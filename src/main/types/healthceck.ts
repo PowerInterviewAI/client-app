@@ -4,4 +4,5 @@ export interface ClientPingRequest {
 
 export interface ClientPingResponse {
   credits: number;
+  provided_llm_model: string;
 }

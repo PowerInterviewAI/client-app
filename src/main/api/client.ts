@@ -18,6 +18,18 @@ export interface ApiResponse<T = unknown> {
   status: number;
 }
 
+export class ApiRequestError extends Error {
+  status: number;
+  content: unknown;
+
+  constructor(message: string, status: number, content?: unknown) {
+    super(message);
+    this.name = 'ApiRequestError';
+    this.status = status;
+    this.content = content;
+  }
+}
+
 export class ApiClient {
   private baseUrl: string;
   private headers: Record<string, string> = {};
@@ -198,20 +210,36 @@ export class ApiClient {
         headers: this.headers,
         body: body ? JSON.stringify(body) : undefined,
       });
-      if (!response.ok || !response.body) {
-        console.error('[ApiClient] Streaming request failed:', {
-          method,
-          url,
-          status: response.status,
-          statusText: response.statusText,
-        });
-        return null;
+      if (!response.ok) {
+        const responseContent = await response.text().catch(() => '');
+        throw new ApiRequestError(
+          response.statusText || 'HTTP stream request failed',
+          response.status,
+          responseContent
+        );
+      }
+      if (!response.body) {
+        throw new ApiRequestError('Empty response body for streaming request', response.status, null);
       }
 
       return response.body;
-    } catch (error) {
+    } catch (error: unknown) {
+      if (error instanceof ApiRequestError) {
+        console.error('[ApiClient] Streaming request failed:', {
+          method,
+          url,
+          status: error.status,
+          content: error.content,
+        });
+        throw error;
+      }
+
       console.error('[ApiClient] Streaming request error:', { method, url, error });
-      return null;
+      throw new ApiRequestError(
+        error instanceof Error ? error.message : 'Network request failed',
+        0,
+        null
+      );
     }
   }
 

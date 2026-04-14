@@ -9,6 +9,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
 import { getElectron } from '@/lib/utils';
+import { useConfigStore } from '@/hooks/use-config-store';
 
 export default function Titlebar() {
   const isStealth = useIsStealthMode();
@@ -31,6 +32,7 @@ export default function Titlebar() {
   };
 
   const { appState } = useAppState();
+  const { config } = useConfigStore();
 
   if (isStealth) return null;
 
@@ -56,7 +58,8 @@ export default function Titlebar() {
 
         {appState?.isLoggedIn && appState?.credits !== undefined && (
           <CreditsDisplay
-            credits={appState.credits!}
+            credits={appState.credits ?? 0}
+            llmModel={config?.llmConf?.model ?? appState.providedLLMModel ?? ""}
             // eslint-disable-next-line
             style={{ WebkitAppRegion: 'drag' } as any}
           />

@@ -182,7 +182,7 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
                 className="flex gap-3 pb-3 border-b border-border/40 last:border-0"
               >
                 {idx === actionSuggestions.length - 1 &&
-                (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) ? (
+                  (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) ? (
                   <Loader2 className="h-4 w-4 mt-px text-accent shrink-0 animate-spin" />
                 ) : s.state === SuggestionState.Stopped ? (
                   <PauseCircle className="h-4 w-4 mt-px text-muted-foreground shrink-0" />
@@ -224,12 +224,12 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
                   <div className="flex-1">
                     {(s.state === SuggestionState.Loading ||
                       s.state === SuggestionState.Success) && (
-                      <div className="text-sm text-foreground/90 leading-relaxed">
-                        <div className="text-sm">
-                          <SafeMarkdown content={s.answer} />
+                        <div className="text-sm text-foreground/90 leading-relaxed">
+                          <div className="text-sm">
+                            <SafeMarkdown content={s.answer} />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {s.state === SuggestionState.Stopped && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
@@ -240,7 +240,7 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
 
                     {s.state === SuggestionState.Error && (
                       <div className="bg-destructive/10 border border-destructive/20 rounded-md p-2 mt-1">
-                        <p className="text-xs text-destructive">Failed to generate</p>
+                        <p className="text-xs text-destructive">{s.error}</p>
                       </div>
                     )}
                   </div>

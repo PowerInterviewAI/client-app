@@ -28,6 +28,7 @@ export class HealthCheckService {
       appStateService.updateState({
         isLoggedIn: res.status === 200,
         credits: res.data?.credits,
+        providedLLMModel: res.data?.provided_llm_model,
       });
     } catch (error) {
       console.error('[HealthCheckService] Initial client ping error:', error);
@@ -91,9 +92,12 @@ export class HealthCheckService {
         let nextInterval = SUCCESS_INTERVAL;
 
         try {
-          const pingResponse = await this.client.pingClient();
-          if (pingResponse.data?.credits !== undefined) {
-            appStateService.updateState({ credits: pingResponse.data?.credits });
+          const res = await this.client.pingClient();
+          if (res.data?.credits !== undefined) {
+            appStateService.updateState({
+              credits: res.data?.credits,
+              providedLLMModel: res.data?.provided_llm_model,
+            });
           }
         } catch (error) {
           console.error('[HealthCheckService] Client ping error:', error);
