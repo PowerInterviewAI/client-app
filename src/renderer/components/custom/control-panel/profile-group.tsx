@@ -1,4 +1,4 @@
-import { ChevronUp, CreditCard, Key, LogOut, SettingsIcon } from 'lucide-react';
+import { ChevronUp, CreditCard, Key, LogOut, Mail, SettingsIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -8,6 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -110,6 +111,11 @@ export function ProfileGroup({
             <LogOut className="mr-2 h-4 w-4" />
             Sign out
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel className='flex items-center'>
+            <Mail className="mr-2 h-4 w-4" />
+            {config?.email}
+          </DropdownMenuLabel>
         </DropdownMenuContent>
       </DropdownMenu>
 
