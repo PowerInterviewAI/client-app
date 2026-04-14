@@ -1,14 +1,44 @@
 import { getElectron } from '@/lib/utils';
 
 const SAMPLE_RATE = 16000;
-const PROCESSOR_BUFFER_SIZE = 4096;
-const MAX_WS_BUFFERED_BYTES = 512 * 1024;
+const MAX_WS_BUFFERED_BYTES = SAMPLE_RATE * 0.3;
 const WS_OPEN_TIMEOUT_MS = 5000;
 const WS_RETRY_MAX_ATTEMPTS = 5;
 const WS_RETRY_BASE_DELAY_MS = 1000;
 const WS_RETRY_MAX_DELAY_MS = 8000;
-const BACKEND_BASE_URL = import.meta.env.DEV ? 'http://localhost:8080' : 'https://api.powerinterviewai.com';
+const BACKEND_BASE_URL = import.meta.env.DEV
+  ? 'http://localhost:8080'
+  : 'https://api.powerinterviewai.com';
 const STREAMING_URL = `${BACKEND_BASE_URL.replace('http', 'ws')}/api/asr/streaming`;
+
+// Inline AudioWorklet processor (runs off the main thread)
+const AUDIO_WORKLET_CODE = `
+class AudioSenderWorklet extends AudioWorkletProcessor {
+  constructor() {
+    super();
+  }
+
+  process(inputs, outputs) {
+    // inputs[0][0] = Float32Array from the microphone / loopback (single channel)
+    const input = inputs[0]?.[0];
+    if (input && input.length > 0) {
+      // Must copy the data - the original buffer is reused by the audio thread
+      this.port.postMessage(new Float32Array(input));
+    }
+
+    // Zero the output buffer so nothing leaks to the speakers
+    // (we still connect to a GainNode with gain = 0 for safety)
+    const output = outputs[0]?.[0];
+    if (output) {
+      output.fill(0);
+    }
+
+    return true;
+  }
+}
+
+registerProcessor('audio-sender-worklet', AudioSenderWorklet);
+`;
 
 type Channel = 'ch_0' | 'ch_1';
 
@@ -16,7 +46,7 @@ class AudioWsStream {
   private ws: WebSocket | null = null;
   private ctx: AudioContext | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
-  private processor: ScriptProcessorNode | null = null;
+  private workletNode: AudioWorkletNode | null = null;
   private monitorGain: GainNode | null = null;
   private active = false;
   private stopping = false;
@@ -38,20 +68,43 @@ class AudioWsStream {
 
     this.ctx = new AudioContext();
     this.source = this.ctx.createMediaStreamSource(this.stream);
-    this.processor = this.ctx.createScriptProcessor(PROCESSOR_BUFFER_SIZE, 1, 1);
+
+    // 1. Load the AudioWorklet (required once per AudioContext)
+    const workletBlob = new Blob([AUDIO_WORKLET_CODE], { type: 'application/javascript' });
+    const workletUrl = URL.createObjectURL(workletBlob);
+    try {
+      await this.ctx.audioWorklet.addModule(workletUrl);
+    } finally {
+      URL.revokeObjectURL(workletUrl); // clean up immediately
+    }
+
+    // 2. Create the worklet node (replaces ScriptProcessorNode)
+    this.workletNode = new AudioWorkletNode(this.ctx, 'audio-sender-worklet', {
+      numberOfInputs: 1,
+      numberOfOutputs: 1,
+    });
+
     this.monitorGain = this.ctx.createGain();
     this.monitorGain.gain.value = 0;
-    this.processor.onaudioprocess = (event) => {
+
+    // Receive raw Float32 audio buffers from the worklet (off-main-thread)
+    this.workletNode.port.onmessage = (event) => {
       if (!this.active || this.ws?.readyState !== WebSocket.OPEN) return;
-      if ((this.ws?.bufferedAmount ?? 0) > MAX_WS_BUFFERED_BYTES) return;
-      const float32 = event.inputBuffer.getChannelData(0);
+      if ((this.ws?.bufferedAmount ?? 0) > MAX_WS_BUFFERED_BYTES) {
+        console.log(`[AudioWsStream] ws buffer full of ${this.channel} channel, dropping data`);
+        return;
+      }
+
+      const float32 = event.data as Float32Array;
       const pcm16 = this.convertTo16kPcm(float32, this.ctx?.sampleRate ?? SAMPLE_RATE);
       this.ws?.send(pcm16);
     };
 
-    this.source.connect(this.processor);
-    this.processor.connect(this.monitorGain);
+    // Wire up the audio graph exactly like the old ScriptProcessor version
+    this.source.connect(this.workletNode);
+    this.workletNode.connect(this.monitorGain);
     this.monitorGain.connect(this.ctx.destination);
+
     this.active = true;
   }
 
@@ -62,10 +115,12 @@ class AudioWsStream {
       window.clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
-    this.processor?.disconnect();
+
+    this.workletNode?.disconnect();
     this.source?.disconnect();
     this.monitorGain?.disconnect();
-    this.processor = null;
+
+    this.workletNode = null;
     this.source = null;
     this.monitorGain = null;
 
