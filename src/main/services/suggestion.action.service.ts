@@ -318,7 +318,12 @@ export class ActionSuggestionService {
         typeof error.content === 'string' && error.content.length > 0
           ? error.content
           : JSON.stringify(error.content ?? {});
-      return `status=${error.status}; content=${content}`;
+      // return `status=${error.status}; content=${content}`;
+      if (error.status === 429) {
+        return 'Too many requests. Please try again later.'
+      } else {
+        return 'Failed to generate response.'
+      }
     }
     return error instanceof Error ? error.message : String(error);
   }
