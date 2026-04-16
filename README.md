@@ -6,7 +6,7 @@
 
 🌐 **Website**: [https://www.powerinterviewai.com](https://www.powerinterviewai.com)
 
-[![Version](https://img.shields.io/badge/version-1.4.1-blue.svg)](https://github.com/PowerInterviewAI/client/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.4.1-blue.svg)](https://github.com/PowerInterviewAI/client-app/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 📧 [Email](mailto:team@vectorleappulse.xyz) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/TJJp5azK7Z) | 🐦 [X](https://x.com/power_interview)
@@ -69,7 +69,7 @@ Power Interview desktop client is supported on:
 - Windows 10/11 (x64 installer build)
 - macOS (Apple Silicon and Intel release artifacts)
 
-Release binaries are published on the [GitHub Releases](https://github.com/PowerInterviewAI/client/releases) page.
+Release binaries are published on the [GitHub Releases](https://github.com/PowerInterviewAI/client-app/releases) page.
 
 ## Architecture
 
@@ -101,7 +101,7 @@ Power Interview follows a **client-server architecture**.
 ### Installation
 
 ```bash
-git clone https://github.com/PowerInterviewAI/client
+git clone https://github.com/PowerInterviewAI/client-app
 cd client
 npm install
 ```
