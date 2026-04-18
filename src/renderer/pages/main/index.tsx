@@ -37,6 +37,7 @@ export default function MainPage() {
   const videoPanelRef = useRef<VideoPanelHandle>(null);
   const [transcriptHeight, setTranscriptHeight] = useState<number | null>(null);
   const [suggestionHeight, setSuggestionHeight] = useState<number | null>(null);
+  const [betaTesterNoticeClosed, setBetaTesterNoticeClosed] = useState(false);
 
   // App state from context
   const { appState } = useAppState();
@@ -233,8 +234,12 @@ export default function MainPage() {
         {/* Show beta tester notice */}
         {appState?.userRole === UserRole.BetaTester &&
           appState?.betaTesterExpiresAt &&
-          appState?.betaTesterExpiresAt >= Date.now() && (
-            <BetaTesterNotice expiresAt={appState?.betaTesterExpiresAt} />
+          appState?.betaTesterExpiresAt >= Date.now() &&
+          !betaTesterNoticeClosed && (
+            <BetaTesterNotice
+              expiresAt={appState?.betaTesterExpiresAt}
+              onClick={() => setBetaTesterNoticeClosed(true)}
+            />
           )}
 
         {/* Right Column: Main Suggestions Panel */}
