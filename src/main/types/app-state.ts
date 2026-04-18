@@ -2,6 +2,8 @@
  * Application State Types
  */
 
+import { UserRole } from './healthceck.js';
+
 export enum Speaker {
   Self = 'self',
   Other = 'other',
@@ -60,5 +62,7 @@ export interface AppState {
   liveSuggestions: LiveSuggestion[];
   actionSuggestions: ActionSuggestion[];
   credits?: number;
+  userRole?: UserRole;
+  betaTesterExpiresAt?: number;
   providedLLMModel?: string;
 }

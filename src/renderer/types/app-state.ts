@@ -8,6 +8,12 @@ export enum RunningState {
   Stopping = 'stopping',
 }
 
+export enum UserRole {
+  User = 'user',
+  BetaTester = 'beta_tester',
+  Admin = 'admin',
+}
+
 export interface AppState {
   isLoggedIn: boolean | null;
   isBackendLive: boolean;
@@ -18,5 +24,7 @@ export interface AppState {
   liveSuggestions: LiveSuggestion[];
   actionSuggestions: ActionSuggestion[];
   credits?: number;
+  userRole?: UserRole;
+  betaTesterExpiresAt?: number;
   providedLLMModel?: string;
 }

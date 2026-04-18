@@ -16,9 +16,10 @@ import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useIdleDetector } from '@/hooks/use-idle';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
-import { RunningState } from '@/types/app-state';
+import { RunningState, UserRole } from '@/types/app-state';
 import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
 import { type Transcript } from '@/types/transcript';
+import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 
 export default function MainPage() {
   const { logout } = useAuth();
@@ -36,6 +37,7 @@ export default function MainPage() {
   const videoPanelRef = useRef<VideoPanelHandle>(null);
   const [transcriptHeight, setTranscriptHeight] = useState<number | null>(null);
   const [suggestionHeight, setSuggestionHeight] = useState<number | null>(null);
+  const [betaTesterNoticeClosed, setBetaTesterNoticeClosed] = useState(false);
 
   // App state from context
   const { appState } = useAppState();
@@ -228,6 +230,18 @@ export default function MainPage() {
             <TranscriptPanel transcripts={transcripts} style={transcriptStyle} />
           )}
         </div>
+
+        {/* Show beta tester notice */}
+        {appState?.userRole === UserRole.BetaTester &&
+          appState?.credits === 0 &&
+          appState?.betaTesterExpiresAt &&
+          appState?.betaTesterExpiresAt >= Date.now() &&
+          !betaTesterNoticeClosed && (
+            <BetaTesterNotice
+              expiresAt={appState?.betaTesterExpiresAt}
+              onClick={() => setBetaTesterNoticeClosed(true)}
+            />
+          )}
 
         {/* Right Column: Main Suggestions Panel */}
         {(hasLiveSuggestions || hasActionSuggestions) && (

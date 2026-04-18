@@ -28,6 +28,8 @@ export class HealthCheckService {
       appStateService.updateState({
         isLoggedIn: res.status === 200,
         credits: res.data?.credits,
+        userRole: res.data?.user_role,
+        betaTesterExpiresAt: res.data?.beta_tester_expires_at,
         providedLLMModel: res.data?.provided_llm_model,
       });
     } catch (error) {
@@ -94,9 +96,12 @@ export class HealthCheckService {
         try {
           const res = await this.client.pingClient();
           if (res.data?.credits !== undefined) {
+            console.log('client ping response:', res.data);
             appStateService.updateState({
               credits: res.data?.credits,
               providedLLMModel: res.data?.provided_llm_model,
+              userRole: res.data?.user_role,
+              betaTesterExpiresAt: res.data?.beta_tester_expires_at,
             });
           }
         } catch (error) {
