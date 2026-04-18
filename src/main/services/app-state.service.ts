@@ -24,6 +24,9 @@ const DEFAULT_STATE: AppState = {
   liveSuggestions: [],
   actionSuggestions: [],
   credits: undefined,
+  userRole: undefined,
+  betaTesterExpiresAt: undefined,
+  providedLLMModel: undefined,
 };
 
 export class AppStateService {

@@ -1,3 +1,0 @@
-/**
- * ASR (Speech Recognition) Types
- */
