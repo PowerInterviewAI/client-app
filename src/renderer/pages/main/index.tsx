@@ -233,6 +233,7 @@ export default function MainPage() {
 
         {/* Show beta tester notice */}
         {appState?.userRole === UserRole.BetaTester &&
+          appState?.credits === 0 &&
           appState?.betaTesterExpiresAt &&
           appState?.betaTesterExpiresAt >= Date.now() &&
           !betaTesterNoticeClosed && (
