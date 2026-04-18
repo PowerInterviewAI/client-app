@@ -16,9 +16,10 @@ import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useIdleDetector } from '@/hooks/use-idle';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
-import { RunningState } from '@/types/app-state';
+import { RunningState, UserRole } from '@/types/app-state';
 import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
 import { type Transcript } from '@/types/transcript';
+import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 
 export default function MainPage() {
   const { logout } = useAuth();
@@ -228,6 +229,13 @@ export default function MainPage() {
             <TranscriptPanel transcripts={transcripts} style={transcriptStyle} />
           )}
         </div>
+
+        {/* Show beta tester notice */}
+        {appState?.userRole === UserRole.BetaTester &&
+          appState?.betaTesterExpiresAt &&
+          appState?.betaTesterExpiresAt >= Date.now() && (
+            <BetaTesterNotice expiresAt={appState?.betaTesterExpiresAt} />
+          )}
 
         {/* Right Column: Main Suggestions Panel */}
         {(hasLiveSuggestions || hasActionSuggestions) && (

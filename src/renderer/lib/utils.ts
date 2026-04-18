@@ -9,3 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 export const getElectron = () => {
   return typeof window !== 'undefined' ? window.electronAPI : undefined;
 };
+
+export const getCurrentTimestamp = () => {
+  return Date.now();
+};
