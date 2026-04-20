@@ -1,4 +1,4 @@
-import { ChevronUp, CreditCard, Key, LogOut, Mail, SettingsIcon } from 'lucide-react';
+import { ChevronUp, CreditCard, Key, LogOut, Mail, Settings, SettingsIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -80,10 +80,10 @@ export function ProfileGroup({
                     : '?'}
                 </div>
               )} */}
-              <p className="text-sm font-medium truncate">
-                {config?.interviewConf?.username ?? '?'}
-              </p>
               <ChevronUp className="h-4 w-4" />
+              <p className="text-sm font-medium truncate">
+                {config?.interviewConf?.username || 'Settings'}
+              </p>
             </div>
           </Button>
         </DropdownMenuTrigger>
@@ -112,7 +112,7 @@ export function ProfileGroup({
             Sign out
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuLabel className='flex items-center'>
+          <DropdownMenuLabel className="flex items-center">
             <Mail className="mr-2 h-4 w-4" />
             {config?.email}
           </DropdownMenuLabel>
