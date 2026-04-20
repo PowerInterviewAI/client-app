@@ -1,4 +1,4 @@
-import { ChevronUp, CreditCard, Key, LogOut, Mail, Settings, SettingsIcon } from 'lucide-react';
+import { ChevronUp, CreditCard, Key, LogOut, Mail, SettingsIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
