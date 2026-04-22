@@ -15,7 +15,7 @@
 
 ## Overview
 
-Power Interview is a privacy-first AI assistant designed to help you ace technical and behavioral interviews. With real-time transcription and intelligent suggestions, you'll have the confidence and support you need during live interviews—all while maintaining your privacy.
+Power Interview is a privacy-first AI assistant designed to help you ace technical and behavioral interviews. With real-time transcription and intelligent suggestions, you'll have the confidence and support you need during live interviews-all while maintaining your privacy.
 
 ## Privacy First
 
