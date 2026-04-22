@@ -19,7 +19,7 @@ export function registerGlobalHotkeys(): void {
   // Unregister existing hotkeys first
   globalShortcut.unregisterAll();
 
-  // Stop assistant — Ctrl+Shift+Q
+  // Stop assistant - Ctrl+Shift+Q
   globalShortcut.register('Control+Shift+Q', () => {
     const w = BrowserWindow.getAllWindows()[0];
     if (w && !w.isDestroyed()) {
@@ -27,7 +27,7 @@ export function registerGlobalHotkeys(): void {
     }
   });
 
-  // Stealth mode toggle — Ctrl+Shift+M
+  // Stealth mode toggle - Ctrl+Shift+M
   globalShortcut.register('Control+Shift+M', () => toggleStealth());
 
   // Opacity toggle (Ctrl+Shift+N): toggle opacity when in stealth mode

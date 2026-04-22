@@ -36,7 +36,7 @@ export function IdleOverlay() {
         cursor: 'pointer',
       }}
     >
-      <div>App is idle — click or press any key to wake.</div>
+      <div>App is idle - click or press any key to wake.</div>
     </div>
   );
 }

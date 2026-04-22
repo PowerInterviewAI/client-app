@@ -71,7 +71,7 @@ export default function PaymentHistoryTab({
     if (isActive) {
       // load immediately (show spinner on first load)
       fetchHistory();
-      // background polls are silent — no spinner flash
+      // background polls are silent - no spinner flash
       interval = window.setInterval(() => fetchHistory(true), 5000);
     }
 

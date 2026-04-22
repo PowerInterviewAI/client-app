@@ -166,7 +166,7 @@ export class ActionSuggestionService {
         message: 'Screenshot capture failed. Please try again.',
       });
     } finally {
-      // Release lock — always reached now regardless of capture or upload failure
+      // Release lock - always reached now regardless of capture or upload failure
       actionLockService.release(ActionType.ScreenshotCapture);
     }
   }
@@ -320,9 +320,9 @@ export class ActionSuggestionService {
           : JSON.stringify(error.content ?? {});
       // return `status=${error.status}; content=${content}`;
       if (error.status === 429) {
-        return 'Too many requests. Please try again later.'
+        return 'Too many requests. Please try again later.';
       } else {
-        return 'Failed to generate response.'
+        return 'Failed to generate response.';
       }
     }
     return error instanceof Error ? error.message : String(error);
