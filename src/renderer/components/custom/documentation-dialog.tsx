@@ -44,8 +44,7 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
           <DialogDescription>
             <p>
               Power Interview is an AI-powered assistant that enhances your interview experience
-              with real-time suggestions, on-screen code recommendations, and an optional Face Swap
-              feature.
+              with real-time suggestions, on-screen code recommendations.
             </p>
             <p className="mt-2 text-sm">
               For full documentation, visit{' '}

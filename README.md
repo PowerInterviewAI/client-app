@@ -6,7 +6,7 @@
 
 🌐 **Website**: [https://www.powerinterviewai.com](https://www.powerinterviewai.com)
 
-[![Version](https://img.shields.io/badge/version-1.4.3-blue.svg)](https://github.com/PowerInterviewAI/client-app/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.4.4-blue.svg)](https://github.com/PowerInterviewAI/client-app/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 📧 [Email](mailto:team@vectorleappulse.xyz) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/TJJp5azK7Z) | 🐦 [X](https://x.com/power_interview)
