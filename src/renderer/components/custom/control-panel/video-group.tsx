@@ -51,18 +51,18 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
     // Disable face swap if required devices are not found
     if (!obsCameraExists && config?.faceSwap) {
       updateConfig({ faceSwap: false });
-      toast.error('OBS Virtual Camera not found — disabling Face Swap');
+      toast.error('OBS Virtual Camera not found - disabling Face Swap');
     }
     if (!vbInputExists && config?.faceSwap) {
       updateConfig({ faceSwap: false });
-      toast.error('VB-Audio Virtual Cable not found — disabling Face Swap');
+      toast.error('VB-Audio Virtual Cable not found - disabling Face Swap');
     }
   }, [obsCameraExists, vbInputExists, config?.faceSwap, updateConfig]);
 
   useEffect(() => {
     if (lowCredits === true && config?.faceSwap) {
       updateConfig({ faceSwap: false });
-      toast.error('Credits depleted — disabling Face Swap');
+      toast.error('Credits depleted - disabling Face Swap');
     }
   }, [lowCredits, config?.faceSwap, updateConfig]);
 

@@ -24,7 +24,7 @@ export function MainGroup({ stateConfig, getDisabled }: MainGroupProps) {
       // eslint-disable-next-line
       const res = onClick() as any;
 
-      // If we're currently running, the user is stopping — wait for any async stop
+      // If we're currently running, the user is stopping - wait for any async stop
       // action to complete before asking about export.
       if (runningState === RunningState.Running) {
         if (res && typeof res.then === 'function') {
