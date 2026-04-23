@@ -10,6 +10,7 @@ export enum RunningState {
 
 export enum UserRole {
   User = 'user',
+  TrialUser = 'trial_user',
   BetaTester = 'beta_tester',
   Admin = 'admin',
 }
