@@ -131,6 +131,12 @@ const electronApi = {
     },
   },
 
+  // macOS permission checks
+  permissions: {
+    checkScreenRecording: () => ipcRenderer.invoke('permissions:check-screen-recording'),
+    requestMicrophone: () => ipcRenderer.invoke('permissions:request-microphone'),
+  },
+
   // Open external URLs in the default browser
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
 

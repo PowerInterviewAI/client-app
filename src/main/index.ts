@@ -18,7 +18,7 @@ import { registerPaymentHandlers } from './ipc/payment.js';
 import { registerActionSuggestionHandlers } from './ipc/suggestion.action.js';
 import { registerLiveSuggestionHandlers } from './ipc/suggestion.live.js';
 import { registerToolsHandlers } from './ipc/tools.js';
-import { initializeAudioLoopback, registerTranscriptHandlers } from './ipc/transcript.js';
+import { initializeAudioLoopback, registerPermissionHandlers, registerTranscriptHandlers } from './ipc/transcript.js';
 import { registerWindowHandlers } from './ipc/window.js';
 import { autoUpdaterService } from './services/auto-updater.service.js';
 import { healthCheckService } from './services/health-check.service.js';
@@ -111,14 +111,45 @@ async function createWindow() {
   // Set minimum size of the window to prevent it from being resized too small
   win.setMinimumSize(MIN_WIDTH, MIN_HEIGHT);
 
-  // Remove the default application menu and hide the menu bar
-  try {
-    Menu.setApplicationMenu(null);
-  } catch (e) {
-    console.warn('Failed to set application menu:', e);
+  // On macOS, keep a minimal menu so Cmd+C/V/X/A/Z/Q work.
+  // On Windows/Linux, remove the menu bar entirely.
+  if (process.platform === 'darwin') {
+    const macMenu = Menu.buildFromTemplate([
+      {
+        label: app.name,
+        submenu: [
+          { role: 'about' },
+          { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideOthers' },
+          { role: 'unhide' },
+          { type: 'separator' },
+          { role: 'quit' },
+        ],
+      },
+      {
+        label: 'Edit',
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectAll' },
+        ],
+      },
+    ]);
+    Menu.setApplicationMenu(macMenu);
+  } else {
+    try {
+      Menu.setApplicationMenu(null);
+    } catch (e) {
+      console.warn('Failed to set application menu:', e);
+    }
+    win.setMenuBarVisibility(false);
+    win.setAutoHideMenuBar(true);
   }
-  win.setMenuBarVisibility(false);
-  win.setAutoHideMenuBar(true);
 
   // Enable content protection to prevent screen capture/recording (unless disabled via CLI)
   const disableContentProtection = process.argv.includes('--disable-content-protection');
@@ -165,6 +196,7 @@ app.whenReady().then(async () => {
   registerAuthHandlers();
   registerPaymentHandlers();
   registerLLMHandlers();
+  registerPermissionHandlers();
   registerTranscriptHandlers();
   registerLiveSuggestionHandlers();
   registerActionSuggestionHandlers();

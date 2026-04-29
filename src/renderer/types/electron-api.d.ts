@@ -154,6 +154,12 @@ declare global {
       onChange: (callback: (percent: number) => void) => () => void;
     };
 
+    // macOS permission checks
+    permissions: {
+      checkScreenRecording: () => Promise<'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'>;
+      requestMicrophone: () => Promise<boolean>;
+    };
+
     // Open external URL in user's default browser
     openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
 

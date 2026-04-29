@@ -112,7 +112,13 @@
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Power Interview needs microphone access to transcribe your voice during interviews.",
+        "NSScreenRecordingUsageDescription": "Power Interview needs screen recording access to capture system audio during interviews."
+      }
     },
     "nsis": {
       "oneClick": false,

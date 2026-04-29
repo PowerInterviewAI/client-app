@@ -23,13 +23,25 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
   videoPanelRef: null,
 
   startAssistant: async () => {
+    const electron = getElectron();
+    if (!electron) {
+      throw new Error('Electron API not available');
+    }
+
     try {
       set({ error: null });
 
-      const electron = getElectron();
-      if (!electron) {
-        throw new Error('Electron API not available');
+      // On macOS, verify Screen Recording permission before starting.
+      // desktopCapturer.getSources() returns [] when permission is denied, which
+      // causes the electron-audio-loopback handler to throw without resolving
+      // getDisplayMedia(), hanging the start flow indefinitely.
+      const screenStatus = await electron.permissions.checkScreenRecording();
+      if (screenStatus === 'denied' || screenStatus === 'restricted') {
+        throw new Error(
+          'Screen Recording permission is required. Go to System Settings → Privacy & Security → Screen Recording, enable Power Interview, then restart the app.'
+        );
       }
+
       electron.appState.update({ runningState: RunningState.Starting });
 
       // Clear previous history
@@ -55,10 +67,10 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       // Update running state to Running after successful start
       electron.appState.update({ runningState: RunningState.Running });
     } catch (error) {
+      // Reset state to Idle so the button doesn't stay stuck on "Starting..."
+      electron.appState.update({ runningState: RunningState.Idle });
       const errorMessage = error instanceof Error ? error.message : 'Failed to start assistant';
-      set({
-        error: errorMessage,
-      });
+      set({ error: errorMessage });
       console.error('Start assistant error:', error);
       throw error;
     }

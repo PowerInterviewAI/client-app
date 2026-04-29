@@ -8,8 +8,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
-import { getElectron } from '@/lib/utils';
+import { cn, getElectron } from '@/lib/utils';
 import { useConfigStore } from '@/hooks/use-config-store';
+
+const isMac = navigator.platform.toUpperCase().includes('MAC');
 
 export default function Titlebar() {
   const isStealth = useIsStealthMode();
@@ -42,7 +44,10 @@ export default function Titlebar() {
         id="titlebar"
         // eslint-disable-next-line
         style={{ WebkitAppRegion: 'drag' } as any}
-        className="flex items-center gap-3 h-9 px-1 select-none bg-card border-b border-border"
+        className={cn(
+          'flex items-center gap-3 h-9 pr-1 select-none bg-card border-b border-border',
+          isMac ? 'pl-20' : 'pl-1'
+        )}
       >
         <div className="flex flex-1 items-center gap-2 px-1">
           <img src={faviconSvg} alt="logo" className="h-5 w-5" />
