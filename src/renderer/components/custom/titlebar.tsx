@@ -1,5 +1,5 @@
 import { EyeOff, Moon, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
 import CreditsDisplay from '@/components/custom/credits-display';
@@ -8,15 +8,31 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
-import { cn, getElectron } from '@/lib/utils';
+import { getElectron } from '@/lib/utils';
 import { useConfigStore } from '@/hooks/use-config-store';
 
 const isMac = navigator.platform.toUpperCase().includes('MAC');
+
+// Traffic lights span x=7..59 logical px (3×12px buttons + 2×8px gaps + 7px offset).
+// We keep 72 logical px clear (59px buttons + 13px breathing room).
+// CSS padding = 72 / zoomFactor so it stays 72 logical px at any zoom level.
+const TRAFFIC_LIGHT_LOGICAL_CLEAR = 72;
 
 export default function Titlebar() {
   const isStealth = useIsStealthMode();
 
   const { isDark, toggleTheme } = useThemeStore();
+
+  const [zoomFactor, setZoomFactor] = useState(1);
+  useEffect(() => {
+    if (!isMac) return;
+    const electron = getElectron();
+    if (!electron) return;
+    electron.zoom.getFactor().then(setZoomFactor).catch(() => {});
+    return electron.zoom.onChange((percent) => setZoomFactor(percent / 100));
+  }, []);
+
+  const macPaddingLeft = isMac ? Math.ceil(TRAFFIC_LIGHT_LOGICAL_CLEAR / zoomFactor) : undefined;
 
   const handleClose = () => {
     const api = window.electronAPI;
@@ -43,11 +59,8 @@ export default function Titlebar() {
       <div
         id="titlebar"
         // eslint-disable-next-line
-        style={{ WebkitAppRegion: 'drag' } as any}
-        className={cn(
-          'flex items-center gap-3 h-9 pr-1 select-none bg-card border-b border-border',
-          isMac ? 'pl-20' : 'pl-1'
-        )}
+        style={{ WebkitAppRegion: 'drag', paddingLeft: macPaddingLeft } as any}
+        className="flex items-center gap-3 h-9 pr-1 pl-1 select-none bg-card border-b border-border"
       >
         <div className="flex flex-1 items-center gap-2 px-1">
           <img src={faviconSvg} alt="logo" className="h-5 w-5" />

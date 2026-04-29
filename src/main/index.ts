@@ -98,6 +98,9 @@ async function createWindow() {
     title: 'Power Interview',
     ...savedBounds,
     titleBarStyle: 'hidden',
+    // Center traffic lights vertically in the h-9 (36px) titlebar.
+    // Default y=7 puts button centers at 13px; (36-12)/2=12 is exact center.
+    trafficLightPosition: { x: 7, y: 12 },
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
