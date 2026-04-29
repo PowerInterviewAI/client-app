@@ -6,6 +6,7 @@ const WS_OPEN_TIMEOUT_MS = 5000;
 const WS_RETRY_MAX_ATTEMPTS = 5;
 const WS_RETRY_BASE_DELAY_MS = 1000;
 const WS_RETRY_MAX_DELAY_MS = 8000;
+const GET_DISPLAY_MEDIA_TIMEOUT_MS = 20000;
 const BACKEND_BASE_URL = import.meta.env.DEV
   ? 'http://localhost:8080'
   : 'https://api.powerinterviewai.com';
@@ -279,10 +280,20 @@ class LiveTranscriptionService {
     });
 
     await electron.transcription.enableLoopbackAudio();
-    const displayStream = await navigator.mediaDevices.getDisplayMedia({
-      audio: true,
-      video: true,
-    });
+    const displayStream = await Promise.race([
+      navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }),
+      new Promise<never>((_, reject) =>
+        window.setTimeout(
+          () =>
+            reject(
+              new Error(
+                'Screen capture timed out. On macOS, go to System Settings → Privacy & Security → Screen Recording and enable Power Interview, then restart the app.'
+              )
+            ),
+          GET_DISPLAY_MEDIA_TIMEOUT_MS
+        )
+      ),
+    ]);
     await electron.transcription.disableLoopbackAudio();
 
     displayStream.getVideoTracks().forEach((track) => {

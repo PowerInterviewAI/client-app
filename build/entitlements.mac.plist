@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!-- Required by Electron for JIT compilation (V8 engine) -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <!-- Required by Electron for unsigned executable memory -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <!-- Required by Electron to load plugins/native modules -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    <!-- Required to disable DYLD environment variable restrictions -->
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
+    <!-- Microphone access for interview transcription -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+    <!-- Outbound network access for WebSocket/API connections -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+  </dict>
+</plist>

@@ -1,7 +1,7 @@
 {
   "name": "power-interview",
   "private": false,
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "AI-powered live interview assistant",
   "author": "Power Interview",
   "main": "electron-dist/index.js",
@@ -112,7 +112,13 @@
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Power Interview needs microphone access to transcribe your voice during interviews.",
+        "NSScreenRecordingUsageDescription": "Power Interview needs screen recording access to capture system audio during interviews."
+      }
     },
     "nsis": {
       "oneClick": false,

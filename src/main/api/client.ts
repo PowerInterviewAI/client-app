@@ -3,9 +3,15 @@
  * Base client for making HTTP requests to backend
  */
 
+import os from 'os';
+
 import { app } from 'electron';
 
 import { BACKEND_BASE_URL } from '../consts.js';
+
+function buildUserAgent(): string {
+  return `PowerInterview/${app.getVersion()} (${process.platform}; ${process.arch}; ${os.release()})`;
+}
 import { configStore } from '../store/config.store.js';
 
 export interface ApiResponse<T = unknown> {
@@ -39,7 +45,7 @@ export class ApiClient {
     this.baseUrl = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/'; // Ensure baseUrl ends with slash
     this.headers = {
       'Content-Type': 'application/json',
-      'User-Agent': `PowerInterview/${app.getVersion()}`,
+      'User-Agent': buildUserAgent(),
     };
   }
 
@@ -78,7 +84,7 @@ export class ApiClient {
 
       // Create headers without Content-Type for FormData
       const formDataHeaders: Record<string, string> = {
-        'User-Agent': `PowerInterview/${app.getVersion()}`,
+        'User-Agent': buildUserAgent(),
         Authorization: this.headers['Authorization'] || '',
       };
 
