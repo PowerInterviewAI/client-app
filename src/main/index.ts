@@ -217,13 +217,18 @@ app.whenReady().then(async () => {
     // Set window reference for auto-updater
     autoUpdaterService.setMainWindow(win);
 
-    // Check for updates on app launch
-    // Use setTimeout to avoid blocking the app initialization
+    // Check for updates on app launch, then every 5 minutes
     setTimeout(() => {
       autoUpdaterService.checkForUpdates().catch((error) => {
         console.error('[Main] Failed to check for updates:', error);
       });
-    }, 3000); // Wait 3 seconds after app launch
+
+      setInterval(() => {
+        autoUpdaterService.checkForUpdates().catch((error) => {
+          console.error('[Main] Failed to check for updates:', error);
+        });
+      }, 5 * 60_000);
+    }, 3000);
   }
 
   // Start health check service
