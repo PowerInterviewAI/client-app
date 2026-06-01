@@ -1,8 +1,9 @@
 import { EnvUtil } from './utils/env.js';
 
-export const BACKEND_BASE_URL = EnvUtil.isDev()
-  ? 'http://localhost:8080'
-  : 'https://api.powerinterviewai.com';
+export const BACKEND_BASE_URL =
+  process.platform === 'darwin' || !EnvUtil.isDev()
+    ? 'https://api.powerinterviewai.com'
+    : 'http://localhost:8080';
 
 // minimum allowed dimensions for window bounds
 export const MIN_WIDTH = 760;

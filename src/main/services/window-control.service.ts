@@ -1,4 +1,4 @@
-import { BrowserWindow, screen } from 'electron';
+import { BrowserWindow, app, screen } from 'electron';
 
 import { MIN_HEIGHT, MIN_WIDTH } from '../consts.js';
 import { configStore } from '../store/config.store.js';
@@ -271,6 +271,11 @@ export function enableStealth(): void {
       console.warn('Failed to save stealth state:', e);
     }
 
+    if (process.platform === 'darwin') {
+      try { win.setWindowButtonVisibility(false); } catch (e) { console.warn('setWindowButtonVisibility(false) failed:', e); }
+      try { app.dock?.hide(); } catch (e) { console.warn('dock.hide failed:', e); }
+    }
+
     console.log('Stealth mode enabled');
 
     try {
@@ -306,6 +311,14 @@ export function disableStealth(): void {
       configStore.setStealth(_stealth);
     } catch (e) {
       console.warn('Failed to save stealth state:', e);
+    }
+
+    win.show();
+    win.focus();
+
+    if (process.platform === 'darwin') {
+      try { win.setWindowButtonVisibility(true); } catch (e) { console.warn('setWindowButtonVisibility(true) failed:', e); }
+      try { app.dock?.show(); } catch (e) { console.warn('dock.show failed:', e); }
     }
 
     console.log('Stealth mode disabled');

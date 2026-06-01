@@ -71,7 +71,7 @@ export default function Titlebar() {
               // eslint-disable-next-line
               style={{ WebkitAppRegion: 'drag' } as any}
             >
-              Power Interview
+              Power Interview AI
             </div>
           </div>
         )}

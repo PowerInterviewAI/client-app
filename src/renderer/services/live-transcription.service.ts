@@ -7,9 +7,11 @@ const WS_RETRY_MAX_ATTEMPTS = 5;
 const WS_RETRY_BASE_DELAY_MS = 1000;
 const WS_RETRY_MAX_DELAY_MS = 8000;
 const GET_DISPLAY_MEDIA_TIMEOUT_MS = 20000;
-const BACKEND_BASE_URL = import.meta.env.DEV
-  ? 'http://localhost:8080'
-  : 'https://api.powerinterviewai.com';
+const isMacOS = navigator.platform.toUpperCase().includes('MAC');
+const BACKEND_BASE_URL =
+  isMacOS || !import.meta.env.DEV
+    ? 'https://api.powerinterviewai.com'
+    : 'http://localhost:8080';
 const STREAMING_URL = `${BACKEND_BASE_URL.replace('http', 'ws')}/api/asr/streaming`;
 
 // Inline AudioWorklet processor (runs off the main thread)
