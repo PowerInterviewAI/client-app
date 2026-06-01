@@ -282,20 +282,26 @@ class LiveTranscriptionService {
     });
 
     await electron.transcription.enableLoopbackAudio();
-    const displayStream = await Promise.race([
-      navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }),
-      new Promise<never>((_, reject) =>
-        window.setTimeout(
-          () =>
-            reject(
-              new Error(
-                'Screen capture timed out. On macOS, go to System Settings → Privacy & Security → Screen Recording and enable Power Interview AI, then restart the app.'
-              )
-            ),
-          GET_DISPLAY_MEDIA_TIMEOUT_MS
-        )
-      ),
-    ]);
+    let displayStream: MediaStream;
+    try {
+      displayStream = await Promise.race([
+        navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }),
+        new Promise<never>((_, reject) =>
+          window.setTimeout(() => reject(new Error('timeout')), GET_DISPLAY_MEDIA_TIMEOUT_MS)
+        ),
+      ]);
+    } catch (err) {
+      await electron.transcription.disableLoopbackAudio();
+      // User denied the OS screen-recording permission dialog, or timed out.
+      // The pre-flight check passes 'not-determined' through so the OS can prompt here.
+      const isPermissionDenied = err instanceof DOMException && err.name === 'NotAllowedError';
+      const isTimeout = err instanceof Error && err.message === 'timeout';
+      if (isPermissionDenied || isTimeout) {
+        await electron.permissions.showDeniedDialog('screen-recording');
+        throw Object.assign(new Error(), { name: 'PermissionError' });
+      }
+      throw err;
+    }
     await electron.transcription.disableLoopbackAudio();
 
     displayStream.getVideoTracks().forEach((track) => {

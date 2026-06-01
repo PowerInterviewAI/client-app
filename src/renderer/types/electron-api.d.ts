@@ -157,7 +157,9 @@ declare global {
     // macOS permission checks
     permissions: {
       checkScreenRecording: () => Promise<'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'>;
+      checkMicrophone: () => Promise<'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'>;
       requestMicrophone: () => Promise<boolean>;
+      showDeniedDialog: (type: 'screen-recording' | 'microphone') => Promise<void>;
     };
 
     // Open external URL in user's default browser
