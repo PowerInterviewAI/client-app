@@ -147,31 +147,34 @@ export default function Titlebar() {
             </TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleClose}
-                aria-label="Close"
-                className="h-7 w-12 flex items-center justify-center rounded hover:bg-destructive/50"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
+          {!isMac && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleClose}
+                  aria-label="Close"
+                  className="h-7 w-12 flex items-center justify-center rounded hover:bg-destructive/50"
+                  // eslint-disable-next-line
+                  style={{ WebkitAppRegion: 'no-drag' } as any}
                 >
-                  <path d="M6 6l12 12M6 18L18 6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Close</p>
-            </TooltipContent>
-          </Tooltip>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path d="M6 6l12 12M6 18L18 6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Close</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
         </div>
       </div>
 

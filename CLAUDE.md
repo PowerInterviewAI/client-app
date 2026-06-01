@@ -23,7 +23,7 @@ npm run format                 # Prettier + ESLint auto-fix
 
 ## Architecture
 
-This is an **Electron desktop application** - an AI-powered live interview assistant that provides real-time transcription and AI suggestions during job interviews.
+This is an **Electron desktop application** targeting **macOS and Windows** - an AI-powered live interview assistant that provides real-time transcription and AI suggestions during job interviews.
 
 **Stack:** React 19 + TypeScript + Tailwind CSS + shadcn/ui (renderer), Electron 40 (main), Vite (build).
 
@@ -65,6 +65,12 @@ Backend URL is defined in [src/main/consts.ts](src/main/consts.ts).
 Hash-based router (required for Electron): `/` → auth flow → `/main` (interview UI) → `/payment`.
 
 Router defined in [src/renderer/router.tsx](src/renderer/router.tsx).
+
+### Platform Differences
+
+- **macOS:** `titleBarStyle: 'hidden'` with native traffic lights (close/minimize/zoom) on the top-left. The custom titlebar leaves 72 logical px clear for them. No custom close button in the UI.
+- **Windows:** Custom titlebar rendered entirely in the renderer. Includes a close button (top-right) since there are no native traffic lights. Use `process.platform === 'darwin'` (main) or `navigator.platform` / `isMac` (renderer) to branch platform-specific behavior.
+- Audio capture and screenshot APIs may behave differently per platform — test on both when touching [src/main/services/](src/main/services/).
 
 ### Key Features
 
