@@ -38,7 +38,7 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       const screenStatus = await electron.permissions.checkScreenRecording();
       if (screenStatus === 'denied' || screenStatus === 'restricted') {
         throw new Error(
-          'Screen Recording permission is required. Go to System Settings → Privacy & Security → Screen Recording, enable Power Interview, then restart the app.'
+          'Screen Recording permission is required. Go to System Settings → Privacy & Security → Screen Recording, enable Power Interview AI, then restart the app.'
         );
       }
 

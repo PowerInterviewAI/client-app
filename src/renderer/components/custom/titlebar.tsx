@@ -28,7 +28,7 @@ export default function Titlebar() {
     if (!isMac) return;
     const electron = getElectron();
     if (!electron) return;
-    electron.zoom.getFactor().then(setZoomFactor).catch(() => {});
+    electron.zoom.getFactor().then(setZoomFactor).catch(() => { });
     return electron.zoom.onChange((percent) => setZoomFactor(percent / 100));
   }, []);
 
@@ -62,17 +62,20 @@ export default function Titlebar() {
         style={{ WebkitAppRegion: 'drag', paddingLeft: macPaddingLeft } as any}
         className="flex items-center gap-3 h-9 pr-1 pl-1 select-none bg-card border-b border-border"
       >
-        <div className="flex flex-1 items-center gap-2 px-1">
-          <img src={faviconSvg} alt="logo" className="h-5 w-5" />
+        {!isMac && (
+          <div className="flex flex-1 items-center gap-2 px-1">
+            <img src={faviconSvg} alt="logo" className="h-5 w-5" />
 
-          <div
-            className="text-sm font-medium"
-            // eslint-disable-next-line
-            style={{ WebkitAppRegion: 'drag' } as any}
-          >
-            Power Interview
+            <div
+              className="text-sm font-medium"
+              // eslint-disable-next-line
+              style={{ WebkitAppRegion: 'drag' } as any}
+            >
+              Power Interview
+            </div>
           </div>
-        </div>
+        )}
+        {isMac && <div className="flex-1" />}
 
         {appState?.isLoggedIn && appState?.credits !== undefined && (
           <CreditsDisplay

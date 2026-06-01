@@ -287,7 +287,7 @@ class LiveTranscriptionService {
           () =>
             reject(
               new Error(
-                'Screen capture timed out. On macOS, go to System Settings → Privacy & Security → Screen Recording and enable Power Interview, then restart the app.'
+                'Screen capture timed out. On macOS, go to System Settings → Privacy & Security → Screen Recording and enable Power Interview AI, then restart the app.'
               )
             ),
           GET_DISPLAY_MEDIA_TIMEOUT_MS

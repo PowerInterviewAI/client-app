@@ -15,11 +15,11 @@
 
 ## Overview
 
-Power Interview is a privacy-first AI assistant designed to help you ace technical and behavioral interviews. With real-time transcription and intelligent suggestions, you'll have the confidence and support you need during live interviews-all while maintaining your privacy.
+Power Interview AI is a privacy-first AI assistant designed to help you ace technical and behavioral interviews. With real-time transcription and intelligent suggestions, you'll have the confidence and support you need during live interviews-all while maintaining your privacy.
 
 ## Privacy First
 
-**Your data stays with you.** Power Interview is built with privacy as a core principle:
+**Your data stays with you.** Power Interview AI is built with privacy as a core principle:
 
 - **Client-Side Application**: Desktop client for account management and UI
 - **Secure Storage**: Credentials and personal info stored using Electron Store
@@ -64,7 +64,7 @@ Stay on top of the conversation with live ASR:
 
 ## Platform Support
 
-Power Interview desktop client is supported on:
+Power Interview AI desktop client is supported on:
 
 - Windows 10/11 (x64 installer build)
 - macOS (Apple Silicon and Intel release artifacts)
@@ -73,7 +73,7 @@ Release binaries are published on the [GitHub Releases](https://github.com/Power
 
 ## Architecture
 
-Power Interview follows a **client-server architecture**.
+Power Interview AI follows a **client-server architecture**.
 
 ### Desktop Client
 

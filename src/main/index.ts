@@ -33,14 +33,9 @@ let win: BrowserWindow | null = null;
 // Must run before app is ready so built-in loopback IPC handlers are registered.
 initializeAudioLoopback();
 
-// Ensure the application name is set (used by native dialogs/title fallbacks)
-try {
-  if (typeof app.setName === 'function') {
-    app.setName('Power Interview');
-  }
-} catch (err) {
-  console.warn('Failed to set app name:', err);
-}
+// Ensure the application name is set (used by native dialogs/title fallbacks).
+// app.setName() was removed in Electron 40+; use the property setter instead.
+app.name = 'Power Interview AI';
 
 // Prevent Chromium from aggressively throttling timers/rendering
 // when the window is occluded or in the background. This improves
@@ -95,7 +90,7 @@ async function createWindow() {
   console.log('Adjusted window bounds with minimum constraints:', savedBounds);
 
   win = new BrowserWindow({
-    title: 'Power Interview',
+    title: 'Power Interview AI',
     ...savedBounds,
     titleBarStyle: 'hidden',
     // Center traffic lights vertically in the h-9 (36px) titlebar.
@@ -119,7 +114,7 @@ async function createWindow() {
   if (process.platform === 'darwin') {
     const macMenu = Menu.buildFromTemplate([
       {
-        label: app.name,
+        label: 'Power Interview AI',
         submenu: [
           { role: 'about' },
           { type: 'separator' },
