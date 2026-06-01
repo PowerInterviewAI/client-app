@@ -3,6 +3,13 @@ import { BrowserWindow } from 'electron';
 import { ZOOM_MAX_FACTOR, ZOOM_MIN_FACTOR } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 
+// h-9 titlebar height in CSS px (must match titlebar.tsx)
+const TITLEBAR_CSS_HEIGHT = 36;
+// macOS traffic light button diameter in logical px
+const TRAFFIC_LIGHT_SIZE = 12;
+// x offset matching trafficLightPosition in index.ts
+const TRAFFIC_LIGHT_X = 7;
+
 let win: BrowserWindow | null = null;
 
 export function setWindowReference(window: BrowserWindow) {
@@ -15,6 +22,7 @@ export function setWindowReference(window: BrowserWindow) {
       if (saved && !isNaN(saved)) {
         const clamped = clamp(saved);
         win!.webContents.setZoomFactor(clamped);
+        repositionTrafficLights(clamped);
       }
     } catch (e) {
       console.warn('zoom.service:apply saved zoom failed', e);
@@ -58,11 +66,22 @@ export function getZoomFactor(): number {
   }
 }
 
+function repositionTrafficLights(factor: number): void {
+  if (process.platform !== 'darwin' || !win || win.isDestroyed()) return;
+  try {
+    const y = Math.round((TITLEBAR_CSS_HEIGHT * factor - TRAFFIC_LIGHT_SIZE) / 2);
+    win.setWindowButtonPosition({ x: TRAFFIC_LIGHT_X, y });
+  } catch (e) {
+    console.warn('zoom.service:repositionTrafficLights failed', e);
+  }
+}
+
 export function setZoomFactor(factor: number): void {
   if (!win || win.isDestroyed()) return;
   const clamped = clamp(factor);
   try {
     win.webContents.setZoomFactor(clamped);
+    repositionTrafficLights(clamped);
     notifyChange(clamped);
     // persist new value
     try {
