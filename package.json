@@ -77,7 +77,7 @@
     "wait-on": "^9.0.3"
   },
   "build": {
-    "appId": "ai.power-interview-ai.client",
+    "appId": "com.powerinterviewai.client-app",
     "productName": "Power Interview AI",
     "copyright": "Copyright ©2026 Power Interview AI",
     "publish": [
@@ -113,6 +113,7 @@
         "dmg",
         "zip"
       ],
+      "icon": "build/icon.icns",
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
       "extendInfo": {
