@@ -79,7 +79,7 @@
   "build": {
     "appId": "com.powerinterviewai.client-app",
     "productName": "Power Interview AI",
-    "copyright": "Copyright ©2026 Power Interview AI",
+    "copyright": "Copyright ©2026 VectorLeap Pulse Innovation LTD",
     "publish": [
       {
         "provider": "github",
