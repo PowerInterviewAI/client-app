@@ -6,7 +6,11 @@ use tauri::State;
 
 use crate::AppServices;
 
-static LOOPBACK_STREAM: Lazy<Mutex<Option<Stream>>> = Lazy::new(|| Mutex::new(None));
+struct SendableStream(Stream);
+unsafe impl Send for SendableStream {}
+unsafe impl Sync for SendableStream {}
+
+static LOOPBACK_STREAM: Lazy<Mutex<Option<SendableStream>>> = Lazy::new(|| Mutex::new(None));
 
 #[tauri::command]
 pub fn transcription_start(services: State<'_, AppServices>) {
@@ -94,7 +98,7 @@ pub fn enable_loopback_audio() -> Result<(), String> {
         stream
             .play()
             .map_err(|e| format!("Failed to start loopback stream: {e}"))?;
-        *stream_guard = Some(stream);
+        *stream_guard = Some(SendableStream(stream));
         return Ok(());
     }
 
@@ -124,17 +128,21 @@ fn build_loopback_stream(
             config,
             move |_data: &[f32], _info| {},
             move |error| log::error!("[AudioLoopback] stream error: {error}"),
+            None,
         ),
         SampleFormat::I16 => device.build_input_stream(
             config,
             move |_data: &[i16], _info| {},
             move |error| log::error!("[AudioLoopback] stream error: {error}"),
+            None,
         ),
         SampleFormat::U16 => device.build_input_stream(
             config,
             move |_data: &[u16], _info| {},
             move |error| log::error!("[AudioLoopback] stream error: {error}"),
+            None,
         ),
+        _ => return Err(format!("Unsupported sample format: {:?}", sample_format)),
     }
     .map_err(|e| format!("Failed to create loopback stream: {e}"))
 }

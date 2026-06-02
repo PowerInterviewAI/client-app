@@ -4,6 +4,8 @@ use serde_json::Value;
 
 use crate::consts::BACKEND_BASE_URL;
 
+pub type ApiError = String;
+
 #[derive(Debug, Clone)]
 pub struct ApiClient {
     client: Client,

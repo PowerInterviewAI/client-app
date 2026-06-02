@@ -271,10 +271,14 @@ async fn capture_and_grayscale() -> Result<Vec<u8>, String> {
     // Use xcap for cross-platform screenshot
     let monitors = xcap::Monitor::all().map_err(|e| e.to_string())?;
     let monitor = monitors.into_iter().next().ok_or("No monitor found")?;
-    let image = monitor.capture_image().map_err(|e| e.to_string())?;
+    let captured = monitor.capture_image().map_err(|e| e.to_string())?;
+    let (width, height) = (captured.width(), captured.height());
+    let raw = captured.into_raw();
+    let rgba = image::RgbaImage::from_raw(width, height, raw)
+        .ok_or("Failed to reconstruct captured image")?;
 
     // Convert to DynamicImage and apply grayscale
-    let dynamic = image::DynamicImage::ImageRgba8(image);
+    let dynamic = image::DynamicImage::ImageRgba8(rgba);
     let gray = dynamic.grayscale();
 
     let mut png_bytes: Vec<u8> = Vec::new();

@@ -3065,6 +3065,7 @@ dependencies = [
  "objc2-app-kit 0.2.2",
  "once_cell",
  "parking_lot",
+ "raw-window-handle",
  "reqwest 0.12.28",
  "serde",
  "serde_json",

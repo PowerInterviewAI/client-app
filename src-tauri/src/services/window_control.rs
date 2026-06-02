@@ -3,6 +3,50 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
 
 use crate::consts::{MIN_HEIGHT, MIN_WIDTH};
+
+fn set_window_opacity(win: &tauri::WebviewWindow, opacity: f64) {
+    #[cfg(target_os = "windows")]
+    {
+        use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+        extern "system" {
+            fn GetWindowLongW(hwnd: isize, index: i32) -> i32;
+            fn SetWindowLongW(hwnd: isize, index: i32, value: i32) -> i32;
+            fn SetLayeredWindowAttributes(hwnd: isize, key: u32, alpha: u8, flags: u32) -> i32;
+        }
+        const GWL_EXSTYLE: i32 = -20;
+        const WS_EX_LAYERED: i32 = 0x80000;
+        const LWA_ALPHA: u32 = 2;
+        if let Ok(handle) = win.window_handle() {
+            if let RawWindowHandle::Win32(h) = handle.as_raw() {
+                let hwnd = h.hwnd.get() as isize;
+                unsafe {
+                    let ex = GetWindowLongW(hwnd, GWL_EXSTYLE);
+                    SetWindowLongW(hwnd, GWL_EXSTYLE, ex | WS_EX_LAYERED);
+                    SetLayeredWindowAttributes(hwnd, 0, (opacity.clamp(0.0, 1.0) * 255.0) as u8, LWA_ALPHA);
+                }
+            }
+        }
+    }
+    #[cfg(target_os = "macos")]
+    {
+        use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+        if let Ok(handle) = win.window_handle() {
+            if let RawWindowHandle::AppKit(h) = handle.as_raw() {
+                unsafe {
+                    use objc2::msg_send;
+                    use objc2::runtime::AnyObject;
+                    let ns_view = h.ns_view.as_ptr() as *mut AnyObject;
+                    let ns_window: *mut AnyObject = msg_send![ns_view, window];
+                    if !ns_window.is_null() {
+                        let _: () = msg_send![ns_window, setAlphaValue: opacity as f64];
+                    }
+                }
+            }
+        }
+    }
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    { let _ = (win, opacity); }
+}
 use crate::services::app_state::AppStateService;
 use crate::services::push_notification::PushNotificationService;
 use crate::store::ConfigStore;
@@ -46,7 +90,7 @@ impl WindowControlService {
         let Some(win) = self.window() else { return };
         let _ = win.set_ignore_cursor_events(true);
         let _ = win.set_always_on_top(true);
-        let _ = win.set_opacity(0.6);
+        let _ = set_window_opacity(&win,0.6);
         *self.stealth.lock() = true;
         self.config_store.set_stealth(true);
         self.app_state.set_stealth(true);
@@ -64,7 +108,7 @@ impl WindowControlService {
         let Some(win) = self.window() else { return };
         let _ = win.set_ignore_cursor_events(false);
         let _ = win.set_always_on_top(false);
-        let _ = win.set_opacity(1.0);
+        let _ = set_window_opacity(&win,1.0);
         let _ = win.show();
         let _ = win.set_focus();
         *self.stealth.lock() = false;
@@ -99,7 +143,7 @@ impl WindowControlService {
         }
         let mut idx = self.opacity_index.lock();
         *idx = (*idx + 1) % OPACITY_LEVELS.len();
-        let _ = win.set_opacity(OPACITY_LEVELS[*idx]);
+        let _ = set_window_opacity(&win,OPACITY_LEVELS[*idx]);
     }
 
     pub fn set_stealth(&self, enabled: bool) {
