@@ -12,10 +12,10 @@ interface VideoPanelProps {
   jpegQuality?: number; // 0.0 - 1.0
 }
 
-export interface VideoPanelHandle {}
+export type VideoPanelHandle = object;
 
 export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(() => {
-  const [videoMessage, setVideoMessage] = useState('Video Stream');
+  const [videoMessage] = useState('Video Stream');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const electron = getElectron();
@@ -23,7 +23,7 @@ export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(() => {
     throw new Error('Electron API not available');
   }
 
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [isStreaming] = useState(false);
 
   return (
     <div className="relative w-full h-full border rounded-xl overflow-hidden bg-white dark:bg-black shrink-0 py-0">

@@ -2,10 +2,10 @@ import { create } from 'zustand';
 
 import { type VideoPanelHandle } from '@/components/custom/video-panel';
 import { getElectron } from '@/lib/utils';
+import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
 
 import { useConfigStore } from './use-config-store';
-import { liveTranscriptionService } from '@/services/live-transcription.service';
 
 interface AssistantService {
   error: string | null;
@@ -18,7 +18,7 @@ interface AssistantService {
   setVideoPanelRef: (ref: React.RefObject<VideoPanelHandle> | null) => void;
 }
 
-export const useAssistantService = create<AssistantService>((set, get) => ({
+export const useAssistantService = create<AssistantService>((set) => ({
   error: null,
   videoPanelRef: null,
 
@@ -73,11 +73,6 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       await electron.tools.clearAll();
 
       const config = useConfigStore.getState().config;
-      const { videoPanelRef } = get();
-
-      // Do something here for face swap
-      if (config?.faceSwap && videoPanelRef?.current) {
-      }
 
       // Start transcription services
       await electron.transcription.start();
@@ -110,13 +105,6 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
         throw new Error('Electron API not available');
       }
       electron.appState.update({ runningState: RunningState.Stopping });
-
-      const config = useConfigStore.getState().config;
-      const { videoPanelRef } = get();
-
-      // Do something here for face swap
-      if (config?.faceSwap && videoPanelRef?.current) {
-      }
 
       // Stop assistant services
       await Promise.all([

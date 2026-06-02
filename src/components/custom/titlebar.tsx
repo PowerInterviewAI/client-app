@@ -6,10 +6,10 @@ import CreditsDisplay from '@/components/custom/credits-display';
 import DocumentationDialog from '@/components/custom/documentation-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
+import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
 import { getElectron } from '@/lib/utils';
-import { useConfigStore } from '@/hooks/use-config-store';
 
 const isMac = navigator.platform.toUpperCase().includes('MAC');
 
@@ -28,7 +28,10 @@ export default function Titlebar() {
     if (!isMac) return;
     const electron = getElectron();
     if (!electron) return;
-    electron.zoom.getFactor().then(setZoomFactor).catch(() => { });
+    electron.zoom
+      .getFactor()
+      .then(setZoomFactor)
+      .catch(() => {});
     return electron.zoom.onChange((percent) => setZoomFactor(percent / 100));
   }, []);
 
@@ -80,7 +83,7 @@ export default function Titlebar() {
         {appState?.isLoggedIn && appState?.credits !== undefined && (
           <CreditsDisplay
             credits={appState.credits ?? 0}
-            llmModel={config?.llmConf?.model ?? appState.providedLLMModel ?? ""}
+            llmModel={config?.llmConf?.model ?? appState.providedLLMModel ?? ''}
             // eslint-disable-next-line
             style={{ WebkitAppRegion: 'drag' } as any}
           />
@@ -177,7 +180,6 @@ export default function Titlebar() {
               </TooltipContent>
             </Tooltip>
           )}
-
         </div>
       </div>
 

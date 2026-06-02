@@ -17,8 +17,8 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
-import { LLMProvider } from '@/types/llm';
 import type { LLMConfigValidationResult, LLMModelInfo } from '@/types/llm';
+import { LLMProvider } from '@/types/llm';
 
 interface LLMGroupProps {
   getDisabled: (state: RunningState, disableOnRunning?: boolean) => boolean;
@@ -50,10 +50,7 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
   const { config, updateConfig } = useConfigStore();
 
   const availableModels = useMemo(
-    () =>
-      models
-        .filter((item) => item.provider === provider)
-        .map((item) => item.id),
+    () => models.filter((item) => item.provider === provider).map((item) => item.id),
     [models, provider]
   );
   const providerValid = PROVIDERS.includes(provider);
@@ -140,7 +137,11 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
 
         setValidation(result.data);
         console.log('validation result:', result.data);
-        setValidationMessage(result.data.provider_ok && result.data.apikey_ok && result.data.model_ok ? 'All details are vaild.' : result.data.error);
+        setValidationMessage(
+          result.data.provider_ok && result.data.apikey_ok && result.data.model_ok
+            ? 'All details are vaild.'
+            : result.data.error
+        );
       } catch (error) {
         console.error('Failed to validate llm config:', error);
         setValidation(null);
@@ -216,10 +217,10 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
       await updateConfig({
         llmConf: useOwnApiKey
           ? {
-            provider: currentProvider,
-            apikey: apiKey.trim(),
-            model: effectiveModel,
-          }
+              provider: currentProvider,
+              apikey: apiKey.trim(),
+              model: effectiveModel,
+            }
           : null,
       });
       toast.success('LLM configuration saved');
@@ -256,7 +257,11 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
           <DialogTitle>LLM Options</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
             <p>Connect your own LLM provider and API key for full control.</p>
-            <p>If you prefer to use our hosted models, we’ll automatically provide them based on your available credits: <strong>GPT-5.4</strong> is active while you have a balance, switching to <strong>Llama-4-Scout (17B)</strong> once credits are exhausted.</p>
+            <p>
+              If you prefer to use our hosted models, we’ll automatically provide them based on your
+              available credits: <strong>GPT-5.4</strong> is active while you have a balance,
+              switching to <strong>Llama-4-Scout (17B)</strong> once credits are exhausted.
+            </p>
           </DialogDescription>
 
           <div className="flex items-center justify-between rounded-md border pl-3 pr-2 py-2">
@@ -302,7 +307,6 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
               className="h-8 text-xs"
               disabled={!useOwnApiKey}
             />
-
           </div>
 
           <div className="grid gap-2">
@@ -322,9 +326,7 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
           </div>
 
           {canShowValidation && (
-            <div
-              className={`rounded-md border px-2 py-1 text-xs ${validationClass}`}
-            >
+            <div className={`rounded-md border px-2 py-1 text-xs ${validationClass}`}>
               {validationText}
             </div>
           )}

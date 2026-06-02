@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
 import ControlPanel from '@/components/custom/control-panel';
 import { IdleOverlay } from '@/components/custom/idle-overlay';
@@ -9,6 +10,7 @@ import ActionSuggestionsPanel from '@/components/custom/panels/action-suggestion
 import LiveSuggestionsPanel from '@/components/custom/panels/live-suggestions-panel';
 import TranscriptPanel from '@/components/custom/panels/transcript-panel';
 import StatusPanel from '@/components/custom/status-panel';
+import TrialUserNotice from '@/components/custom/trial-user-notice';
 import { VideoPanel, type VideoPanelHandle } from '@/components/custom/video-panel';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
@@ -19,8 +21,6 @@ import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { RunningState, UserRole } from '@/types/app-state';
 import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
 import { type Transcript } from '@/types/transcript';
-import BetaTesterNotice from '@/components/custom/beta-tester-notice';
-import TrialUserNotice from '@/components/custom/trial-user-notice';
 
 export default function MainPage() {
   const { logout } = useAuth();
@@ -30,6 +30,7 @@ export default function MainPage() {
   const navigate = useNavigate();
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [now] = useState(() => Date.now());
   const { config, isLoading: configLoading, loadConfig } = useConfigStore();
   const { setVideoPanelRef, stopAssistant } = useAssistantService();
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
@@ -166,21 +167,15 @@ export default function MainPage() {
   );
   const suggestionStyle = useMemo(() => ({ height: `${suggestionHeight}px` }), [suggestionHeight]);
 
-  // Sync app state to local state - remove local state from deps to avoid infinite loops
+  // Sync app state to local state
   useEffect(() => {
-    if (appState?.transcripts && appState.transcripts !== transcripts) {
-      setTranscripts(appState.transcripts);
-    }
+    if (appState?.transcripts) setTranscripts(appState.transcripts);
   }, [appState?.transcripts]);
   useEffect(() => {
-    if (appState?.liveSuggestions && appState.liveSuggestions !== liveSuggestions) {
-      setLiveSuggestions(appState.liveSuggestions);
-    }
+    if (appState?.liveSuggestions) setLiveSuggestions(appState.liveSuggestions);
   }, [appState?.liveSuggestions]);
   useEffect(() => {
-    if (appState?.actionSuggestions && appState.actionSuggestions !== actionSuggestions) {
-      setActionSuggestions(appState.actionSuggestions);
-    }
+    if (appState?.actionSuggestions) setActionSuggestions(appState.actionSuggestions);
   }, [appState?.actionSuggestions]);
 
   // Redirect to login if not logged in
@@ -237,7 +232,7 @@ export default function MainPage() {
         {appState?.userRole === UserRole.BetaTester &&
           appState?.credits === 0 &&
           appState?.betaTesterExpiresAt &&
-          appState?.betaTesterExpiresAt >= Date.now() &&
+          appState?.betaTesterExpiresAt >= now &&
           !betaTesterNoticeClosed && (
             <BetaTesterNotice
               expiresAt={appState?.betaTesterExpiresAt}
