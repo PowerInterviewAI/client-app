@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "identifier": "com.powerinterviewai.client-app",
+  "productName": "Power Interview AI",
+  "version": "1.5.2",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Power Interview AI",
+        "width": 1024,
+        "height": 640,
+        "minWidth": 760,
+        "minHeight": 480,
+        "decorations": false,
+        "shadow": true,
+        "center": true
+      }
+    ],
+    "security": {
+      "capabilities": ["default"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "publisher": "VectorLeap Pulse Innovation LTD",
+    "copyright": "Copyright ©2026 VectorLeap Pulse Innovation LTD",
+    "macOS": {
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Power Interview AI needs microphone access to transcribe your voice during interviews.",
+        "NSScreenRecordingUsageDescription": "Power Interview AI needs screen recording access to capture system audio during interviews."
+      },
+      "entitlements": "../build/entitlements.mac.plist",
+      "signingIdentity": null
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      },
+      "nsis": {
+        "installMode": "perMachine"
+      }
+    },
+    "updater": {
+      "active": true,
+      "pubkey": "",
+      "endpoints": [
+        "https://github.com/PowerInterviewAI/client/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}
