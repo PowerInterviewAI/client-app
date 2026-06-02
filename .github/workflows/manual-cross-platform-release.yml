@@ -33,27 +33,29 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Build renderer assets
-        run: npm run build
-
       - name: Build Tauri bundle
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: npm run tauri:build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.platform }}
-          path: |
-            src-tauri/target/release/bundle/**/*
+          path: src-tauri/target/release/bundle/**/*
           if-no-files-found: error
 
   publish:
-    if: ${{ inputs.publish }}
+    if: inputs.publish
     name: Publish GitHub Release
     needs: build
     runs-on: ubuntu-latest
@@ -68,30 +70,29 @@ jobs:
         with:
           path: release-artifacts
 
-      - name: Prepare release metadata
+      - name: Read version
         id: meta
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          TAG="v${VERSION}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Create or update release
+      - name: Create or update GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.meta.outputs.tag }}"
-          TITLE="Release ${TAG}"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists; uploading artifacts."
           else
-            gh release create "$TAG" --title "$TITLE" --notes "Manual cross-platform Tauri build artifacts."
+            gh release create "$TAG" \
+              --title "Release $TAG" \
+              --notes "Manual cross-platform Tauri build."
           fi
           while IFS= read -r -d '' file; do
             echo "Uploading $(basename "$file")"
             gh release upload "$TAG" "$file" --clobber
-          done < <(
-            find release-artifacts -type f \
-              \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' -o -name '*.msi' -o -name '*.tar.gz' \) \
-              -print0
-          )
+          done < <(find release-artifacts -type f \( \
+            -name '*.exe' -o -name '*.msi' -o \
+            -name '*.dmg' -o -name '*.tar.gz' -o -name '*.zip' \
+          \) -print0)
