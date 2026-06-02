@@ -1,25 +1,25 @@
-﻿# CLAUDE.md
+# CLAUDE.md
 
 This repository is a **Tauri desktop application** for Windows and macOS.
 
 ## Commands
 
 ```bash
-npm run dev
-npm run tauri:dev
-npm run build
-npm run tauri:build
-npm run lint
-npm run format
+pnpm dev
+pnpm tauri:dev
+pnpm build
+pnpm tauri:build
+pnpm lint
+pnpm format
 ```
 
 ## Architecture
 
 The app is built as a Tauri desktop client with a React frontend.
 
-### Renderer
-- `src/renderer/` — React, Tailwind, hooks, components, pages.
-- `src/renderer/lib/tauri-bridge.ts` exposes the same compatibility API used by existing renderer hooks.
+### Frontend
+- `src/` — React, Tailwind, hooks, components, pages.
+- `src/lib/tauri-bridge.ts` exposes the IPC compatibility API used by renderer hooks.
 
 ### Native Backend
 - `src-tauri/src/` — Tauri command handlers, services, state, and native utilities.
@@ -30,23 +30,22 @@ The app is built as a Tauri desktop client with a React frontend.
 - Tauri `invoke()` is exposed through `tauriApi` and assigned to `window.electronAPI` for compatibility.
 - Transcription, permissions, payment, config, and window control are handled through Tauri commands.
 
-## Key Implementation Changes
+## Key Implementation Notes
 
 - Electron has been removed from the repository.
 - The build flows are now Tauri-first.
 - Native audio loopback is implemented in `src-tauri/src/commands/transcription.rs`.
-- MacOS screen recording permission is validated natively.
-- The GitHub Action workflow now builds Tauri bundles instead of Electron packages.
+- macOS screen recording permission is validated natively.
+- The GitHub Actions workflow builds Tauri bundles for Windows and macOS.
 
 ## Build and Release Workflow
 
 The workflow at `.github/workflows/manual-cross-platform-release.yml`:
-- checks out the repo
-- installs npm dependencies
-- builds renderer assets
-- runs `npm run tauri:build`
-- uploads generated bundle artifacts
-- publishes releases when enabled
+- builds on Windows and macOS in parallel
+- installs pnpm dependencies
+- runs `pnpm tauri:build` (which builds the frontend via `beforeBuildCommand` automatically)
+- uploads bundle artifacts
+- publishes a GitHub release when the `publish` input is enabled
 
 ## Platform Support
 
@@ -58,3 +57,4 @@ The workflow at `.github/workflows/manual-cross-platform-release.yml`:
 - There is no `src/main/` Electron host code in this repo anymore.
 - Use the Tauri app as the single desktop implementation.
 - Update native dependencies in `src-tauri/Cargo.toml` and frontend dependencies in `package.json`.
+- Package manager is pnpm — do not use npm or yarn.

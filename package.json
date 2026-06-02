@@ -5,6 +5,7 @@
   "description": "AI-powered live interview assistant",
   "author": "Power Interview AI",
   "type": "module",
+  "packageManager": "pnpm@11.1.3",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
