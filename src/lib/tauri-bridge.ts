@@ -41,8 +41,7 @@ export const tauriApi = {
   auth: {
     signup: (username: string, email: string, password: string) =>
       invoke('auth_signup', { username, email, password }),
-    login: (email: string, password: string) =>
-      invoke('auth_login', { email, password }),
+    login: (email: string, password: string) => invoke('auth_login', { email, password }),
     logout: () => invoke('auth_logout'),
     changePassword: (currentPassword: string, newPassword: string) =>
       invoke('auth_change_password', { currentPassword, newPassword }),
@@ -70,8 +69,7 @@ export const tauriApi = {
     update: (updates: unknown) => invoke('app_state_update', { updates }),
   },
 
-  onAppStateUpdated: (callback: (state: unknown) => void) =>
-    onEvent('app-state-updated', callback),
+  onAppStateUpdated: (callback: (state: unknown) => void) => onEvent('app-state-updated', callback),
 
   // ---- Transcription ----
   transcription: {
@@ -137,8 +135,7 @@ export const tauriApi = {
     checkForUpdates: () => invoke('updater_check_for_updates'),
     quitAndInstall: () => invoke('updater_quit_and_install'),
     getVersion: () => invoke('updater_get_version'),
-    onStatusUpdate: (callback: (data: unknown) => void) =>
-      onEvent('auto-updater:status', callback),
+    onStatusUpdate: (callback: (data: unknown) => void) => onEvent('auto-updater:status', callback),
   },
 
   // ---- Window Controls ----
@@ -149,8 +146,7 @@ export const tauriApi = {
     decrease: () => invoke('zoom_out'),
     reset: () => invoke('zoom_reset'),
     getFactor: () => invoke('zoom_get_factor'),
-    onChange: (callback: (percent: number) => void) =>
-      onEvent('zoom-level-changed', callback),
+    onChange: (callback: (percent: number) => void) => onEvent('zoom-level-changed', callback),
   },
 
   // ---- Permissions ----

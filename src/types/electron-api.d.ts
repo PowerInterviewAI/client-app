@@ -156,9 +156,13 @@ declare global {
 
     // macOS permission checks
     permissions: {
-      checkScreenRecording: () => Promise<'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'>;
+      checkScreenRecording: () => Promise<
+        'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'
+      >;
       checkScreenSources: () => Promise<boolean>;
-      checkMicrophone: () => Promise<'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'>;
+      checkMicrophone: () => Promise<
+        'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'
+      >;
       requestMicrophone: () => Promise<boolean>;
       showDeniedDialog: (type: 'screen-recording' | 'microphone') => Promise<void>;
       showRestartDialog: () => Promise<void>;

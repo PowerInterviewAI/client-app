@@ -10,7 +10,12 @@ interface CreditsDisplayProps {
   style?: React.CSSProperties;
 }
 
-export default function CreditsDisplay({ credits, llmModel, className, style }: CreditsDisplayProps) {
+export default function CreditsDisplay({
+  credits,
+  llmModel,
+  className,
+  style,
+}: CreditsDisplayProps) {
   const availableMinutes = Math.floor(credits / CREDITS_PER_MINUTE);
 
   const formatDuration = (mins: number) => {
@@ -30,28 +35,22 @@ export default function CreditsDisplay({ credits, llmModel, className, style }: 
       : formatDuration(availableMinutes);
 
   return (
-    <div
-      className={cn(
-        'flex text-xs font-bold gap-2',
-        className,
-      )}
-      style={style}
-    >
-      <span className={cn(
-        availableMinutes >= 5
-          ? 'text-muted-foreground'
-          : availableMinutes >= 1
-            ? 'text-yellow-600 animate-pulse'
-            : 'text-destructive animate-pulse'
-      )}>
+    <div className={cn('flex text-xs font-bold gap-2', className)} style={style}>
+      <span
+        className={cn(
+          availableMinutes >= 5
+            ? 'text-muted-foreground'
+            : availableMinutes >= 1
+              ? 'text-yellow-600 animate-pulse'
+              : 'text-destructive animate-pulse'
+        )}
+      >
         {credits.toLocaleString()} credits - {availableTime}
       </span>
       {llmModel && (
         <>
           <hr className="h-4 border border-border" />
-          <span className='text-muted-foreground'>
-            {llmModel}
-          </span>
+          <span className="text-muted-foreground">{llmModel}</span>
         </>
       )}
     </div>

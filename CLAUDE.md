@@ -18,15 +18,18 @@ pnpm format
 The app is built as a Tauri desktop client with a React frontend.
 
 ### Frontend
+
 - `src/` — React, Tailwind, hooks, components, pages.
 - `src/lib/tauri-bridge.ts` exposes the IPC compatibility API used by renderer hooks.
 
 ### Native Backend
+
 - `src-tauri/src/` — Tauri command handlers, services, state, and native utilities.
 - `src-tauri/tauri.conf.json` — macOS and Windows bundle settings.
 - `src-tauri/Cargo.toml` — Rust dependency manifest.
 
 ### IPC Bridge
+
 - Tauri `invoke()` is exposed through `tauriApi` and assigned to `window.electronAPI` for compatibility.
 - Transcription, permissions, payment, config, and window control are handled through Tauri commands.
 
@@ -41,6 +44,7 @@ The app is built as a Tauri desktop client with a React frontend.
 ## Build and Release Workflow
 
 The workflow at `.github/workflows/manual-cross-platform-release.yml`:
+
 - builds on Windows and macOS in parallel
 - installs pnpm dependencies
 - runs `pnpm tauri:build` (which builds the frontend via `beforeBuildCommand` automatically)
