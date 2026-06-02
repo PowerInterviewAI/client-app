@@ -33,9 +33,6 @@ src-tauri/WixTools/
 # Tauri CLI local cache
 .tauri/
 
-# ── Electron (legacy — no longer used after Tauri migration) ──────────────────
-electron-dist/
-release/
 
 # ── Editor ────────────────────────────────────────────────────────────────────
 .vscode/*

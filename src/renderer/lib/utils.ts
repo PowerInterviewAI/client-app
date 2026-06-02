@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Helper to get Electron API
+// Helper to get the platform API alias exposed by Tauri
 export const getElectron = () => {
   return typeof window !== 'undefined' ? window.electronAPI : undefined;
 };

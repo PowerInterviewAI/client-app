@@ -18,10 +18,8 @@ jobs:
         include:
           - os: windows-latest
             platform: win
-            build_command: npx electron-builder --win --x64 --publish never
           - os: macos-latest
             platform: mac
-            build_command: npx electron-builder --mac --publish never
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -38,29 +36,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Electron main process
-        run: npm run electron:build-main
-
       - name: Build renderer assets
         run: npm run build
 
-      - name: Build release packages
+      - name: Build Tauri bundle
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
-        run: ${{ matrix.build_command }}
-        shell: bash
+        run: npm run tauri:build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.platform }}
           path: |
-            release/*.exe
-            release/*.dmg
-            release/*.zip
-            release/*.yml
-            release/*.yaml
-            release/*.blockmap
+            src-tauri/target/release/bundle/**/*
           if-no-files-found: error
 
   publish:
@@ -96,13 +85,13 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists; uploading artifacts."
           else
-            gh release create "$TAG" --title "$TITLE" --notes "Manual cross-platform build artifacts."
+            gh release create "$TAG" --title "$TITLE" --notes "Manual cross-platform Tauri build artifacts."
           fi
           while IFS= read -r -d '' file; do
             echo "Uploading $(basename "$file")"
             gh release upload "$TAG" "$file" --clobber
           done < <(
             find release-artifacts -type f \
-              \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' -o -name '*.yml' -o -name '*.yaml' -o -name '*.blockmap' \) \
+              \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' -o -name '*.msi' -o -name '*.tar.gz' \) \
               -print0
           )

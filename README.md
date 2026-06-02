@@ -1,193 +1,109 @@
-# Power Interview AI - Privacy First AI Interview Assistant
-
-<div align="center">
-
-**Your Personal AI-Powered Interview Coach**
-
-🌐 **Website**: [https://www.powerinterviewai.com](https://www.powerinterviewai.com)
-
-[![Version](https://img.shields.io/github/v/release/PowerInterviewAI/client-app?label=version)](https://github.com/PowerInterviewAI/client-app/releases/latest)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-
-📧 [Email](mailto:team@vectorleappulse.xyz) | 🌐 [Website](https://www.powerinterviewai.com/) | 🌐 [GitHub Pages](https://powerinterviewai.github.io/hero/) | 💬 [Telegram](https://t.me/+uQuuBdrsIYBjY2Qx) | 💭 [Discord](https://discord.gg/TJJp5azK7Z) | 🐦 [X](https://x.com/power_interview)
-
-</div>
+﻿# Power Interview AI — Tauri Desktop Interview Assistant
 
 ## Overview
 
-Power Interview AI is a privacy-first AI assistant designed to help you ace technical and behavioral interviews. With real-time transcription and intelligent suggestions, you'll have the confidence and support you need during live interviews-all while maintaining your privacy.
+Power Interview AI is a native desktop interview assistant built with **Tauri**, **React**, and **TypeScript**.
+It delivers live transcription, intelligent interview suggestions, and secure local configuration on:
 
-## Privacy First
+- **Windows 11+**
+- **macOS 14.4+**
 
-**Your data stays with you.** Power Interview AI is built with privacy as a core principle:
-
-- **Client-Side Application**: Desktop client for account management and UI
-- **Secure Storage**: Credentials and personal info stored using Electron Store
-- **AI Processing**: Handled by secure backend services
-- **No Data Mining**: No selling or sharing personal data
-- **Minimal Data Transfer**: Only necessary data sent for AI suggestions
-- **Your Control**: CV, profile, and configs remain on your device
+This repository contains the frontend UI in `src/renderer/` and the Tauri backend in `src-tauri/`.
 
 ## Key Features
 
-### Real-Time Transcription
+- Real-time transcription of interviewer and candidate audio
+- Dual-channel audio capture (microphone + system audio)
+- Native screen recording permissions for macOS
+- Fast Tauri desktop packaging for Windows and macOS
+- Lightweight local state and secure storage
+- Automatic release packaging via GitHub Actions
 
-Stay on top of the conversation with live ASR:
+## Platform Notes
 
-- Dual-channel transcription (you + interviewer)
-- WebSocket streaming for low latency
-- Speaker detection
-- Full transcript history
+### Windows
 
-### Intelligent AI Suggestions
+- Uses system audio capture via Tauri and browser media APIs
+- Requires Windows 11 or later for reliable audio capture
+- Uses the default output device and WASAPI-compatible loopback when available
 
-#### Live Suggestions
+### macOS
 
-- Personalized responses based on CV and job description
-- Streaming responses in real time
-- Context-aware outputs
-- Natural language responses
-
-#### Action Suggestions
-
-- Screenshot-based problem understanding
-- Multi-image support (up to 3)
-- LLM-powered solutions
-- Syntax-highlighted code output
-
-### Smart Configuration
-
-- Profile management (CV, job description, etc.)
-- Audio device selection
-- Language support (English)
-- Persistent settings
-
-## Platform Support
-
-Power Interview AI desktop client is supported on:
-
-- Windows 10/11 (x64 installer build)
-- macOS (Apple Silicon and Intel release artifacts)
-
-Release binaries are published on the [GitHub Releases](https://github.com/PowerInterviewAI/client-app/releases) page.
-
-## Architecture
-
-Power Interview AI follows a **client-server architecture**.
-
-### Desktop Client
-
-- Electron + React + TypeScript
-- Zustand + React Query
-- Handles UI and orchestration
-
-### Backend Services
-
-- AI/LLM Service for suggestions
-- ASR Service for transcription
-- Auth Service
-
-### Communication
-
-- WebSocket (real-time)
-- REST API
+- Requires macOS 14.4 or later
+- Uses screen recording permission to capture system audio alongside microphone input
+- If system audio capture is unavailable, users should install a virtual audio device such as BlackHole or Loopback
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js v18+ (v20 recommended)
+- Node.js 22.x
+- npm
+- Rust toolchain (for Tauri builds)
 
-### Installation
+### Install
 
 ```bash
-git clone https://github.com/PowerInterviewAI/client-app
-cd client
+git clone https://github.com/PowerInterviewAI/client-app.git
+cd power-interview-client
 npm install
 ```
 
-### Run
+### Development
+
+- `npm run dev` — start the renderer only
+- `npm run tauri:dev` — launch the Tauri desktop app locally
+
+### Build
 
 ```bash
-npm run start
+npm run build
+npm run tauri:build
 ```
 
-### Configuration
+### Package Output
 
-- Set profile (CV, job description)
-- Select microphone
-- Start assistant
-
-## Use Cases
-
-### Technical Interviews
-
-- Code suggestions
-- Debugging assistance
-- Live transcription
-
-### Behavioral Interviews
-
-- AI-generated responses
-- Context-aware answers
-
-### Practice Sessions
-
-- Self-monitoring
-- Feedback loops
-
-## Security & Privacy
-
-- Local encrypted storage
-- HTTPS + secure WebSockets
-- No external transcript storage
-- Full user control
-
-## Technology Stack
-
-### Frontend
-
-- Electron
-- React 19
-- TypeScript
-- Tailwind CSS
-
-### Backend
-
-- WebSocket
+Tauri bundles are produced under `src-tauri/target/release/bundle/`.
 
 ## Project Structure
 
 ```
 power-interview-client/
-├── src/
-├── public/
-├── build/
+├── src/               # React renderer app
+├── public/            # Static assets
+├── src-tauri/         # Rust Tauri backend and native commands
+├── package.json       # npm scripts and dependencies
+├── README.md          # Developer documentation
+└── .github/           # CI / release workflow
 ```
 
-## Legal Disclaimer
+## Tauri Architecture
 
-Use for **ethical and legal interview preparation only**.
+- `src/renderer/` contains the React UI and Tauri bridge code.
+- `src-tauri/src/` contains native command handlers and services.
+- `src-tauri/tauri.conf.json` defines the macOS and Windows bundle settings.
+- `src-tauri/Cargo.toml` manages Rust dependencies.
 
-Users are responsible for complying with all applicable laws and platform policies.
+## Loopback Audio Capture
 
-## Contributing
+System audio capture is implemented as a Tauri-friendly, platform-aware helper:
 
-Pull requests welcome.
+- **Windows:** Attempts native WASAPI loopback capture
+- **macOS:** Validates screen recording permission and uses browser display capture
+
+This is the most stable cross-platform approach for modern Tauri desktop clients.
+
+## Build & Release
+
+A GitHub Actions workflow is configured at `.github/workflows/manual-cross-platform-release.yml`.
+It installs dependencies, builds the renderer, and runs `npm run tauri:build` for both Windows and macOS.
+
+## Notes
+
+- Electron support has been removed from this repository.
+- Legacy Electron files, scripts, and build paths are no longer part of the project.
+- Use Tauri for all local desktop builds.
 
 ## License
 
-MIT License
-
-## Support
-
-- Email: [team@vectorleappulse.xyz](mailto:team@vectorleappulse.xyz)
-- GitHub Issues for bugs/features
-
----
-
-<div align="center">
-
-**Built to help you succeed in interviews**
-
-</div>
+MIT

@@ -7,7 +7,7 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  globalIgnores(['dist', 'electron-dist']),
+  globalIgnores(['dist']),
   {
     files: ['**/*.{ts,tsx}'],
     plugins: {

@@ -1,81 +1,60 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This repository is a **Tauri desktop application** for Windows and macOS.
 
 ## Commands
 
 ```bash
-# Development
-npm run dev                    # Vite renderer dev server only
-npm run electron:dev-hide      # Electron + renderer dev (hidden window)
-npm run electron:dev-show      # Electron + renderer dev (visible window)
-npm start                      # Alias for electron:dev-hide
-
-# Build
-npm run build                  # tsc + vite build (renderer)
-npm run electron:build-main    # Build Electron main process
-npm run electron:build         # Full Electron distribution build
-
-# Code quality
-npm run lint                   # ESLint check
-npm run format                 # Prettier + ESLint auto-fix
+npm run dev
+npm run tauri:dev
+npm run build
+npm run tauri:build
+npm run lint
+npm run format
 ```
 
 ## Architecture
 
-This is an **Electron desktop application** targeting **macOS and Windows** - an AI-powered live interview assistant that provides real-time transcription and AI suggestions during job interviews.
+The app is built as a Tauri desktop client with a React frontend.
 
-**Stack:** React 19 + TypeScript + Tailwind CSS + shadcn/ui (renderer), Electron 35 (main), Vite (build).
+### Renderer
+- `src/renderer/` — React, Tailwind, hooks, components, pages.
+- `src/renderer/lib/tauri-bridge.ts` exposes the same compatibility API used by existing renderer hooks.
 
-### Process Split
-
-```
-src/main/        ← Electron main process (Node.js)
-src/renderer/    ← React/Vite frontend
-```
-
-The path alias `@/*` resolves to `./renderer/*`.
-
-**Main process** handles: audio capture, WebSocket connections to backend, IPC with renderer, Electron Store persistence, global hotkeys, auto-updates.
-
-**Renderer** handles: UI, routing, state display. It never calls backend APIs directly - all backend communication goes through IPC to main.
+### Native Backend
+- `src-tauri/src/` — Tauri command handlers, services, state, and native utilities.
+- `src-tauri/tauri.conf.json` — macOS and Windows bundle settings.
+- `src-tauri/Cargo.toml` — Rust dependency manifest.
 
 ### IPC Bridge
+- Tauri `invoke()` is exposed through `tauriApi` and assigned to `window.electronAPI` for compatibility.
+- Transcription, permissions, payment, config, and window control are handled through Tauri commands.
 
-[src/main/preload.cts](src/main/preload.cts) exposes `window.electronAPI` to the renderer with namespaced APIs: `config`, `auth`, `payment`, `llm`, `appState`, `transcription`, `liveSuggestion`, `actionSuggestion`, `tools`, `window`, `autoUpdater`, `external`.
+## Key Implementation Changes
 
-IPC handlers live in [src/main/ipc/](src/main/ipc/) (one file per domain). Services in [src/main/services/](src/main/services/) contain the business logic called by handlers.
+- Electron has been removed from the repository.
+- The build flows are now Tauri-first.
+- Native audio loopback is implemented in `src-tauri/src/commands/transcription.rs`.
+- MacOS screen recording permission is validated natively.
+- The GitHub Action workflow now builds Tauri bundles instead of Electron packages.
 
-### State Management (Renderer)
+## Build and Release Workflow
 
-Two distinct stores:
+The workflow at `.github/workflows/manual-cross-platform-release.yml`:
+- checks out the repo
+- installs npm dependencies
+- builds renderer assets
+- runs `npm run tauri:build`
+- uploads generated bundle artifacts
+- publishes releases when enabled
 
-1. **AppState** ([src/renderer/hooks/use-app-state.tsx](src/renderer/hooks/use-app-state.tsx)) - React Context, synced from main via IPC. Holds real-time interview state: running status, transcripts, AI suggestions, credits, backend health. Read-only in renderer; mutated by main process pushing updates.
+## Platform Support
 
-2. **ConfigStore** ([src/renderer/hooks/use-config-store.ts](src/renderer/hooks/use-config-store.ts)) - Zustand store backed by Electron Store. Holds user settings, auth tokens, audio/video device selection, interview configuration (CV, job description). Persisted to disk.
+- Windows 11+
+- macOS 14.4+
 
-### API Layer (Main Process)
+## Notes for Developers
 
-[src/main/api/client.ts](src/main/api/client.ts) - `ApiClient` class: fetch-based, Bearer token auth, streaming support. Wrapped by domain-specific clients: `AuthApi`, `LLMApi`, `PaymentApi`, `HealthCheckApi` in [src/main/api/](src/main/api/).
-
-Backend URL is defined in [src/main/consts.ts](src/main/consts.ts).
-
-### Routing (Renderer)
-
-Hash-based router (required for Electron): `/` → auth flow → `/main` (interview UI) → `/payment`.
-
-Router defined in [src/renderer/router.tsx](src/renderer/router.tsx).
-
-### Platform Differences
-
-- **macOS:** `titleBarStyle: 'hidden'` with native traffic lights (close/minimize/zoom) on the top-left. The custom titlebar leaves 72 logical px clear for them. No custom close button in the UI.
-- **Windows:** Custom titlebar rendered entirely in the renderer. Includes a close button (top-right) since there are no native traffic lights. Use `process.platform === 'darwin'` (main) or `navigator.platform` / `isMac` (renderer) to branch platform-specific behavior.
-- Audio capture and screenshot APIs may behave differently per platform — test on both when touching [src/main/services/](src/main/services/).
-
-### Key Features
-
-- **Transcription:** Dual-channel (speaker + interviewer mic) via WebSocket streaming - [src/main/services/transcript-service.ts](src/main/services/transcript-service.ts)
-- **Live Suggestions:** Real-time AI responses based on CV + job description - [src/main/services/live-suggestion-service.ts](src/main/services/live-suggestion-service.ts)
-- **Action Suggestions:** Screenshot-based problem solving (up to 3 images) - [src/main/services/action-suggestion-service.ts](src/main/services/action-suggestion-service.ts)
-- **Credits:** Purchase and usage tracking via payment API
-- **Auto-Updates:** electron-updater publishing to GitHub releases
+- There is no `src/main/` Electron host code in this repo anymore.
+- Use the Tauri app as the single desktop implementation.
+- Update native dependencies in `src-tauri/Cargo.toml` and frontend dependencies in `package.json`.
