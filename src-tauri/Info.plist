@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Power Interview AI needs microphone access to transcribe your voice during interviews.</string>
+  <key>NSScreenRecordingUsageDescription</key>
+  <string>Power Interview AI needs screen recording access to capture system audio during interviews.</string>
+</dict>
+</plist>

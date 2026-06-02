@@ -40,10 +40,7 @@
     "publisher": "VectorLeap Pulse Innovation LTD",
     "copyright": "Copyright ©2026 VectorLeap Pulse Innovation LTD",
     "macOS": {
-      "infoPlist": {
-        "NSMicrophoneUsageDescription": "Power Interview AI needs microphone access to transcribe your voice during interviews.",
-        "NSScreenRecordingUsageDescription": "Power Interview AI needs screen recording access to capture system audio during interviews."
-      },
+      "infoPlist": "Info.plist",
       "entitlements": "../build/entitlements.mac.plist",
       "signingIdentity": null
     },
@@ -54,9 +51,10 @@
       "nsis": {
         "installMode": "perMachine"
       }
-    },
+    }
+  },
+  "plugins": {
     "updater": {
-      "active": true,
       "pubkey": "",
       "endpoints": [
         "https://github.com/PowerInterviewAI/client/releases/latest/download/latest.json"
