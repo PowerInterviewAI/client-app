@@ -134,10 +134,12 @@ const electronApi = {
   // macOS permission checks
   permissions: {
     checkScreenRecording: () => ipcRenderer.invoke('permissions:check-screen-recording'),
+    checkScreenSources: () => ipcRenderer.invoke('permissions:check-screen-sources'),
     checkMicrophone: () => ipcRenderer.invoke('permissions:check-microphone'),
     requestMicrophone: () => ipcRenderer.invoke('permissions:request-microphone'),
     showDeniedDialog: (type: 'screen-recording' | 'microphone') =>
       ipcRenderer.invoke('permissions:show-denied-dialog', type),
+    showRestartDialog: () => ipcRenderer.invoke('permissions:show-restart-dialog'),
   },
 
   // Open external URLs in the default browser

@@ -25,7 +25,7 @@ npm run format                 # Prettier + ESLint auto-fix
 
 This is an **Electron desktop application** targeting **macOS and Windows** - an AI-powered live interview assistant that provides real-time transcription and AI suggestions during job interviews.
 
-**Stack:** React 19 + TypeScript + Tailwind CSS + shadcn/ui (renderer), Electron 40 (main), Vite (build).
+**Stack:** React 19 + TypeScript + Tailwind CSS + shadcn/ui (renderer), Electron 35 (main), Vite (build).
 
 ### Process Split
 

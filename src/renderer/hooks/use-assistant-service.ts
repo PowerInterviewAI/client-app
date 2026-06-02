@@ -56,6 +56,17 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
         return;
       }
 
+      // On macOS, even when getMediaAccessStatus returns 'granted', desktopCapturer.getSources()
+      // returns [] if the app hasn't been restarted since permission was first granted.
+      // Detect this early to avoid a 20-second getDisplayMedia timeout and show a clear message.
+      if (screenStatus === 'granted') {
+        const hasSources = await electron.permissions.checkScreenSources();
+        if (!hasSources) {
+          await electron.permissions.showRestartDialog();
+          return;
+        }
+      }
+
       electron.appState.update({ runningState: RunningState.Starting });
 
       // Clear previous history

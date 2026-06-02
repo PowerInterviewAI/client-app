@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, ipcMain, session, shell, systemPreferences } from 'electron';
+import { BrowserWindow,desktopCapturer, dialog, ipcMain, session, shell, systemPreferences } from 'electron';
 import loopbackPkg from 'electron-audio-loopback';
 
 import { BACKEND_BASE_URL } from '../consts.js';
@@ -35,6 +35,20 @@ export function registerPermissionHandlers() {
     return systemPreferences.getMediaAccessStatus('screen');
   });
 
+  // On macOS, getMediaAccessStatus('screen') returning 'granted' doesn't guarantee that
+  // desktopCapturer.getSources() will return sources — the app must be restarted after
+  // the first permission grant. This handler lets the renderer detect that case early
+  // and show a "restart required" message rather than a confusing permission dialog.
+  ipcMain.handle('permissions:check-screen-sources', async () => {
+    if (process.platform !== 'darwin') return true;
+    try {
+      const sources = await desktopCapturer.getSources({ types: ['screen'] });
+      return sources.length > 0;
+    } catch {
+      return false;
+    }
+  });
+
   // macOS has no askForMediaAccess('screen') — screen recording permission can only be
   // triggered by the OS when getDisplayMedia() is called from the renderer.
   // Mic and camera can be explicitly requested via askForMediaAccess.
@@ -69,6 +83,19 @@ export function registerPermissionHandlers() {
       }
     }
   );
+
+  ipcMain.handle('permissions:show-restart-dialog', async () => {
+    if (process.platform !== 'darwin') return;
+    const win = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0];
+    await dialog.showMessageBox(win, {
+      type: 'info',
+      title: 'Restart Required',
+      message: 'Screen Recording permission was just granted',
+      detail:
+        'macOS requires a full app restart before screen recording can be used. Please quit and relaunch Power Interview AI.',
+      buttons: ['OK'],
+    });
+  });
 }
 
 export function registerTranscriptHandlers() {
