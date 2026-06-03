@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use futures_util::StreamExt;
 use parking_lot::Mutex;
 
-use crate::consts::LIVE_SUGGESTION_NO_SUGGESTION;
+use crate::consts::{API_LLM_LIVE_SUGGESTION, LIVE_SUGGESTION_NO_SUGGESTION};
 use crate::services::api_client::ApiClient;
 use crate::services::app_state::AppStateService;
 use crate::store::ConfigStore;
@@ -106,7 +106,7 @@ impl LiveSuggestionService {
                 app_state.set_live_suggestions(list);
             };
 
-            match client.post_stream("/api/llm/live-suggestion", &body).await {
+            match client.post_stream(API_LLM_LIVE_SUGGESTION, &body).await {
                 Err(e) => {
                     let error_msg = if e.contains("429") {
                         "Too many requests. Please try again later.".into()

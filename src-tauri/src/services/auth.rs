@@ -1,5 +1,6 @@
 use serde_json::Value;
 
+use crate::consts::{API_AUTH_CHANGE_PASSWORD, API_AUTH_LOGIN, API_AUTH_LOGOUT, API_AUTH_SIGNUP};
 use crate::services::api_client::{ApiClient, ApiError};
 use crate::store::ConfigStore;
 
@@ -24,7 +25,7 @@ impl AuthService {
     ) -> Result<Value, ApiError> {
         let client = ApiClient::new();
         let body = serde_json::json!({ "username": username, "email": email, "password": password });
-        let resp = client.post("/api/auth/signup", &body).await?;
+        let resp = client.post(API_AUTH_SIGNUP, &body).await?;
         if let Some(token) = resp.get("session_token").or_else(|| resp.get("access_token")).and_then(|t| t.as_str()) {
             config_store.update_config(serde_json::json!({ "sessionToken": token }));
         }
@@ -38,7 +39,7 @@ impl AuthService {
     ) -> Result<Value, ApiError> {
         let client = ApiClient::new();
         let body = serde_json::json!({ "email": email, "password": password });
-        let resp = client.post("/api/auth/login", &body).await?;
+        let resp = client.post(API_AUTH_LOGIN, &body).await?;
         if let Some(token) = resp.get("session_token").or_else(|| resp.get("access_token")).and_then(|t| t.as_str()) {
             config_store.update_config(serde_json::json!({ "sessionToken": token }));
         }
@@ -47,7 +48,7 @@ impl AuthService {
 
     pub async fn logout(config_store: &ConfigStore) -> Result<(), ApiError> {
         let client = Self::build_client(config_store);
-        let _ = client.post("/api/auth/logout", &serde_json::json!({})).await;
+        let _ = client.post(API_AUTH_LOGOUT, &serde_json::json!({})).await;
         config_store.update_config(serde_json::json!({ "sessionToken": "" }));
         Ok(())
     }
@@ -62,6 +63,6 @@ impl AuthService {
             "current_password": current_password,
             "new_password": new_password,
         });
-        client.post("/api/auth/change-password", &body).await
+        client.post(API_AUTH_CHANGE_PASSWORD, &body).await
     }
 }

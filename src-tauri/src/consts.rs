@@ -5,6 +5,26 @@ pub const BACKEND_BASE_URL: &str = if cfg!(debug_assertions) {
     "https://api.powerinterviewai.com"
 };
 
+// API endpoints
+pub const API_AUTH_SIGNUP: &str = "/api/auth/signup";
+pub const API_AUTH_LOGIN: &str = "/api/auth/login";
+pub const API_AUTH_LOGOUT: &str = "/api/auth/logout";
+pub const API_AUTH_CHANGE_PASSWORD: &str = "/api/auth/change-password";
+pub const API_AUTH_PING_CLIENT: &str = "/api/auth/ping-client";
+pub const API_HEALTH: &str = "/api/health";
+pub const API_LLM_MODELS: &str = "/api/llm/models";
+pub const API_LLM_VALIDATE: &str = "/api/llm/validate";
+pub const API_LLM_UPLOAD_IMAGE: &str = "/api/llm/upload-image";
+pub const API_LLM_ACTION_SUGGESTION: &str = "/api/llm/action-suggestion";
+pub const API_LLM_LIVE_SUGGESTION: &str = "/api/llm/live-suggestion";
+pub const API_LLM_GET_THUMB: &str = "/api/llm/get-thumb";
+pub const API_PAYMENT_PLANS: &str = "/api/payment/plans";
+pub const API_PAYMENT_CURRENCIES: &str = "/api/payment/currencies";
+pub const API_PAYMENT_CREATE: &str = "/api/payment/create";
+pub const API_PAYMENT_STATUS: &str = "/api/payment/status";
+pub const API_PAYMENT_HISTORY: &str = "/api/payment/history";
+pub const API_PAYMENT_CREDITS: &str = "/api/payment/credits";
+
 pub const MIN_WIDTH: u32 = 760;
 pub const MIN_HEIGHT: u32 = 480;
 

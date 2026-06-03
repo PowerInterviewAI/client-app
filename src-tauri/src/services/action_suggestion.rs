@@ -5,7 +5,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use futures_util::StreamExt;
 use parking_lot::Mutex;
 
-use crate::consts::{ACTION_SUGGESTION_MAX_CAPTURES, BACKEND_BASE_URL};
+use crate::consts::{
+    ACTION_SUGGESTION_MAX_CAPTURES, API_LLM_ACTION_SUGGESTION, API_LLM_GET_THUMB,
+    API_LLM_UPLOAD_IMAGE, BACKEND_BASE_URL,
+};
 use crate::services::action_lock::{ActionLockService, ActionType};
 use crate::services::api_client::ApiClient;
 use crate::services::app_state::AppStateService;
@@ -121,7 +124,7 @@ impl ActionSuggestionService {
                         .file_name("screenshot.png")
                         .mime_str("image/png").unwrap());
 
-                match client.post_multipart("/api/llm/upload-image", form).await {
+                match client.post_multipart(API_LLM_UPLOAD_IMAGE, form).await {
                     Ok(resp) => {
                         if let Some(name) = resp.as_str() {
                             self.uploaded_images.lock().push(name.to_string());
@@ -201,7 +204,7 @@ impl ActionSuggestionService {
                 app_state.set_action_suggestions(list);
             };
 
-            match client.post_stream("/api/llm/action-suggestion", &body).await {
+            match client.post_stream(API_LLM_ACTION_SUGGESTION, &body).await {
                 Err(e) => {
                     let error_msg = if e.contains("429") { "Too many requests. Please try again later.".into() } else { "Failed to generate response.".into() };
                     let mut map = suggestions.lock();
@@ -264,7 +267,7 @@ fn get_last_interviewer_question(transcripts: &[Transcript]) -> String {
 }
 
 fn image_url(name: &str) -> String {
-    format!("{}/api/llm/get-thumb/{}", BACKEND_BASE_URL, name)
+    format!("{}{}/{}", BACKEND_BASE_URL, API_LLM_GET_THUMB, name)
 }
 
 async fn capture_and_grayscale() -> Result<Vec<u8>, String> {
