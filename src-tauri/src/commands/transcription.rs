@@ -6,7 +6,7 @@ use tauri::State;
 
 use crate::AppServices;
 
-struct SendableStream(Stream);
+struct SendableStream(#[allow(dead_code)] Stream);
 unsafe impl Send for SendableStream {}
 unsafe impl Sync for SendableStream {}
 

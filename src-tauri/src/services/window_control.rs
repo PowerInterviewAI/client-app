@@ -152,7 +152,7 @@ impl WindowControlService {
 
     pub fn move_to_position(&self, position: &str) {
         let Some(win) = self.window() else { return };
-        let Ok(scale) = win.scale_factor() else { return };
+        let Ok(_scale) = win.scale_factor() else { return };
         let Ok(size) = win.inner_size() else { return };
         let monitor = win.current_monitor().ok().flatten()
             .or_else(|| win.primary_monitor().ok().flatten());

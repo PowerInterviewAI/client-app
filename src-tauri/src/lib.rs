@@ -12,10 +12,8 @@ use tauri::{AppHandle, Emitter, Manager};
 use crate::services::action_lock::ActionLockService;
 use crate::services::action_suggestion::ActionSuggestionService;
 use crate::services::app_state::AppStateService;
-use crate::services::auth::AuthService;
 use crate::services::health_check::HealthCheckService;
 use crate::services::live_suggestion::LiveSuggestionService;
-use crate::services::payment::PaymentService;
 use crate::services::push_notification::PushNotificationService;
 use crate::services::tools::ToolsService;
 use crate::services::transcript::TranscriptService;
@@ -250,7 +248,7 @@ pub fn run() {
 fn register_hotkeys(handle: &AppHandle) {
     use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
-    let h = handle.clone();
+    let _h = handle.clone();
     if let Err(e) = handle.global_shortcut().on_shortcuts(
         [
             // Stop assistant: Ctrl+Shift+Q

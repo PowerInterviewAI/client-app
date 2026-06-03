@@ -193,7 +193,7 @@ impl ActionSuggestionService {
             let client = if token.is_empty() { ApiClient::new() } else { ApiClient::new().with_token(&token) };
 
             let emit = |map: &HashMap<i64, ActionSuggestion>, imgs: &Vec<String>| {
-                let mut list: Vec<ActionSuggestion> = map.values().cloned().collect();
+                let list: Vec<ActionSuggestion> = map.values().cloned().collect();
                 if !imgs.is_empty() {
                     // pending prompt still shown - handled by emit_suggestions, skip here
                 }
