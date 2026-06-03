@@ -14,7 +14,7 @@ export default defineConfig({
     assetsDir: 'assets',
     // Tauri uses ES modules; produce a module format compatible with webview
     target: ['es2021', 'chrome100', 'safari13'],
-    minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
+    minify: !process.env.TAURI_DEBUG,
     sourcemap: !!process.env.TAURI_DEBUG,
   },
   resolve: {
