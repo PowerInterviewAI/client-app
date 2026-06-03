@@ -110,8 +110,8 @@ export const tauriApi = {
       const transcripts = await invoke<unknown[]>('tools_get_transcripts_for_export');
       const markdown = transcriptsToMarkdown(transcripts as TranscriptItem[]);
       try {
-        const { mdToDocx } = await import('@mohtasham/md-to-docx');
-        const blob: Blob = await mdToDocx(markdown);
+        const { convertMarkdownToDocx } = await import('@mohtasham/md-to-docx');
+        const blob: Blob = await convertMarkdownToDocx(markdown);
         const arrayBuffer = await blob.arrayBuffer();
         const bytes = new Uint8Array(arrayBuffer);
         const filePath = await save({
