@@ -33,17 +33,14 @@ export const useAssistantService = create<AssistantService>((set) => ({
 
       // Pre-flight permission checks before any state change.
       //
-      // Microphone: check + request if not-determined (macOS exposes askForMediaAccess).
-      // Screen recording: check only — macOS has no programmatic request API; the OS
-      // dialog fires automatically when getDisplayMedia() is called in the start flow.
+      // Microphone: only hard-block when the OS reports an explicit denial. For
+      // 'not-determined'/'unknown' we let getUserMedia() trigger the native OS prompt
+      // in the start flow — that is the real request path on both platforms (there is
+      // no reliable programmatic request API in the webview).
+      // Screen recording: check only — the OS dialog fires automatically when
+      // getDisplayMedia() is called.
       const micStatus = await electron.permissions.checkMicrophone();
-      if (micStatus === 'not-determined') {
-        const granted = await electron.permissions.requestMicrophone();
-        if (!granted) {
-          await electron.permissions.showDeniedDialog('microphone');
-          return;
-        }
-      } else if (micStatus === 'denied' || micStatus === 'restricted') {
+      if (micStatus === 'denied' || micStatus === 'restricted') {
         await electron.permissions.showDeniedDialog('microphone');
         return;
       }
@@ -89,6 +86,15 @@ export const useAssistantService = create<AssistantService>((set) => ({
     } catch (error) {
       // Reset state to Idle so the button doesn't stay stuck on "Starting..."
       electron.appState.update({ runningState: RunningState.Idle });
+
+      // A microphone denial at the native getUserMedia prompt surfaces here as
+      // NotAllowedError — show the actionable dialog instead of a generic message.
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        await electron.permissions.showDeniedDialog('microphone');
+        set({ error: 'Microphone permission denied' });
+        return;
+      }
+
       const errorMessage = error instanceof Error ? error.message : 'Failed to start assistant';
       set({ error: errorMessage });
       console.error('Start assistant error:', error);

@@ -108,11 +108,7 @@ impl LiveSuggestionService {
 
             match client.post_stream(API_LLM_LIVE_SUGGESTION, &body).await {
                 Err(e) => {
-                    let error_msg = if e.contains("429") {
-                        "Too many requests. Please try again later.".into()
-                    } else {
-                        "Failed to generate response.".into()
-                    };
+                    let error_msg = crate::utils::llm_error_message(&e);
                     let mut map = suggestions.lock();
                     if let Some(s) = map.get_mut(&timestamp) {
                         s.state = SuggestionState::Error;
@@ -131,6 +127,7 @@ impl LiveSuggestionService {
 
                     let mut stream = resp.bytes_stream();
                     let mut answer = String::new();
+                    let mut pending = Vec::<u8>::new();
 
                     while let Some(chunk) = stream.next().await {
                         if abort.load(Ordering::Acquire) {
@@ -142,8 +139,8 @@ impl LiveSuggestionService {
                             return;
                         }
                         if let Ok(bytes) = chunk {
-                            let text = String::from_utf8_lossy(&bytes).to_string();
-                            answer.push_str(&text);
+                            pending.extend_from_slice(&bytes);
+                            crate::utils::drain_utf8(&mut pending, &mut answer);
 
                             let mut map = suggestions.lock();
                             if answer.starts_with(LIVE_SUGGESTION_NO_SUGGESTION) {

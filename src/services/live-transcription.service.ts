@@ -56,6 +56,7 @@ class AudioWsStream {
   constructor(
     private readonly channel: Channel,
     private readonly stream: MediaStream,
+    private readonly sessionToken: string,
     private readonly onTranscript: (payload: {
       channel: Channel;
       type: 'partial' | 'final';
@@ -67,7 +68,10 @@ class AudioWsStream {
     this.stopping = false;
     await this.connectWithRetry();
 
-    this.ctx = new AudioContext();
+    // Force a 16 kHz context so the browser performs high-quality resampling of the
+    // 48 kHz capture; convertTo16kPcm then becomes a passthrough instead of a crude
+    // nearest-neighbour decimation that aliases and hurts STT accuracy.
+    this.ctx = new AudioContext({ sampleRate: SAMPLE_RATE });
     this.source = this.ctx.createMediaStreamSource(this.stream);
 
     // 1. Load the AudioWorklet (required once per AudioContext)
@@ -164,9 +168,17 @@ class AudioWsStream {
       : new Error(`Failed to open websocket for ${this.channel}`);
   }
 
+  private streamingUrl(): string {
+    // Browser WebSocket can't set Authorization headers, so the session token is
+    // passed as a query parameter (the conventional approach for authenticated WS).
+    if (!this.sessionToken) return STREAMING_URL;
+    const sep = STREAMING_URL.includes('?') ? '&' : '?';
+    return `${STREAMING_URL}${sep}token=${encodeURIComponent(this.sessionToken)}`;
+  }
+
   private connectWebSocket(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(STREAMING_URL);
+      const ws = new WebSocket(this.streamingUrl());
       this.ws = ws;
       let settled = false;
 
@@ -316,8 +328,13 @@ class LiveTranscriptionService {
       await electron.transcription.ingest(payload);
     };
 
-    const micChannel = new AudioWsStream('ch_1', this.micStream, onTranscript);
-    const loopbackChannel = new AudioWsStream('ch_0', this.loopbackStream, onTranscript);
+    const micChannel = new AudioWsStream('ch_1', this.micStream, sessionToken, onTranscript);
+    const loopbackChannel = new AudioWsStream(
+      'ch_0',
+      this.loopbackStream,
+      sessionToken,
+      onTranscript
+    );
     this.channels = [micChannel, loopbackChannel];
     await Promise.all(this.channels.map((channel) => channel.start()));
   }

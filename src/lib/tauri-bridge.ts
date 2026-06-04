@@ -150,11 +150,21 @@ export const tauriApi = {
   },
 
   // ---- Permissions ----
+  // The Rust commands return objects ({ status } / { granted }); unwrap them here so
+  // callers receive the bare string/boolean the typed API (electron-api.d.ts) promises.
   permissions: {
-    checkScreenRecording: () => invoke('permissions_check_screen_recording'),
-    checkScreenSources: () => invoke('permissions_check_screen_sources'),
-    checkMicrophone: () => invoke('permissions_check_microphone'),
-    requestMicrophone: () => invoke('permissions_request_microphone'),
+    checkScreenRecording: () =>
+      invoke('permissions_check_screen_recording').then(
+        (r) => (r as { status?: string })?.status ?? 'unknown'
+      ),
+    checkScreenSources: () =>
+      invoke('permissions_check_screen_sources').then((r) => !!(r as { granted?: boolean })?.granted),
+    checkMicrophone: () =>
+      invoke('permissions_check_microphone').then(
+        (r) => (r as { status?: string })?.status ?? 'unknown'
+      ),
+    requestMicrophone: () =>
+      invoke('permissions_request_microphone').then((r) => !!(r as { granted?: boolean })?.granted),
     showDeniedDialog: (type: 'screen-recording' | 'microphone') =>
       invoke('permissions_show_denied_dialog', { permission_type: type }),
     showRestartDialog: () => invoke('permissions_show_restart_dialog'),
