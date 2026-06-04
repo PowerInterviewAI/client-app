@@ -1,36 +1,13 @@
-/**
- * Auto-Updater Hook
- * Provides auto-update functionality to React components
- */
-
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export enum UpdateStatus {
-  Checking = 'checking',
-  Available = 'available',
-  NotAvailable = 'not-available',
-  Downloading = 'downloading',
   Downloaded = 'downloaded',
   Error = 'error',
 }
 
-export interface UpdateInfo {
-  version: string;
-  releaseDate: string;
-  releaseNotes?: string;
-}
-
-export interface UpdateProgressInfo {
-  bytesPerSecond: number;
-  percent: number;
-  transferred: number;
-  total: number;
-}
-
 export interface UpdateStatusData {
   status: UpdateStatus;
-  info: UpdateInfo | null;
-  progress?: UpdateProgressInfo | null;
+  version?: string;
   error?: string;
 }
 
@@ -39,66 +16,39 @@ export function useAutoUpdater() {
   const [currentVersion, setCurrentVersion] = useState<string>('');
 
   useEffect(() => {
-    // Get current version
-    if (window.electronAPI?.autoUpdater) {
-      window.electronAPI.autoUpdater
-        .getVersion()
-        // eslint-disable-next-line
-        .then((result: any) => {
-          if (result.success && result.version) {
-            setCurrentVersion(result.version);
-          }
-        })
-        // eslint-disable-next-line
-        .catch((error: any) => {
-          console.error('Failed to get version:', error);
-        });
+    if (!window.electronAPI?.autoUpdater) return;
 
-      // Listen for update status changes
-      const cleanup = window.electronAPI.autoUpdater.onStatusUpdate((data) => {
-        setUpdateStatus(data as UpdateStatusData);
+    window.electronAPI.autoUpdater
+      .getVersion()
+      .then((version: unknown) => {
+        if (typeof version === 'string') setCurrentVersion(version);
+      })
+      .catch((error: unknown) => {
+        console.error('[Updater] failed to get version:', error);
       });
 
-      return cleanup;
+    const cleanup = window.electronAPI.autoUpdater.onStatusUpdate((data) => {
+      setUpdateStatus(data as UpdateStatusData);
+    });
+
+    return cleanup;
+  }, []);
+
+  const checkForUpdates = useCallback(async (): Promise<void> => {
+    try {
+      await window.electronAPI?.autoUpdater.checkForUpdates();
+    } catch (error) {
+      console.error('[Updater] check failed:', error);
     }
   }, []);
 
-  const checkForUpdates = async (): Promise<void> => {
-    if (!window.electronAPI?.autoUpdater) {
-      console.warn('Auto-updater API not available');
-      return;
-    }
-
+  const quitAndInstall = useCallback(async (): Promise<void> => {
     try {
-      const result = await window.electronAPI.autoUpdater.checkForUpdates();
-      if (!result.success) {
-        console.error('Failed to check for updates:', result.error);
-      }
+      await window.electronAPI?.autoUpdater.quitAndInstall();
     } catch (error) {
-      console.error('Failed to check for updates:', error);
+      console.error('[Updater] install failed:', error);
     }
-  };
+  }, []);
 
-  const quitAndInstall = async (): Promise<void> => {
-    if (!window.electronAPI?.autoUpdater) {
-      console.warn('Auto-updater API not available');
-      return;
-    }
-
-    try {
-      const result = await window.electronAPI.autoUpdater.quitAndInstall();
-      if (!result.success) {
-        console.error('Failed to quit and install:', result.error);
-      }
-    } catch (error) {
-      console.error('Failed to quit and install:', error);
-    }
-  };
-
-  return {
-    updateStatus,
-    currentVersion,
-    checkForUpdates,
-    quitAndInstall,
-  };
+  return { updateStatus, currentVersion, checkForUpdates, quitAndInstall };
 }

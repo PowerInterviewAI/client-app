@@ -48,7 +48,7 @@ impl AuthService {
 
     pub async fn logout(config_store: &ConfigStore) -> Result<(), ApiError> {
         let client = Self::build_client(config_store);
-        let _ = client.post(API_AUTH_LOGOUT, &serde_json::json!({})).await;
+        let _ = client.get(API_AUTH_LOGOUT).await;
         config_store.update_config(serde_json::json!({ "sessionToken": "" }));
         Ok(())
     }

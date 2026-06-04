@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use serde::Deserialize;
 
-use crate::consts::{API_AUTH_PING_CLIENT, API_HEALTH};
+use crate::consts::{API_HEALTH_CHECK_PING, API_HEALTH_CHECK_PING_CLIENT};
 use crate::services::api_client::ApiClient;
 use crate::services::app_state::AppStateService;
 use crate::store::ConfigStore;
@@ -52,7 +52,7 @@ impl HealthCheckService {
         let token = config_store.get_config().session_token;
         if !token.is_empty() {
             let client = ApiClient::new().with_token(&token);
-            match client.get(API_AUTH_PING_CLIENT).await {
+            match client.post(API_HEALTH_CHECK_PING_CLIENT, &serde_json::json!({})).await {
                 Ok(resp) => {
                     if let Ok(data) = serde_json::from_value::<ClientPingResponse>(resp) {
                         app_state.set_logged_in(Some(true));
@@ -93,13 +93,13 @@ impl HealthCheckService {
             let token = config_store.get_config().session_token;
             let client = if token.is_empty() { ApiClient::new() } else { ApiClient::new().with_token(&token) };
 
-            let backend_live = client.get(API_HEALTH).await.is_ok();
+            let backend_live = client.get(API_HEALTH_CHECK_PING).await.is_ok();
             app_state.set_backend_live(backend_live);
 
             // also do client ping if logged in
             let state = app_state.get_state();
-            if state.is_logged_in == Some(true) && !state.is_app_idle && !token.is_empty() {
-                if let Ok(resp) = client.get(API_AUTH_PING_CLIENT).await {
+            if state.is_logged_in == Some(true) && !token.is_empty() {
+                if let Ok(resp) = client.post(API_HEALTH_CHECK_PING_CLIENT, &serde_json::json!({})).await {
                     if let Ok(data) = serde_json::from_value::<ClientPingResponse>(resp) {
                         app_state.set_credits_and_role(
                             data.credits,

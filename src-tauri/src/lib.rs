@@ -141,15 +141,17 @@ pub fn run() {
             // Register global hotkeys
             register_hotkeys(&handle);
 
-            // Schedule periodic update checks
+            // Periodic update checks: first at t=3s, then every 4 hours.
             let handle_update = handle.clone();
             tauri::async_runtime::spawn(async move {
-                tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
-                check_updates(&handle_update).await;
-                let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(300));
+                use tokio::time::{interval_at, Duration, Instant};
+                let mut ticker = interval_at(
+                    Instant::now() + Duration::from_secs(3),
+                    Duration::from_secs(4 * 3600),
+                );
                 loop {
-                    interval.tick().await;
-                    check_updates(&handle_update).await;
+                    ticker.tick().await;
+                    commands::updater::check_and_download_update(handle_update.clone()).await;
                 }
             });
 
@@ -341,18 +343,3 @@ fn register_hotkeys(handle: &AppHandle) {
     }
 }
 
-async fn check_updates(handle: &AppHandle) {
-    use tauri_plugin_updater::UpdaterExt;
-    if let Ok(updater) = handle.updater() {
-        match updater.check().await {
-            Ok(Some(update)) => {
-                let _ = handle.emit("auto-updater:status", serde_json::json!({
-                    "status": "update-available",
-                    "version": update.version,
-                }));
-            }
-            Ok(None) => {}
-            Err(e) => log::debug!("[Updater] check error: {}", e),
-        }
-    }
-}

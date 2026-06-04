@@ -118,25 +118,13 @@ declare global {
 
     // Auto-updater management
     autoUpdater: {
-      checkForUpdates: () => Promise<{ success: boolean; error?: string }>;
-      quitAndInstall: () => Promise<{ success: boolean; error?: string }>;
-      getVersion: () => Promise<{ success: boolean; version?: string; error?: string }>;
+      checkForUpdates: () => Promise<void>;
+      quitAndInstall: () => Promise<void>;
+      getVersion: () => Promise<string>;
       onStatusUpdate: (
         callback: (data: {
-          status:
-            | 'checking'
-            | 'available'
-            | 'not-available'
-            | 'downloading'
-            | 'downloaded'
-            | 'error';
-          info: { version: string; releaseDate: string; releaseNotes?: string } | null;
-          progress?: {
-            bytesPerSecond: number;
-            percent: number;
-            transferred: number;
-            total: number;
-          } | null;
+          status: 'downloaded' | 'error';
+          version?: string;
           error?: string;
         }) => void
       ) => () => void;

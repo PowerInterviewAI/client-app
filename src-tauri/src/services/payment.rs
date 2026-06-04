@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 use crate::consts::{
-    API_PAYMENT_CREDITS, API_PAYMENT_CURRENCIES, API_PAYMENT_CREATE, API_PAYMENT_HISTORY,
+    API_HEALTH_CHECK_PING_CLIENT, API_PAYMENT_CURRENCIES, API_PAYMENT_CREATE, API_PAYMENT_HISTORY,
     API_PAYMENT_PLANS, API_PAYMENT_STATUS,
 };
 use crate::services::api_client::ApiClient;
@@ -37,6 +37,6 @@ impl PaymentService {
     }
 
     pub async fn get_credits(config_store: &ConfigStore) -> Result<Value, String> {
-        Self::client(config_store).get(API_PAYMENT_CREDITS).await
+        Self::client(config_store).post(API_HEALTH_CHECK_PING_CLIENT, &serde_json::json!({})).await
     }
 }

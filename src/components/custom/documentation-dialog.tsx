@@ -26,8 +26,8 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
     try {
       window.electronAPI?.autoUpdater
         .getVersion()
-        .then((res) => {
-          if (res?.success && res.version) setVersion(res.version);
+        .then((res: unknown) => {
+          if (typeof res === 'string') setVersion(res);
         })
         .catch(() => {
           /* ignore */
