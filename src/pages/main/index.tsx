@@ -17,6 +17,7 @@ import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { RunningState, UserRole } from '@/types/app-state';
+import { Loader } from 'lucide-react';
 import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
 import { type Transcript } from '@/types/transcript';
 
@@ -272,6 +273,16 @@ export default function MainPage() {
       )}
 
       <ConfigurationDialog isOpen={isProfileOpen} onOpenChange={setIsProfileOpen} />
+
+      {(appState?.runningState === RunningState.Starting ||
+        appState?.runningState === RunningState.Stopping) && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center gap-2 bg-background/60 z-50 pointer-events-none">
+          <Loader className="w-6 h-6 animate-spin text-foreground" />
+          <span className="text-sm text-foreground">
+            {appState.runningState === RunningState.Starting ? 'Starting…' : 'Stopping…'}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
