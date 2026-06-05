@@ -1,11 +1,11 @@
-use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
 
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_updater::Update;
 
-use crate::AppServices;
 use crate::types::config::WindowBounds;
+use crate::AppServices;
 
 static DOWNLOAD_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
 /// A fully downloaded update waiting to be installed on the user's command.
@@ -13,7 +13,7 @@ static DOWNLOAD_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
 static PENDING_UPDATE: Mutex<Option<(Update, Vec<u8>)>> = Mutex::new(None);
 
 /// Check for an update and, if found, download it in the background.
-/// The installer is NOT run here — on Windows `install()` exits the process,
+/// The installer is NOT run here - on Windows `install()` exits the process,
 /// so we defer it until the user explicitly restarts. Emits `auto-updater:status`
 /// with `downloaded` (ready to install) or `error`.
 /// No-ops if an update is already staged or a download is in progress.
@@ -51,10 +51,13 @@ pub async fn check_and_download_update(handle: AppHandle) {
     };
 
     let version = update.version.clone();
-    log::info!("[Updater] update {} available, downloading in background", version);
+    log::info!(
+        "[Updater] update {} available, downloading in background",
+        version
+    );
 
     tokio::spawn(async move {
-        // Download only — does not run the installer or exit the app.
+        // Download only - does not run the installer or exit the app.
         match update.download(|_, _| {}, || {}).await {
             Ok(bytes) => {
                 *PENDING_UPDATE.lock().unwrap() = Some((update, bytes));
@@ -90,7 +93,7 @@ pub async fn updater_check_for_updates(app: AppHandle) -> Result<(), String> {
 
 /// Persist window position/size before the process exits for the update.
 /// On Windows `install()` calls `process::exit(0)` and on macOS `app.restart()`
-/// re-execs — neither fires the normal `CloseRequested` handler, so bounds would
+/// re-execs - neither fires the normal `CloseRequested` handler, so bounds would
 /// otherwise be lost across the update.
 fn save_window_bounds(app: &AppHandle) {
     if let Some(win) = app.get_webview_window("main") {

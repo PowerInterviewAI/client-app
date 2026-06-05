@@ -62,7 +62,7 @@
   <!-- Shooting star right -->
   <line x1="540" y1="30" x2="575" y2="48" stroke="#ffffff" stroke-width="0.6" opacity="0.2" style="fill:rgb(0, 0, 0);stroke:rgb(255, 255, 255);color:rgb(0, 0, 0);stroke-width:0.6px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.2;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
 
-  <!-- Icon border ring — centered horizontally -->
+  <!-- Icon border ring - centered horizontally -->
   <rect x="313" y="20" width="54" height="54" rx="13" ry="13" fill="none" stroke="url(#borderG)" stroke-width="1" opacity="0.6" style="fill:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.6;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
   <!-- Icon bg -->
   <rect x="315" y="22" width="50" height="50" rx="11" ry="11" fill="url(#bgIcon)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>

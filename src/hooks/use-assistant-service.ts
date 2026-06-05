@@ -35,9 +35,9 @@ export const useAssistantService = create<AssistantService>((set) => ({
       //
       // Microphone: only hard-block when the OS reports an explicit denial. For
       // 'not-determined'/'unknown' we let getUserMedia() trigger the native OS prompt
-      // in the start flow — that is the real request path on both platforms (there is
+      // in the start flow - that is the real request path on both platforms (there is
       // no reliable programmatic request API in the webview).
-      // Screen recording: check only — the OS dialog fires automatically when
+      // Screen recording: check only - the OS dialog fires automatically when
       // getDisplayMedia() is called.
       const micStatus = await electron.permissions.checkMicrophone();
       if (micStatus === 'denied' || micStatus === 'restricted') {
@@ -46,7 +46,7 @@ export const useAssistantService = create<AssistantService>((set) => ({
       }
 
       // desktopCapturer.getSources() returns [] when screen recording is denied,
-      // causing getDisplayMedia() to hang indefinitely — guard against it here.
+      // causing getDisplayMedia() to hang indefinitely - guard against it here.
       const screenStatus = await electron.permissions.checkScreenRecording();
       if (screenStatus === 'denied' || screenStatus === 'restricted') {
         await electron.permissions.showDeniedDialog('screen-recording');
@@ -88,7 +88,7 @@ export const useAssistantService = create<AssistantService>((set) => ({
       electron.appState.update({ runningState: RunningState.Idle });
 
       // A microphone denial at the native getUserMedia prompt surfaces here as
-      // NotAllowedError — show the actionable dialog instead of a generic message.
+      // NotAllowedError - show the actionable dialog instead of a generic message.
       if (error instanceof DOMException && error.name === 'NotAllowedError') {
         await electron.permissions.showDeniedDialog('microphone');
         set({ error: 'Microphone permission denied' });

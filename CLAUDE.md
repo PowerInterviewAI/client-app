@@ -19,14 +19,14 @@ The app is built as a Tauri desktop client with a React frontend.
 
 ### Frontend
 
-- `src/` — React, Tailwind, hooks, components, pages.
+- `src/` - React, Tailwind, hooks, components, pages.
 - `src/lib/tauri-bridge.ts` exposes the IPC compatibility API used by renderer hooks.
 
 ### Native Backend
 
-- `src-tauri/src/` — Tauri command handlers, services, state, and native utilities.
-- `src-tauri/tauri.conf.json` — macOS and Windows bundle settings.
-- `src-tauri/Cargo.toml` — Rust dependency manifest.
+- `src-tauri/src/` - Tauri command handlers, services, state, and native utilities.
+- `src-tauri/tauri.conf.json` - macOS and Windows bundle settings.
+- `src-tauri/Cargo.toml` - Rust dependency manifest.
 
 ### IPC Bridge
 
@@ -61,4 +61,4 @@ The workflow at `.github/workflows/manual-cross-platform-release.yml`:
 - There is no `src/main/` Electron host code in this repo anymore.
 - Use the Tauri app as the single desktop implementation.
 - Update native dependencies in `src-tauri/Cargo.toml` and frontend dependencies in `package.json`.
-- Package manager is pnpm — do not use npm or yarn.
+- Package manager is pnpm - do not use npm or yarn.

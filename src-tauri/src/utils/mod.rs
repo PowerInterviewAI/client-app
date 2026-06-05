@@ -24,12 +24,12 @@ pub fn drain_utf8(buf: &mut Vec<u8>, out: &mut String) {
                     out.push_str(unsafe { std::str::from_utf8_unchecked(&buf[..valid]) });
                 }
                 match e.error_len() {
-                    // Incomplete trailing sequence — keep it and wait for more bytes.
+                    // Incomplete trailing sequence - keep it and wait for more bytes.
                     None => {
                         buf.drain(..valid);
                         return;
                     }
-                    // Genuinely invalid byte(s) — emit a replacement and skip past them.
+                    // Genuinely invalid byte(s) - emit a replacement and skip past them.
                     Some(len) => {
                         out.push('\u{FFFD}');
                         buf.drain(..valid + len);

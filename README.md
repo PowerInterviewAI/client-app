@@ -1,4 +1,4 @@
-﻿# Power Interview AI — Tauri Desktop Interview Assistant
+﻿# Power Interview AI - Tauri Desktop Interview Assistant
 
 ## Overview
 
@@ -51,8 +51,8 @@ npm install
 
 ### Development
 
-- `npm run dev` — start the renderer only
-- `npm run tauri:dev` — launch the Tauri desktop app locally
+- `npm run dev` - start the renderer only
+- `npm run tauri:dev` - launch the Tauri desktop app locally
 
 ### Build
 

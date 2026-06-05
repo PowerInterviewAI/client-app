@@ -49,7 +49,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
           await startAssistant();
         } catch (error) {
           console.log('Failed to start assistant:', error);
-          // PermissionError: native dialog was already shown — skip the toast
+          // PermissionError: native dialog was already shown - skip the toast
           if ((error as { name?: string })?.name !== 'PermissionError') {
             toast.error(error instanceof Error ? error.message : 'Failed to start assistant');
           }

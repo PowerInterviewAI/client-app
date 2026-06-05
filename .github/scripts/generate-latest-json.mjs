@@ -18,9 +18,9 @@ if (!TAG || !VERSION) {
 
 // 1. Map uploaded asset name -> browser download URL.
 //    GitHub stores asset names with spaces replaced by dots, so we match both forms.
-const assets = JSON.parse(
-  execFileSync('gh', ['release', 'view', TAG, '--json', 'assets'], { encoding: 'utf8' })
-).assets ?? [];
+const assets =
+  JSON.parse(execFileSync('gh', ['release', 'view', TAG, '--json', 'assets'], { encoding: 'utf8' }))
+    .assets ?? [];
 const urlByName = new Map(assets.map((a) => [a.name, a.url]));
 
 function resolveUrl(localBasename) {
@@ -59,7 +59,7 @@ for (const sig of sigFiles) {
 
   const url = resolveUrl(artifact);
   if (!url) {
-    console.warn(`No uploaded asset URL for "${artifact}" — skipping ${keys.join(', ')}`);
+    console.warn(`No uploaded asset URL for "${artifact}" - skipping ${keys.join(', ')}`);
     continue;
   }
   const entry = { signature: readFileSync(sig, 'utf8').trim(), url };
@@ -67,7 +67,9 @@ for (const sig of sigFiles) {
 }
 
 if (Object.keys(platforms).length === 0) {
-  console.error('No updater platforms resolved — is createUpdaterArtifacts enabled and signing configured?');
+  console.error(
+    'No updater platforms resolved - is createUpdaterArtifacts enabled and signing configured?'
+  );
   process.exit(1);
 }
 

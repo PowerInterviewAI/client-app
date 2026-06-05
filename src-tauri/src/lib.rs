@@ -135,7 +135,9 @@ pub fn run() {
             let app_state_ref = Arc::clone(&app_state);
             let config_store_ref = Arc::clone(&config_store);
             tauri::async_runtime::spawn(async move {
-                health_check_ref.start(app_state_ref, config_store_ref).await;
+                health_check_ref
+                    .start(app_state_ref, config_store_ref)
+                    .await;
             });
 
             // Register global hotkeys
@@ -232,14 +234,16 @@ pub fn run() {
             if let tauri::WindowEvent::CloseRequested { .. } = event {
                 // Save bounds before closing
                 if let (Ok(pos), Ok(size)) = (window.outer_position(), window.inner_size()) {
-                    // state() panics only if not managed — safe since setup() always manages AppServices
+                    // state() panics only if not managed - safe since setup() always manages AppServices
                     let services = window.state::<AppServices>();
-                    services.config_store.save_window_bounds(crate::types::config::WindowBounds {
-                        x: Some(pos.x),
-                        y: Some(pos.y),
-                        width: Some(size.width),
-                        height: Some(size.height),
-                    });
+                    services
+                        .config_store
+                        .save_window_bounds(crate::types::config::WindowBounds {
+                            x: Some(pos.x),
+                            y: Some(pos.y),
+                            width: Some(size.width),
+                            height: Some(size.height),
+                        });
                 }
             }
         })
@@ -248,7 +252,9 @@ pub fn run() {
 }
 
 fn register_hotkeys(handle: &AppHandle) {
-    use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+    use tauri_plugin_global_shortcut::{
+        Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState,
+    };
 
     let _h = handle.clone();
     if let Err(e) = handle.global_shortcut().on_shortcuts(
@@ -296,26 +302,74 @@ fn register_hotkeys(handle: &AppHandle) {
                 None => return,
             };
             match shortcut.key {
-                Code::KeyQ => { let _ = app.emit("hotkey-stop-assistant", ()); }
-                Code::KeyM => { services.window_control.toggle_stealth(); }
-                Code::KeyN => { services.window_control.toggle_opacity(); }
-                Code::Equal => { services.zoom.adjust(crate::consts::ZOOM_STEP); }
-                Code::Minus => { services.zoom.adjust(-crate::consts::ZOOM_STEP); }
-                Code::Digit0 => { services.zoom.reset(); }
-                Code::KeyK => { let _ = app.emit("hotkey-scroll", serde_json::json!({"section": "0", "direction": "up"})); }
-                Code::KeyJ => { let _ = app.emit("hotkey-scroll", serde_json::json!({"section": "0", "direction": "down"})); }
-                Code::KeyL => { let _ = app.emit("hotkey-scroll", serde_json::json!({"section": "0", "direction": "end"})); }
-                Code::KeyI => { let _ = app.emit("hotkey-scroll", serde_json::json!({"section": "1", "direction": "up"})); }
-                Code::KeyU => { let _ = app.emit("hotkey-scroll", serde_json::json!({"section": "1", "direction": "down"})); }
-                Code::KeyO => { let _ = app.emit("hotkey-scroll", serde_json::json!({"section": "1", "direction": "end"})); }
+                Code::KeyQ => {
+                    let _ = app.emit("hotkey-stop-assistant", ());
+                }
+                Code::KeyM => {
+                    services.window_control.toggle_stealth();
+                }
+                Code::KeyN => {
+                    services.window_control.toggle_opacity();
+                }
+                Code::Equal => {
+                    services.zoom.adjust(crate::consts::ZOOM_STEP);
+                }
+                Code::Minus => {
+                    services.zoom.adjust(-crate::consts::ZOOM_STEP);
+                }
+                Code::Digit0 => {
+                    services.zoom.reset();
+                }
+                Code::KeyK => {
+                    let _ = app.emit(
+                        "hotkey-scroll",
+                        serde_json::json!({"section": "0", "direction": "up"}),
+                    );
+                }
+                Code::KeyJ => {
+                    let _ = app.emit(
+                        "hotkey-scroll",
+                        serde_json::json!({"section": "0", "direction": "down"}),
+                    );
+                }
+                Code::KeyL => {
+                    let _ = app.emit(
+                        "hotkey-scroll",
+                        serde_json::json!({"section": "0", "direction": "end"}),
+                    );
+                }
+                Code::KeyI => {
+                    let _ = app.emit(
+                        "hotkey-scroll",
+                        serde_json::json!({"section": "1", "direction": "up"}),
+                    );
+                }
+                Code::KeyU => {
+                    let _ = app.emit(
+                        "hotkey-scroll",
+                        serde_json::json!({"section": "1", "direction": "down"}),
+                    );
+                }
+                Code::KeyO => {
+                    let _ = app.emit(
+                        "hotkey-scroll",
+                        serde_json::json!({"section": "1", "direction": "end"}),
+                    );
+                }
                 Code::F9 => {
                     let svc = Arc::clone(&services.action_suggestion);
-                    tauri::async_runtime::spawn(async move { svc.capture_screenshot().await; });
+                    tauri::async_runtime::spawn(async move {
+                        svc.capture_screenshot().await;
+                    });
                 }
-                Code::F10 => { services.action_suggestion.clear_images(); }
+                Code::F10 => {
+                    services.action_suggestion.clear_images();
+                }
                 Code::F11 => {
                     let svc = Arc::clone(&services.action_suggestion);
-                    tauri::async_runtime::spawn(async move { svc.start_generate_suggestion().await; });
+                    tauri::async_runtime::spawn(async move {
+                        svc.start_generate_suggestion().await;
+                    });
                 }
                 Code::F12 => {
                     let svc = Arc::clone(&services.action_suggestion);
@@ -326,15 +380,33 @@ fn register_hotkeys(handle: &AppHandle) {
                         svc.start_generate_suggestion().await;
                     });
                 }
-                Code::Digit1 => { services.window_control.move_to_position("bottom-left"); }
-                Code::Digit2 => { services.window_control.move_to_position("bottom-center"); }
-                Code::Digit3 => { services.window_control.move_to_position("bottom-right"); }
-                Code::Digit4 => { services.window_control.move_to_position("middle-left"); }
-                Code::Digit5 => { services.window_control.move_to_position("center"); }
-                Code::Digit6 => { services.window_control.move_to_position("middle-right"); }
-                Code::Digit7 => { services.window_control.move_to_position("top-left"); }
-                Code::Digit8 => { services.window_control.move_to_position("top-center"); }
-                Code::Digit9 => { services.window_control.move_to_position("top-right"); }
+                Code::Digit1 => {
+                    services.window_control.move_to_position("bottom-left");
+                }
+                Code::Digit2 => {
+                    services.window_control.move_to_position("bottom-center");
+                }
+                Code::Digit3 => {
+                    services.window_control.move_to_position("bottom-right");
+                }
+                Code::Digit4 => {
+                    services.window_control.move_to_position("middle-left");
+                }
+                Code::Digit5 => {
+                    services.window_control.move_to_position("center");
+                }
+                Code::Digit6 => {
+                    services.window_control.move_to_position("middle-right");
+                }
+                Code::Digit7 => {
+                    services.window_control.move_to_position("top-left");
+                }
+                Code::Digit8 => {
+                    services.window_control.move_to_position("top-center");
+                }
+                Code::Digit9 => {
+                    services.window_control.move_to_position("top-right");
+                }
                 _ => {}
             }
         },
@@ -342,4 +414,3 @@ fn register_hotkeys(handle: &AppHandle) {
         log::error!("[Hotkeys] Failed to register hotkeys: {}", e);
     }
 }
-
