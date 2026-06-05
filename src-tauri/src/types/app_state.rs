@@ -84,7 +84,6 @@ pub struct ActionSuggestion {
 pub struct AppState {
     pub is_stealth: bool,
     pub is_backend_live: bool,
-    pub is_gpu_server_live: bool,
     pub is_logged_in: Option<bool>,
     pub running_state: RunningState,
     pub is_app_idle: bool,
@@ -103,7 +102,6 @@ impl Default for AppState {
         Self {
             is_stealth: false,
             is_backend_live: false,
-            is_gpu_server_live: false,
             is_logged_in: None,
             running_state: RunningState::Idle,
             is_app_idle: false,
