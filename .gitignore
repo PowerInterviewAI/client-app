@@ -20,9 +20,6 @@ electron-dist
 release
 *.local
 
-# Claude Code
-.claude
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -33,3 +30,6 @@ release
 *.njsproj
 *.sln
 *.sw?
+
+# Temp
+.temp
