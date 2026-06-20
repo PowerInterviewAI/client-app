@@ -10,6 +10,7 @@ import ActionSuggestionsPanel from '@/components/custom/panels/action-suggestion
 import LiveSuggestionsPanel from '@/components/custom/panels/live-suggestions-panel';
 import TranscriptPanel from '@/components/custom/panels/transcript-panel';
 import StatusPanel from '@/components/custom/status-panel';
+import { TransitionOverlay } from '@/components/custom/transition-overlay';
 import TrialUserNotice from '@/components/custom/trial-user-notice';
 import { VideoPanel, type VideoPanelHandle } from '@/components/custom/video-panel';
 import { useAppState } from '@/hooks/use-app-state';
@@ -285,6 +286,7 @@ export default function MainPage() {
       )}
 
       <ConfigurationDialog isOpen={isProfileOpen} onOpenChange={setIsProfileOpen} />
+      <TransitionOverlay />
       <IdleOverlay />
     </div>
   );
