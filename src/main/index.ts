@@ -40,7 +40,7 @@ initializeAudioLoopback();
 // Ensure the application name is set (used by native dialogs/title fallbacks)
 try {
   if (typeof app.setName === 'function') {
-    app.setName('Power Interview');
+    app.setName('Power Interview AI');
   }
 } catch (err) {
   console.warn('Failed to set app name:', err);
@@ -89,7 +89,7 @@ async function createWindow() {
   if (!savedBounds.height || savedBounds.height < MIN_HEIGHT) savedBounds.height = MIN_HEIGHT;
 
   win = new BrowserWindow({
-    title: 'Power Interview',
+    title: 'Power Interview AI',
     ...savedBounds,
     titleBarStyle: 'hidden',
     // Center traffic lights vertically in the h-9 (36px) titlebar.

@@ -40,7 +40,7 @@ export default function SignupPage() {
     <Card className="max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Create account</CardTitle>
-        <CardDescription>Register a new account for Power Interview</CardDescription>
+        <CardDescription>Register a new account for Power Interview AI</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-4">

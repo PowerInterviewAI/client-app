@@ -22,33 +22,11 @@ import { pushNotificationService } from './push-notification.service.js';
 export class ActionSuggestionService {
   private llmApi: LLMApi = new LLMApi();
   private uploadedImageNames: string[] = [];
-
-  /**
-   * Public helper for callers to know whether there are pending captures.
-   * Used by hotkey handler to avoid redundant screenshots on combo key.
-   */
-  hasUploadedImages(): boolean {
-    return this.uploadedImageNames.length > 0;
-  }
   private suggestions: Map<number, ActionSuggestion> = new Map();
   private abortMap: Map<string, boolean> = new Map();
 
-  // --------------------------
-  // Public API
-  // --------------------------
-
-  /**
-   * Get all suggestions with pending prompt if images are uploaded
-   */
-  // helper: return most recent finalized transcript spoken by interviewer
-  private getLastInterviewerQuestion(transcripts: Transcript[]): string {
-    for (let i = transcripts.length - 1; i >= 0; i--) {
-      const t = transcripts[i];
-      if (t.speaker === Speaker.Other && t.isFinal) {
-        return t.text;
-      }
-    }
-    return '';
+  hasUploadedImages(): boolean {
+    return this.uploadedImageNames.length > 0;
   }
 
   getSuggestions(isUploading: boolean = false, includePrompt: boolean = true): ActionSuggestion[] {
@@ -86,9 +64,6 @@ export class ActionSuggestionService {
     return suggestionsArray;
   }
 
-  /**
-   * Clear uploaded images
-   */
   async clearImages(): Promise<void> {
     if (appStateService.getState().runningState !== RunningState.Running) {
       pushNotificationService.pushNotification({
@@ -102,9 +77,6 @@ export class ActionSuggestionService {
     appStateService.updateState({ actionSuggestions: this.getSuggestions() });
   }
 
-  /**
-   * Capture screenshot and upload to backend
-   */
   async captureScreenshot(): Promise<void> {
     if (appStateService.getState().runningState !== RunningState.Running) {
       pushNotificationService.pushNotification({
@@ -114,7 +86,6 @@ export class ActionSuggestionService {
       return;
     }
 
-    // Enforce maximum screenshots limit
     if (this.uploadedImageNames.length >= ACTION_SUGGESTION_MAX_CAPTURES) {
       pushNotificationService.pushNotification({
         type: 'warning',
@@ -123,51 +94,40 @@ export class ActionSuggestionService {
       return;
     }
 
-    // Try to acquire lock
     if (!actionLockService.tryAcquire(ActionType.ScreenshotCapture)) {
       return;
     }
 
-    // Update app state
     appStateService.updateState({
       actionSuggestions: this.getSuggestions(true),
     });
 
     try {
-      // Capture screenshot from main window
       const imageBytes = await this.captureScreenshotAsGrayscale();
 
-      // Create FormData for file upload
       const formData = new FormData();
       const blob = new Blob([new Uint8Array(imageBytes)], { type: 'image/png' });
       formData.append('image_file', blob, 'screenshot.png');
 
-      // Upload image to backend
       const response = await this.llmApi.uploadImage(formData);
       if (response.error || !response.data) {
         throw new Error(`Upload failed: ${response.error?.message || 'No filename returned'}`);
       }
       this.uploadedImageNames.push(response.data);
 
-      // Update app state
       appStateService.updateState({ actionSuggestions: this.getSuggestions() });
     } catch (error) {
       console.error('[ActionSuggestionService] Failed to capture/upload image:', error);
-      // Reset uploading state so UI is not stuck in loading
       appStateService.updateState({ actionSuggestions: this.getSuggestions() });
       pushNotificationService.pushNotification({
         type: 'error',
         message: 'Screenshot capture failed. Please try again.',
       });
     } finally {
-      // Release lock - always reached now regardless of capture or upload failure
       actionLockService.release(ActionType.ScreenshotCapture);
     }
   }
 
-  /**
-   * Generate code suggestion asynchronously
-   */
   async startGenerateSuggestion(): Promise<void> {
     const appState = appStateService.getState();
 
@@ -179,41 +139,50 @@ export class ActionSuggestionService {
       return;
     }
 
-    // Try to acquire lock
     if (!actionLockService.tryAcquire(ActionType.CaptureSuggestion)) {
       return;
     }
 
-    // Cancel any current task
     this.stopRunningTasks();
 
-    // Start new generation
     const taskId = UuidUtil.generate();
     this.abortMap.set(taskId, false);
     this.generateSuggestion(taskId, appState.transcripts);
   }
 
-  /**
-   * Stop current suggestion generation
-   */
   stopRunningTasks(): void {
     this.abortMap.forEach((_value, key) => {
       this.abortMap.set(key, true);
     });
   }
 
-  // --------------------------
-  // Private Methods
-  // --------------------------
+  async clear(): Promise<void> {
+    this.stopRunningTasks();
+    this.suggestions.clear();
+    this.uploadedImageNames = [];
+    appStateService.updateState({ actionSuggestions: [] });
+  }
+
+  async stop(): Promise<void> {
+    this.stopRunningTasks();
+  }
 
   private setSuggestion(timestamp: number, suggestion: ActionSuggestion): void {
     this.suggestions.set(timestamp, suggestion);
     appStateService.updateState({ actionSuggestions: this.getSuggestions(false, false) });
   }
 
-  /**
-   * Generate code suggestion and stream response
-   */
+  // Returns the most recent finalized transcript spoken by the interviewer (ch_0 / Other speaker)
+  private getLastInterviewerQuestion(transcripts: Transcript[]): string {
+    for (let i = transcripts.length - 1; i >= 0; i--) {
+      const t = transcripts[i];
+      if (t.speaker === Speaker.Other && t.isFinal) {
+        return t.text;
+      }
+    }
+    return '';
+  }
+
   private async generateSuggestion(taskId: string, transcripts: Transcript[]): Promise<void> {
     const timestamp = DateTimeUtil.now();
     const conf = configStore.getConfig();
@@ -226,8 +195,6 @@ export class ActionSuggestionService {
       image_names: [...this.uploadedImageNames],
     };
 
-    // Create initial suggestion
-    // determine the most recent interviewer question (other speaker & final)
     const lastQuestion = this.getLastInterviewerQuestion(transcripts);
 
     const suggestion: ActionSuggestion = {
@@ -240,7 +207,6 @@ export class ActionSuggestionService {
     };
     this.setSuggestion(timestamp, suggestion);
 
-    // Clear uploaded images (they're now part of the request)
     this.uploadedImageNames = [];
 
     try {
@@ -252,7 +218,6 @@ export class ActionSuggestionService {
       const reader = stream.getReader();
       const decoder = new TextDecoder();
 
-      // Update state to loading
       suggestion.state = SuggestionState.Loading;
       this.setSuggestion(timestamp, suggestion);
 
@@ -262,7 +227,6 @@ export class ActionSuggestionService {
 
           if (done) break;
 
-          // Check if task was stopped
           if (this.abortMap.get(taskId)) {
             this.abortMap.delete(taskId);
 
@@ -280,7 +244,6 @@ export class ActionSuggestionService {
           }
         }
 
-        // Mark as successful if not stopped
         if (suggestion.state === SuggestionState.Loading) {
           suggestion.state = SuggestionState.Success;
           this.setSuggestion(timestamp, suggestion);
@@ -302,9 +265,6 @@ export class ActionSuggestionService {
     return `${BACKEND_BASE_URL}/api/llm/get-thumb/${imageName}`;
   }
 
-  /**
-   * Capture screenshot from desktop and convert to grayscale PNG
-   */
   private async captureScreenshotAsGrayscale(): Promise<Uint8Array> {
     try {
       // Identify which display the main window is currently on, so we only
@@ -316,10 +276,6 @@ export class ActionSuggestionService {
 
       const physicalWidth = Math.round(targetDisplay.size.width * targetDisplay.scaleFactor);
       const physicalHeight = Math.round(targetDisplay.size.height * targetDisplay.scaleFactor);
-
-      console.log(
-        `[ActionSuggestionService] Capturing display id=${targetDisplay.id} (${physicalWidth}x${physicalHeight})...`
-      );
 
       // desktopCapturer is Electron's built-in screen-capture API.
       // A timeout guards against indefinite hangs on restricted or virtual display adapters.
@@ -345,12 +301,8 @@ export class ActionSuggestionService {
       const targetSource =
         sources.find((s) => s.display_id === String(targetDisplay.id)) ?? sources[0];
 
-      console.log(`[ActionSuggestionService] Using source: "${targetSource.name}"`);
-
       const capturedBuffer: Buffer = targetSource.thumbnail.toPNG();
-      console.log(`[ActionSuggestionService] Captured ${capturedBuffer.length} bytes`);
 
-      // Use Sharp to convert to grayscale PNG with high efficiency
       const grayscalePngBuffer = await sharp(capturedBuffer)
         .greyscale()
         .png({
@@ -359,10 +311,6 @@ export class ActionSuggestionService {
         })
         .toBuffer();
 
-      console.log(
-        `[ActionSuggestionService] Converted to grayscale: ${grayscalePngBuffer.length} bytes`
-      );
-
       return new Uint8Array(grayscalePngBuffer);
     } catch (error) {
       console.error('[ActionSuggestionService] Failed to capture screenshot:', error);
@@ -370,21 +318,6 @@ export class ActionSuggestionService {
         `Screenshot capture failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
-  }
-
-  /**
-   * Clear suggestions (legacy method)
-   */
-  async clear(): Promise<void> {
-    this.stopRunningTasks();
-    this.suggestions.clear();
-    this.uploadedImageNames = [];
-    // Update app state
-    appStateService.updateState({ actionSuggestions: [] });
-  }
-
-  async stop(): Promise<void> {
-    this.stopRunningTasks();
   }
 }
 

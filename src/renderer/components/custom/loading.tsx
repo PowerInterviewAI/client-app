@@ -7,7 +7,7 @@ type LoadingProps = {
 };
 
 export function LoadingPage({ disclaimer }: LoadingProps) {
-  const title = 'Power Interview';
+  const title = 'Power Interview AI';
 
   return (
     <div className="flex justify-center items-center h-screen w-full bg-background ">

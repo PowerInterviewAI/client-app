@@ -40,10 +40,10 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl w-full max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Power Interview {version ? `v${version}` : ''}</DialogTitle>
+          <DialogTitle>Power Interview AI {version ? `v${version}` : ''}</DialogTitle>
           <DialogDescription>
             <p>
-              Power Interview is an AI-powered assistant that enhances your interview experience
+              Power Interview AI is an AI-powered assistant that enhances your interview experience
               with real-time suggestions, on-screen code recommendations.
             </p>
             <p className="mt-2 text-sm">

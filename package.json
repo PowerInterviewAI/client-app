@@ -1,9 +1,9 @@
 {
-  "name": "power-interview",
+  "name": "power-interview-ai",
   "private": false,
   "version": "1.5.2",
   "description": "AI-powered live interview assistant",
-  "author": "Power Interview",
+  "author": "VectorLeap Pulse Innovation LTD",
   "main": "electron-dist/index.js",
   "type": "module",
   "packageManager": "pnpm@11.1.3",
@@ -78,9 +78,10 @@
     "wait-on": "^9.0.3"
   },
   "build": {
-    "appId": "ai.power-interview.client",
-    "productName": "Power Interview",
-    "copyright": "Copyright ©2026 Power Interview",
+    "appId": "ai.powerinterviewai.pia",
+    "productName": "Power Interview AI",
+    "executableName": "pia",
+    "copyright": "Copyright ©2026 VectorLeap Pulse Innovation LTD",
     "publish": [
       {
         "provider": "github",
@@ -117,8 +118,8 @@
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "Power Interview needs microphone access to transcribe your voice during interviews.",
-        "NSScreenRecordingUsageDescription": "Power Interview needs screen recording access to capture system audio during interviews."
+        "NSMicrophoneUsageDescription": "Power Interview AI needs microphone access to transcribe your voice during interviews.",
+        "NSScreenRecordingUsageDescription": "Power Interview AI needs screen recording access to capture system audio during interviews."
       }
     },
     "nsis": {
@@ -132,8 +133,8 @@
       "installerLanguages": [
         "en_US"
       ],
-      "shortcutName": "Power Interview",
-      "artifactName": "PowerInterview-Setup-${version}.exe"
+      "shortcutName": "Power Interview AI",
+      "artifactName": "PowerInterviewAI-Setup-${version}.exe"
     }
   }
 }
