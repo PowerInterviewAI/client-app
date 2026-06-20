@@ -3,14 +3,6 @@ import { useEffect, useState } from 'react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-/**
- * Render the set of zoom buttons that live in the titlebar.
- *
- * This component handles its own state (current zoom percent) and
- * communicates with the preload/electron API directly.  The
- * parent (Titlebar) simply places the controls in the layout and
- * is free to show/hide an enclosing divider if necessary.
- */
 export default function ZoomControl() {
   const [zoomPercent, setZoomPercent] = useState(100);
 
@@ -48,8 +40,6 @@ export default function ZoomControl() {
             aria-label="Reset zoom"
             title="Reset zoom"
             className="h-7 w-16 flex items-center justify-center rounded hover:bg-muted"
-            // eslint-disable-next-line
-            style={{ WebkitAppRegion: 'no-drag' } as any}
           >
             <RefreshCcw className="h-4 w-4" />
             <span className="ml-1 text-xs">{zoomPercent}%</span>
@@ -67,8 +57,6 @@ export default function ZoomControl() {
             aria-label="Zoom in"
             title="Zoom in"
             className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-            // eslint-disable-next-line
-            style={{ WebkitAppRegion: 'no-drag' } as any}
           >
             <ZoomIn className="h-4 w-4" />
           </button>
@@ -85,8 +73,6 @@ export default function ZoomControl() {
             aria-label="Zoom out"
             title="Zoom out"
             className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-            // eslint-disable-next-line
-            style={{ WebkitAppRegion: 'no-drag' } as any}
           >
             <ZoomOut className="h-4 w-4" />
           </button>

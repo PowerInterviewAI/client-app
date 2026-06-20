@@ -2,7 +2,6 @@ import { ChevronUp, CreditCard, Key, LogOut, Mail, Moon, SettingsIcon, Sun } fro
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import DocumentationDialog from '@/components/custom/documentation-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -38,7 +37,6 @@ export function ProfileGroup({
   const { changePassword, loading, error, setError } = useAuth();
   const { isDark, toggleTheme } = useThemeStore();
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [isDocumentationOpen, setIsDocumentationOpen] = useState(false);
 
   const disabled = getDisabled(runningState, true);
 
@@ -133,7 +131,6 @@ export function ProfileGroup({
         loading={loading}
         error={error}
       />
-      <DocumentationDialog open={isDocumentationOpen} onOpenChange={setIsDocumentationOpen} />
     </div>
   );
 }
