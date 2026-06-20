@@ -1,8 +1,3 @@
-/**
- * Transcription Service
- * Maintains transcript state and suggestion triggers.
- */
-
 import { LIVE_SUGGESTION_GAP_MS, TRANSCRIPT_INTER_TRANSCRIPT_GAP_MS } from '../consts.js';
 import { Speaker, Transcript } from '../types/app-state.js';
 import { appStateService } from './app-state.service.js';
@@ -82,42 +77,27 @@ class TranscriptService {
     }
 
     const lastSelf = cleaned.filter((t) => t.speaker === Speaker.Self).slice(-1)[0];
-    if (transcript.speaker === Speaker.Other && transcript.isFinal) {
-      if (this.selfPartialTranscript) {
-        console.log('Skipping suggestion: SELF partial active');
-      } else {
-        const skipDueToRecentSelf =
-          !!lastSelf &&
-          lastSelf.isFinal &&
-          Date.now() - lastSelf.endTimestamp <= LIVE_SUGGESTION_GAP_MS;
-        if (!skipDueToRecentSelf) {
-          await liveSuggestionService.startGenerateSuggestion(cleaned);
-        } else {
-          console.log('Skipping suggestion generation due to recent self transcript');
-        }
+    if (transcript.speaker === Speaker.Other && transcript.isFinal && !this.selfPartialTranscript) {
+      const skipDueToRecentSelf =
+        !!lastSelf &&
+        lastSelf.isFinal &&
+        Date.now() - lastSelf.endTimestamp <= LIVE_SUGGESTION_GAP_MS;
+      if (!skipDueToRecentSelf) {
+        await liveSuggestionService.startGenerateSuggestion(cleaned);
       }
     }
 
     appStateService.updateState({ transcripts: cleaned });
   }
 
-  /**
-   * Start all transcription services
-   */
   async start(): Promise<void> {
     this.isActive = true;
   }
 
-  /**
-   * Stop all transcription services
-   */
   async stop(): Promise<void> {
     this.isActive = false;
   }
 
-  /**
-   * Clear all stored transcripts and partial transcripts
-   */
   clear(): void {
     this.selfTranscripts = [];
     this.selfPartialTranscript = null;

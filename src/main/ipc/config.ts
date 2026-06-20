@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 
 import { configStore, RuntimeConfig } from '../store/config.store.js';
 
-export function registerConfigHandlers() {
+export function registerConfigHandlers(): void {
   // Handle config queries
   ipcMain.handle('config:get', async () => {
     try {

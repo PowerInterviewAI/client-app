@@ -46,7 +46,7 @@ jobs:
 
       - name: Build release packages
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: ${{ matrix.build_command }}
         shell: bash
 

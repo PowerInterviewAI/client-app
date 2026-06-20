@@ -3,9 +3,8 @@
  * Base client for making HTTP requests to backend
  */
 
-import os from 'os';
-
 import { app } from 'electron';
+import os from 'os';
 
 import { BACKEND_BASE_URL } from '../consts.js';
 
@@ -225,7 +224,11 @@ export class ApiClient {
         );
       }
       if (!response.body) {
-        throw new ApiRequestError('Empty response body for streaming request', response.status, null);
+        throw new ApiRequestError(
+          'Empty response body for streaming request',
+          response.status,
+          null
+        );
       }
 
       return response.body;

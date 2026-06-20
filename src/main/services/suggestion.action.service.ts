@@ -1,13 +1,7 @@
-/**
- * Action Suggestion Service
- * Generates action suggestions using LLM based on screenshots and transcripts
- */
-
 import { BrowserWindow, desktopCapturer, screen } from 'electron';
 import sharp from 'sharp';
 
-import { ApiClient } from '../api/client.js';
-import { ApiRequestError } from '../api/client.js';
+import { LLMApi } from '../api/llm.js';
 import { ACTION_SUGGESTION_MAX_CAPTURES, ACTION_TIMEOUT_MS, BACKEND_BASE_URL } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import {
@@ -19,11 +13,11 @@ import {
 } from '../types/app-state.js';
 import { GenerateActionSuggestionRequest } from '../types/llm.js';
 import { DateTimeUtil } from '../utils/datetime.js';
+import { getSuggestionErrorMessage } from '../utils/suggestion-error.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
-import { LLMApi } from '../api/llm.js';
 
 export class ActionSuggestionService {
   private llmApi: LLMApi = new LLMApi();
@@ -297,35 +291,15 @@ export class ActionSuggestionService {
     } catch (error) {
       console.error('[ActionSuggestionService] Failed to generate action suggestion:', error);
       suggestion.state = SuggestionState.Error;
-      suggestion.error = this.getSuggestionErrorMessage(error);
+      suggestion.error = getSuggestionErrorMessage(error);
       this.setSuggestion(timestamp, suggestion);
     } finally {
-      // Release lock when generation completes
       actionLockService.release(ActionType.CaptureSuggestion);
     }
   }
 
-  /**
-   * Get backend image URL
-   */
   private getBackendImageUrl(imageName: string): string {
     return `${BACKEND_BASE_URL}/api/llm/get-thumb/${imageName}`;
-  }
-
-  private getSuggestionErrorMessage(error: unknown): string {
-    if (error instanceof ApiRequestError) {
-      const content =
-        typeof error.content === 'string' && error.content.length > 0
-          ? error.content
-          : JSON.stringify(error.content ?? {});
-      // return `status=${error.status}; content=${content}`;
-      if (error.status === 429) {
-        return 'Too many requests. Please try again later.';
-      } else {
-        return 'Failed to generate response.';
-      }
-    }
-    return error instanceof Error ? error.message : String(error);
   }
 
   /**

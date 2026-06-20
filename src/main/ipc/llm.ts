@@ -5,7 +5,7 @@ import { LLMConfig } from '../types/llm.js';
 
 const llmApi = new LLMApi();
 
-export function registerLLMHandlers() {
+export function registerLLMHandlers(): void {
   ipcMain.handle('llm:list-models', async () => {
     try {
       const response = await llmApi.listModels();

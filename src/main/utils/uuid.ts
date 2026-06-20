@@ -1,17 +1,10 @@
-/**
- * UUID utility functions
- */
-
 import { randomBytes } from 'crypto';
 
 export class UuidUtil {
-  /**
-   * Generate a UUID v4
-   */
   static generate(): string {
     const bytes = randomBytes(16);
 
-    // Set version (4) and variant bits
+    // Set version (4) and variant bits per RFC 4122
     bytes[6] = (bytes[6] & 0x0f) | 0x40;
     bytes[8] = (bytes[8] & 0x3f) | 0x80;
 

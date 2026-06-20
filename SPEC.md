@@ -8,16 +8,16 @@ Power Interview is an Electron desktop application that provides real-time trans
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Desktop shell | Electron 40 |
-| Renderer | React 19, TypeScript, Vite |
-| Styling | Tailwind CSS v4, shadcn/ui |
-| State | Zustand (config), React Context (app state) |
-| Data fetching | TanStack Query v5 |
-| Persistence | Electron Store |
-| Build/dist | electron-builder, GitHub Releases |
-| Package manager | pnpm |
+| Layer           | Technology                                  |
+| --------------- | ------------------------------------------- |
+| Desktop shell   | Electron 40                                 |
+| Renderer        | React 19, TypeScript, Vite                  |
+| Styling         | Tailwind CSS v4, shadcn/ui                  |
+| State           | Zustand (config), React Context (app state) |
+| Data fetching   | TanStack Query v5                           |
+| Persistence     | Electron Store                              |
+| Build/dist      | electron-builder, GitHub Releases           |
+| Package manager | pnpm                                        |
 
 ## Process Architecture
 

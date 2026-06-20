@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 
 import { liveSuggestionService } from '../services/suggestion.live.service.js';
 
-export function registerLiveSuggestionHandlers() {
+export function registerLiveSuggestionHandlers(): void {
   ipcMain.handle('live-suggestion:clear', async () => {
     await liveSuggestionService.clear();
   });

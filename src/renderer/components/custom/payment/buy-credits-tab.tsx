@@ -1,8 +1,3 @@
-/**
- * Buy Credits Tab Component
- */
-
-import { Check } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 
 import { Loading } from '@/components/custom/loading';
@@ -20,13 +15,6 @@ import { CREDITS_PER_MINUTE } from '@/lib/consts';
 import { cn } from '@/lib/utils';
 import type { AvailableCurrency, CreditPlanInfo } from '@/types/payment';
 import { CreditPlan } from '@/types/payment';
-
-// Plan features configuration
-const planFeatures: Record<CreditPlan, string[]> = {
-  [CreditPlan.Starter]: [],
-  [CreditPlan.Pro]: [],
-  [CreditPlan.Enterprise]: [],
-};
 
 const planNames: Record<CreditPlan, string> = {
   [CreditPlan.Starter]: 'Starter',
@@ -121,7 +109,6 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
             {plans.map((plan) => {
               const isPro = plan.plan === CreditPlan.Pro;
               const minutes = Math.floor(plan.credits / CREDITS_PER_MINUTE);
-              const features = planFeatures[plan.plan] || [];
               const planName = planNames[plan.plan] || plan.plan;
               const planDescription = planDescriptions[plan.plan] || plan.description || '';
 

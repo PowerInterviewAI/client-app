@@ -2,10 +2,10 @@ import { create } from 'zustand';
 
 import { type VideoPanelHandle } from '@/components/custom/video-panel';
 import { getElectron } from '@/lib/utils';
+import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
 
 import { useConfigStore } from './use-config-store';
-import { liveTranscriptionService } from '@/services/live-transcription.service';
 
 interface AssistantService {
   error: string | null;
@@ -48,11 +48,8 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       await electron.tools.clearAll();
 
       const config = useConfigStore.getState().config;
-      const { videoPanelRef } = get();
-
-      // Do something here for face swap
-      if (config?.faceSwap && videoPanelRef?.current) {
-      }
+      // videoPanelRef is reserved for future face-swap integration
+      void get().videoPanelRef;
 
       // Start transcription services
       await electron.transcription.start();
@@ -86,12 +83,9 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       }
       electron.appState.update({ runningState: RunningState.Stopping });
 
-      const config = useConfigStore.getState().config;
-      const { videoPanelRef } = get();
-
-      // Do something here for face swap
-      if (config?.faceSwap && videoPanelRef?.current) {
-      }
+      // config and videoPanelRef reserved for future face-swap integration
+      void useConfigStore.getState().config;
+      void get().videoPanelRef;
 
       // Stop assistant services
       await Promise.all([

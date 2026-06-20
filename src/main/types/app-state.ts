@@ -2,7 +2,7 @@
  * Application State Types
  */
 
-import { UserRole } from './healthceck.js';
+import { UserRole } from './health-check.js';
 
 export enum Speaker {
   Self = 'self',

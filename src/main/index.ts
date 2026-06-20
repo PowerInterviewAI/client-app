@@ -18,7 +18,11 @@ import { registerPaymentHandlers } from './ipc/payment.js';
 import { registerActionSuggestionHandlers } from './ipc/suggestion.action.js';
 import { registerLiveSuggestionHandlers } from './ipc/suggestion.live.js';
 import { registerToolsHandlers } from './ipc/tools.js';
-import { initializeAudioLoopback, registerPermissionHandlers, registerTranscriptHandlers } from './ipc/transcript.js';
+import {
+  initializeAudioLoopback,
+  registerPermissionHandlers,
+  registerTranscriptHandlers,
+} from './ipc/transcript.js';
 import { registerWindowHandlers } from './ipc/window.js';
 import { autoUpdaterService } from './services/auto-updater.service.js';
 import { healthCheckService } from './services/health-check.service.js';
@@ -75,24 +79,14 @@ if (!gotLock) {
 // CREATE WINDOW
 // -------------------------------------------------------------
 async function createWindow() {
-  // minimum size constants (already imported above)
-
-  // Load previously saved window bounds, fall back to sensible defaults
   const savedBounds = configStore.getWindowBounds() || {
     width: 1024,
     height: 640,
   };
-  console.log('Restoring window bounds:', savedBounds);
 
-  // Ensure bounds meet minimum requirements to avoid tiny or invalid windows
-  // (zero is treated as invalid because it's falsy in the earlier check)
-  if (!savedBounds.width || savedBounds.width < MIN_WIDTH) {
-    savedBounds.width = MIN_WIDTH;
-  }
-  if (!savedBounds.height || savedBounds.height < MIN_HEIGHT) {
-    savedBounds.height = MIN_HEIGHT;
-  }
-  console.log('Adjusted window bounds with minimum constraints:', savedBounds);
+  // Clamp to minimum so persisted tiny/invalid bounds don't create unusable windows
+  if (!savedBounds.width || savedBounds.width < MIN_WIDTH) savedBounds.width = MIN_WIDTH;
+  if (!savedBounds.height || savedBounds.height < MIN_HEIGHT) savedBounds.height = MIN_HEIGHT;
 
   win = new BrowserWindow({
     title: 'Power Interview',
@@ -111,7 +105,6 @@ async function createWindow() {
     },
   });
 
-  // Set minimum size of the window to prevent it from being resized too small
   win.setMinimumSize(MIN_WIDTH, MIN_HEIGHT);
 
   // On macOS, keep a minimal menu so Cmd+C/V/X/A/Z/Q work.
@@ -154,18 +147,10 @@ async function createWindow() {
     win.setAutoHideMenuBar(true);
   }
 
-  // Enable content protection to prevent screen capture/recording (unless disabled via CLI)
-  const disableContentProtection = process.argv.includes('--disable-content-protection');
-  if (!disableContentProtection) {
-    console.log('Enabling content protection to prevent screen capture/recording');
-    win.setContentProtection(true);
-  } else {
-    console.log('Content protection is disabled via command line argument');
-  }
+  // Pass --disable-content-protection on the CLI to allow screen recording (dev/testing only)
+  win.setContentProtection(!process.argv.includes('--disable-content-protection'));
 
-  // Set window reference for window controls
   setWindowReference(win);
-  // also give the zoom service a reference so it can adjust the webcontents
   setZoomWindowReference(win);
 
   win.on('close', () => {

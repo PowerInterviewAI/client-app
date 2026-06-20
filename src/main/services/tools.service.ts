@@ -2,14 +2,14 @@ import { convertMarkdownToDocx } from '@mohtasham/md-to-docx';
 import { dialog } from 'electron';
 import fs from 'fs/promises';
 
+import { LLMApi } from '../api/llm.js';
 import { configStore } from '../store/config.store.js';
 import { Speaker } from '../types/app-state.js';
+import { GenerateSummarizeRequest } from '../types/llm.js';
 import { appStateService } from './app-state.service.js';
 import { actionSuggestionService } from './suggestion.action.service.js';
 import { liveSuggestionService } from './suggestion.live.service.js';
 import { transcriptService } from './transcript.service.js';
-import { LLMApi } from '../api/llm.js';
-import { GenerateSummarizeRequest } from '../types/llm.js';
 
 class ToolsService {
   private llmApi: LLMApi = new LLMApi();

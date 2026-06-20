@@ -4,6 +4,7 @@
  */
 
 import ElectronStore from 'electron-store';
+
 import { LLMConfig } from '../types/llm.js';
 
 // Runtime configuration (matches Config type in frontend)
