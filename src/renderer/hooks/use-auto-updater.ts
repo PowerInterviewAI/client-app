@@ -1,8 +1,3 @@
-/**
- * Auto-Updater Hook
- * Provides auto-update functionality to React components
- */
-
 import { useEffect, useState } from 'react';
 
 export enum UpdateStatus {
@@ -39,28 +34,22 @@ export function useAutoUpdater() {
   const [currentVersion, setCurrentVersion] = useState<string>('');
 
   useEffect(() => {
-    // Get current version
-    if (window.electronAPI?.autoUpdater) {
-      window.electronAPI.autoUpdater
-        .getVersion()
-        // eslint-disable-next-line
-        .then((result: any) => {
-          if (result.success && result.version) {
-            setCurrentVersion(result.version);
-          }
-        })
-        // eslint-disable-next-line
-        .catch((error: any) => {
-          console.error('Failed to get version:', error);
-        });
+    if (!window.electronAPI?.autoUpdater) return;
 
-      // Listen for update status changes
-      const cleanup = window.electronAPI.autoUpdater.onStatusUpdate((data) => {
-        setUpdateStatus(data as UpdateStatusData);
+    window.electronAPI.autoUpdater
+      .getVersion()
+      .then((result) => {
+        if (result.success && result.version) {
+          setCurrentVersion(result.version);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to get version:', error);
       });
 
-      return cleanup;
-    }
+    return window.electronAPI.autoUpdater.onStatusUpdate((data) => {
+      setUpdateStatus(data as UpdateStatusData);
+    });
   }, []);
 
   const checkForUpdates = async (): Promise<void> => {

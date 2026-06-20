@@ -86,7 +86,7 @@
       {
         "provider": "github",
         "owner": "PowerInterviewAI",
-        "repo": "client",
+        "repo": "client-app",
         "releaseType": "release"
       }
     ],
