@@ -7,8 +7,8 @@ import { configStore } from '../store/config.store.js';
 import { Speaker } from '../types/app-state.js';
 import { GenerateSummarizeRequest } from '../types/llm.js';
 import { appStateService } from './app-state.service.js';
-import { actionSuggestionService } from './suggestion.action.service.js';
-import { liveSuggestionService } from './suggestion.live.service.js';
+import { actionSuggestionService } from './suggestion-action.service.js';
+import { liveSuggestionService } from './suggestion-live.service.js';
 import { transcriptService } from './transcript.service.js';
 
 class ToolsService {

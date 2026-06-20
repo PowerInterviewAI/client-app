@@ -90,7 +90,7 @@ export class AppStateService {
     try {
       const win = getWindowReference();
       if (win && !win.isDestroyed()) {
-        win.webContents.send('app-state-updated', this.getState());
+        win.webContents.send('app:state-updated', this.getState());
       }
     } catch (e) {
       console.warn('Failed to broadcast app state update:', e);

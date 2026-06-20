@@ -1,7 +1,7 @@
 import { BrowserWindow, globalShortcut } from 'electron';
 
 import { ZOOM_STEP } from './consts.js';
-import { actionSuggestionService } from './services/suggestion.action.service.js';
+import { actionSuggestionService } from './services/suggestion-action.service.js';
 import {
   moveWindowByArrow,
   moveWindowToCorner,
@@ -23,7 +23,7 @@ export function registerGlobalHotkeys(): void {
   globalShortcut.register('Control+Shift+Q', () => {
     const w = BrowserWindow.getAllWindows()[0];
     if (w && !w.isDestroyed()) {
-      w.webContents.send('hotkey-stop-assistant');
+      w.webContents.send('hotkey:stop-assistant');
     }
   });
 
@@ -108,29 +108,29 @@ export function registerGlobalHotkeys(): void {
   // Scroll live suggestions: Ctrl+Shift+K (up) / Ctrl+Shift+J (down) / Ctrl+Shift+L (end)
   globalShortcut.register('Control+Shift+K', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '0', 'up');
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey:scroll', '0', 'up');
   });
   globalShortcut.register('Control+Shift+J', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '0', 'down');
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey:scroll', '0', 'down');
   });
   globalShortcut.register('Control+Shift+L', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '0', 'end');
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey:scroll', '0', 'end');
   });
 
   // Scroll action suggestions: Ctrl+Shift+I (up) / Ctrl+Shift+U (down) / Ctrl+Shift+O (end)
   globalShortcut.register('Control+Shift+I', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '1', 'up');
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey:scroll', '1', 'up');
   });
   globalShortcut.register('Control+Shift+U', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '1', 'down');
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey:scroll', '1', 'down');
   });
   globalShortcut.register('Control+Shift+O', () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) w.webContents.send('hotkey-scroll', '1', 'end');
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey:scroll', '1', 'end');
   });
 
   // Action suggestion operations:

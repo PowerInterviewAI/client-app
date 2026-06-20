@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 
-import { actionSuggestionService } from '../services/suggestion.action.service.js';
+import { actionSuggestionService } from '../services/suggestion-action.service.js';
 
 export function registerActionSuggestionHandlers(): void {
   ipcMain.handle('action-suggestion:clear', async () => {

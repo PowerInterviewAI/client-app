@@ -1,7 +1,7 @@
 import { LIVE_SUGGESTION_GAP_MS, TRANSCRIPT_INTER_TRANSCRIPT_GAP_MS } from '../consts.js';
 import { Speaker, Transcript } from '../types/app-state.js';
 import { appStateService } from './app-state.service.js';
-import { liveSuggestionService } from './suggestion.live.service.js';
+import { liveSuggestionService } from './suggestion-live.service.js';
 
 class TranscriptService {
   private isActive = false;

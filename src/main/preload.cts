@@ -26,14 +26,14 @@ const electronApi = {
   onHotkeyScroll: (callback: (section: string, direction: string) => void) => {
     const handler = (_event: Electron.IpcRendererEvent, section: string, direction: string) =>
       callback(section, direction);
-    ipcRenderer.on('hotkey-scroll', handler);
-    return () => ipcRenderer.removeListener('hotkey-scroll', handler);
+    ipcRenderer.on('hotkey:scroll', handler);
+    return () => ipcRenderer.removeListener('hotkey:scroll', handler);
   },
 
   onHotkeyStopAssistant: (callback: () => void) => {
     const handler = () => callback();
-    ipcRenderer.on('hotkey-stop-assistant', handler);
-    return () => ipcRenderer.removeListener('hotkey-stop-assistant', handler);
+    ipcRenderer.on('hotkey:stop-assistant', handler);
+    return () => ipcRenderer.removeListener('hotkey:stop-assistant', handler);
   },
 
   config: {
@@ -73,8 +73,8 @@ const electronApi = {
   onAppStateUpdated: (callback: (state: Record<string, unknown>) => void) => {
     const handler = (_event: Electron.IpcRendererEvent, state: Record<string, unknown>) =>
       callback(state);
-    ipcRenderer.on('app-state-updated', handler);
-    return () => ipcRenderer.removeListener('app-state-updated', handler);
+    ipcRenderer.on('app:state-updated', handler);
+    return () => ipcRenderer.removeListener('app:state-updated', handler);
   },
 
   transcription: {
@@ -85,6 +85,7 @@ const electronApi = {
       ipcRenderer.invoke('transcription:ingest', payload),
     setSessionToken: (token: string) =>
       ipcRenderer.invoke('transcription:set-session-token', token),
+    // Channel names set by the electron-audio-loopback package — cannot be renamed
     enableLoopbackAudio: () => ipcRenderer.invoke('enable-loopback-audio'),
     disableLoopbackAudio: () => ipcRenderer.invoke('disable-loopback-audio'),
   },
@@ -102,8 +103,8 @@ const electronApi = {
   onPushNotification: (callback: (notification: PushNotification) => void) => {
     const handler = (_event: Electron.IpcRendererEvent, notification: PushNotification) =>
       callback(notification);
-    ipcRenderer.on('push-notification', handler);
-    return () => ipcRenderer.removeListener('push-notification', handler);
+    ipcRenderer.on('notification:push', handler);
+    return () => ipcRenderer.removeListener('notification:push', handler);
   },
 
   tools: {
@@ -123,17 +124,17 @@ const electronApi = {
     },
   },
 
-  close: () => ipcRenderer.send('window-close'),
+  close: () => ipcRenderer.send('window:close'),
 
   zoom: {
-    increase: () => ipcRenderer.send('zoom-in'),
-    decrease: () => ipcRenderer.send('zoom-out'),
-    reset: () => ipcRenderer.send('zoom-reset'),
+    increase: () => ipcRenderer.send('zoom:in'),
+    decrease: () => ipcRenderer.send('zoom:out'),
+    reset: () => ipcRenderer.send('zoom:reset'),
     getFactor: () => ipcRenderer.invoke('zoom:get-factor'),
     onChange: (callback: (percent: number) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, percent: number) => callback(percent);
-      ipcRenderer.on('zoom-level-changed', handler);
-      return () => ipcRenderer.removeListener('zoom-level-changed', handler);
+      ipcRenderer.on('zoom:level-changed', handler);
+      return () => ipcRenderer.removeListener('zoom:level-changed', handler);
     },
   },
 
@@ -142,13 +143,13 @@ const electronApi = {
     requestMicrophone: () => ipcRenderer.invoke('permissions:request-microphone'),
   },
 
-  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+  openExternal: (url: string) => ipcRenderer.invoke('external:open', url),
 
-  setStealth: (isStealth: boolean) => ipcRenderer.send('set-stealth', !!isStealth),
-  toggleStealth: () => ipcRenderer.send('window-toggle-stealth'),
-  toggleOpacity: () => ipcRenderer.send('window-toggle-opacity'),
+  setStealth: (isStealth: boolean) => ipcRenderer.send('window:set-stealth', !!isStealth),
+  toggleStealth: () => ipcRenderer.send('window:toggle-stealth'),
+  toggleOpacity: () => ipcRenderer.send('window:toggle-opacity'),
 
-  ping: () => ipcRenderer.send('preload-ping'),
+  ping: () => ipcRenderer.send('system:ping'),
   isElectron: true,
 };
 
@@ -161,7 +162,7 @@ try {
 
 console.log('preload: electron API exposed');
 
-ipcRenderer.on('stealth-changed', (_event, isStealth: boolean) => {
+ipcRenderer.on('window:stealth-changed', (_event, isStealth: boolean) => {
   const apply = () => {
     try {
       if (isStealth) {

@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 
-import { liveSuggestionService } from '../services/suggestion.live.service.js';
+import { liveSuggestionService } from '../services/suggestion-live.service.js';
 
 export function registerLiveSuggestionHandlers(): void {
   ipcMain.handle('live-suggestion:clear', async () => {

@@ -89,7 +89,7 @@ function notifyChange(factor: number): void {
   if (!win || win.isDestroyed()) return;
   try {
     // send percent to renderer
-    win.webContents.send('zoom-level-changed', Math.round(factor * 100));
+    win.webContents.send('zoom:level-changed', Math.round(factor * 100));
   } catch (e) {
     console.warn('zoom.service:notifyChange failed', e);
   }

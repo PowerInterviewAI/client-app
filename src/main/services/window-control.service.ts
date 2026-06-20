@@ -275,10 +275,10 @@ export function enableStealth(): void {
 
     try {
       if (win && !win.isDestroyed()) {
-        win.webContents.send('stealth-changed', _stealth);
+        win.webContents.send('window:stealth-changed', _stealth);
       }
     } catch (e) {
-      console.warn('Failed to send stealth-changed event:', e);
+      console.warn('Failed to send window:stealth-changed event:', e);
     }
   } catch (err) {
     console.warn('⚠️ enableStealth failed:', err);
@@ -312,10 +312,10 @@ export function disableStealth(): void {
 
     try {
       if (win && !win.isDestroyed()) {
-        win.webContents.send('stealth-changed', _stealth);
+        win.webContents.send('window:stealth-changed', _stealth);
       }
     } catch (e) {
-      console.warn('Failed to send stealth-changed event:', e);
+      console.warn('Failed to send window:stealth-changed event:', e);
     }
   } catch (err) {
     console.warn('⚠️ disableStealth failed:', err);
