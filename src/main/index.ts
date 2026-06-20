@@ -199,10 +199,9 @@ app.whenReady().then(async () => {
   if (win) {
     registerWindowHandlers(win);
 
-    // Set window reference for auto-updater
     autoUpdaterService.setMainWindow(win);
 
-    // Check for updates on app launch, then every 5 minutes
+    // 3s delay gives the renderer time to mount before the first toast fires
     setTimeout(() => {
       autoUpdaterService.checkForUpdates().catch((error) => {
         console.error('[Main] Failed to check for updates:', error);

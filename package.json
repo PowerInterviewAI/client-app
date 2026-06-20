@@ -78,9 +78,8 @@
     "wait-on": "^9.0.3"
   },
   "build": {
-    "appId": "ai.powerinterviewai.pia",
+    "appId": "com.powerinterviewai.client-app",
     "productName": "Power Interview AI",
-    "executableName": "pia",
     "copyright": "Copyright ©2026 VectorLeap Pulse Innovation LTD",
     "publish": [
       {

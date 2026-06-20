@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export enum UpdateStatus {
   Checking = 'checking',
@@ -52,7 +52,7 @@ export function useAutoUpdater() {
     });
   }, []);
 
-  const checkForUpdates = async (): Promise<void> => {
+  const checkForUpdates = useCallback(async (): Promise<void> => {
     if (!window.electronAPI?.autoUpdater) {
       console.warn('Auto-updater API not available');
       return;
@@ -66,9 +66,9 @@ export function useAutoUpdater() {
     } catch (error) {
       console.error('Failed to check for updates:', error);
     }
-  };
+  }, []);
 
-  const quitAndInstall = async (): Promise<void> => {
+  const quitAndInstall = useCallback(async (): Promise<void> => {
     if (!window.electronAPI?.autoUpdater) {
       console.warn('Auto-updater API not available');
       return;
@@ -82,7 +82,7 @@ export function useAutoUpdater() {
     } catch (error) {
       console.error('Failed to quit and install:', error);
     }
-  };
+  }, []);
 
   return {
     updateStatus,
