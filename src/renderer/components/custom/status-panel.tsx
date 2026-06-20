@@ -8,13 +8,13 @@ import { RunningState } from '@/types/app-state';
 
 import { RunningIndicator } from './running-indicator';
 
-type Props = {
+interface StatusPanelProps {
   runningState: RunningState;
   credits: number;
   llmModel: string;
-};
+}
 
-export default function StatusPanel({ runningState, llmModel, credits }: Props) {
+export default function StatusPanel({ runningState, llmModel, credits }: StatusPanelProps) {
   // calculate and formatting handled by CreditsDisplay component
 
   return (
@@ -36,7 +36,7 @@ export default function StatusPanel({ runningState, llmModel, credits }: Props) 
           <div className="space-y-2">
             {HOTKEY_GROUPS.map((group) => (
               <div key={group.label}>
-                <div className="text-[10px] font-semibold text-background mb-1 uppercase">
+                <div className="text-[10px] font-semibold text-foreground mb-1 uppercase">
                   {group.label}
                 </div>
                 <div className="grid grid-cols-3 gap-1">
@@ -56,7 +56,7 @@ export default function StatusPanel({ runningState, llmModel, credits }: Props) 
                         >
                           {info.combo}
                         </div>
-                        <div className="text-[11px] font-semibold text-background">
+                        <div className="text-[11px] font-semibold text-foreground">
                           {info.title}
                         </div>
                       </div>

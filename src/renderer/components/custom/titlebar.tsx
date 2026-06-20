@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { APP_NAME } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 
 // WebkitAppRegion is an Electron-specific CSS property not included in React.CSSProperties
@@ -70,7 +71,7 @@ export default function Titlebar() {
           <img src={faviconSvg} alt="logo" className="h-5 w-5" />
 
           <div className="text-sm font-medium" style={DRAG}>
-            Power Interview AI
+            {APP_NAME}
           </div>
         </div>
 

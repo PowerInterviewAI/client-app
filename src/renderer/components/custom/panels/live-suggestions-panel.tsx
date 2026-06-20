@@ -17,12 +17,12 @@ import { type LiveSuggestion, SuggestionState } from '@/types/suggestion';
 
 import { Checkbox } from '../../ui/checkbox';
 
-interface SuggestionsPanelProps {
+interface LiveSuggestionsPanelProps {
   suggestions?: LiveSuggestion[];
   style?: React.CSSProperties;
 }
 
-function LiveSuggestionsPanel({ suggestions = [], style }: SuggestionsPanelProps) {
+function LiveSuggestionsPanel({ suggestions = [], style }: LiveSuggestionsPanelProps) {
   const hasItems = suggestions.length > 0;
 
   const containerRef = useRef<HTMLDivElement | null>(null);

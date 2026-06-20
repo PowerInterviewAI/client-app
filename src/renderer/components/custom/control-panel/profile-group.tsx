@@ -67,19 +67,6 @@ export function ProfileGroup({
             className="w-32 rounded-md hover:bg-muted"
           >
             <div className="max-w-36 overflow-hidden flex items-center gap-2 text-foreground">
-              {/* {config?.interviewConf?.photo ? (
-                <img
-                  src={config?.interviewConf?.photo}
-                  alt="Profile preview"
-                  className="w-8 h-8 rounded-full object-cover border"
-                />
-              ) : (
-                <div className="w-12 h-8 rounded-full bg-muted flex items-center justify-center text-md font-semibold uppercase text-muted-foreground border">
-                  {config?.interviewConf?.username
-                    ? config?.interviewConf?.username.charAt(0)
-                    : '?'}
-                </div>
-              )} */}
               <ChevronUp className="h-4 w-4" />
               <p className="text-sm font-medium truncate">
                 {config?.interviewConf?.username || 'Settings'}

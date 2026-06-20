@@ -48,7 +48,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
         try {
           await startAssistant();
         } catch (error) {
-          console.log('Failed to start assistant:', error);
+          console.error('Failed to start assistant:', error);
           toast.error(error instanceof Error ? error.message : 'Failed to start assistant');
           await stopAssistant();
         }
@@ -108,7 +108,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
 
     for (const { ok, message } of checks) {
       if (!ok) {
-        alert(message);
+        toast.error(message);
         return false;
       }
     }
@@ -137,7 +137,6 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
           getDisabled={getDisabled}
         />
         <LLMGroup getDisabled={getDisabled} />
-        {/* <VideoGroup videoDeviceNotFound={videoDeviceNotFound} getDisabled={getDisabled} /> */}
         <MainGroup stateConfig={{ onClick, className, icon, label }} getDisabled={getDisabled} />
         <ToolsGroup getDisabled={getDisabled} />
       </div>

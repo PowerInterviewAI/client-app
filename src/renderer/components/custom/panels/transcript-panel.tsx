@@ -7,12 +7,12 @@ import { Speaker, type Transcript } from '@/types/transcript';
 
 import { Checkbox } from '../../ui/checkbox';
 
-interface TranscriptionPanelProps {
+interface TranscriptPanelProps {
   transcripts: Transcript[];
   style?: React.CSSProperties;
 }
 
-function TranscriptPanel({ transcripts, style }: TranscriptionPanelProps) {
+function TranscriptPanel({ transcripts, style }: TranscriptPanelProps) {
   const { config, updateConfig } = useConfigStore();
   const username = config?.interviewConf?.username ?? '';
   const containerRef = useRef<HTMLDivElement>(null);

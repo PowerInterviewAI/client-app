@@ -136,7 +136,6 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
         }
 
         setValidation(result.data);
-        console.log('validation result:', result.data);
         setValidationMessage(
           result.data.provider_ok && result.data.apikey_ok && result.data.model_ok
             ? 'All details are vaild.'

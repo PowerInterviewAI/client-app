@@ -19,24 +19,13 @@ export function IdleOverlay() {
 
   return (
     <div
-      className="idle-overlay"
+      className="fixed inset-0 z-9999 bg-black/60 text-white flex items-center justify-center cursor-pointer"
       onClick={wake}
       onKeyDown={wake}
       tabIndex={0}
       role="button"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.6)',
-        color: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-        cursor: 'pointer',
-      }}
     >
-      <div>App is idle - click or press any key to wake.</div>
+      <p className="text-sm font-medium">App is idle - click or press any key to wake.</p>
     </div>
   );
 }

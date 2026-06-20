@@ -140,7 +140,6 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   // Generate payment URI for wallet apps (includes amount)
   // memoized so it only recalculates when status changes
   const paymentUri = useMemo(() => {
-    console.log('Generating payment URI with status:', paymentStatus?.payment_status);
     if (!paymentStatus) return '';
 
     const { pay_address, pay_amount, pay_currency } = paymentStatus;
