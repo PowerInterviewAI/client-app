@@ -165,12 +165,6 @@ power-interview-client/
 ├── build/
 ```
 
-## Legal Disclaimer
-
-Use for **ethical and legal interview preparation only**.
-
-Users are responsible for complying with all applicable laws and platform policies.
-
 ## Contributing
 
 Pull requests welcome.
