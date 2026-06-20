@@ -1,4 +1,4 @@
-import { ChevronUp, CreditCard, Key, LogOut, Mail, SettingsIcon } from 'lucide-react';
+import { ChevronUp, CreditCard, Key, LogOut, Mail, Moon, SettingsIcon, Sun } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
+import { useThemeStore } from '@/hooks/use-theme-store';
 import { RunningState } from '@/types/app-state';
 import { type Config } from '@/types/config';
 
@@ -35,6 +36,7 @@ export function ProfileGroup({
   const navigate = useNavigate();
   const { runningState } = useAppState();
   const { changePassword, loading, error, setError } = useAuth();
+  const { isDark, toggleTheme } = useThemeStore();
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isDocumentationOpen, setIsDocumentationOpen] = useState(false);
 
@@ -64,7 +66,7 @@ export function ProfileGroup({
             disabled={disabled}
             variant="ghost"
             size="sm"
-            className="rounded-md hover:bg-muted"
+            className="w-32 rounded-md hover:bg-muted"
           >
             <div className="max-w-36 overflow-hidden flex items-center gap-2 text-foreground">
               {/* {config?.interviewConf?.photo ? (
@@ -88,6 +90,11 @@ export function ProfileGroup({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="top">
+          <DropdownMenuItem onClick={() => toggleTheme()}>
+            {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+            {isDark ? 'Light mode' : 'Dark mode'}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => !disabled && onProfileClick()} disabled={disabled}>
             <SettingsIcon className="mr-2 h-4 w-4" />
             Configuration

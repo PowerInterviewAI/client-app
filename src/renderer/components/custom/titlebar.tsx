@@ -1,4 +1,4 @@
-import { EyeOff, Moon, Sun } from 'lucide-react';
+import { EyeOff } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
@@ -8,7 +8,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
-import { useThemeStore } from '@/hooks/use-theme-store';
 import { getElectron } from '@/lib/utils';
 
 // WebkitAppRegion is an Electron-specific CSS property not included in React.CSSProperties
@@ -25,8 +24,6 @@ const TRAFFIC_LIGHT_LOGICAL_CLEAR = 72;
 
 export default function Titlebar() {
   const isStealth = useIsStealthMode();
-
-  const { isDark, toggleTheme } = useThemeStore();
 
   const [zoomFactor, setZoomFactor] = useState(1);
   useEffect(() => {
@@ -110,22 +107,6 @@ export default function Titlebar() {
               </TooltipContent>
             </Tooltip>
           )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => toggleTheme()}
-                aria-label="Toggle theme"
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                style={NO_DRAG}
-              >
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{isDark ? 'Light mode' : 'Dark mode'}</p>
-            </TooltipContent>
-          </Tooltip>
-
           <Tooltip>
             <TooltipTrigger asChild>
               <button
