@@ -145,6 +145,8 @@ declare global {
 
     // Window controls
     close: () => void;
+    minimize: () => void;
+    maximize: () => void;
 
     // Zoom controls
     zoom: {

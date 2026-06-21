@@ -40,10 +40,9 @@ export default function Titlebar() {
 
   const macPaddingLeft = isMac ? Math.ceil(TRAFFIC_LIGHT_LOGICAL_CLEAR / zoomFactor) : undefined;
 
-  const handleClose = () => {
-    const api = window.electronAPI;
-    if (api?.close) api.close();
-  };
+  const handleMinimize = () => window.electronAPI?.minimize();
+  const handleMaximize = () => window.electronAPI?.maximize();
+  const handleClose = () => window.electronAPI?.close();
 
   const [isDocsOpen, setIsDocsOpen] = useState(false);
   const handleToggleStealth = () => {
@@ -124,12 +123,64 @@ export default function Titlebar() {
             </TooltipContent>
           </Tooltip>
 
+          {!isMac && (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleMinimize}
+                    aria-label="Minimize"
+                    className="h-7 w-8 flex items-center justify-center rounded hover:bg-muted"
+                    style={NO_DRAG}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path d="M5 12h14" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Minimize</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleMaximize}
+                    aria-label="Maximize"
+                    className="h-7 w-8 flex items-center justify-center rounded hover:bg-muted"
+                    style={NO_DRAG}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <rect x="4" y="4" width="16" height="16" rx="1" />
+                    </svg>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Maximize</p>
+                </TooltipContent>
+              </Tooltip>
+            </>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={handleClose}
                 aria-label="Close"
-                className="h-7 w-12 flex items-center justify-center rounded hover:bg-destructive/50"
+                className="h-7 w-8 flex items-center justify-center rounded hover:bg-destructive/50"
                 style={NO_DRAG}
               >
                 <svg

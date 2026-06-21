@@ -8,8 +8,17 @@ import * as zoomService from '../services/zoom.service.js';
 
 export function registerWindowHandlers(win: BrowserWindow): void {
   ipcMain.on('window:close', () => {
+    if (win && !win.isDestroyed()) win.close();
+  });
+
+  ipcMain.on('window:minimize', () => {
+    if (win && !win.isDestroyed()) win.minimize();
+  });
+
+  ipcMain.on('window:maximize', () => {
     if (win && !win.isDestroyed()) {
-      win.close();
+      if (win.isMaximized()) win.unmaximize();
+      else win.maximize();
     }
   });
 
