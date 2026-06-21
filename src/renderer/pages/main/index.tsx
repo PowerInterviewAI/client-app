@@ -1,32 +1,29 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
 import ControlPanel from '@/components/custom/control-panel';
-import { IdleOverlay } from '@/components/custom/idle-overlay';
 import { LoadingPage } from '@/components/custom/loading';
 import ActionSuggestionsPanel from '@/components/custom/panels/action-suggestions-panel';
 import LiveSuggestionsPanel from '@/components/custom/panels/live-suggestions-panel';
 import TranscriptPanel from '@/components/custom/panels/transcript-panel';
 import StatusPanel from '@/components/custom/status-panel';
+import { TransitionOverlay } from '@/components/custom/transition-overlay';
+import TrialUserNotice from '@/components/custom/trial-user-notice';
 import { VideoPanel, type VideoPanelHandle } from '@/components/custom/video-panel';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
-import { useIdleDetector } from '@/hooks/use-idle';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { RunningState, UserRole } from '@/types/app-state';
 import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
 import { type Transcript } from '@/types/transcript';
-import BetaTesterNotice from '@/components/custom/beta-tester-notice';
-import TrialUserNotice from '@/components/custom/trial-user-notice';
 
 export default function MainPage() {
   const { logout } = useAuth();
 
-  // idle timer/watchdog
-  useIdleDetector();
   const navigate = useNavigate();
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -43,6 +40,11 @@ export default function MainPage() {
 
   // App state from context
   const { appState } = useAppState();
+  const isBetaTesterActive = useMemo(
+    // eslint-disable-next-line react-hooks/purity
+    () => !!appState?.betaTesterExpiresAt && appState.betaTesterExpiresAt >= Date.now(),
+    [appState?.betaTesterExpiresAt]
+  );
 
   // Register videoPanelRef with assistant state
   useEffect(() => {
@@ -236,8 +238,7 @@ export default function MainPage() {
         {/* Show beta tester notice */}
         {appState?.userRole === UserRole.BetaTester &&
           appState?.credits === 0 &&
-          appState?.betaTesterExpiresAt &&
-          appState?.betaTesterExpiresAt >= Date.now() &&
+          isBetaTesterActive &&
           !betaTesterNoticeClosed && (
             <BetaTesterNotice
               expiresAt={appState?.betaTesterExpiresAt}
@@ -281,7 +282,7 @@ export default function MainPage() {
       )}
 
       <ConfigurationDialog isOpen={isProfileOpen} onOpenChange={setIsProfileOpen} />
-      <IdleOverlay />
+      <TransitionOverlay />
     </div>
   );
 }

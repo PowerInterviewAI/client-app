@@ -111,9 +111,10 @@ declare global {
 
     // Tools management
     tools: {
-      exportTranscript: () => Promise<string>;
+      exportTranscript: () => Promise<string | null>;
       clearAll: () => Promise<void>;
       setPlaceholderData: () => Promise<void>;
+      saveImage: (opts: { filename: string; data: number[] }) => Promise<{ filePath: string | null }>;
     };
 
     // Auto-updater management
@@ -144,6 +145,8 @@ declare global {
 
     // Window controls
     close: () => void;
+    minimize: () => void;
+    maximize: () => void;
 
     // Zoom controls
     zoom: {
@@ -156,12 +159,16 @@ declare global {
 
     // macOS permission checks
     permissions: {
-      checkScreenRecording: () => Promise<'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'>;
+      checkScreenRecording: () => Promise<
+        'not-determined' | 'denied' | 'granted' | 'restricted' | 'unknown'
+      >;
       requestMicrophone: () => Promise<boolean>;
     };
 
     // Open external URL in user's default browser
     openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
+    openFile: (filePath: string) => Promise<{ success: boolean; error?: string }>;
+    showInFolder: (filePath: string) => Promise<void>;
 
     // Stealth control helpers
     setStealth: (isStealth: boolean) => void;

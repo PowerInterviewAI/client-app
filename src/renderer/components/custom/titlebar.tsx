@@ -1,15 +1,20 @@
-import { EyeOff, Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { EyeOff } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
 import CreditsDisplay from '@/components/custom/credits-display';
 import DocumentationDialog from '@/components/custom/documentation-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
-import useIsStealthMode from '@/hooks/use-is-stealth-mode';
-import { useThemeStore } from '@/hooks/use-theme-store';
-import { getElectron } from '@/lib/utils';
 import { useConfigStore } from '@/hooks/use-config-store';
+import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { APP_NAME } from '@/lib/consts';
+import { getElectron } from '@/lib/utils';
+
+// WebkitAppRegion is an Electron-specific CSS property not included in React.CSSProperties
+type DragStyle = React.CSSProperties & { WebkitAppRegion: 'drag' | 'no-drag' };
+const DRAG: DragStyle = { WebkitAppRegion: 'drag' };
+const NO_DRAG: DragStyle = { WebkitAppRegion: 'no-drag' };
 
 const isMac = navigator.platform.toUpperCase().includes('MAC');
 
@@ -21,23 +26,23 @@ const TRAFFIC_LIGHT_LOGICAL_CLEAR = 72;
 export default function Titlebar() {
   const isStealth = useIsStealthMode();
 
-  const { isDark, toggleTheme } = useThemeStore();
-
   const [zoomFactor, setZoomFactor] = useState(1);
   useEffect(() => {
     if (!isMac) return;
     const electron = getElectron();
     if (!electron) return;
-    electron.zoom.getFactor().then(setZoomFactor).catch(() => {});
+    electron.zoom
+      .getFactor()
+      .then(setZoomFactor)
+      .catch(() => {});
     return electron.zoom.onChange((percent) => setZoomFactor(percent / 100));
   }, []);
 
   const macPaddingLeft = isMac ? Math.ceil(TRAFFIC_LIGHT_LOGICAL_CLEAR / zoomFactor) : undefined;
 
-  const handleClose = () => {
-    const api = window.electronAPI;
-    if (api?.close) api.close();
-  };
+  const handleMinimize = () => window.electronAPI?.minimize();
+  const handleMaximize = () => window.electronAPI?.maximize();
+  const handleClose = () => window.electronAPI?.close();
 
   const [isDocsOpen, setIsDocsOpen] = useState(false);
   const handleToggleStealth = () => {
@@ -58,36 +63,26 @@ export default function Titlebar() {
     <>
       <div
         id="titlebar"
-        // eslint-disable-next-line
-        style={{ WebkitAppRegion: 'drag', paddingLeft: macPaddingLeft } as any}
+        style={{ ...DRAG, paddingLeft: macPaddingLeft }}
         className="flex items-center gap-3 h-9 pr-1 pl-1 select-none bg-card border-b border-border"
       >
         <div className="flex flex-1 items-center gap-2 px-1">
           <img src={faviconSvg} alt="logo" className="h-5 w-5" />
 
-          <div
-            className="text-sm font-medium"
-            // eslint-disable-next-line
-            style={{ WebkitAppRegion: 'drag' } as any}
-          >
-            Power Interview
+          <div className="text-sm font-medium" style={DRAG}>
+            {APP_NAME}
           </div>
         </div>
 
         {appState?.isLoggedIn && appState?.credits !== undefined && (
           <CreditsDisplay
             credits={appState.credits ?? 0}
-            llmModel={config?.llmConf?.model ?? appState.providedLLMModel ?? ""}
-            // eslint-disable-next-line
-            style={{ WebkitAppRegion: 'drag' } as any}
+            llmModel={config?.llmConf?.model ?? appState.providedLLMModel ?? ''}
+            style={DRAG}
           />
         )}
 
-        <div
-          className="ml-auto flex items-center gap-1"
-          // eslint-disable-next-line
-          style={{ WebkitAppRegion: 'no-drag' } as any}
-        >
+        <div className="ml-auto flex items-center gap-1" style={NO_DRAG}>
           {appState?.isLoggedIn && appState?.credits !== undefined && (
             <>
               <hr className="h-6 border border-border" />
@@ -102,8 +97,7 @@ export default function Titlebar() {
                   aria-label="Toggle stealth mode"
                   title="Toggle stealth mode"
                   className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                  // eslint-disable-next-line
-                  style={{ WebkitAppRegion: 'no-drag' } as any}
+                  style={NO_DRAG}
                 >
                   <EyeOff className="h-4 w-4" />
                 </button>
@@ -116,28 +110,10 @@ export default function Titlebar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => toggleTheme()}
-                aria-label="Toggle theme"
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
-              >
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{isDark ? 'Light mode' : 'Dark mode'}</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
                 onClick={() => setIsDocsOpen(true)}
                 aria-label="Documentation"
                 className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
+                style={NO_DRAG}
               >
                 <span className="font-medium">?</span>
               </button>
@@ -147,14 +123,65 @@ export default function Titlebar() {
             </TooltipContent>
           </Tooltip>
 
+          {!isMac && (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleMinimize}
+                    aria-label="Minimize"
+                    className="h-7 w-8 flex items-center justify-center rounded hover:bg-muted"
+                    style={NO_DRAG}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path d="M5 12h14" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Minimize</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleMaximize}
+                    aria-label="Maximize"
+                    className="h-7 w-8 flex items-center justify-center rounded hover:bg-muted"
+                    style={NO_DRAG}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <rect x="4" y="4" width="16" height="16" rx="1" />
+                    </svg>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Maximize</p>
+                </TooltipContent>
+              </Tooltip>
+            </>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={handleClose}
                 aria-label="Close"
-                className="h-7 w-12 flex items-center justify-center rounded hover:bg-destructive/50"
-                // eslint-disable-next-line
-                style={{ WebkitAppRegion: 'no-drag' } as any}
+                className="h-7 w-8 flex items-center justify-center rounded hover:bg-destructive/50"
+                style={NO_DRAG}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

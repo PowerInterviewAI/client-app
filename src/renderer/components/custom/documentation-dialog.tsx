@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { APP_NAME } from '@/lib/consts';
 import { Hotkey, HOTKEY_GROUPS, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 
@@ -40,10 +41,10 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl w-full max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Power Interview {version ? `v${version}` : ''}</DialogTitle>
+          <DialogTitle>{APP_NAME} {version ? `v${version}` : ''}</DialogTitle>
           <DialogDescription>
             <p>
-              Power Interview is an AI-powered assistant that enhances your interview experience
+              {APP_NAME} is an AI-powered assistant that enhances your interview experience
               with real-time suggestions, on-screen code recommendations.
             </p>
             <p className="mt-2 text-sm">

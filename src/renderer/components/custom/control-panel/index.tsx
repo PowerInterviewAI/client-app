@@ -48,7 +48,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
         try {
           await startAssistant();
         } catch (error) {
-          console.log('Failed to start assistant:', error);
+          console.error('Failed to start assistant:', error);
           toast.error(error instanceof Error ? error.message : 'Failed to start assistant');
           await stopAssistant();
         }
@@ -58,7 +58,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
       label: 'Start',
     },
     [RunningState.Starting]: {
-      onClick: () => { },
+      onClick: () => {},
       className: 'bg-blue-600 hover:bg-blue-600/90',
       icon: <Ellipsis className="h-3.5 w-3.5 animate-pulse" />,
       label: 'Starting...',
@@ -72,7 +72,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
       label: 'Stop',
     },
     [RunningState.Stopping]: {
-      onClick: () => { },
+      onClick: () => {},
       className: 'bg-destructive hover:bg-destructive/90',
       icon: <Ellipsis className="h-3.5 w-3.5 animate-pulse" />,
       label: 'Stopping...',
@@ -108,7 +108,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
 
     for (const { ok, message } of checks) {
       if (!ok) {
-        alert(message);
+        toast.error(message);
         return false;
       }
     }
@@ -137,7 +137,6 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
           getDisabled={getDisabled}
         />
         <LLMGroup getDisabled={getDisabled} />
-        {/* <VideoGroup videoDeviceNotFound={videoDeviceNotFound} getDisabled={getDisabled} /> */}
         <MainGroup stateConfig={{ onClick, className, icon, label }} getDisabled={getDisabled} />
         <ToolsGroup getDisabled={getDisabled} />
       </div>

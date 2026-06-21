@@ -4,7 +4,7 @@
 
 import { appStateService } from '../services/app-state.service.js';
 import { RunningState } from '../types/app-state.js';
-import { ClientPingRequest, ClientPingResponse } from '../types/healthceck.js';
+import { ClientPingRequest, ClientPingResponse } from '../types/health-check.js';
 import { ApiClient, ApiResponse } from './client.js';
 
 export class HealthCheckApi extends ApiClient {

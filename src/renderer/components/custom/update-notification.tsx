@@ -1,8 +1,3 @@
-/**
- * Update Notification Component
- * Displays update notifications and handles user interactions
- */
-
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
@@ -18,9 +13,7 @@ export function UpdateNotification() {
 
     const { status, info, progress, error } = updateStatus;
 
-    // Avoid duplicate notifications for the same status
     if (lastStatusRef.current === status) {
-      // Update download progress toast if it exists
       if (status === UpdateStatus.Downloading && downloadToastIdRef.current && progress) {
         toast.loading(`Downloading update... ${progress.percent.toFixed(0)}%`, {
           id: downloadToastIdRef.current,
@@ -34,8 +27,7 @@ export function UpdateNotification() {
 
     switch (status) {
       case UpdateStatus.Checking:
-        // Don't show intrusive UI for checking
-        console.log('[UpdateNotification] Checking for updates...');
+      case UpdateStatus.NotAvailable:
         break;
 
       case UpdateStatus.Available:
@@ -45,11 +37,6 @@ export function UpdateNotification() {
             duration: 5000,
           });
         }
-        break;
-
-      case UpdateStatus.NotAvailable:
-        // Don't show notification for no updates
-        console.log('[UpdateNotification] No updates available');
         break;
 
       case UpdateStatus.Downloading:
@@ -64,7 +51,6 @@ export function UpdateNotification() {
         break;
 
       case UpdateStatus.Downloaded:
-        // Dismiss download progress toast
         if (downloadToastIdRef.current) {
           toast.dismiss(downloadToastIdRef.current);
           downloadToastIdRef.current = null;
@@ -73,40 +59,28 @@ export function UpdateNotification() {
         if (info) {
           toast.success(`Update Downloaded: v${info.version}`, {
             description: 'Click to restart and install the update.',
-            duration: Infinity, // Keep until user interacts
+            duration: Infinity,
             action: {
               label: 'Restart Now',
-              onClick: () => {
-                quitAndInstall();
-              },
+              onClick: () => quitAndInstall(),
             },
             cancel: {
               label: 'Later',
-              onClick: () => {
-                toast.info('Update will be installed when you close the app');
-              },
+              onClick: () => toast.info('Update will be installed when you close the app.'),
             },
           });
         }
         break;
 
       case UpdateStatus.Error:
-        // Dismiss download progress toast if exists
         if (downloadToastIdRef.current) {
           toast.dismiss(downloadToastIdRef.current);
           downloadToastIdRef.current = null;
         }
-
         console.error('[UpdateNotification] Update error:', error);
-        // Don't show error toast to avoid disrupting user experience
-        // Error is logged for debugging
-        break;
-
-      default:
         break;
     }
   }, [updateStatus, quitAndInstall]);
 
-  // This component doesn't render anything visible
   return null;
 }

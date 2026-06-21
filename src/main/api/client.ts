@@ -1,18 +1,12 @@
-/**
- * HTTP API Client
- * Base client for making HTTP requests to backend
- */
-
+import { app } from 'electron';
 import os from 'os';
 
-import { app } from 'electron';
-
 import { BACKEND_BASE_URL } from '../consts.js';
+import { configStore } from '../store/config.store.js';
 
 function buildUserAgent(): string {
-  return `PowerInterview/${app.getVersion()} (${process.platform}; ${process.arch}; ${os.release()})`;
+  return `PowerInterviewAI/${app.getVersion()} (${process.platform}; ${process.arch}; ${os.release()})`;
 }
-import { configStore } from '../store/config.store.js';
 
 export interface ApiResponse<T = unknown> {
   data?: T;
@@ -42,38 +36,26 @@ export class ApiClient {
 
   constructor() {
     const baseUrl = BACKEND_BASE_URL;
-    this.baseUrl = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/'; // Ensure baseUrl ends with slash
+    this.baseUrl = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
     this.headers = {
       'Content-Type': 'application/json',
       'User-Agent': buildUserAgent(),
     };
   }
 
-  /**
-   * Set authentication token
-   */
   setAuthToken(token: string): void {
     this.headers['Authorization'] = `Bearer ${token}`;
   }
 
-  /**
-   * Clear authentication token
-   */
   clearAuthToken(): void {
     delete this.headers['Authorization'];
   }
 
-  /**
-   * Make GET request
-   */
   async get<T>(path: string, params?: Record<string, unknown>): Promise<ApiResponse<T>> {
     const url = this.buildUrl(path, params);
     return this.request<T>('GET', url);
   }
 
-  /**
-   * Make Form Data POST request
-   */
   async postFormData<T>(path: string, formData: FormData): Promise<ApiResponse<T>> {
     const url = this.buildUrl(path);
     try {
@@ -82,7 +64,7 @@ export class ApiClient {
         this.setAuthToken(sessionToken);
       }
 
-      // Create headers without Content-Type for FormData
+      // FormData must not have Content-Type set — the browser sets it with the boundary
       const formDataHeaders: Record<string, string> = {
         'User-Agent': buildUserAgent(),
         Authorization: this.headers['Authorization'] || '',
@@ -121,41 +103,26 @@ export class ApiClient {
     }
   }
 
-  /**
-   * Make POST request
-   */
   async post<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
     const url = this.buildUrl(path);
     return this.request<T>('POST', url, body);
   }
 
-  /**
-   * Make POST request for streaming response
-   */
   async postStream(path: string, body?: unknown): Promise<ReadableStream<Uint8Array> | null> {
     const url = this.buildUrl(path);
     return this.requestStream('POST', url, body);
   }
 
-  /**
-   * Make PUT request
-   */
   async put<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
     const url = this.buildUrl(path);
     return this.request<T>('PUT', url, body);
   }
 
-  /**
-   * Make DELETE request
-   */
   async delete<T>(path: string): Promise<ApiResponse<T>> {
     const url = this.buildUrl(path);
     return this.request<T>('DELETE', url);
   }
 
-  /**
-   * Make HTTP request
-   */
   private async request<T>(method: string, url: string, body?: unknown): Promise<ApiResponse<T>> {
     try {
       const sessionToken = configStore.getConfig().sessionToken;
@@ -197,9 +164,6 @@ export class ApiClient {
     }
   }
 
-  /**
-   * Make HTTP request for streaming response
-   */
   async requestStream(
     method: string,
     url: string,
@@ -225,7 +189,11 @@ export class ApiClient {
         );
       }
       if (!response.body) {
-        throw new ApiRequestError('Empty response body for streaming request', response.status, null);
+        throw new ApiRequestError(
+          'Empty response body for streaming request',
+          response.status,
+          null
+        );
       }
 
       return response.body;
@@ -249,13 +217,9 @@ export class ApiClient {
     }
   }
 
-  /**
-   * Build full URL with query parameters
-   */
   private buildUrl(path: string, params?: Record<string, unknown>): string {
     try {
-      const cleanPath = path.replace(/^\/+/, ''); // Ensure no leading slash on path
-
+      const cleanPath = path.replace(/^\/+/, '');
       const url = new URL(cleanPath, this.baseUrl);
 
       if (params) {

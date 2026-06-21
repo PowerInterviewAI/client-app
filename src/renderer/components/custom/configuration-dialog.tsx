@@ -45,16 +45,6 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
   }, [isOpen, config?.interviewConf]);
 
   const handleSave = async () => {
-    // enforce required profile name and profile data
-    if (name.trim() === '') {
-      alert('Profile name is required');
-      return;
-    }
-    if (profileData.trim() === '') {
-      alert('User profile information is required');
-      return;
-    }
-
     const interviewConf = {
       photo: photo,
       username: name,

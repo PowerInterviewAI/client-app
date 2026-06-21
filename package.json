@@ -1,21 +1,22 @@
 {
-  "name": "power-interview",
+  "name": "power-interview-ai",
   "private": false,
   "version": "1.5.2",
   "description": "AI-powered live interview assistant",
-  "author": "Power Interview",
+  "author": "VectorLeap Pulse Innovation LTD",
   "main": "electron-dist/index.js",
   "type": "module",
+  "packageManager": "pnpm@11.1.3",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "electron:build-main": "tsc -p tsconfig.electron.json",
-    "electron:dev-hide": "npm run electron:build-main && concurrently \"cross-env BROWSER=none npm run dev -- --port 5173 --strictPort\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-    "electron:dev-show": "npm run electron:build-main && concurrently \"cross-env BROWSER=none npm run dev -- --port 5173 --strictPort\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron . --disable-content-protection\"",
-    "electron:build": "npm run electron:build-main && npm run build && electron-builder",
+    "electron:dev-hide": "pnpm electron:build-main && concurrently --kill-others-on-fail \"cross-env BROWSER=none pnpm dev -- --port 5173 --strictPort\" \"tsc -p tsconfig.electron.json --watch --preserveWatchOutput\" \"wait-on http://localhost:5173 && nodemon --config nodemon.hide.json\"",
+    "electron:dev-show": "pnpm electron:build-main && concurrently --kill-others-on-fail \"cross-env BROWSER=none pnpm dev -- --port 5173 --strictPort\" \"tsc -p tsconfig.electron.json --watch --preserveWatchOutput\" \"wait-on http://localhost:5173 && nodemon --config nodemon.show.json\"",
+    "electron:build": "pnpm electron:build-main && pnpm build && electron-builder",
     "lint": "eslint .",
     "format": "prettier --write . && eslint --fix .",
-    "start": "npm run electron:dev-hide"
+    "start": "pnpm electron:dev-hide"
   },
   "dependencies": {
     "@mohtasham/md-to-docx": "^2.6.1",
@@ -67,6 +68,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "globals": "^16.5.0",
+    "nodemon": "^3.1.14",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.1.18",
@@ -77,14 +79,14 @@
     "wait-on": "^9.0.3"
   },
   "build": {
-    "appId": "ai.power-interview.client",
-    "productName": "Power Interview",
-    "copyright": "Copyright ©2026 Power Interview",
+    "appId": "com.powerinterviewai.client-app",
+    "productName": "Power Interview AI",
+    "copyright": "Copyright ©2026 VectorLeap Pulse Innovation LTD",
     "publish": [
       {
         "provider": "github",
         "owner": "PowerInterviewAI",
-        "repo": "client",
+        "repo": "client-app",
         "releaseType": "release"
       }
     ],
@@ -116,8 +118,8 @@
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "Power Interview needs microphone access to transcribe your voice during interviews.",
-        "NSScreenRecordingUsageDescription": "Power Interview needs screen recording access to capture system audio during interviews."
+        "NSMicrophoneUsageDescription": "Power Interview AI needs microphone access to transcribe your voice during interviews.",
+        "NSScreenRecordingUsageDescription": "Power Interview AI needs screen recording access to capture system audio during interviews."
       }
     },
     "nsis": {
@@ -131,8 +133,8 @@
       "installerLanguages": [
         "en_US"
       ],
-      "shortcutName": "Power Interview",
-      "artifactName": "PowerInterview-Setup-${version}.exe"
+      "shortcutName": "Power Interview AI",
+      "artifactName": "PowerInterviewAI-Setup-${version}.exe"
     }
   }
 }

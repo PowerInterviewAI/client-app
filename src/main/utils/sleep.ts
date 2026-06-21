@@ -1,6 +1,5 @@
 export function safeSleep(ms: number, signal?: AbortSignal): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve) => {
     if (signal?.aborted) return resolve();
 
     const id = setTimeout(() => {

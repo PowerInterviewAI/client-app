@@ -6,7 +6,7 @@ class PushNotificationService {
     try {
       const win = getWindowReference();
       if (win && !win.isDestroyed()) {
-        win.webContents.send('push-notification', notification);
+        win.webContents.send('notification:push', notification);
       }
     } catch (e) {
       console.warn('Failed to send push notification:', e);

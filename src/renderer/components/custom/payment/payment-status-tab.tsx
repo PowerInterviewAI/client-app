@@ -2,8 +2,8 @@
  * Payment Status Tab Component
  */
 
-import { Copy, RefreshCw } from 'lucide-react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { CircleCheck, Copy, FileIcon, FolderOpenIcon, RefreshCw, XIcon } from 'lucide-react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { QrcodeCanvas, useQrcodeDownload } from 'react-qrcode-pretty';
 import { toast } from 'sonner';
 
@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePayment } from '@/hooks/use-payment';
-import { cn } from '@/lib/utils';
+import { cn, getElectron } from '@/lib/utils';
 import type { PaymentStatusResponse } from '@/types/payment';
 import { PaymentStatus } from '@/types/payment';
 
@@ -24,16 +25,15 @@ interface MemoQrProps {
   paymentUri: string;
   setQrcode: (canvas: HTMLCanvasElement | SVGSVGElement) => void;
   isQrcodeReady: boolean;
-  orderId: string;
-  download: (filename: string) => void;
+  orderId: string; // memo comparison only
+  onDownload: () => void;
 }
 
 const QrComponent: React.FC<MemoQrProps> = ({
   paymentUri,
   setQrcode,
   isQrcodeReady,
-  orderId,
-  download,
+  onDownload,
 }) => (
   <>
     <QrcodeCanvas
@@ -61,8 +61,9 @@ const QrComponent: React.FC<MemoQrProps> = ({
     <Button
       size="sm"
       variant="outline"
-      onClick={() => download(`payment-${orderId}`)}
+      onClick={onDownload}
       disabled={!isQrcodeReady}
+      className="cursor-pointer"
     >
       Download QR Code
     </Button>
@@ -88,7 +89,62 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [setQrcode, downloadQrcode, isQrcodeReady] = useQrcodeDownload('payment');
+  const [setQrcode, , isQrcodeReady] = useQrcodeDownload('payment');
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const handleQrcodeReady = useCallback((canvas: HTMLCanvasElement | SVGSVGElement) => {
+    setQrcode(canvas);
+    if (canvas instanceof HTMLCanvasElement) canvasRef.current = canvas;
+  }, [setQrcode]);
+
+  const handleDownloadQr = useCallback(async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) return;
+    const data = Array.from(new Uint8Array(await blob.arrayBuffer()));
+    const filename = `payment-${paymentStatus?.order_id ?? 'qr'}.png`;
+    const result = await getElectron()?.tools.saveImage({ filename, data });
+    const filePath = result?.filePath;
+    if (!filePath) return;
+    const electron = getElectron();
+    const toastId = `qr-${Date.now()}`;
+    toast.custom(
+      () => (
+        <div className="flex items-center gap-2 w-full px-4 py-3 rounded-lg border shadow-md" style={{ background: 'var(--success-bg)', borderColor: 'var(--success-border)', color: 'var(--success-text)' }}>
+          <CircleCheck className="h-4 w-4 shrink-0" />
+          <span className="flex-1 text-sm font-medium">QR code saved</span>
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="outline" className="h-6 w-6 p-0" onClick={() => electron?.openFile(filePath)}>
+                  <FileIcon className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Open file</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="outline" className="h-6 w-6 p-0" onClick={() => electron?.showInFolder(filePath)}>
+                  <FolderOpenIcon className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Show in folder</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => toast.dismiss(toastId)}>
+                  <XIcon className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Dismiss</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+      ),
+      { id: toastId, duration: 10_000, style: { width: 'var(--width, 356px)' } }
+    );
+  }, [paymentStatus?.order_id]);
 
   const paymentStatusRef = React.useRef<PaymentStatusResponse | null>(null);
 
@@ -140,7 +196,6 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   // Generate payment URI for wallet apps (includes amount)
   // memoized so it only recalculates when status changes
   const paymentUri = useMemo(() => {
-    console.log('Generating payment URI with status:', paymentStatus?.payment_status);
     if (!paymentStatus) return '';
 
     const { pay_address, pay_amount, pay_currency } = paymentStatus;
@@ -278,10 +333,10 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                         <div className="flex flex-col items-center space-y-3">
                           <MemoQr
                             paymentUri={paymentUri}
-                            setQrcode={setQrcode}
+                            setQrcode={handleQrcodeReady}
                             isQrcodeReady={isQrcodeReady}
                             orderId={paymentStatus.order_id}
-                            download={downloadQrcode}
+                            onDownload={handleDownloadQr}
                           />
                           <p className="text-sm text-muted-foreground text-center">
                             Scan with your wallet app

@@ -1,17 +1,8 @@
-/**
- * Auto-Updater IPC Handlers
- * Handles communication between renderer and auto-updater service
- */
-
 import { ipcMain } from 'electron';
 
 import { autoUpdaterService } from '../services/auto-updater.service.js';
 
-/**
- * Register auto-updater IPC handlers
- */
 export function registerAutoUpdaterHandlers(): void {
-  // Check for updates
   ipcMain.handle('auto-updater:check-for-updates', async () => {
     try {
       await autoUpdaterService.checkForUpdates();
@@ -25,7 +16,6 @@ export function registerAutoUpdaterHandlers(): void {
     }
   });
 
-  // Quit and install update
   ipcMain.handle('auto-updater:quit-and-install', () => {
     try {
       autoUpdaterService.quitAndInstall();
@@ -39,7 +29,6 @@ export function registerAutoUpdaterHandlers(): void {
     }
   });
 
-  // Get current version
   ipcMain.handle('auto-updater:get-version', () => {
     try {
       return {

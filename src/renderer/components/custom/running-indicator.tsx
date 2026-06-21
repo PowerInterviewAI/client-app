@@ -1,12 +1,12 @@
 import { RunningState } from '@/types/app-state';
 
-type Props = {
+interface RunningIndicatorProps {
   runningState: RunningState;
   compact?: boolean;
   className?: string;
-};
+}
 
-export function RunningIndicator({ runningState, compact = false, className = '' }: Props) {
+export function RunningIndicator({ runningState, compact = false, className = '' }: RunningIndicatorProps) {
   const indicatorConfig: Record<
     RunningState,
     { dotClass: string; label: string; labelClass: string }

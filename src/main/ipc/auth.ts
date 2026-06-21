@@ -1,13 +1,8 @@
-/**
- * Auth IPC Handlers
- * Handles authentication-related IPC communication
- */
-
 import { ipcMain } from 'electron';
 
 import { authService } from '../services/auth.service.js';
 
-export function registerAuthHandlers() {
+export function registerAuthHandlers(): void {
   // Signup
   ipcMain.handle(
     'auth:signup',

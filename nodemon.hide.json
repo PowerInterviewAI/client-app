@@ -1,0 +1,6 @@
+{
+  "watch": ["electron-dist"],
+  "ext": "js,cjs,json",
+  "delay": 1000,
+  "exec": "cross-env NODE_ENV=development electron ."
+}

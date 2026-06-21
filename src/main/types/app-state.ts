@@ -2,7 +2,7 @@
  * Application State Types
  */
 
-import { UserRole } from './healthceck.js';
+import { UserRole } from './health-check.js';
 
 export enum Speaker {
   Self = 'self',
@@ -57,7 +57,6 @@ export interface AppState {
   isGpuServerLive: boolean;
   isLoggedIn: boolean | null;
   runningState: RunningState;
-  isAppIdle: boolean;
   transcripts: Transcript[];
   liveSuggestions: LiveSuggestion[];
   actionSuggestions: ActionSuggestion[];

@@ -7,23 +7,22 @@ import { RunningState } from '@/types/app-state';
 interface VideoPanelProps {
   runningState: RunningState;
   credits: number;
-  // Optional: streaming fps for websocket
   fps?: number;
   jpegQuality?: number; // 0.0 - 1.0
 }
 
-export interface VideoPanelHandle {}
+// Placeholder handle type - no imperative methods exposed yet
+export type VideoPanelHandle = Record<string, never>;
 
 export const VideoPanel = forwardRef<VideoPanelHandle, VideoPanelProps>(() => {
-  const [videoMessage, setVideoMessage] = useState('Video Stream');
+  const [videoMessage] = useState('Video Stream');
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isStreaming] = useState(false);
 
   const electron = getElectron();
   if (!electron) {
     throw new Error('Electron API not available');
   }
-
-  const [isStreaming, setIsStreaming] = useState(false);
 
   return (
     <div className="relative w-full h-full border rounded-xl overflow-hidden bg-white dark:bg-black shrink-0 py-0">

@@ -1,3 +1,5 @@
+export const APP_NAME = 'Power Interview AI';
+
 export const CREDITS_PER_MINUTE = 10;
 
 // maximum allowable RTT change (ms) before restarting audio agent

@@ -7,13 +7,13 @@ import { transcriptService } from '../services/transcript.service.js';
 let loopbackInitialized = false;
 const { initMain: initAudioLoopback } = loopbackPkg;
 
-export function initializeAudioLoopback() {
+export function initializeAudioLoopback(): void {
   if (loopbackInitialized) return;
   initAudioLoopback();
   loopbackInitialized = true;
 }
 
-export function registerPermissionHandlers() {
+export function registerPermissionHandlers(): void {
   ipcMain.handle('permissions:check-screen-recording', () => {
     if (process.platform !== 'darwin') return 'granted';
     return systemPreferences.getMediaAccessStatus('screen');
@@ -25,7 +25,7 @@ export function registerPermissionHandlers() {
   });
 }
 
-export function registerTranscriptHandlers() {
+export function registerTranscriptHandlers(): void {
   ipcMain.handle('transcription:clear', async () => {
     transcriptService.clear();
   });

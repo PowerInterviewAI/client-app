@@ -1,9 +1,4 @@
-/**
- * Auto-Updater Hook
- * Provides auto-update functionality to React components
- */
-
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export enum UpdateStatus {
   Checking = 'checking',
@@ -39,31 +34,25 @@ export function useAutoUpdater() {
   const [currentVersion, setCurrentVersion] = useState<string>('');
 
   useEffect(() => {
-    // Get current version
-    if (window.electronAPI?.autoUpdater) {
-      window.electronAPI.autoUpdater
-        .getVersion()
-        // eslint-disable-next-line
-        .then((result: any) => {
-          if (result.success && result.version) {
-            setCurrentVersion(result.version);
-          }
-        })
-        // eslint-disable-next-line
-        .catch((error: any) => {
-          console.error('Failed to get version:', error);
-        });
+    if (!window.electronAPI?.autoUpdater) return;
 
-      // Listen for update status changes
-      const cleanup = window.electronAPI.autoUpdater.onStatusUpdate((data) => {
-        setUpdateStatus(data as UpdateStatusData);
+    window.electronAPI.autoUpdater
+      .getVersion()
+      .then((result) => {
+        if (result.success && result.version) {
+          setCurrentVersion(result.version);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to get version:', error);
       });
 
-      return cleanup;
-    }
+    return window.electronAPI.autoUpdater.onStatusUpdate((data) => {
+      setUpdateStatus(data as UpdateStatusData);
+    });
   }, []);
 
-  const checkForUpdates = async (): Promise<void> => {
+  const checkForUpdates = useCallback(async (): Promise<void> => {
     if (!window.electronAPI?.autoUpdater) {
       console.warn('Auto-updater API not available');
       return;
@@ -77,9 +66,9 @@ export function useAutoUpdater() {
     } catch (error) {
       console.error('Failed to check for updates:', error);
     }
-  };
+  }, []);
 
-  const quitAndInstall = async (): Promise<void> => {
+  const quitAndInstall = useCallback(async (): Promise<void> => {
     if (!window.electronAPI?.autoUpdater) {
       console.warn('Auto-updater API not available');
       return;
@@ -93,7 +82,7 @@ export function useAutoUpdater() {
     } catch (error) {
       console.error('Failed to quit and install:', error);
     }
-  };
+  }, []);
 
   return {
     updateStatus,

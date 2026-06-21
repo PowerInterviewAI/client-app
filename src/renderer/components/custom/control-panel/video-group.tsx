@@ -95,12 +95,6 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
       await new Promise((r) => requestAnimationFrame(r)); // wait for DOM to mount
       videoElement = videoPreviewRef.current;
 
-      console.log('Starting video preview with config:', {
-        camera_device_name: config?.cameraDeviceName,
-        video_width: config?.videoWidth,
-        video_height: config?.videoHeight,
-      });
-
       // Stop previous stream before starting a new one
       if (previewStreamRef.current) {
         previewStreamRef.current.getTracks().forEach((t) => t.stop());
@@ -111,7 +105,6 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
       const videoDeviceId = videoDevices.find(
         (d) => d.label === config?.cameraDeviceName
       )?.deviceId;
-      console.log('Selected video device ID:', videoDeviceId);
 
       // Create media stream
       const constraints: MediaStreamConstraints = {
@@ -183,7 +176,7 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
               onClick={() => {
                 const tryingToEnable = !config?.faceSwap;
                 if (tryingToEnable && (!obsCameraExists || !vbInputExists)) {
-                  alert('OBS Virtual Camera or VB-Audio Input not found. Face Swap requires both.');
+                  toast.error('OBS Virtual Camera or VB-Audio Input not found. Face Swap requires both.');
                   return;
                 }
                 toast.success(config?.faceSwap ? 'Face Swap is Off' : 'Face Swap is On');

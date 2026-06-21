@@ -2,14 +2,14 @@ import { convertMarkdownToDocx } from '@mohtasham/md-to-docx';
 import { dialog } from 'electron';
 import fs from 'fs/promises';
 
+import { LLMApi } from '../api/llm.js';
 import { configStore } from '../store/config.store.js';
 import { Speaker } from '../types/app-state.js';
-import { appStateService } from './app-state.service.js';
-import { actionSuggestionService } from './suggestion.action.service.js';
-import { liveSuggestionService } from './suggestion.live.service.js';
-import { transcriptService } from './transcript.service.js';
-import { LLMApi } from '../api/llm.js';
 import { GenerateSummarizeRequest } from '../types/llm.js';
+import { appStateService } from './app-state.service.js';
+import { actionSuggestionService } from './suggestion-action.service.js';
+import { liveSuggestionService } from './suggestion-live.service.js';
+import { transcriptService } from './transcript.service.js';
 
 class ToolsService {
   private llmApi: LLMApi = new LLMApi();
@@ -29,7 +29,7 @@ class ToolsService {
     return `report-${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}.docx`;
   }
 
-  async exportTranscript(): Promise<void> {
+  async exportTranscript(): Promise<string | null> {
     // Prepare request data
     const username = configStore.getConfig().interviewConf.username;
     const transcripts = appStateService.getState().transcripts;
@@ -96,9 +96,10 @@ class ToolsService {
       filters: [{ name: 'Word Document', extensions: ['docx'] }],
     });
 
-    if (canceled || !filePath) return;
+    if (canceled || !filePath) return null;
 
     await fs.writeFile(filePath, Buffer.from(await docxBlob.arrayBuffer()));
+    return filePath;
   }
 
   async clearAll(): Promise<void> {

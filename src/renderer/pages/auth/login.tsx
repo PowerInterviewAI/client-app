@@ -73,7 +73,7 @@ export default function LoginPage() {
     <Card className="max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Sign in</CardTitle>
-        <CardDescription>Use your account to access Power Interview</CardDescription>
+        <CardDescription>Use your account to access Power Interview AI</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-4">
