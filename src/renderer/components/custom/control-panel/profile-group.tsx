@@ -1,6 +1,6 @@
 import { ChevronUp, CreditCard, Key, LogOut, Mail, Moon, SettingsIcon, Sun } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -64,7 +64,7 @@ export function ProfileGroup({
             disabled={disabled}
             variant="ghost"
             size="sm"
-            className="w-32 rounded-md hover:bg-muted"
+            className="w-32 rounded-md hover:bg-muted justify-start"
           >
             <div className="max-w-36 overflow-hidden flex items-center gap-2 text-foreground">
               <ChevronUp className="h-4 w-4" />
