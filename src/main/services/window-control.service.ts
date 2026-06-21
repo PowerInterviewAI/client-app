@@ -1,6 +1,6 @@
 import { BrowserWindow, screen } from 'electron';
 
-import { MIN_HEIGHT, MIN_WIDTH } from '../consts.js';
+import { MIN_HEIGHT, MIN_WIDTH, OPACITY_LEVELS } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
@@ -261,8 +261,8 @@ export function enableStealth(): void {
     // Make window non-focusable so it doesn't capture keyboard events
     win.setFocusable(false);
 
-    // Make the window semi-transparent
-    win.setOpacity(0.6);
+    // Make the window semi-transparent using last-used opacity level
+    win.setOpacity(configStore.getOpacityLevel());
 
     _stealth = true;
     try {
@@ -360,7 +360,6 @@ export function toggleOpacity(): void {
 
   try {
     const current = win.getOpacity();
-    const OPACITY_LEVELS = [0.2, 0.6, 0.9];
     const tolerance = 0.05;
 
     const currentIndex = OPACITY_LEVELS.findIndex(
@@ -370,6 +369,7 @@ export function toggleOpacity(): void {
     const newOpacity = OPACITY_LEVELS[nextIndex];
 
     win.setOpacity(newOpacity);
+    configStore.saveOpacityLevel(newOpacity);
     console.log(`🔄 Window opacity toggled to ${(newOpacity * 100).toFixed(0)}%`);
   } catch (err) {
     console.warn('⚠️ Opacity toggle not supported on this platform:', err);

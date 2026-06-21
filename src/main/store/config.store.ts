@@ -5,6 +5,7 @@
 
 import ElectronStore from 'electron-store';
 
+import { OPACITY_DEFAULT } from '../consts.js';
 import { LLMConfig } from '../types/llm.js';
 
 // Runtime configuration (matches Config type in frontend)
@@ -63,11 +64,13 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   autoScrollTranscript: true,
 };
 
+
 interface StoredConfig {
   window?: {
     bounds?: { x: number; y: number; width: number; height: number };
     stealth?: boolean;
     zoomFactor?: number;
+    opacityLevel?: number;
   };
   runtime?: Partial<RuntimeConfig>;
 }
@@ -155,6 +158,20 @@ class ConfigStore {
    */
   setStealth(enabled: boolean): void {
     this.store.set('window.stealth', enabled);
+  }
+
+  /**
+   * Get stored stealth opacity level (defaults to second-highest level)
+   */
+  getOpacityLevel(): number {
+    return this.store.get('window.opacityLevel', OPACITY_DEFAULT) as number;
+  }
+
+  /**
+   * Persist stealth opacity level
+   */
+  saveOpacityLevel(level: number): void {
+    this.store.set('window.opacityLevel', level);
   }
 
   /**
