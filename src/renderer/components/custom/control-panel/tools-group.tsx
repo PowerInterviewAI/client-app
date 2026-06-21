@@ -1,4 +1,4 @@
-import { FileIcon, FolderOpenIcon, Loader, RotateCcw, Save, XIcon } from 'lucide-react';
+import { CircleCheck, FileIcon, FolderOpenIcon, Loader, RotateCcw, Save, XIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -31,55 +31,41 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
       if (!filePath) return;
       const electron = getElectron();
       const toastId = `export-${Date.now()}`;
-      toast.success('Interview exported', {
-        id: toastId,
-        duration: 10_000,
-        description: (
-          <div className="flex gap-1.5 mt-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-6 px-2 text-xs gap-1"
-                  onClick={() => electron?.openFile(filePath)}
-                >
-                  <FileIcon className="h-3 w-3" />
-                  Open file
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Open the exported document</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-6 px-2 text-xs gap-1"
-                  onClick={() => electron?.showInFolder(filePath)}
-                >
-                  <FolderOpenIcon className="h-3 w-3" />
-                  Show in folder
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reveal in file explorer</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0"
-                  onClick={() => toast.dismiss(toastId)}
-                >
-                  <XIcon className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Dismiss</TooltipContent>
-            </Tooltip>
+      toast.custom(
+        () => (
+          <div className="flex items-center gap-2 w-full px-4 py-3 rounded-lg border shadow-md" style={{ background: 'var(--success-bg)', borderColor: 'var(--success-border)', color: 'var(--success-text)' }}>
+            <CircleCheck className="h-4 w-4 shrink-0" />
+            <span className="flex-1 text-sm font-medium">Interview exported</span>
+            <div className="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="outline" className="h-6 w-6 p-0" onClick={() => electron?.openFile(filePath)}>
+                    <FileIcon className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Open file</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="outline" className="h-6 w-6 p-0" onClick={() => electron?.showInFolder(filePath)}>
+                    <FolderOpenIcon className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Show in folder</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => toast.dismiss(toastId)}>
+                    <XIcon className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Dismiss</TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         ),
-      });
+        { id: toastId, duration: 10_000, style: { width: 'var(--width, 356px)' } }
+      );
     } catch (error) {
       console.error(error);
       toast.error('Failed to export interview');

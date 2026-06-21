@@ -1,5 +1,3 @@
-import { Loader } from 'lucide-react';
-
 import { useAppState } from '@/hooks/use-app-state';
 import { RunningState } from '@/types/app-state';
 
@@ -14,9 +12,9 @@ export function TransitionOverlay() {
   const message = runningState === RunningState.Starting ? 'Starting...' : 'Stopping...';
 
   return (
-    <div className="fixed inset-0 z-9998 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+    <div className="fixed inset-0 top-9 z-9998 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <Loader className="h-6 w-6 animate-spin text-foreground" />
+        <div className="h-8 w-8 rounded-full border-2 border-foreground/20 border-t-foreground animate-spin" />
         <p className="text-sm font-medium text-foreground">{message}</p>
       </div>
     </div>
