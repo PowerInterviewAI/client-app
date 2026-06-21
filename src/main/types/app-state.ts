@@ -57,7 +57,6 @@ export interface AppState {
   isGpuServerLive: boolean;
   isLoggedIn: boolean | null;
   runningState: RunningState;
-  isAppIdle: boolean;
   transcripts: Transcript[];
   liveSuggestions: LiveSuggestion[];
   actionSuggestions: ActionSuggestion[];

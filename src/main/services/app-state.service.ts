@@ -19,7 +19,6 @@ const DEFAULT_STATE: AppState = {
   isGpuServerLive: false,
   isLoggedIn: false,
   runningState: RunningState.Idle,
-  isAppIdle: false,
   transcripts: [],
   liveSuggestions: [],
   actionSuggestions: [],

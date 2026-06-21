@@ -20,7 +20,6 @@ export interface AppState {
   isBackendLive: boolean;
   isGpuServerLive: boolean;
   runningState: RunningState;
-  isAppIdle: boolean;
   transcripts: Transcript[];
   liveSuggestions: LiveSuggestion[];
   actionSuggestions: ActionSuggestion[];

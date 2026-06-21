@@ -79,11 +79,6 @@ export class HealthCheckService {
     (async () => {
       while (this.running) {
         const state = appStateService.getState();
-        // if the app is idle we halt client pings until user wakes it
-        if (state.isAppIdle) {
-          await safeSleep(SUCCESS_INTERVAL);
-          continue;
-        }
 
         // skip if not logged in
         if (!state.isLoggedIn) {
