@@ -29,7 +29,7 @@ class ToolsService {
     return `report-${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}.docx`;
   }
 
-  async exportTranscript(): Promise<void> {
+  async exportTranscript(): Promise<string | null> {
     // Prepare request data
     const username = configStore.getConfig().interviewConf.username;
     const transcripts = appStateService.getState().transcripts;
@@ -96,9 +96,10 @@ class ToolsService {
       filters: [{ name: 'Word Document', extensions: ['docx'] }],
     });
 
-    if (canceled || !filePath) return;
+    if (canceled || !filePath) return null;
 
     await fs.writeFile(filePath, Buffer.from(await docxBlob.arrayBuffer()));
+    return filePath;
   }
 
   async clearAll(): Promise<void> {

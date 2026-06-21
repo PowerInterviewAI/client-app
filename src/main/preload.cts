@@ -111,6 +111,8 @@ const electronApi = {
     exportTranscript: () => ipcRenderer.invoke('tools:export-transcript'),
     clearAll: () => ipcRenderer.invoke('tools:clear-all'),
     setPlaceholderData: () => ipcRenderer.invoke('tools:set-placeholder-data'),
+    saveImage: (opts: { filename: string; data: number[] }) =>
+      ipcRenderer.invoke('tools:save-image', opts),
   },
 
   autoUpdater: {
@@ -144,6 +146,8 @@ const electronApi = {
   },
 
   openExternal: (url: string) => ipcRenderer.invoke('external:open', url),
+  openFile: (filePath: string) => ipcRenderer.invoke('external:open-file', filePath),
+  showInFolder: (filePath: string) => ipcRenderer.invoke('external:show-in-folder', filePath),
 
   setStealth: (isStealth: boolean) => ipcRenderer.send('window:set-stealth', !!isStealth),
   toggleStealth: () => ipcRenderer.send('window:toggle-stealth'),

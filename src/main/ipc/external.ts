@@ -11,4 +11,13 @@ export function registerExternalHandlers(): void {
       return { success: false, error: err instanceof Error ? err.message : String(err) };
     }
   });
+
+  ipcMain.handle('external:open-file', async (_event, filePath: string) => {
+    const err = await shell.openPath(filePath);
+    return err ? { success: false, error: err } : { success: true };
+  });
+
+  ipcMain.handle('external:show-in-folder', (_event, filePath: string) => {
+    shell.showItemInFolder(filePath);
+  });
 }
