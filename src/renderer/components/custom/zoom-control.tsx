@@ -2,6 +2,7 @@ import { RefreshCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatCombo } from '@/lib/hotkeys';
 
 export default function ZoomControl() {
   const [zoomPercent, setZoomPercent] = useState(100);
@@ -46,7 +47,7 @@ export default function ZoomControl() {
           </button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Reset zoom (Ctrl+Shift+0)</p>
+          <p>Reset zoom ({formatCombo('0')})</p>
         </TooltipContent>
       </Tooltip>
 
@@ -62,7 +63,7 @@ export default function ZoomControl() {
           </button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Zoom in (Ctrl+Shift+=)</p>
+          <p>Zoom in ({formatCombo('=')})</p>
         </TooltipContent>
       </Tooltip>
 
@@ -78,7 +79,7 @@ export default function ZoomControl() {
           </button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Zoom out (Ctrl+Shift+-)</p>
+          <p>Zoom out ({formatCombo('-')})</p>
         </TooltipContent>
       </Tooltip>
     </div>

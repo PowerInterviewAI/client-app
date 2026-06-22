@@ -54,69 +54,81 @@ export interface HotkeyInfo {
   description: string;
 }
 
+const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().includes('MAC');
+
+// Base modifier: macOS = ⌃⌥ (Ctrl+Option), others = Ctrl+Shift text
+const BASE = isMac ? '⌃⌥' : 'Ctrl+Shift+';
+const MOVE = isMac ? '⌃⌥⇧' : 'Ctrl+Alt+Shift+';
+const RESIZE = isMac ? '⌃⌥⌘' : 'Ctrl+Win+Shift+';
+
+/** Format a single key with the platform base modifier */
+export function formatCombo(key: string): string {
+  return `${BASE}${key}`;
+}
+
 export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
   [Hotkey.StopAll]: {
-    combo: 'Ctrl+Shift+Q',
+    combo: `${BASE}Q`,
     title: 'Stop All',
     description: 'Stop assistant and exit stealth mode',
   },
   [Hotkey.ToggleStealth]: {
-    combo: 'Ctrl+Shift+M',
+    combo: `${BASE}M`,
     title: 'Toggle Stealth',
     description: 'Toggle stealth mode ON or OFF',
   },
   [Hotkey.Opacity]: {
-    combo: 'Ctrl+Shift+N',
+    combo: `${BASE}N`,
     title: 'Toggle Opacity',
     description: 'Toggle window opacity in stealth mode',
   },
   [Hotkey.PlaceWin]: {
-    combo: 'Ctrl+Shift+1-9',
+    combo: `${BASE}1-9`,
     title: 'Place Window',
     description: 'Place window in a specific corner, side, or center',
   },
   [Hotkey.MoveWin]: {
-    combo: 'Ctrl+Alt+Shift+Arrow',
+    combo: `${MOVE}[↑↓←→]`,
     title: 'Move Window',
     description: 'Move window in the specified direction',
   },
   [Hotkey.ResizeWin]: {
-    combo: 'Ctrl+Win+Shift+Arrow',
+    combo: `${RESIZE}[↑↓←→]`,
     title: 'Resize Window',
     description: 'Resize window in the specified direction',
   },
   [Hotkey.ZoomInOutReset]: {
-    combo: 'Ctrl+Shift+[=, -, 0]',
+    combo: `${BASE}[=  -  0]`,
     title: 'Zoom In/Out/Reset',
     description: 'Adjust or reset UI zoom level',
   },
   [Hotkey.ScrollLiveSuggestionPanel]: {
-    combo: 'Ctrl+Shift+[J, K, L]',
+    combo: `${BASE}[J  K  L]`,
     title: 'Scroll Live Panel',
     description: 'Scroll Down/Up/End in the live suggestions panel',
   },
   [Hotkey.ScrollActionSuggestionPanel]: {
-    combo: 'Ctrl+Shift+[U, I, O]',
+    combo: `${BASE}[U  I  O]`,
     title: 'Scroll Triggered Panel',
     description: 'Scroll Down/Up/End in the triggered suggestions panel',
   },
   [Hotkey.Capture]: {
-    combo: 'Ctrl+Shift+F9',
+    combo: `${BASE}F9`,
     title: 'Capture Screen',
     description: 'Take a screenshot for triggered suggestions',
   },
   [Hotkey.ClearCaptures]: {
-    combo: 'Ctrl+Shift+F10',
+    combo: `${BASE}F10`,
     title: 'Clear Captures',
     description: 'Clear captured screenshots',
   },
   [Hotkey.TriggerWithoutCaptures]: {
-    combo: 'Ctrl+Shift+F11',
+    combo: `${BASE}F11`,
     title: 'Trigger without Captures',
     description: 'Generate suggestion without captures',
   },
   [Hotkey.TriggerWithCaptures]: {
-    combo: 'Ctrl+Shift+F12',
+    combo: `${BASE}F12`,
     title: 'Trigger with Captures',
     description:
       'Generate suggestion referencing screen captures. If no captures exist, attempts to take one before generating.',

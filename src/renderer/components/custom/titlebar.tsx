@@ -10,6 +10,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
 import { APP_NAME } from '@/lib/consts';
+import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { getElectron } from '@/lib/utils';
 
 // WebkitAppRegion is an Electron-specific CSS property not included in React.CSSProperties
@@ -108,7 +109,7 @@ export default function Titlebar() {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Toggle stealth mode (Ctrl+Shift+M)</p>
+                <p>Toggle stealth mode ({HOTKEYS[Hotkey.ToggleStealth].combo})</p>
               </TooltipContent>
             </Tooltip>
           )}
