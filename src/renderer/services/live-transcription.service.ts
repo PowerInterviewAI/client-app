@@ -98,7 +98,7 @@ class AudioWsStream {
 
       const float32 = event.data as Float32Array;
       const pcm16 = this.convertTo16kPcm(float32, this.ctx?.sampleRate ?? SAMPLE_RATE);
-      this.ws?.send(pcm16);
+      this.ws?.send(pcm16.buffer as ArrayBuffer);
     };
 
     // Wire up the audio graph exactly like the old ScriptProcessor version
@@ -272,6 +272,13 @@ class LiveTranscriptionService {
     const electron = getElectron();
     if (!electron) throw new Error('Electron API not available');
     await electron.transcription.setSessionToken(sessionToken);
+
+    const micGranted = await electron.permissions.requestMicrophone();
+    if (!micGranted) {
+      throw new Error(
+        'Microphone permission is required. Go to System Settings → Privacy & Security → Microphone, enable Power Interview AI, then restart the app.'
+      );
+    }
 
     const micDeviceId = await this.resolveMicDeviceId(audioInputDeviceName);
     this.micStream = await navigator.mediaDevices.getUserMedia({
