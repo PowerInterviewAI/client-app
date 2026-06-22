@@ -3,6 +3,10 @@ import { BrowserWindow } from 'electron';
 import { ZOOM_MAX_FACTOR, ZOOM_MIN_FACTOR } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 
+const TITLEBAR_HEIGHT_PX = 36; // h-9
+const TRAFFIC_LIGHT_SIZE_PX = 12; // macOS native button diameter
+const TRAFFIC_LIGHT_X = 7;
+
 let win: BrowserWindow | null = null;
 
 export function setWindowReference(window: BrowserWindow) {
@@ -15,6 +19,7 @@ export function setWindowReference(window: BrowserWindow) {
       if (saved && !isNaN(saved)) {
         const clamped = clamp(saved);
         win!.webContents.setZoomFactor(clamped);
+        repositionTrafficLights(clamped);
       }
     } catch (e) {
       console.warn('zoom.service:apply saved zoom failed', e);
@@ -63,6 +68,7 @@ export function setZoomFactor(factor: number): void {
   const clamped = clamp(factor);
   try {
     win.webContents.setZoomFactor(clamped);
+    repositionTrafficLights(clamped);
     notifyChange(clamped);
     // persist new value
     try {
@@ -83,6 +89,16 @@ export function adjustZoom(delta: number): void {
 
 export function resetZoom(): void {
   setZoomFactor(1);
+}
+
+function repositionTrafficLights(factor: number): void {
+  if (process.platform !== 'darwin' || !win || win.isDestroyed()) return;
+  try {
+    const y = Math.round((TITLEBAR_HEIGHT_PX * factor - TRAFFIC_LIGHT_SIZE_PX) / 2);
+    win.setWindowButtonPosition({ x: TRAFFIC_LIGHT_X, y });
+  } catch (e) {
+    console.warn('zoom.service:setTrafficLightPosition failed', e);
+  }
 }
 
 function notifyChange(factor: number): void {

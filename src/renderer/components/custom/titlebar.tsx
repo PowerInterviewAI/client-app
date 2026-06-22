@@ -69,11 +69,14 @@ export default function Titlebar() {
         className="flex items-center gap-3 h-9 pr-1 pl-1 select-none bg-card border-b border-border"
       >
         <div className="flex flex-1 items-center gap-2 px-1">
-          <img src={faviconSvg} alt="logo" className="h-5 w-5" />
-
-          <div className="text-sm font-medium" style={DRAG}>
-            {APP_NAME}
-          </div>
+          {!isMac && (
+            <>
+              <img src={faviconSvg} alt="logo" className="h-5 w-5" />
+              <div className="text-sm font-medium" style={DRAG}>
+                {APP_NAME}
+              </div>
+            </>
+          )}
         </div>
 
         {appState?.isLoggedIn && appState?.credits !== undefined && (
