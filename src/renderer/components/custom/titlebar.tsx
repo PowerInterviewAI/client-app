@@ -1,4 +1,4 @@
-import { EyeOff } from 'lucide-react';
+import { EyeOff, Moon, Sun } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { useThemeStore } from '@/hooks/use-theme-store';
 import { APP_NAME } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 
@@ -56,6 +57,7 @@ export default function Titlebar() {
 
   const { appState } = useAppState();
   const { config } = useConfigStore();
+  const { isDark, toggleTheme } = useThemeStore();
 
   if (isStealth) return null;
 
@@ -107,6 +109,21 @@ export default function Titlebar() {
               </TooltipContent>
             </Tooltip>
           )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
+                style={NO_DRAG}
+              >
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isDark ? 'Light mode' : 'Dark mode'}</p>
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
