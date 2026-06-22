@@ -1,4 +1,4 @@
-import { ipcMain, session, systemPreferences } from 'electron';
+import { ipcMain, session } from 'electron';
 import loopbackPkg from 'electron-audio-loopback';
 
 import { BACKEND_BASE_URL } from '../consts.js';
@@ -11,18 +11,6 @@ export function initializeAudioLoopback(): void {
   if (loopbackInitialized) return;
   initAudioLoopback();
   loopbackInitialized = true;
-}
-
-export function registerPermissionHandlers(): void {
-  ipcMain.handle('permissions:check-screen-recording', () => {
-    if (process.platform !== 'darwin') return 'granted';
-    return systemPreferences.getMediaAccessStatus('screen');
-  });
-
-  ipcMain.handle('permissions:request-microphone', async () => {
-    if (process.platform !== 'darwin') return true;
-    return systemPreferences.askForMediaAccess('microphone');
-  });
 }
 
 export function registerTranscriptHandlers(): void {

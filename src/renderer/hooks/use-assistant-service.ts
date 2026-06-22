@@ -31,17 +31,6 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
     try {
       set({ error: null });
 
-      // On macOS, verify Screen Recording permission before starting.
-      // desktopCapturer.getSources() returns [] when permission is denied, which
-      // causes the electron-audio-loopback handler to throw without resolving
-      // getDisplayMedia(), hanging the start flow indefinitely.
-      const screenStatus = await electron.permissions.checkScreenRecording();
-      if (screenStatus !== 'granted') {
-        throw new Error(
-          'Screen Recording permission is required. Go to System Settings → Privacy & Security → Screen Recording, enable Power Interview AI, then restart the app.'
-        );
-      }
-
       electron.appState.update({ runningState: RunningState.Starting });
 
       // Clear previous history

@@ -273,13 +273,6 @@ class LiveTranscriptionService {
     if (!electron) throw new Error('Electron API not available');
     await electron.transcription.setSessionToken(sessionToken);
 
-    const micGranted = await electron.permissions.requestMicrophone();
-    if (!micGranted) {
-      throw new Error(
-        'Microphone permission is required. Go to System Settings → Privacy & Security → Microphone, enable Power Interview AI, then restart the app.'
-      );
-    }
-
     const micDeviceId = await this.resolveMicDeviceId(audioInputDeviceName);
     this.micStream = await navigator.mediaDevices.getUserMedia({
       audio: micDeviceId ? { deviceId: { exact: micDeviceId } } : true,

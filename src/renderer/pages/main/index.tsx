@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import PermissionGateDialog from '@/components/custom/permission-gate-dialog';
+import { isMac } from '@/lib/consts';
+import { getElectron } from '@/lib/utils';
+
 import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
 import ControlPanel from '@/components/custom/control-panel';
@@ -108,6 +112,23 @@ export default function MainPage() {
   }, [suggestionPanelCount]);
 
   const isStealth = useIsStealthMode();
+
+  const [startupPermGateOpen, setStartupPermGateOpen] = useState(false);
+  const startupPermChecked = useRef(false);
+
+  useEffect(() => {
+    if (!isMac || startupPermChecked.current) return;
+    if (configLoading || !appState?.isBackendLive || appState.isLoggedIn !== true) return;
+    startupPermChecked.current = true;
+    getElectron()
+      ?.permissions.checkAll()
+      .then((perms) => {
+        const micOk = perms.mic === 'granted';
+        const screenOk = perms.screen === 'granted' || perms.screen === 'not-determined';
+        if (!micOk || !screenOk) setStartupPermGateOpen(true);
+      })
+      .catch(() => {});
+  }, [configLoading, appState?.isBackendLive, appState?.isLoggedIn]);
 
   // Compute available space when page is navigated to
   useEffect(() => {
@@ -282,6 +303,12 @@ export default function MainPage() {
       )}
 
       <ConfigurationDialog isOpen={isProfileOpen} onOpenChange={setIsProfileOpen} />
+      <PermissionGateDialog
+        open={startupPermGateOpen}
+        onOpenChange={setStartupPermGateOpen}
+        onProceed={() => {}}
+        proceedLabel="Continue"
+      />
       <TransitionOverlay />
     </div>
   );

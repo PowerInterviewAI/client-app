@@ -1,5 +1,7 @@
 export const APP_NAME = 'Power Interview AI';
 
+export const isMac = navigator.platform.toUpperCase().includes('MAC');
+
 export const CREDITS_PER_MINUTE = 10;
 
 // maximum allowable RTT change (ms) before restarting audio agent

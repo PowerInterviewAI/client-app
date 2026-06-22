@@ -1,3 +1,5 @@
+import { isMac } from './consts';
+
 export enum Hotkey {
   StopAll = 'StopAll',
   ToggleStealth = 'ToggleStealth',
@@ -53,8 +55,6 @@ export interface HotkeyInfo {
   title: string;
   description: string;
 }
-
-const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().includes('MAC');
 
 // Base modifier: macOS = ⌃⌥ (Ctrl+Option), others = Ctrl+Shift text
 const BASE = isMac ? '⌃⌥' : 'Ctrl+Shift+';

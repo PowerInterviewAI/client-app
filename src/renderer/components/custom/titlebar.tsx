@@ -9,7 +9,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
-import { APP_NAME } from '@/lib/consts';
+import { APP_NAME, isMac } from '@/lib/consts';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { getElectron } from '@/lib/utils';
 
@@ -17,8 +17,6 @@ import { getElectron } from '@/lib/utils';
 type DragStyle = React.CSSProperties & { WebkitAppRegion: 'drag' | 'no-drag' };
 const DRAG: DragStyle = { WebkitAppRegion: 'drag' };
 const NO_DRAG: DragStyle = { WebkitAppRegion: 'no-drag' };
-
-const isMac = navigator.platform.toUpperCase().includes('MAC');
 
 // Traffic lights span x=7..59 logical px (3×12px buttons + 2×8px gaps + 7px offset).
 // We keep 72 logical px clear (59px buttons + 13px breathing room).

@@ -143,8 +143,10 @@ const electronApi = {
   },
 
   permissions: {
-    checkScreenRecording: () => ipcRenderer.invoke('permissions:check-screen-recording'),
+    checkAll: () => ipcRenderer.invoke('permissions:check-all'),
     requestMicrophone: () => ipcRenderer.invoke('permissions:request-microphone'),
+    openSettings: (pane: 'microphone' | 'screen') =>
+      ipcRenderer.invoke('permissions:open-settings', pane),
   },
 
   openExternal: (url: string) => ipcRenderer.invoke('external:open', url),
