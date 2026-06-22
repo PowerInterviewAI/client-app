@@ -62,9 +62,11 @@ export default function PermissionGateDialog({
             note={
               status.mic === 'unknown'
                 ? 'Checking...'
-                : status.mic === 'denied' || status.mic === 'restricted'
-                  ? 'Enable in System Settings, then click Check Again'
-                  : 'Required to capture your voice'
+                : status.mic === 'granted'
+                  ? 'Access granted'
+                  : status.mic === 'denied' || status.mic === 'restricted'
+                    ? 'Enable in System Settings, then click Check Again'
+                    : 'Required to capture your voice'
             }
             action={
               status.mic === 'not-determined' ? (
@@ -86,11 +88,11 @@ export default function PermissionGateDialog({
             note={
               status.screen === 'unknown'
                 ? 'Checking...'
-                : status.screen === 'not-determined'
-                  ? 'Will be requested when recording starts'
-                  : status.screen === 'denied' || status.screen === 'restricted'
-                    ? 'Enable in System Settings, then click Check Again'
-                    : 'Required to capture interview audio'
+                : status.screen === 'granted'
+                  ? 'Access granted'
+                  : status.screen === 'not-determined'
+                    ? 'Will be requested when recording starts'
+                    : 'Enable in System Settings, then click Check Again'
             }
             action={
               status.screen === 'denied' || status.screen === 'restricted' ? (
