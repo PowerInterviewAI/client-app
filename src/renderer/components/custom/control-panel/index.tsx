@@ -8,6 +8,7 @@ import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useVideoDevices } from '@/hooks/use-video-devices';
+import { isMac } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 
@@ -20,7 +21,6 @@ import { ProfileGroup } from './profile-group';
 import { ToolsGroup } from './tools-group';
 
 interface ControlPanelProps {
-  assistantState: RunningState;
   onProfileClick: () => void;
   onSignOut: () => void;
 }
@@ -85,14 +85,16 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
   const handleStartClick = async () => {
     if (!checkCanStart()) return;
 
-    const electron = getElectron();
-    if (electron) {
-      const perms = await electron.permissions.checkAll();
-      const micOk = perms.mic === 'granted';
-      const screenOk = perms.screen === 'granted' || perms.screen === 'not-determined';
-      if (!micOk || !screenOk) {
-        setPermGateOpen(true);
-        return;
+    if (isMac) {
+      const electron = getElectron();
+      if (electron) {
+        const perms = await electron.permissions.checkAll();
+        const micOk = perms.mic === 'granted';
+        const screenOk = perms.screen === 'granted' || perms.screen === 'not-determined';
+        if (!micOk || !screenOk) {
+          setPermGateOpen(true);
+          return;
+        }
       }
     }
 
@@ -161,11 +163,13 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
         <ZoomControl />
       </div>
 
-      <PermissionGateDialog
-        open={permGateOpen}
-        onOpenChange={setPermGateOpen}
-        onProceed={doStart}
-      />
+      {isMac && (
+        <PermissionGateDialog
+          open={permGateOpen}
+          onOpenChange={setPermGateOpen}
+          onProceed={doStart}
+        />
+      )}
     </>
   );
 }

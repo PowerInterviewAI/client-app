@@ -123,9 +123,9 @@ export default function MainPage() {
     getElectron()
       ?.permissions.checkAll()
       .then((perms) => {
-        const micOk = perms.mic === 'granted';
-        const screenOk = perms.screen === 'granted' || perms.screen === 'not-determined';
-        if (!micOk || !screenOk) setStartupPermGateOpen(true);
+        const micBlocked = perms.mic === 'denied' || perms.mic === 'restricted';
+        const screenBlocked = perms.screen === 'denied' || perms.screen === 'restricted';
+        if (micBlocked || screenBlocked) setStartupPermGateOpen(true);
       })
       .catch(() => {});
   }, [configLoading, appState?.isBackendLive, appState?.isLoggedIn]);
@@ -262,7 +262,7 @@ export default function MainPage() {
           isBetaTesterActive &&
           !betaTesterNoticeClosed && (
             <BetaTesterNotice
-              expiresAt={appState?.betaTesterExpiresAt}
+              expiresAt={appState!.betaTesterExpiresAt!}
               onClick={() => setBetaTesterNoticeClosed(true)}
             />
           )}
@@ -289,7 +289,6 @@ export default function MainPage() {
       </div>
 
       <ControlPanel
-        assistantState={appState?.runningState ?? RunningState.Idle}
         onProfileClick={() => setIsProfileOpen(true)}
         onSignOut={handleSignOut}
       />

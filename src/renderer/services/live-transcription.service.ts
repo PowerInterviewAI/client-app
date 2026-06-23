@@ -279,22 +279,21 @@ class LiveTranscriptionService {
       video: false,
     });
 
-    await electron.transcription.enableLoopbackAudio();
-    const displayStream = await Promise.race([
-      navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }),
-      new Promise<never>((_, reject) =>
-        window.setTimeout(
-          () =>
-            reject(
-              new Error(
-                'Screen capture timed out. On macOS, go to System Settings → Privacy & Security → Screen Recording and enable Power Interview AI, then restart the app.'
-              )
-            ),
-          GET_DISPLAY_MEDIA_TIMEOUT_MS
-        )
-      ),
-    ]);
-    await electron.transcription.disableLoopbackAudio();
+    let displayStream: MediaStream;
+    try {
+      await electron.transcription.enableLoopbackAudio();
+      displayStream = await Promise.race([
+        navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }),
+        new Promise<never>((_, reject) =>
+          window.setTimeout(
+            () => reject(new Error('Screen capture timed out. Please try again.')),
+            GET_DISPLAY_MEDIA_TIMEOUT_MS
+          )
+        ),
+      ]);
+    } finally {
+      await electron.transcription.disableLoopbackAudio().catch(() => {});
+    }
 
     displayStream.getVideoTracks().forEach((track) => {
       track.stop();
