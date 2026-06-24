@@ -1,4 +1,5 @@
-import { CircleCheck, FileIcon, FolderOpenIcon, Loader, RotateCcw, Save, XIcon } from 'lucide-react';
+import { CircleCheck, FileIcon, FolderOpenIcon, Loader, Save, Trash2, XIcon } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -14,14 +15,19 @@ interface ToolsGroupProps {
 
 export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   const { runningState } = useAppState();
-  const { exporting, exportTranscript, setPlaceholderData } = useTools();
+  const { exporting, exportTranscript, clearAll } = useTools();
+  const [clearing, setClearing] = useState(false);
 
-  const onResetAll = async () => {
+  const onClear = async () => {
+    setClearing(true);
     try {
-      await setPlaceholderData();
+      await clearAll();
+      toast.success('Cleared');
     } catch (error) {
       console.error(error);
-      toast.error('Failed to reset');
+      toast.error('Failed to clear');
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -78,16 +84,16 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
         <TooltipTrigger asChild>
           <Button
             variant="secondary"
-            onClick={onResetAll}
+            onClick={onClear}
             size="sm"
             className="h-8 w-8 text-xs rounded-xl cursor-pointer"
-            disabled={getDisabled(runningState) || exporting}
+            disabled={getDisabled(runningState) || exporting || clearing}
           >
-            <RotateCcw className="h-4 w-4" />
+            {clearing ? <Loader className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Reset All</p>
+          <p>Clear</p>
         </TooltipContent>
       </Tooltip>
       <Tooltip>
