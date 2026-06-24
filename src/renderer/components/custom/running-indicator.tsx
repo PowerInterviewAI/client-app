@@ -6,7 +6,11 @@ interface RunningIndicatorProps {
   className?: string;
 }
 
-export function RunningIndicator({ runningState, compact = false, className = '' }: RunningIndicatorProps) {
+export function RunningIndicator({
+  runningState,
+  compact = false,
+  className = '',
+}: RunningIndicatorProps) {
   const indicatorConfig: Record<
     RunningState,
     { dotClass: string; label: string; labelClass: string }

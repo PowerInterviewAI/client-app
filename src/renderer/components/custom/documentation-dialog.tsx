@@ -41,11 +41,13 @@ export default function DocumentationDialog({ open, onOpenChange }: Documentatio
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl w-full max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{APP_NAME} {version ? `v${version}` : ''}</DialogTitle>
+          <DialogTitle>
+            {APP_NAME} {version ? `v${version}` : ''}
+          </DialogTitle>
           <DialogDescription>
             <p>
-              {APP_NAME} is an AI-powered assistant that enhances your interview experience
-              with real-time suggestions, on-screen code recommendations.
+              {APP_NAME} is an AI-powered assistant that enhances your interview experience with
+              real-time suggestions, on-screen code recommendations.
             </p>
             <p className="mt-2 text-sm">
               For full documentation, visit{' '}

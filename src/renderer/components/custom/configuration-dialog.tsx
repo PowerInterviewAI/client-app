@@ -149,6 +149,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your profile name"
                 className="text-sm"
+                maxLength={100}
               />
             </div>
 
@@ -161,6 +162,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
                 onChange={(e) => setProfileData(e.target.value)}
                 placeholder="Enter your profile information. (e.g. your CV/resume, LinkedIn profile, or a brief bio)"
                 className="text-sm min-h-20 max-h-40 overflow-auto"
+                maxLength={60000}
               />
             </div>
 
@@ -173,6 +175,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
                 onChange={(e) => setJobDescription(e.target.value)}
                 placeholder="Enter the context you are targeting. (e.g. the job description, role requirements or any other information)"
                 className="text-sm min-h-20 max-h-40 overflow-auto"
+                maxLength={60000}
               />
             </div>
           </div>

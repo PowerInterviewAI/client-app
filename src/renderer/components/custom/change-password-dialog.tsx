@@ -72,6 +72,7 @@ export function ChangePasswordDialog({
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Enter current password"
+                maxLength={128}
               />
             </div>
           </div>
@@ -85,6 +86,7 @@ export function ChangePasswordDialog({
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password"
+                maxLength={128}
               />
             </div>
           </div>
@@ -98,6 +100,7 @@ export function ChangePasswordDialog({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
+                maxLength={128}
               />
             </div>
           </div>
