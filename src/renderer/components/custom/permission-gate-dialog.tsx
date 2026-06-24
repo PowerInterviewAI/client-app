@@ -42,6 +42,10 @@ export default function PermissionGateDialog({
     getElectron()?.permissions.openSettings(pane);
   };
 
+  const relaunch = () => {
+    getElectron()?.permissions.relaunch();
+  };
+
   const handleProceed = () => {
     onOpenChange(false);
     onProceed();
@@ -92,13 +96,18 @@ export default function PermissionGateDialog({
                   ? 'Access granted'
                   : status.screen === 'not-determined'
                     ? 'Will be requested when recording starts'
-                    : 'Enable in System Settings, then click Check Again'
+                    : 'Enable in System Settings, then restart the app to apply'
             }
             action={
               status.screen === 'denied' || status.screen === 'restricted' ? (
-                <Button size="sm" variant="outline" onClick={() => openSettings('screen')}>
-                  Open Settings
-                </Button>
+                <div className="flex flex-col gap-1.5">
+                  <Button size="sm" variant="outline" onClick={() => openSettings('screen')}>
+                    Open Settings
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={relaunch}>
+                    Restart App
+                  </Button>
+                </div>
               ) : null
             }
           />

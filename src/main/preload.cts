@@ -147,6 +147,7 @@ const electronApi = {
     requestMicrophone: () => ipcRenderer.invoke('permissions:request-microphone'),
     openSettings: (pane: 'microphone' | 'screen') =>
       ipcRenderer.invoke('permissions:open-settings', pane),
+    relaunch: () => ipcRenderer.invoke('permissions:relaunch'),
   },
 
   openExternal: (url: string) => ipcRenderer.invoke('external:open', url),

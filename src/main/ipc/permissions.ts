@@ -1,4 +1,4 @@
-import { ipcMain, shell, systemPreferences } from 'electron';
+import { app, ipcMain, shell, systemPreferences } from 'electron';
 
 export function registerPermissionHandlers(): void {
   ipcMain.handle('permissions:check-all', () => {
@@ -24,5 +24,12 @@ export function registerPermissionHandlers(): void {
         'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture',
     };
     if (urls[pane]) await shell.openExternal(urls[pane]).catch(() => {});
+  });
+
+  // macOS only applies a freshly-granted Screen Recording permission after the
+  // app is relaunched, so the first capture otherwise fails silently.
+  ipcMain.handle('permissions:relaunch', () => {
+    app.relaunch();
+    app.exit(0);
   });
 }

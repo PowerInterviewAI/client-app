@@ -168,6 +168,7 @@ declare global {
       }>;
       requestMicrophone: () => Promise<boolean>;
       openSettings: (pane: 'microphone' | 'screen') => Promise<void>;
+      relaunch: () => Promise<void>;
     };
 
     // Open external URL in user's default browser
