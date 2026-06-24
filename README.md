@@ -71,6 +71,13 @@ Power Interview desktop client is supported on:
 
 Release binaries are published on the [GitHub Releases](https://github.com/PowerInterviewAI/client-app/releases) page.
 
+### Unsigned builds
+
+Release artifacts are not yet code-signed, so the OS will warn on first launch:
+
+- **macOS**: the app is ad-hoc signed (so it runs on Apple Silicon) but not notarized. If you see "app is damaged" or it is blocked, run `xattr -cr "/Applications/Power Interview AI.app"`, or right-click the app and choose Open.
+- **Windows**: SmartScreen shows "Windows protected your PC". Click "More info" then "Run anyway".
+
 ## Architecture
 
 Power Interview follows a **client-server architecture**.
