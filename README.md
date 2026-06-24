@@ -67,7 +67,7 @@ Stay on top of the conversation with live ASR:
 Power Interview desktop client is supported on:
 
 - Windows 10/11 (x64 installer build)
-- macOS (Apple Silicon and Intel release artifacts)
+- macOS 14.4+ (Apple Silicon and Intel release artifacts) - 14.4 is the floor for system-audio loopback capture
 
 Release binaries are published on the [GitHub Releases](https://github.com/PowerInterviewAI/client-app/releases) page.
 

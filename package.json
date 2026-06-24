@@ -129,7 +129,7 @@
       ],
       "icon": "build/icon.png",
       "category": "public.app-category.productivity",
-      "minimumSystemVersion": "12.3.0",
+      "minimumSystemVersion": "14.4.0",
       "hardenedRuntime": true,
       "notarize": true,
       "entitlements": "build/entitlements.mac.plist",
