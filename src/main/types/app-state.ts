@@ -54,7 +54,6 @@ export interface ActionSuggestion {
 export interface AppState {
   isStealth: boolean;
   isBackendLive: boolean;
-  isGpuServerLive: boolean;
   isLoggedIn: boolean | null;
   runningState: RunningState;
   transcripts: Transcript[];

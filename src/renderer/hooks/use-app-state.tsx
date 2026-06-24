@@ -34,7 +34,6 @@ class AppStateManager {
     return {
       isLoggedIn: raw.isLoggedIn,
       isBackendLive: raw.isBackendLive,
-      isGpuServerLive: raw.isGpuServerLive,
       runningState: raw.runningState,
       transcripts: raw.transcripts ?? [],
       liveSuggestions: raw.liveSuggestions ?? [],

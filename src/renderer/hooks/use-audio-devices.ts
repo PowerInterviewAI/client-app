@@ -17,7 +17,3 @@ function filterAudioDevices(devices: MediaDeviceInfo[], deviceType: string): Aud
 export function useAudioInputDevices(): AudioDevice[] {
   return useMediaDevices('audioinput', (devices) => filterAudioDevices(devices, 'Input'));
 }
-
-export function useAudioOutputDevices(): AudioDevice[] {
-  return useMediaDevices('audiooutput', (devices) => filterAudioDevices(devices, 'Output'));
-}

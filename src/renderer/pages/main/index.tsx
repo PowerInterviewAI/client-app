@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import PermissionGateDialog from '@/components/custom/permission-gate-dialog';
-import { isMac } from '@/lib/consts';
-import { getElectron } from '@/lib/utils';
-
 import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
 import ControlPanel from '@/components/custom/control-panel';
@@ -12,15 +8,17 @@ import { LoadingPage } from '@/components/custom/loading';
 import ActionSuggestionsPanel from '@/components/custom/panels/action-suggestions-panel';
 import LiveSuggestionsPanel from '@/components/custom/panels/live-suggestions-panel';
 import TranscriptPanel from '@/components/custom/panels/transcript-panel';
+import PermissionGateDialog from '@/components/custom/permission-gate-dialog';
 import StatusPanel from '@/components/custom/status-panel';
 import { TransitionOverlay } from '@/components/custom/transition-overlay';
 import TrialUserNotice from '@/components/custom/trial-user-notice';
-import { VideoPanel, type VideoPanelHandle } from '@/components/custom/video-panel';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { isMac } from '@/lib/consts';
+import { getElectron } from '@/lib/utils';
 import { RunningState, UserRole } from '@/types/app-state';
 import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
 import { type Transcript } from '@/types/transcript';
@@ -32,11 +30,10 @@ export default function MainPage() {
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { config, isLoading: configLoading, loadConfig } = useConfigStore();
-  const { setVideoPanelRef, stopAssistant } = useAssistantService();
+  const { stopAssistant } = useAssistantService();
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
   const [liveSuggestions, setLiveSuggestions] = useState<LiveSuggestion[]>([]);
   const [actionSuggestions, setActionSuggestions] = useState<ActionSuggestion[]>([]);
-  const videoPanelRef = useRef<VideoPanelHandle>(null);
   const [transcriptHeight, setTranscriptHeight] = useState<number | null>(null);
   const [suggestionHeight, setSuggestionHeight] = useState<number | null>(null);
   const [betaTesterNoticeClosed, setBetaTesterNoticeClosed] = useState(false);
@@ -49,11 +46,6 @@ export default function MainPage() {
     () => !!appState?.betaTesterExpiresAt && appState.betaTesterExpiresAt >= Date.now(),
     [appState?.betaTesterExpiresAt]
   );
-
-  // Register videoPanelRef with assistant state
-  useEffect(() => {
-    setVideoPanelRef(videoPanelRef as React.RefObject<VideoPanelHandle>);
-  }, [setVideoPanelRef]);
 
   // Listen for hotkey to stop assistant
   useEffect(() => {
@@ -76,7 +68,6 @@ export default function MainPage() {
   const hasLiveSuggestions = liveSuggestions.length > 0;
   const hasActionSuggestions = actionSuggestions.length > 0;
   const hasTranscripts = transcripts.length > 0;
-  const hideVideoPanel = !config?.faceSwap;
   const hideTranscriptPanel = hasActionSuggestions && !hasTranscripts;
 
   const hasSuggestions = hasLiveSuggestions || hasActionSuggestions;
@@ -89,16 +80,12 @@ export default function MainPage() {
     const title = document.getElementById('titlebar')?.getBoundingClientRect().height || 0;
     let status = document.getElementById('status-panel')?.getBoundingClientRect().height || 0;
     let control = document.getElementById('control-panel')?.getBoundingClientRect().height || 0;
-    let video = document.getElementById('video-panel')?.getBoundingClientRect().height || 0;
     const extra = 8; // spacing/padding between elements
 
     if (status > 0) status += 4; // account for border
     if (control > 0) control += 4; // account for border
-    if (video > 0) video += 4; // account for border
 
-    setTranscriptHeight(
-      Math.max(100, window.innerHeight - (title + status + control + video + extra))
-    );
+    setTranscriptHeight(Math.max(100, window.innerHeight - (title + status + control + extra)));
     if (suggestionPanelCount > 0) {
       setSuggestionHeight(
         Math.max(
@@ -153,24 +140,12 @@ export default function MainPage() {
   // Recompute when panels mount/unmount
   useEffect(() => {
     computeAvailable();
-  }, [
-    hasActionSuggestions,
-    hasLiveSuggestions,
-    hasTranscripts,
-    hideVideoPanel,
-    hideTranscriptPanel,
-    computeAvailable,
-  ]);
+  }, [hasActionSuggestions, hasLiveSuggestions, hasTranscripts, hideTranscriptPanel, computeAvailable]);
 
   // Recompute when stealth mode toggles
   useEffect(() => {
     computeAvailable();
   }, [isStealth, computeAvailable]);
-
-  // Recompute when face swap setting toggles
-  useEffect(() => {
-    computeAvailable();
-  }, [config?.faceSwap, computeAvailable]);
 
   // Recompute when assistant running state or appState becomes available
   useEffect(() => {
@@ -236,22 +211,13 @@ export default function MainPage() {
   return (
     <div className="flex-1 flex flex-col w-full bg-background p-1 space-y-1">
       <div className="flex-1 flex overflow-y-hidden gap-1">
-        {/* Left Column: Video + Transcription */}
+        {/* Left Column: Transcription */}
         <div
           className={`flex flex-col ${hasSuggestions ? 'w-80' : 'flex-1'} gap-1`}
-          hidden={hideVideoPanel && hideTranscriptPanel}
+          hidden={hideTranscriptPanel}
         >
-          {/* Video Panel - Small and compact */}
-          <div id="video-panel" className="h-45 w-full max-w-80 mx-auto" hidden={hideVideoPanel}>
-            <VideoPanel
-              ref={videoPanelRef}
-              runningState={appState?.runningState ?? RunningState.Idle}
-              credits={appState?.credits ?? 0}
-            />
-          </div>
-
           {/* Transcription Panel - Fill remaining space with scroll */}
-          {(!hideTranscriptPanel || !hideVideoPanel) && (
+          {!hideTranscriptPanel && (
             <TranscriptPanel transcripts={transcripts} style={transcriptStyle} />
           )}
         </div>

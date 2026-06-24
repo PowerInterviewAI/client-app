@@ -24,18 +24,4 @@ export class HealthCheckApi extends ApiClient {
       is_assistant_running: appState.runningState === RunningState.Running,
     } as ClientPingRequest);
   }
-
-  /**
-   * Ping GPU server
-   */
-  async pingGpuServer(): Promise<ApiResponse<string>> {
-    return this.get('/api/health-check/ping-gpu-server');
-  }
-
-  /**
-   * Wake up GPU server
-   */
-  async wakeupGpuServer(): Promise<ApiResponse<void>> {
-    return this.get('/api/health-check/wakeup-gpu-server', {});
-  }
 }

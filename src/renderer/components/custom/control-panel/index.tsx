@@ -7,7 +7,6 @@ import { useAssistantService } from '@/hooks/use-assistant-service';
 import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
-import { useVideoDevices } from '@/hooks/use-video-devices';
 import { isMac } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
@@ -39,7 +38,6 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
   const { config } = useConfigStore();
   const [permGateOpen, setPermGateOpen] = useState(false);
 
-  const videoDevices = useVideoDevices();
   const audioInputDevices = useAudioInputDevices();
 
   if (isStealth) return null;
@@ -48,18 +46,10 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
     const checks: { ok: boolean; message: string }[] = [
       { ok: !!config?.interviewConf, message: 'Profile is not set' },
       { ok: !!config?.interviewConf?.username, message: 'Username is not set' },
-      {
-        ok: !config?.faceSwap || !!config?.interviewConf?.photo,
-        message: 'Photo is not set (required for face swap)',
-      },
       { ok: !!config?.interviewConf?.profileData, message: 'Profile data is not set' },
       {
         ok: !audioInputDeviceNotFound,
         message: `Audio input device "${config?.audioInputDeviceName}" is not found`,
-      },
-      {
-        ok: !config?.faceSwap || !videoDeviceNotFound,
-        message: `Video device "${config?.cameraDeviceName}" is not found`,
       },
     ];
 
@@ -131,8 +121,6 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
 
   const audioInputDeviceNotFound =
     audioInputDevices?.find((d) => d.name === config?.audioInputDeviceName) === undefined;
-  const videoDeviceNotFound =
-    videoDevices.find((d) => d.label === config?.cameraDeviceName) === undefined;
 
   const getDisabled = (state: RunningState, disableOnRunning: boolean = true): boolean => {
     if (disableOnRunning && state === RunningState.Running) return true;
