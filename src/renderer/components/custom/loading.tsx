@@ -8,7 +8,6 @@ interface LoadingProps {
 }
 
 export function LoadingPage({ disclaimer }: LoadingProps) {
-
   return (
     <div className="flex justify-center items-center h-screen w-full bg-background ">
       <div className="flex flex-col items-center">

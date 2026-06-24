@@ -64,7 +64,6 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   autoScrollTranscript: true,
 };
 
-
 interface StoredConfig {
   window?: {
     bounds?: { x: number; y: number; width: number; height: number };

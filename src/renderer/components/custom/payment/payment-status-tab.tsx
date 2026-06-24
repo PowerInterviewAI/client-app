@@ -92,10 +92,13 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   const [setQrcode, , isQrcodeReady] = useQrcodeDownload('payment');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const handleQrcodeReady = useCallback((canvas: HTMLCanvasElement | SVGSVGElement) => {
-    setQrcode(canvas);
-    if (canvas instanceof HTMLCanvasElement) canvasRef.current = canvas;
-  }, [setQrcode]);
+  const handleQrcodeReady = useCallback(
+    (canvas: HTMLCanvasElement | SVGSVGElement) => {
+      setQrcode(canvas);
+      if (canvas instanceof HTMLCanvasElement) canvasRef.current = canvas;
+    },
+    [setQrcode]
+  );
 
   const handleDownloadQr = useCallback(async () => {
     const canvas = canvasRef.current;
@@ -111,13 +114,25 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
     const toastId = `qr-${Date.now()}`;
     toast.custom(
       () => (
-        <div className="flex items-center gap-2 w-full px-4 py-3 rounded-lg border shadow-md" style={{ background: 'var(--success-bg)', borderColor: 'var(--success-border)', color: 'var(--success-text)' }}>
+        <div
+          className="flex items-center gap-2 w-full px-4 py-3 rounded-lg border shadow-md"
+          style={{
+            background: 'var(--success-bg)',
+            borderColor: 'var(--success-border)',
+            color: 'var(--success-text)',
+          }}
+        >
           <CircleCheck className="h-4 w-4 shrink-0" />
           <span className="flex-1 text-sm font-medium">QR code saved</span>
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" className="h-6 w-6 p-0" onClick={() => electron?.openFile(filePath)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 w-6 p-0"
+                  onClick={() => electron?.openFile(filePath)}
+                >
                   <FileIcon className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
@@ -125,7 +140,12 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" className="h-6 w-6 p-0" onClick={() => electron?.showInFolder(filePath)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 w-6 p-0"
+                  onClick={() => electron?.showInFolder(filePath)}
+                >
                   <FolderOpenIcon className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
@@ -133,7 +153,12 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => toast.dismiss(toastId)}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 w-6 p-0"
+                  onClick={() => toast.dismiss(toastId)}
+                >
                   <XIcon className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>

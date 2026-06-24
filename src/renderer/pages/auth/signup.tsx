@@ -57,7 +57,13 @@ export default function SignupPage() {
 
           <div>
             <label className="text-sm block mb-1">Email</label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={254} required />
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              maxLength={254}
+              required
+            />
           </div>
 
           <div>
