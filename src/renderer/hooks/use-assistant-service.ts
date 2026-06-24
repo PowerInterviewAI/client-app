@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 
-import { type VideoPanelHandle } from '@/components/custom/video-panel';
 import { getElectron } from '@/lib/utils';
 import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
@@ -9,18 +8,15 @@ import { useConfigStore } from './use-config-store';
 
 interface AssistantService {
   error: string | null;
-  videoPanelRef: React.RefObject<VideoPanelHandle> | null;
 
   // Actions
   startAssistant: () => Promise<void>;
   stopAssistant: () => Promise<void>;
   setError: (error: string | null) => void;
-  setVideoPanelRef: (ref: React.RefObject<VideoPanelHandle> | null) => void;
 }
 
-export const useAssistantService = create<AssistantService>((set, get) => ({
+export const useAssistantService = create<AssistantService>((set) => ({
   error: null,
-  videoPanelRef: null,
 
   startAssistant: async () => {
     const electron = getElectron();
@@ -37,8 +33,6 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       await electron.tools.clearAll();
 
       const config = useConfigStore.getState().config;
-      // videoPanelRef is reserved for future face-swap integration
-      void get().videoPanelRef;
 
       // Start transcription services
       await electron.transcription.start();
@@ -72,10 +66,6 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
       }
       electron.appState.update({ runningState: RunningState.Stopping });
 
-      // config and videoPanelRef reserved for future face-swap integration
-      void useConfigStore.getState().config;
-      void get().videoPanelRef;
-
       // Stop assistant services
       await Promise.all([
         liveTranscriptionService.stop(),
@@ -103,9 +93,5 @@ export const useAssistantService = create<AssistantService>((set, get) => ({
 
   setError: (error: string | null) => {
     set({ error });
-  },
-
-  setVideoPanelRef: (ref: React.RefObject<VideoPanelHandle> | null) => {
-    set({ videoPanelRef: ref });
   },
 }));

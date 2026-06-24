@@ -11,7 +11,6 @@ import { LLMConfig } from '../types/llm.js';
 // Runtime configuration (matches Config type in frontend)
 export interface RuntimeConfig {
   interviewConf: {
-    photo: string;
     username: string;
     profileData: string;
     jobDescription: string;
@@ -22,11 +21,6 @@ export interface RuntimeConfig {
   email: string;
   password: string;
   audioInputDeviceName: string;
-  faceSwap: boolean;
-  cameraDeviceName: string;
-  videoWidth: number;
-  videoHeight: number;
-  enableFaceEnhance: boolean;
 
   llmConf: LLMConfig | null;
 
@@ -39,7 +33,6 @@ export interface RuntimeConfig {
 // Default runtime configuration
 const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   interviewConf: {
-    photo: '',
     username: '',
     profileData: '',
     jobDescription: '',
@@ -50,11 +43,6 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   email: '',
   password: '',
   audioInputDeviceName: '',
-  faceSwap: false,
-  cameraDeviceName: '',
-  videoWidth: 1280,
-  videoHeight: 720,
-  enableFaceEnhance: true,
 
   llmConf: null,
 
@@ -84,7 +72,6 @@ class ConfigStore {
         runtime: DEFAULT_RUNTIME_CONFIG,
       },
     });
-    this.updateConfig({ faceSwap: false }); // ensure new keys have defaults on first run
   }
 
   /**
@@ -198,7 +185,7 @@ export const configStore = new ConfigStore();
   // read the raw stored object so we can test for undefined values
   // eslint-disable-next-line
   const raw = (configStore as any).store.get('runtime') as Partial<RuntimeConfig> | undefined;
-  const migration: Partial<RuntimeConfig> = { faceSwap: false };
+  const migration: Partial<RuntimeConfig> = {};
   if (raw?.autoScrollLiveSuggestions === undefined) {
     migration.autoScrollLiveSuggestions = true;
   }
@@ -209,7 +196,7 @@ export const configStore = new ConfigStore();
     migration.autoScrollTranscript = true;
   }
   // perform migration only if there are values to set
-  if (Object.keys(migration).length > 1) {
+  if (Object.keys(migration).length > 0) {
     configStore.updateConfig(migration);
   }
 })(); // migration block

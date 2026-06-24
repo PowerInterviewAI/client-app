@@ -1,7 +1,6 @@
 import type { LLMConfig } from './llm';
 
 export interface InterviewConf {
-  photo: string;
   username: string;
   profileData: string;
   jobDescription: string;
@@ -24,12 +23,6 @@ export interface Config {
   // Transcription options
   audioInputDeviceName: string;
 
-  // Video control options - Face Swap Control
-  faceSwap: boolean;
-  cameraDeviceName: string;
-  videoWidth: number;
-  videoHeight: number;
-  enableFaceEnhance: boolean;
   llmConf: LLMConfig | null;
 
   // Panel auto-scroll preferences (persisted between sessions)
