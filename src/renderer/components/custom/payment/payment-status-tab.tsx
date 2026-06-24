@@ -251,6 +251,7 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               value={paymentId}
               onChange={(e) => setPaymentId(e.target.value)}
               className="max-w-40"
+              maxLength={100}
             />
             <Button onClick={() => handleCheckStatus()} disabled={!paymentId || loading}>
               {loading ? 'Checking...' : 'Check Status'}

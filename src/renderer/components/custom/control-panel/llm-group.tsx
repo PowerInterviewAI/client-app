@@ -305,6 +305,7 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
               placeholder="Enter API key"
               className="h-8 text-xs"
               disabled={!useOwnApiKey}
+              maxLength={200}
             />
           </div>
 
