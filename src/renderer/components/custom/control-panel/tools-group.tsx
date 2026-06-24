@@ -15,13 +15,13 @@ interface ToolsGroupProps {
 
 export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   const { runningState } = useAppState();
-  const { exporting, exportTranscript, clearAll } = useTools();
+  const { exporting, exportTranscript, setPlaceholderData } = useTools();
   const [clearing, setClearing] = useState(false);
 
   const onClear = async () => {
     setClearing(true);
     try {
-      await clearAll();
+      await setPlaceholderData();
       toast.success('Cleared');
     } catch (error) {
       console.error(error);
