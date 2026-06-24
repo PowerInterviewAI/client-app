@@ -6,6 +6,8 @@
 import { HealthCheckApi } from '../api/health-check.js';
 import { safeSleep } from '../utils/sleep.js';
 import { appStateService } from './app-state.service.js';
+import { authService } from './auth.service.js';
+import { pushNotificationService } from './push-notification.service.js';
 
 const SUCCESS_INTERVAL = 5 * 1000; // 5 seconds
 const FAILURE_INTERVAL = 1 * 1000; // 1 second
@@ -90,7 +92,14 @@ export class HealthCheckService {
 
         try {
           const res = await this.client.pingClient();
-          if (res.data?.credits !== undefined) {
+          if (res.status === 401) {
+            console.warn('[HealthCheckService] Session expired (401) - logging out');
+            pushNotificationService.pushNotification({
+              type: 'warning',
+              message: 'Your session expired, please log in again.',
+            });
+            await authService.logout();
+          } else if (res.data?.credits !== undefined) {
             console.log('client ping response:', res.data);
             appStateService.updateState({
               credits: res.data?.credits,

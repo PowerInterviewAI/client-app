@@ -114,7 +114,10 @@ declare global {
       exportTranscript: () => Promise<string | null>;
       clearAll: () => Promise<void>;
       setPlaceholderData: () => Promise<void>;
-      saveImage: (opts: { filename: string; data: number[] }) => Promise<{ filePath: string | null }>;
+      saveImage: (opts: {
+        filename: string;
+        data: number[];
+      }) => Promise<{ filePath: string | null }>;
     };
 
     // Auto-updater management

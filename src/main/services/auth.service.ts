@@ -1,6 +1,7 @@
 import { AuthApi } from '../api/auth.js';
 import { configStore } from '../store/config.store.js';
 import { appStateService } from './app-state.service.js';
+import { disableStealth } from './window-control.service.js';
 
 /**
  * AuthService
@@ -84,6 +85,7 @@ export class AuthService {
     } catch {
       return { success: false, error: 'Logout failed' };
     } finally {
+      disableStealth();
       // clear session token and update app state
       configStore.updateConfig({ sessionToken: '' });
       appStateService.updateState({ isLoggedIn: false });

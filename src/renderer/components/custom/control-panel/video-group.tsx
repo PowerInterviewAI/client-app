@@ -176,7 +176,9 @@ export function VideoGroup({ videoDeviceNotFound, getDisabled }: VideoGroupProps
               onClick={() => {
                 const tryingToEnable = !config?.faceSwap;
                 if (tryingToEnable && (!obsCameraExists || !vbInputExists)) {
-                  toast.error('OBS Virtual Camera or VB-Audio Input not found. Face Swap requires both.');
+                  toast.error(
+                    'OBS Virtual Camera or VB-Audio Input not found. Face Swap requires both.'
+                  );
                   return;
                 }
                 toast.success(config?.faceSwap ? 'Face Swap is Off' : 'Face Swap is On');

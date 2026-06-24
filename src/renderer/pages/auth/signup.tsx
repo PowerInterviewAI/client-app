@@ -50,13 +50,20 @@ export default function SignupPage() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              maxLength={50}
               required
             />
           </div>
 
           <div>
             <label className="text-sm block mb-1">Email</label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              maxLength={254}
+              required
+            />
           </div>
 
           <div>
@@ -64,6 +71,7 @@ export default function SignupPage() {
             <InputPassword
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              maxLength={128}
               required
             />
           </div>
@@ -73,6 +81,7 @@ export default function SignupPage() {
             <InputPassword
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
+              maxLength={128}
               required
             />
           </div>
