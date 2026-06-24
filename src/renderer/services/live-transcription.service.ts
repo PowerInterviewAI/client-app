@@ -98,7 +98,7 @@ class AudioWsStream {
 
       const float32 = event.data as Float32Array;
       const pcm16 = this.convertTo16kPcm(float32, this.ctx?.sampleRate ?? SAMPLE_RATE);
-      this.ws?.send(pcm16);
+      this.ws?.send(pcm16.buffer as ArrayBuffer);
     };
 
     // Wire up the audio graph exactly like the old ScriptProcessor version
