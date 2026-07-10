@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
+import ConnectingNotice from '@/components/custom/connecting-notice';
 import ControlPanel from '@/components/custom/control-panel';
 import { LoadingPage } from '@/components/custom/loading';
 import ActionSuggestionsPanel from '@/components/custom/panels/action-suggestions-panel';
@@ -204,12 +205,14 @@ export default function MainPage() {
   }
 
   // Show loading if config or app state is not loaded yet
-  if (configLoading || !appState || (appState && !appState.isBackendLive)) {
+  if (configLoading || !appState) {
     return <LoadingPage disclaimer="Loading…" />;
   }
 
   return (
     <div className="flex-1 flex flex-col w-full bg-background p-1 space-y-1">
+      {!appState.isBackendLive && <ConnectingNotice />}
+
       <div className="flex-1 flex overflow-y-hidden gap-1">
         {/* Left Column: Transcription */}
         <div
