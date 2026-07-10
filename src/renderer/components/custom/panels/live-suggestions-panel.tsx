@@ -1,4 +1,4 @@
-import { Loader2, PauseCircle, Zap } from 'lucide-react';
+import { ArrowDown, Loader2, PauseCircle, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useConfigStore } from '@/hooks/use-config-store';
@@ -15,6 +15,7 @@ import { Card } from '@/components/ui/card';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { type LiveSuggestion, SuggestionState } from '@/types/suggestion';
 
+import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 
 interface LiveSuggestionsPanelProps {
@@ -222,7 +223,16 @@ function LiveSuggestionsPanel({ suggestions = [], style }: LiveSuggestionsPanelP
         )}
       </div>
 
-      {/* scroll-to-latest button removed; auto-scroll still available via toggle */}
+      {!autoScroll && hasItems && (
+        <Button
+          size="icon-sm"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          onClick={() => scrollToLatest('smooth')}
+          aria-label="Scroll to bottom"
+        >
+          <ArrowDown className="size-4" />
+        </Button>
+      )}
     </Card>
   );
 }

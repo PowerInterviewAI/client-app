@@ -1,4 +1,4 @@
-import { ImageUp, Loader2, PauseCircle, Zap } from 'lucide-react';
+import { ArrowDown, ImageUp, Loader2, PauseCircle, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -14,6 +14,7 @@ function truncateMiddle(text: string, maxLen: number): string {
   return text.slice(0, half) + ' ... ... ... ' + text.slice(text.length - (maxLen - 3 - half));
 }
 
+import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 import { SafeMarkdown } from '../safe-markdown';
 
@@ -251,7 +252,16 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
         )}
       </div>
 
-      {/* scroll-to-latest button removed; auto-scroll still available via toggle */}
+      {!autoScroll && hasItems && (
+        <Button
+          size="icon-sm"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          onClick={() => scrollToLatest('smooth')}
+          aria-label="Scroll to bottom"
+        >
+          <ArrowDown className="size-4" />
+        </Button>
+      )}
     </Card>
   );
 }

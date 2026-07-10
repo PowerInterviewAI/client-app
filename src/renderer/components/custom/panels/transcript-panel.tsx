@@ -1,3 +1,4 @@
+import { ArrowDown } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -5,6 +6,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { Speaker, type Transcript } from '@/types/transcript';
 
+import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 
 interface TranscriptPanelProps {
@@ -84,7 +86,16 @@ function TranscriptPanel({ transcripts, style }: TranscriptPanelProps) {
         )}
       </div>
 
-      {/* scroll-to-bottom button removed; auto-scroll still available via toggle */}
+      {!autoScroll && (
+        <Button
+          size="icon-sm"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          onClick={() => endRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          aria-label="Scroll to bottom"
+        >
+          <ArrowDown className="size-4" />
+        </Button>
+      )}
     </Card>
   );
 }
