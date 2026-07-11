@@ -64,10 +64,6 @@ export function UpdateNotification() {
               label: 'Restart Now',
               onClick: () => quitAndInstall(),
             },
-            cancel: {
-              label: 'Later',
-              onClick: () => toast.info('Update will be installed when you close the app.'),
-            },
           });
         }
         break;
