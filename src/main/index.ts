@@ -163,7 +163,7 @@ async function createWindow() {
   await win.webContents.session.clearCache();
 
   if (EnvUtil.isDev()) {
-    win.loadURL('http://localhost:5173');
+    win.loadURL('http://localhost:15173');
     win.webContents.openDevTools();
   } else {
     // Use app.getAppPath() for conventional path resolution

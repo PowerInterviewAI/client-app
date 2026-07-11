@@ -31,7 +31,6 @@ export class HealthCheckService {
         isLoggedIn: res.status === 200,
         credits: res.data?.credits,
         userRole: res.data?.user_role,
-        betaTesterExpiresAt: res.data?.beta_tester_expires_at,
         providedLLMModel: res.data?.provided_llm_model,
       });
     } catch (error) {
@@ -105,7 +104,6 @@ export class HealthCheckService {
               credits: res.data?.credits,
               providedLLMModel: res.data?.provided_llm_model,
               userRole: res.data?.user_role,
-              betaTesterExpiresAt: res.data?.beta_tester_expires_at,
             });
           }
         } catch (error) {

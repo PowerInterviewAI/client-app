@@ -82,6 +82,7 @@ export default function Titlebar() {
           <CreditsDisplay
             credits={appState.credits ?? 0}
             llmModel={config?.llmConf?.model ?? appState.providedLLMModel ?? ''}
+            userRole={appState.userRole}
             style={DRAG}
           />
         )}

@@ -15,7 +15,7 @@ Always use Context7 MCP (`mcp__context7__resolve-library-id` then `mcp__context7
 ## Commands
 
 ```bash
-pnpm dev                       # Vite renderer dev server only (http://localhost:5173)
+pnpm dev                       # Vite renderer dev server only (http://localhost:15173)
 pnpm electron:dev-hide         # Electron + renderer dev, hidden window
 pnpm electron:dev-show         # Electron + renderer dev, visible window
 pnpm start                     # Alias for electron:dev-hide

@@ -11,8 +11,8 @@ export default function TrialUserNotice({ onClick }: TrialUserNoticeProps) {
     <div className="fixed top-11 left-1/2 -translate-x-1/2 bg-primary/10 backdrop-blur-sm text-foreground text-xs font-medium pl-4 pr-2 py-1 rounded-full shadow-xl z-50 border border-primary flex items-center gap-2">
       <span>
         Trial plan: 1 hour of free usage with the{' '}
-        <span className="font-semibold">Llama-4-Scout</span> model.
-        <br /> Buy credits to unlock all models.
+        <span className="font-bold">free tier</span> model.
+        <br /> Buy credits to unlock <span className="font-bold">SOTA</span> model.
       </span>
       <Button
         variant="ghost"

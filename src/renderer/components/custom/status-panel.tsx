@@ -4,7 +4,7 @@ import CreditsDisplay from '@/components/custom/credits-display';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Hotkey, HOTKEY_GROUPS, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
-import { RunningState } from '@/types/app-state';
+import { RunningState, UserRole } from '@/types/app-state';
 
 import { RunningIndicator } from './running-indicator';
 
@@ -12,15 +12,21 @@ interface StatusPanelProps {
   runningState: RunningState;
   credits: number;
   llmModel: string;
+  userRole?: UserRole;
 }
 
-export default function StatusPanel({ runningState, llmModel, credits }: StatusPanelProps) {
+export default function StatusPanel({
+  runningState,
+  llmModel,
+  credits,
+  userRole,
+}: StatusPanelProps) {
   // calculate and formatting handled by CreditsDisplay component
 
   return (
     <div id="status-panel" className="flex items-center justify-between text-muted-foreground p-1">
       <RunningIndicator runningState={runningState} />
-      <CreditsDisplay credits={credits} llmModel={llmModel} className="ml-2" />
+      <CreditsDisplay credits={credits} llmModel={llmModel} userRole={userRole} className="ml-2" />
       <div className="flex-1" />
       <Tooltip>
         <TooltipTrigger asChild>

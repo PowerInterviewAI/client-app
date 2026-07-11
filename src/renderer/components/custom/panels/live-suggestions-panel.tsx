@@ -1,4 +1,4 @@
-import { Loader2, PauseCircle, Zap } from 'lucide-react';
+import { ArrowDown, Loader2, PauseCircle, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useConfigStore } from '@/hooks/use-config-store';
@@ -15,14 +15,20 @@ import { Card } from '@/components/ui/card';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { type LiveSuggestion, SuggestionState } from '@/types/suggestion';
 
+import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 
 interface LiveSuggestionsPanelProps {
   suggestions?: LiveSuggestion[];
   style?: React.CSSProperties;
+  isRunning?: boolean;
 }
 
-function LiveSuggestionsPanel({ suggestions = [], style }: LiveSuggestionsPanelProps) {
+function LiveSuggestionsPanel({
+  suggestions = [],
+  style,
+  isRunning = false,
+}: LiveSuggestionsPanelProps) {
   const hasItems = suggestions.length > 0;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -138,7 +144,13 @@ function LiveSuggestionsPanel({ suggestions = [], style }: LiveSuggestionsPanelP
     >
       {/* Header */}
       <div className="border-b border-border p-2 shrink-0 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {isRunning && (
+            <span
+              className="h-2 w-2 rounded-full bg-destructive animate-pulse shrink-0"
+              aria-hidden="true"
+            />
+          )}
           <h3 className="font-semibold text-foreground text-xs">Live Suggestions</h3>
         </div>
 
@@ -222,7 +234,16 @@ function LiveSuggestionsPanel({ suggestions = [], style }: LiveSuggestionsPanelP
         )}
       </div>
 
-      {/* scroll-to-latest button removed; auto-scroll still available via toggle */}
+      {!autoScroll && hasItems && (
+        <Button
+          size="icon-sm"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          onClick={() => scrollToLatest('smooth')}
+          aria-label="Scroll to bottom"
+        >
+          <ArrowDown className="size-4" />
+        </Button>
+      )}
     </Card>
   );
 }

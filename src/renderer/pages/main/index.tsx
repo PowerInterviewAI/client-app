@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
+import ConnectingNotice from '@/components/custom/connecting-notice';
 import ControlPanel from '@/components/custom/control-panel';
 import { LoadingPage } from '@/components/custom/loading';
 import ActionSuggestionsPanel from '@/components/custom/panels/action-suggestions-panel';
@@ -36,16 +36,10 @@ export default function MainPage() {
   const [actionSuggestions, setActionSuggestions] = useState<ActionSuggestion[]>([]);
   const [transcriptHeight, setTranscriptHeight] = useState<number | null>(null);
   const [suggestionHeight, setSuggestionHeight] = useState<number | null>(null);
-  const [betaTesterNoticeClosed, setBetaTesterNoticeClosed] = useState(false);
   const [trialNoticeClosed, setTrialNoticeClosed] = useState(false);
 
   // App state from context
   const { appState } = useAppState();
-  const isBetaTesterActive = useMemo(
-    // eslint-disable-next-line react-hooks/purity
-    () => !!appState?.betaTesterExpiresAt && appState.betaTesterExpiresAt >= Date.now(),
-    [appState?.betaTesterExpiresAt]
-  );
 
   // Listen for hotkey to stop assistant
   useEffect(() => {
@@ -204,12 +198,14 @@ export default function MainPage() {
   }
 
   // Show loading if config or app state is not loaded yet
-  if (configLoading || !appState || (appState && !appState.isBackendLive)) {
+  if (configLoading || !appState) {
     return <LoadingPage disclaimer="Loading…" />;
   }
 
   return (
     <div className="flex-1 flex flex-col w-full bg-background p-1 space-y-1">
+      {!appState.isBackendLive && <ConnectingNotice />}
+
       <div className="flex-1 flex overflow-y-hidden gap-1">
         {/* Left Column: Transcription */}
         <div
@@ -218,20 +214,13 @@ export default function MainPage() {
         >
           {/* Transcription Panel - Fill remaining space with scroll */}
           {!hideTranscriptPanel && (
-            <TranscriptPanel transcripts={transcripts} style={transcriptStyle} />
-          )}
-        </div>
-
-        {/* Show beta tester notice */}
-        {appState?.userRole === UserRole.BetaTester &&
-          appState?.credits === 0 &&
-          isBetaTesterActive &&
-          !betaTesterNoticeClosed && (
-            <BetaTesterNotice
-              expiresAt={appState!.betaTesterExpiresAt!}
-              onClick={() => setBetaTesterNoticeClosed(true)}
+            <TranscriptPanel
+              transcripts={transcripts}
+              style={transcriptStyle}
+              isRunning={appState?.runningState === RunningState.Running}
             />
           )}
+        </div>
 
         {/* Show trial user notice */}
         {appState?.userRole === UserRole.TrialUser && !trialNoticeClosed && (
@@ -245,10 +234,15 @@ export default function MainPage() {
               <ActionSuggestionsPanel
                 actionSuggestions={actionSuggestions}
                 style={suggestionStyle}
+                isRunning={appState?.runningState === RunningState.Running}
               />
             )}
             {hasLiveSuggestions && (
-              <LiveSuggestionsPanel suggestions={liveSuggestions} style={suggestionStyle} />
+              <LiveSuggestionsPanel
+                suggestions={liveSuggestions}
+                style={suggestionStyle}
+                isRunning={appState?.runningState === RunningState.Running}
+              />
             )}
           </div>
         )}
@@ -264,6 +258,7 @@ export default function MainPage() {
           runningState={appState?.runningState ?? RunningState.Idle}
           credits={appState?.credits ?? 0}
           llmModel={config?.llmConf?.model ?? appState?.providedLLMModel ?? ''}
+          userRole={appState?.userRole}
         />
       )}
 
