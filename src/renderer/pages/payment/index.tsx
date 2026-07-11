@@ -46,27 +46,22 @@ export default function PaymentPage() {
   return (
     <div className="w-full flex flex-col bg-background">
       {/* Header */}
-      <div className="border-b bg-background px-6 py-4">
-        <div className="flex items-center gap-4">
+      <div className="sticky top-0 z-10 border-b bg-background px-4 py-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2"
+            className="flex items-center"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">Buy Credits</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Buy credits, view payment history, and check payment status
-            </p>
-          </div>
+          <h1 className="text-sm font-semibold">Buy Credits</h1>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden px-6 py-6 w-full max-w-4xl mx-auto">
+      <div className="flex-1 overflow-hidden px-4 py-3 w-full max-w-3xl mx-auto">
         <Tabs
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as 'buy' | 'history' | 'status')}
@@ -87,11 +82,11 @@ export default function PaymentPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="buy" className="flex-1 mt-6">
+          <TabsContent value="buy" className="flex-1 mt-3">
             <BuyCreditsTab credits={remainingCredits} onPaymentCreated={handlePaymentCreated} />
           </TabsContent>
 
-          <TabsContent value="history" className="flex-1 mt-6">
+          <TabsContent value="history" className="flex-1 mt-3">
             <PaymentHistoryTab
               isActive={activeTab === 'history'}
               onViewPayment={handleViewPayment}
@@ -99,7 +94,7 @@ export default function PaymentPage() {
             />
           </TabsContent>
 
-          <TabsContent value="status" className="flex-1 mt-6">
+          <TabsContent value="status" className="flex-1 mt-3">
             <PaymentStatusTab key={statusPaymentId} initialPaymentId={statusPaymentId} />
           </TabsContent>
         </Tabs>

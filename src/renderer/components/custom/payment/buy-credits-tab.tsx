@@ -72,11 +72,11 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
   }, [selectedPlan, selectedCurrency, createPayment, onPaymentCreated]);
 
   return (
-    <div className="space-y-4">
-      <div className="bg-muted/50 p-4 rounded-lg">
-        <div className="text-sm font-medium">Current Balance</div>
-        <div className="text-2xl font-bold">{credits.toLocaleString()} credits</div>
-        <div className="text-sm text-muted-foreground">
+    <div className="space-y-3">
+      <div className="bg-muted/50 p-3 rounded-lg">
+        <div className="text-xs font-medium">Current Balance</div>
+        <div className="text-lg font-bold">{credits.toLocaleString()} credits</div>
+        <div className="text-xs text-muted-foreground">
           Available for ~
           {availableHours > 0 && (
             <>
@@ -100,12 +100,12 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
       )}
 
       {loading && plans.length === 0 ? (
-        <div className="py-8">
+        <div className="py-6">
           <Loading disclaimer="Loading payment plans…" />
         </div>
       ) : (
         <>
-          <div className="mx-auto grid gap-2 md:grid-cols-3 p-1">
+          <div className="mx-auto grid gap-2 md:grid-cols-3">
             {plans.map((plan) => {
               const isPro = plan.plan === CreditPlan.Pro;
               const minutes = Math.floor(plan.credits / CREDITS_PER_MINUTE);
@@ -116,7 +116,7 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                 <Card
                   key={plan.plan}
                   className={cn(
-                    'relative flex flex-col transition-shadow',
+                    'relative flex flex-col gap-3 py-4 transition-shadow',
                     isPro
                       ? 'border-primary shadow-lg hover:shadow-xl'
                       : 'shadow-sm hover:shadow-lg',
@@ -124,32 +124,33 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                   )}
                 >
                   {isPro && (
-                    <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                      <span className="rounded-full bg-primary px-4 py-1 text-sm font-semibold text-primary-foreground">
+                    <div className="absolute -top-3 left-0 right-0 flex justify-center">
+                      <span className="rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
                         Most Popular
                       </span>
                     </div>
                   )}
 
-                  <CardHeader>
-                    <CardTitle className="text-2xl">{planName}</CardTitle>
-                    <CardDescription>{planDescription}</CardDescription>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold">${plan.priceUsd}</span>
-                      <span className="text-muted-foreground">
+                  <CardHeader className="gap-1 px-4">
+                    <CardTitle className="text-lg">{planName}</CardTitle>
+                    <CardDescription className="text-xs">{planDescription}</CardDescription>
+                    <div className="mt-2">
+                      <span className="text-2xl font-bold">${plan.priceUsd}</span>
+                      <span className="text-xs text-muted-foreground">
                         {' '}
                         / {plan.credits.toLocaleString()} credits
                       </span>
                     </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       ~{minutes.toLocaleString()} minutes of AI assistance
                     </p>
                   </CardHeader>
 
-                  <CardContent className="flex-1 pt-0">
+                  <CardContent className="flex-1 px-4 pt-0">
                     <Button
+                      size="sm"
                       className={cn(
-                        'mt-2 w-full cursor-pointer',
+                        'w-full cursor-pointer',
                         isPro
                           ? ''
                           : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
@@ -169,18 +170,18 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
           </div>
 
           {selectedPlan && (
-            <Card ref={paymentDetailsRef}>
-              <CardHeader>
-                <CardTitle>Payment Details</CardTitle>
-                <CardDescription>
+            <Card ref={paymentDetailsRef} className="gap-3 py-4">
+              <CardHeader className="gap-1 px-4">
+                <CardTitle className="text-base">Payment Details</CardTitle>
+                <CardDescription className="text-xs">
                   Complete your purchase of{' '}
                   <span className="font-bold">{selectedPlan.credits.toLocaleString()} credits</span>{' '}
                   for <span className="font-bold">${selectedPlan.priceUsd} USD</span>
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="px-4 space-y-3">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
+                  <label className="text-xs font-medium mb-1.5 block">
                     Payment Currency <span className="text-destructive">*</span>
                   </label>
                   <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
@@ -203,6 +204,7 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                 </div>
 
                 <Button
+                  size="sm"
                   className="w-full"
                   onClick={handleCreatePayment}
                   disabled={creating || !selectedCurrency}
