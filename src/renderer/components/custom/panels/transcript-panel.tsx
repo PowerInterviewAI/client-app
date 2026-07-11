@@ -12,9 +12,10 @@ import { Checkbox } from '../../ui/checkbox';
 interface TranscriptPanelProps {
   transcripts: Transcript[];
   style?: React.CSSProperties;
+  isRunning?: boolean;
 }
 
-function TranscriptPanel({ transcripts, style }: TranscriptPanelProps) {
+function TranscriptPanel({ transcripts, style, isRunning = false }: TranscriptPanelProps) {
   const { config, updateConfig } = useConfigStore();
   const username = config?.interviewConf?.username ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +38,15 @@ function TranscriptPanel({ transcripts, style }: TranscriptPanelProps) {
   return (
     <Card className="relative flex flex-col h-full bg-card p-0 rounded-md gap-2" style={style}>
       <div className="border-b border-border p-2 shrink-0 flex items-center justify-between gap-4">
-        <h3 className="font-semibold text-foreground text-xs">Transcription</h3>
+        <div className="flex items-center gap-2">
+          {isRunning && (
+            <span
+              className="h-2 w-2 rounded-full bg-destructive animate-pulse shrink-0"
+              aria-hidden="true"
+            />
+          )}
+          <h3 className="font-semibold text-foreground text-xs">Transcription</h3>
+        </div>
 
         {!isStealth && (
           <label className="flex items-center gap-2 text-xs text-muted-foreground">

@@ -214,7 +214,11 @@ export default function MainPage() {
         >
           {/* Transcription Panel - Fill remaining space with scroll */}
           {!hideTranscriptPanel && (
-            <TranscriptPanel transcripts={transcripts} style={transcriptStyle} />
+            <TranscriptPanel
+              transcripts={transcripts}
+              style={transcriptStyle}
+              isRunning={appState?.runningState === RunningState.Running}
+            />
           )}
         </div>
 
@@ -230,10 +234,15 @@ export default function MainPage() {
               <ActionSuggestionsPanel
                 actionSuggestions={actionSuggestions}
                 style={suggestionStyle}
+                isRunning={appState?.runningState === RunningState.Running}
               />
             )}
             {hasLiveSuggestions && (
-              <LiveSuggestionsPanel suggestions={liveSuggestions} style={suggestionStyle} />
+              <LiveSuggestionsPanel
+                suggestions={liveSuggestions}
+                style={suggestionStyle}
+                isRunning={appState?.runningState === RunningState.Running}
+              />
             )}
           </div>
         )}

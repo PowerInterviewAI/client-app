@@ -21,9 +21,14 @@ import { SafeMarkdown } from '../safe-markdown';
 interface ActionSuggestionsPanelProps {
   actionSuggestions?: ActionSuggestion[];
   style?: React.CSSProperties;
+  isRunning?: boolean;
 }
 
-function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggestionsPanelProps) {
+function ActionSuggestionsPanel({
+  actionSuggestions = [],
+  style,
+  isRunning = false,
+}: ActionSuggestionsPanelProps) {
   const hasItems = actionSuggestions.length > 0;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -141,7 +146,13 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
     >
       {/* Header */}
       <div className="border-b border-border p-2 shrink-0 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {isRunning && (
+            <span
+              className="h-2 w-2 rounded-full bg-destructive animate-pulse shrink-0"
+              aria-hidden="true"
+            />
+          )}
           <h3 className="font-semibold text-foreground text-xs">Triggered Suggestions</h3>
         </div>
 

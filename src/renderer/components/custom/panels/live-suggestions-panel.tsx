@@ -21,9 +21,14 @@ import { Checkbox } from '../../ui/checkbox';
 interface LiveSuggestionsPanelProps {
   suggestions?: LiveSuggestion[];
   style?: React.CSSProperties;
+  isRunning?: boolean;
 }
 
-function LiveSuggestionsPanel({ suggestions = [], style }: LiveSuggestionsPanelProps) {
+function LiveSuggestionsPanel({
+  suggestions = [],
+  style,
+  isRunning = false,
+}: LiveSuggestionsPanelProps) {
   const hasItems = suggestions.length > 0;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -139,7 +144,13 @@ function LiveSuggestionsPanel({ suggestions = [], style }: LiveSuggestionsPanelP
     >
       {/* Header */}
       <div className="border-b border-border p-2 shrink-0 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {isRunning && (
+            <span
+              className="h-2 w-2 rounded-full bg-destructive animate-pulse shrink-0"
+              aria-hidden="true"
+            />
+          )}
           <h3 className="font-semibold text-foreground text-xs">Live Suggestions</h3>
         </div>
 
