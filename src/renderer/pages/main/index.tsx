@@ -258,6 +258,7 @@ export default function MainPage() {
           runningState={appState?.runningState ?? RunningState.Idle}
           credits={appState?.credits ?? 0}
           llmModel={config?.llmConf?.model ?? appState?.providedLLMModel ?? ''}
+          userRole={appState?.userRole}
         />
       )}
 
