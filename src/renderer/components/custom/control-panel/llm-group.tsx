@@ -216,10 +216,10 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
       await updateConfig({
         llmConf: useOwnApiKey
           ? {
-              provider: currentProvider,
-              apikey: apiKey.trim(),
-              model: effectiveModel,
-            }
+            provider: currentProvider,
+            apikey: apiKey.trim(),
+            model: effectiveModel,
+          }
           : null,
       });
       toast.success('LLM configuration saved');
@@ -258,8 +258,8 @@ export function LLMGroup({ getDisabled }: LLMGroupProps) {
             <p>Connect your own LLM provider and API key for full control.</p>
             <p>
               If you prefer to use our hosted models, we’ll automatically provide them based on your
-              available credits: <strong>GPT-5.4</strong> is active while you have a balance,
-              switching to <strong>Llama-4-Scout (17B)</strong> once credits are exhausted.
+              available credits: <strong>SOTA</strong> model is active while you have a balance,
+              switching to <strong>free tier</strong> model once credits are exhausted.
             </p>
           </DialogDescription>
 

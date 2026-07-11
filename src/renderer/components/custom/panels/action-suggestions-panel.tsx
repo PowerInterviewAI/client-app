@@ -1,4 +1,4 @@
-import { ImageUp, Loader2, PauseCircle, Zap } from 'lucide-react';
+import { ArrowDown, ImageUp, Loader2, PauseCircle, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -14,15 +14,21 @@ function truncateMiddle(text: string, maxLen: number): string {
   return text.slice(0, half) + ' ... ... ... ' + text.slice(text.length - (maxLen - 3 - half));
 }
 
+import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 import { SafeMarkdown } from '../safe-markdown';
 
 interface ActionSuggestionsPanelProps {
   actionSuggestions?: ActionSuggestion[];
   style?: React.CSSProperties;
+  isRunning?: boolean;
 }
 
-function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggestionsPanelProps) {
+function ActionSuggestionsPanel({
+  actionSuggestions = [],
+  style,
+  isRunning = false,
+}: ActionSuggestionsPanelProps) {
   const hasItems = actionSuggestions.length > 0;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -140,7 +146,13 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
     >
       {/* Header */}
       <div className="border-b border-border p-2 shrink-0 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {isRunning && (
+            <span
+              className="h-2 w-2 rounded-full bg-destructive animate-pulse shrink-0"
+              aria-hidden="true"
+            />
+          )}
           <h3 className="font-semibold text-foreground text-xs">Triggered Suggestions</h3>
         </div>
 
@@ -251,7 +263,16 @@ function ActionSuggestionsPanel({ actionSuggestions = [], style }: ActionSuggest
         )}
       </div>
 
-      {/* scroll-to-latest button removed; auto-scroll still available via toggle */}
+      {!autoScroll && hasItems && (
+        <Button
+          size="icon-sm"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          onClick={() => scrollToLatest('smooth')}
+          aria-label="Scroll to bottom"
+        >
+          <ArrowDown className="size-4" />
+        </Button>
+      )}
     </Card>
   );
 }

@@ -2,10 +2,12 @@ import React from 'react';
 
 import { CREDITS_PER_MINUTE } from '@/lib/consts';
 import { cn } from '@/lib/utils';
+import { UserRole } from '@/types/app-state';
 
 interface CreditsDisplayProps {
   credits: number;
   llmModel?: string;
+  userRole?: UserRole;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -13,9 +15,11 @@ interface CreditsDisplayProps {
 export default function CreditsDisplay({
   credits,
   llmModel,
+  userRole,
   className,
   style,
 }: CreditsDisplayProps) {
+  const planLabel = userRole === UserRole.TrialUser ? 'Trial Plan' : 'Pro Plan';
   const availableMinutes = Math.floor(credits / CREDITS_PER_MINUTE);
 
   const formatDuration = (mins: number) => {
@@ -36,6 +40,12 @@ export default function CreditsDisplay({
 
   return (
     <div className={cn('flex text-xs font-bold gap-2', className)} style={style}>
+      {userRole !== undefined && (
+        <>
+          <span className="text-muted-foreground">{planLabel}</span>
+          <hr className="h-4 border border-border" />
+        </>
+      )}
       <span
         className={cn(
           availableMinutes >= 5

@@ -1,3 +1,4 @@
+import { ArrowDown } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -5,14 +6,16 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { Speaker, type Transcript } from '@/types/transcript';
 
+import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 
 interface TranscriptPanelProps {
   transcripts: Transcript[];
   style?: React.CSSProperties;
+  isRunning?: boolean;
 }
 
-function TranscriptPanel({ transcripts, style }: TranscriptPanelProps) {
+function TranscriptPanel({ transcripts, style, isRunning = false }: TranscriptPanelProps) {
   const { config, updateConfig } = useConfigStore();
   const username = config?.interviewConf?.username ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,7 +38,15 @@ function TranscriptPanel({ transcripts, style }: TranscriptPanelProps) {
   return (
     <Card className="relative flex flex-col h-full bg-card p-0 rounded-md gap-2" style={style}>
       <div className="border-b border-border p-2 shrink-0 flex items-center justify-between gap-4">
-        <h3 className="font-semibold text-foreground text-xs">Transcription</h3>
+        <div className="flex items-center gap-2">
+          {isRunning && (
+            <span
+              className="h-2 w-2 rounded-full bg-destructive animate-pulse shrink-0"
+              aria-hidden="true"
+            />
+          )}
+          <h3 className="font-semibold text-foreground text-xs">Transcription</h3>
+        </div>
 
         {!isStealth && (
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -84,7 +95,16 @@ function TranscriptPanel({ transcripts, style }: TranscriptPanelProps) {
         )}
       </div>
 
-      {/* scroll-to-bottom button removed; auto-scroll still available via toggle */}
+      {!autoScroll && (
+        <Button
+          size="icon-sm"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          onClick={() => endRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          aria-label="Scroll to bottom"
+        >
+          <ArrowDown className="size-4" />
+        </Button>
+      )}
     </Card>
   );
 }
