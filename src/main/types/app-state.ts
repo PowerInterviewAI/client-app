@@ -61,6 +61,5 @@ export interface AppState {
   actionSuggestions: ActionSuggestion[];
   credits?: number;
   userRole?: UserRole;
-  betaTesterExpiresAt?: number;
   providedLLMModel?: string;
 }

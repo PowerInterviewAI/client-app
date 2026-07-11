@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import BetaTesterNotice from '@/components/custom/beta-tester-notice';
 import ConfigurationDialog from '@/components/custom/configuration-dialog';
 import ConnectingNotice from '@/components/custom/connecting-notice';
 import ControlPanel from '@/components/custom/control-panel';
@@ -37,16 +36,10 @@ export default function MainPage() {
   const [actionSuggestions, setActionSuggestions] = useState<ActionSuggestion[]>([]);
   const [transcriptHeight, setTranscriptHeight] = useState<number | null>(null);
   const [suggestionHeight, setSuggestionHeight] = useState<number | null>(null);
-  const [betaTesterNoticeClosed, setBetaTesterNoticeClosed] = useState(false);
   const [trialNoticeClosed, setTrialNoticeClosed] = useState(false);
 
   // App state from context
   const { appState } = useAppState();
-  const isBetaTesterActive = useMemo(
-    // eslint-disable-next-line react-hooks/purity
-    () => !!appState?.betaTesterExpiresAt && appState.betaTesterExpiresAt >= Date.now(),
-    [appState?.betaTesterExpiresAt]
-  );
 
   // Listen for hotkey to stop assistant
   useEffect(() => {
@@ -224,17 +217,6 @@ export default function MainPage() {
             <TranscriptPanel transcripts={transcripts} style={transcriptStyle} />
           )}
         </div>
-
-        {/* Show beta tester notice */}
-        {appState?.userRole === UserRole.BetaTester &&
-          appState?.credits === 0 &&
-          isBetaTesterActive &&
-          !betaTesterNoticeClosed && (
-            <BetaTesterNotice
-              expiresAt={appState!.betaTesterExpiresAt!}
-              onClick={() => setBetaTesterNoticeClosed(true)}
-            />
-          )}
 
         {/* Show trial user notice */}
         {appState?.userRole === UserRole.TrialUser && !trialNoticeClosed && (

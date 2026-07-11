@@ -23,7 +23,6 @@ const DEFAULT_STATE: AppState = {
   actionSuggestions: [],
   credits: undefined,
   userRole: undefined,
-  betaTesterExpiresAt: undefined,
   providedLLMModel: undefined,
 };
 
