@@ -1,7 +1,7 @@
 {
   "name": "power-interview-ai",
   "private": false,
-  "version": "1.5.3",
+  "version": "1.5.2",
   "description": "AI-powered live interview assistant",
   "author": "VectorLeap Pulse Innovation LTD",
   "main": "electron-dist/index.js",
@@ -62,7 +62,7 @@
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "electron": "^40.1.0",
-    "electron-builder": "^26.4.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
