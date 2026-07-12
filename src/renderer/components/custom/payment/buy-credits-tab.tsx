@@ -45,15 +45,20 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
   const paymentDetailsRef = useRef<HTMLDivElement>(null);
   const currencySearchInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredCurrencies = useMemo(() => {
-    const query = currencySearch.trim().toLowerCase();
-    if (!query) return currencies;
-    return currencies.filter(
-      (currency) =>
-        currency.name.toLowerCase().includes(query) ||
-        currency.code.toLowerCase().includes(query)
-    );
-  }, [currencies, currencySearch]);
+  const currencyMatches = useCallback(
+    (currency: AvailableCurrency) => {
+      const terms = currencySearch.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      if (terms.length === 0) return true;
+      const haystack = `${currency.name} ${currency.code}`.toLowerCase();
+      return terms.every((term) => haystack.includes(term));
+    },
+    [currencySearch]
+  );
+
+  const hasVisibleCurrency = useMemo(
+    () => currencies.some((currency) => currencyMatches(currency)),
+    [currencies, currencyMatches]
+  );
 
   useEffect(() => {
     if (!currencySelectOpen) return;
@@ -253,13 +258,17 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                           />
                         </div>
                       </div>
-                      {filteredCurrencies.length === 0 ? (
+                      {!hasVisibleCurrency ? (
                         <div className="py-4 text-center text-xs text-muted-foreground">
                           No currency found
                         </div>
                       ) : (
-                        filteredCurrencies.map((currency: AvailableCurrency) => (
-                          <SelectItem key={currency.code} value={currency.code}>
+                        currencies.map((currency: AvailableCurrency) => (
+                          <SelectItem
+                            key={currency.code}
+                            value={currency.code}
+                            className={cn(!currencyMatches(currency) && 'hidden')}
+                          >
                             <div className="flex items-center gap-2">
                               <img
                                 src={currency.logo_url}
