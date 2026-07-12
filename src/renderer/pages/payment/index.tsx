@@ -3,7 +3,7 @@
  * Unified page for payment management with tabs for plans, history, and status
  */
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CreditCard, History, Receipt } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -62,10 +62,20 @@ export default function PaymentPage() {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <TabsList className="grid flex-1 grid-cols-3">
-            <TabsTrigger value="buy">Buy Credits</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="status">Status</TabsTrigger>
+          <h1 className="text-sm font-semibold shrink-0">Buy Credits</h1>
+          <TabsList className="ml-auto">
+            <TabsTrigger value="buy" className="flex items-center gap-1.5">
+              <CreditCard className="h-4 w-4" />
+              <span>Buy Credits</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-1.5">
+              <History className="h-4 w-4" />
+              <span>History</span>
+            </TabsTrigger>
+            <TabsTrigger value="status" className="flex items-center gap-1.5">
+              <Receipt className="h-4 w-4" />
+              <span>Status</span>
+            </TabsTrigger>
           </TabsList>
         </div>
       </div>
