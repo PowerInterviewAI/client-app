@@ -163,16 +163,19 @@ export default function MainPage() {
     if (appState?.transcripts && appState.transcripts !== transcripts) {
       setTranscripts(appState.transcripts);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState?.transcripts]);
   useEffect(() => {
     if (appState?.liveSuggestions && appState.liveSuggestions !== liveSuggestions) {
       setLiveSuggestions(appState.liveSuggestions);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState?.liveSuggestions]);
   useEffect(() => {
     if (appState?.actionSuggestions && appState.actionSuggestions !== actionSuggestions) {
       setActionSuggestions(appState.actionSuggestions);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState?.actionSuggestions]);
 
   // Redirect to login if not logged in
