@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 
 import { Loading } from '@/components/custom/loading';
@@ -108,6 +109,7 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
           <div className="mx-auto grid gap-2 md:grid-cols-3">
             {plans.map((plan) => {
               const isPro = plan.plan === CreditPlan.Pro;
+              const isSelected = selectedPlan?.plan === plan.plan;
               const minutes = Math.floor(plan.credits / CREDITS_PER_MINUTE);
               const planName = planNames[plan.plan] || plan.plan;
               const planDescription = planDescriptions[plan.plan] || plan.description || '';
@@ -116,13 +118,21 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                 <Card
                   key={plan.plan}
                   className={cn(
-                    'relative flex flex-col gap-3 py-4 transition-shadow',
+                    'relative flex flex-col gap-3 py-4 transition-all duration-150',
                     isPro
                       ? 'border-primary shadow-lg hover:shadow-xl'
                       : 'shadow-sm hover:shadow-lg',
-                    selectedPlan?.plan === plan.plan && 'ring-2 ring-primary'
+                    isSelected
+                      ? 'ring-2 ring-primary bg-primary/5 shadow-xl -translate-y-0.5'
+                      : 'hover:-translate-y-0.5'
                   )}
                 >
+                  {isSelected && (
+                    <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
+                      <Check className="h-3.5 w-3.5" />
+                    </div>
+                  )}
+
                   {isPro && (
                     <div className="absolute -top-3 left-0 right-0 flex justify-center">
                       <span className="rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
@@ -151,17 +161,26 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                       size="sm"
                       className={cn(
                         'w-full cursor-pointer',
-                        isPro
+                        isSelected
                           ? ''
-                          : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
+                          : isPro
+                            ? ''
+                            : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
                       )}
-                      variant={isPro ? 'default' : 'outline'}
+                      variant={isSelected || isPro ? 'default' : 'outline'}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSelectPlan(plan);
                       }}
                     >
-                      Buy
+                      {isSelected ? (
+                        <>
+                          <Check className="h-3.5 w-3.5" />
+                          Selected
+                        </>
+                      ) : (
+                        'Buy'
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
