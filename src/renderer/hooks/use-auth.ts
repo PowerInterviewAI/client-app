@@ -15,6 +15,50 @@ export default function useAuth() {
   // last auth error message or null
   const [error, setError] = useState<string | null>(null);
 
+  // Send an email verification code. Returns boolean for convenience and
+  // sets `error` on failure so callers can surface messages.
+  const sendVerificationCode = async (email: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await window.electronAPI?.auth.sendVerificationCode(email);
+      if (!result?.success) {
+        const errMsg = result?.error || 'Failed to send verification code';
+        setError(errMsg);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('sendVerificationCode error:', err);
+      setError('Failed to send verification code');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify an email verification code. Returns boolean for convenience and
+  // sets `error` on failure so callers can surface messages.
+  const verifyEmailCode = async (email: string, code: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await window.electronAPI?.auth.verifyEmailCode(email, code);
+      if (!result?.success) {
+        const errMsg = result?.error || 'Invalid or expired verification code';
+        setError(errMsg);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('verifyEmailCode error:', err);
+      setError('Invalid or expired verification code');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Attempt to login; on failure sets `error` and throws.
   const login = async (email: string, password: string) => {
     try {
@@ -35,11 +79,16 @@ export default function useAuth() {
 
   // Sign up a new user. Returns boolean for convenience and still
   // sets `error`/throws on failure so callers can surface messages.
-  const signup = async (username: string, email: string, password: string): Promise<boolean> => {
+  const signup = async (
+    username: string,
+    email: string,
+    password: string,
+    verificationCode: string
+  ): Promise<boolean> => {
     setLoading(true);
     setError(null);
     try {
-      const result = await window.electronAPI?.auth.signup(username, email, password);
+      const result = await window.electronAPI?.auth.signup(username, email, password, verificationCode);
       if (!result?.success) {
         const errMsg = result?.error || 'Signup failed';
         setError(errMsg);
@@ -96,6 +145,8 @@ export default function useAuth() {
   // Return stable object for consumers; `setError` is exposed so callers
   // can clear errors when appropriate (e.g. on input changes).
   return {
+    sendVerificationCode,
+    verifyEmailCode,
     login,
     signup,
     logout,
