@@ -1,7 +1,7 @@
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as React from 'react';
 
-import { useMainContainer } from '@/components/ui/dialog';
+import { useMainContainer } from '@/hooks/use-main-container';
 import { cn } from '@/lib/utils';
 
 function TooltipProvider({

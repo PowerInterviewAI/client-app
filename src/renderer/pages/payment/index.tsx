@@ -15,10 +15,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppState } from '@/hooks/use-app-state';
 import { usePayment } from '@/hooks/use-payment';
 
+type PaymentTab = 'buy' | 'history' | 'status';
+
 export default function PaymentPage() {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('buy');
+  const [activeTab, setActiveTab] = useState<PaymentTab>('buy');
   const [statusPaymentId, setStatusPaymentId] = useState('');
   const { appState } = useAppState();
   const { getCurrencies } = usePayment();
@@ -44,7 +46,11 @@ export default function PaymentPage() {
   const remainingCredits = appState?.credits ?? 0;
 
   return (
-    <div className="w-full flex flex-col bg-background">
+    <Tabs
+      value={activeTab}
+      onValueChange={(value) => setActiveTab(value as PaymentTab)}
+      className="w-full flex flex-col bg-background"
+    >
       {/* Header */}
       <div className="sticky top-0 z-10 border-b bg-background px-4 py-2">
         <div className="flex items-center gap-2">
@@ -52,53 +58,46 @@ export default function PaymentPage() {
             variant="ghost"
             size="icon-sm"
             onClick={() => navigate(-1)}
-            className="flex items-center"
+            className="flex items-center shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-sm font-semibold">Buy Credits</h1>
+          <h1 className="text-sm font-semibold shrink-0">Buy Credits</h1>
+          <TabsList className="ml-auto">
+            <TabsTrigger value="buy" className="flex items-center gap-1.5">
+              <CreditCard className="h-4 w-4" />
+              <span>Buy Credits</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-1.5">
+              <History className="h-4 w-4" />
+              <span>History</span>
+            </TabsTrigger>
+            <TabsTrigger value="status" className="flex items-center gap-1.5">
+              <Receipt className="h-4 w-4" />
+              <span>Status</span>
+            </TabsTrigger>
+          </TabsList>
         </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-hidden px-4 py-3 w-full max-w-3xl mx-auto">
-        <Tabs
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value as 'buy' | 'history' | 'status')}
-          className="h-full flex flex-col"
-        >
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="buy" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              <span>Buy Credits</span>
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              <span>History</span>
-            </TabsTrigger>
-            <TabsTrigger value="status" className="flex items-center gap-2">
-              <Receipt className="h-4 w-4" />
-              <span>Status</span>
-            </TabsTrigger>
-          </TabsList>
+        <TabsContent value="buy" className="flex-1 mt-0">
+          <BuyCreditsTab credits={remainingCredits} onPaymentCreated={handlePaymentCreated} />
+        </TabsContent>
 
-          <TabsContent value="buy" className="flex-1 mt-3">
-            <BuyCreditsTab credits={remainingCredits} onPaymentCreated={handlePaymentCreated} />
-          </TabsContent>
+        <TabsContent value="history" className="flex-1 mt-0">
+          <PaymentHistoryTab
+            isActive={activeTab === 'history'}
+            onViewPayment={handleViewPayment}
+            onSwitchToBuy={handleSwitchToBuy}
+          />
+        </TabsContent>
 
-          <TabsContent value="history" className="flex-1 mt-3">
-            <PaymentHistoryTab
-              isActive={activeTab === 'history'}
-              onViewPayment={handleViewPayment}
-              onSwitchToBuy={handleSwitchToBuy}
-            />
-          </TabsContent>
-
-          <TabsContent value="status" className="flex-1 mt-3">
-            <PaymentStatusTab key={statusPaymentId} initialPaymentId={statusPaymentId} />
-          </TabsContent>
-        </Tabs>
+        <TabsContent value="status" className="flex-1 mt-0">
+          <PaymentStatusTab key={statusPaymentId} initialPaymentId={statusPaymentId} />
+        </TabsContent>
       </div>
-    </div>
+    </Tabs>
   );
 }

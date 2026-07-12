@@ -15,10 +15,10 @@ import { registerConfigHandlers } from './ipc/config.js';
 import { registerExternalHandlers } from './ipc/external.js';
 import { registerLLMHandlers } from './ipc/llm.js';
 import { registerPaymentHandlers } from './ipc/payment.js';
+import { registerPermissionHandlers } from './ipc/permissions.js';
 import { registerActionSuggestionHandlers } from './ipc/suggestion-action.js';
 import { registerLiveSuggestionHandlers } from './ipc/suggestion-live.js';
 import { registerToolsHandlers } from './ipc/tools.js';
-import { registerPermissionHandlers } from './ipc/permissions.js';
 import {
   initializeAudioLoopback,
   registerTranscriptHandlers,

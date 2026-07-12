@@ -53,7 +53,7 @@ export interface ActionSuggestion {
 
 export interface AppState {
   isStealth: boolean;
-  isBackendLive: boolean;
+  isBackendLive: boolean | null;
   isLoggedIn: boolean | null;
   runningState: RunningState;
   transcripts: Transcript[];

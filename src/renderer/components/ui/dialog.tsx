@@ -2,15 +2,8 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { XIcon } from 'lucide-react';
 import * as React from 'react';
 
+import { useMainContainer } from '@/hooks/use-main-container';
 import { cn } from '@/lib/utils';
-
-// context that provides an optional default container element for portals
-// we store the element itself so consumers re-render when it becomes available
-const MainContainerContext = React.createContext<Element | null>(null);
-
-function useMainContainer(): Element | null {
-  return React.useContext(MainContainerContext);
-}
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
@@ -159,6 +152,4 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
-  MainContainerContext as MainContainerContext,
-  useMainContainer,
 };
