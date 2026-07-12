@@ -242,8 +242,8 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a currency" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <div className="sticky -top-1 z-10 -mx-1 -mt-1 mb-1 border-b bg-popover p-1.5">
+                    <SelectContent className="max-h-80">
+                      <div className="sticky top-0 z-10 -mx-1 -mt-1 mb-1 border-b bg-popover p-1.5">
                         <div className="relative">
                           <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                           <Input
