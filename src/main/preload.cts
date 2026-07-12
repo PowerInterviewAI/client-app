@@ -42,8 +42,11 @@ const electronApi = {
   },
 
   auth: {
-    signup: (username: string, email: string, password: string) =>
-      ipcRenderer.invoke('auth:signup', username, email, password),
+    sendVerificationCode: (email: string) => ipcRenderer.invoke('auth:send-verification-code', email),
+    verifyEmailCode: (email: string, code: string) =>
+      ipcRenderer.invoke('auth:verify-email-code', email, code),
+    signup: (username: string, email: string, password: string, verificationCode: string) =>
+      ipcRenderer.invoke('auth:signup', username, email, password, verificationCode),
     login: (email: string, password: string) => ipcRenderer.invoke('auth:login', email, password),
     logout: () => ipcRenderer.invoke('auth:logout'),
     changePassword: (currentPassword: string, newPassword: string) =>

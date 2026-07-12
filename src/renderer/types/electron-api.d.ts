@@ -31,10 +31,13 @@ declare global {
 
     // Authentication management
     auth: {
+      sendVerificationCode: (email: string) => Promise<{ success: boolean; error?: string }>;
+      verifyEmailCode: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
       signup: (
         username: string,
         email: string,
-        password: string
+        password: string,
+        verificationCode: string
       ) => Promise<{ success: boolean; error?: string }>;
       login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
       logout: () => Promise<{ success: boolean; error?: string }>;
