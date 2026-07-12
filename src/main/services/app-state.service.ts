@@ -15,7 +15,7 @@ import { getWindowReference } from './window-control.service.js';
 
 const DEFAULT_STATE: AppState = {
   isStealth: false,
-  isBackendLive: false,
+  isBackendLive: null,
   isLoggedIn: false,
   runningState: RunningState.Idle,
   transcripts: [],
