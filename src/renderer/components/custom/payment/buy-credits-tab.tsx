@@ -1,9 +1,10 @@
-import { Check } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
+import { Check, Search } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Loading } from '@/components/custom/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -39,7 +40,31 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
   const [selectedPlan, setSelectedPlan] = useState<CreditPlanInfo | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
   const [creating, setCreating] = useState(false);
+  const [currencySearch, setCurrencySearch] = useState('');
+  const [currencySelectOpen, setCurrencySelectOpen] = useState(false);
   const paymentDetailsRef = useRef<HTMLDivElement>(null);
+  const currencySearchInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredCurrencies = useMemo(() => {
+    const query = currencySearch.trim().toLowerCase();
+    if (!query) return currencies;
+    return currencies.filter(
+      (currency) =>
+        currency.name.toLowerCase().includes(query) ||
+        currency.code.toLowerCase().includes(query)
+    );
+  }, [currencies, currencySearch]);
+
+  useEffect(() => {
+    if (!currencySelectOpen) return;
+    const id = setTimeout(() => currencySearchInputRef.current?.focus(), 0);
+    return () => clearTimeout(id);
+  }, [currencySelectOpen]);
+
+  const handleCurrencySelectOpenChange = useCallback((open: boolean) => {
+    setCurrencySelectOpen(open);
+    if (!open) setCurrencySearch('');
+  }, []);
 
   const availableMinutes = Math.floor(credits / CREDITS_PER_MINUTE);
   const availableHours = Math.floor(availableMinutes / 60);
@@ -203,21 +228,51 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
                   <label className="text-xs font-medium mb-1.5 block">
                     Payment Currency <span className="text-destructive">*</span>
                   </label>
-                  <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-                    <SelectTrigger>
+                  <Select
+                    value={selectedCurrency}
+                    onValueChange={setSelectedCurrency}
+                    open={currencySelectOpen}
+                    onOpenChange={handleCurrencySelectOpenChange}
+                  >
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a currency" />
                     </SelectTrigger>
                     <SelectContent>
-                      {currencies.map((currency: AvailableCurrency) => (
-                        <SelectItem key={currency.code} value={currency.code}>
-                          <div className="flex items-center gap-2">
-                            <img src={currency.logo_url} alt={currency.name} className="w-4 h-4" />
-                            <span>
-                              {currency.name} ({currency.code.toUpperCase()})
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      <div className="sticky -top-1 z-10 -mx-1 -mt-1 mb-1 border-b bg-popover p-1.5">
+                        <div className="relative">
+                          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            ref={currencySearchInputRef}
+                            value={currencySearch}
+                            onChange={(e) => setCurrencySearch(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key !== 'Escape') e.stopPropagation();
+                            }}
+                            placeholder="Search currency..."
+                            className="h-8 pl-7 text-xs"
+                          />
+                        </div>
+                      </div>
+                      {filteredCurrencies.length === 0 ? (
+                        <div className="py-4 text-center text-xs text-muted-foreground">
+                          No currency found
+                        </div>
+                      ) : (
+                        filteredCurrencies.map((currency: AvailableCurrency) => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={currency.logo_url}
+                                alt={currency.name}
+                                className="w-4 h-4"
+                              />
+                              <span>
+                                {currency.name} ({currency.code.toUpperCase()})
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
