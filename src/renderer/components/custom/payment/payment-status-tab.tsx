@@ -2,7 +2,15 @@
  * Payment Status Tab Component
  */
 
-import { CircleCheck, Copy, FileIcon, FolderOpenIcon, RefreshCw, XIcon } from 'lucide-react';
+import {
+  CircleCheck,
+  Copy,
+  CopyCheck,
+  FileIcon,
+  FolderOpenIcon,
+  RefreshCw,
+  XIcon,
+} from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { QrcodeCanvas, useQrcodeDownload } from 'react-qrcode-pretty';
 import { toast } from 'sonner';
@@ -203,20 +211,46 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
     [paymentId, getPaymentStatus]
   );
 
+  type CopyField = 'address' | 'amount' | 'currency';
+  const [copiedField, setCopiedField] = useState<CopyField | null>(null);
+  const copiedFieldTimeoutRef = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (copiedFieldTimeoutRef.current) window.clearTimeout(copiedFieldTimeoutRef.current);
+    },
+    []
+  );
+
+  const copyToClipboard = useCallback((text: string, field: CopyField, message: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(message);
+    setCopiedField(field);
+    if (copiedFieldTimeoutRef.current) window.clearTimeout(copiedFieldTimeoutRef.current);
+    copiedFieldTimeoutRef.current = window.setTimeout(() => setCopiedField(null), 1500);
+  }, []);
+
   const handleCopyAddress = useCallback(() => {
     if (paymentStatus?.pay_address) {
-      navigator.clipboard.writeText(paymentStatus.pay_address);
-      toast.success('Payment address copied to clipboard');
+      copyToClipboard(paymentStatus.pay_address, 'address', 'Payment address copied to clipboard');
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, copyToClipboard]);
 
   const handleCopyAmount = useCallback(() => {
-    if (paymentStatus?.pay_amount != null && paymentStatus?.pay_currency) {
-      const text = `${paymentStatus.pay_amount} ${paymentStatus.pay_currency.toUpperCase()}`;
-      navigator.clipboard.writeText(text);
-      toast.success('Amount copied to clipboard');
+    if (paymentStatus?.pay_amount != null) {
+      copyToClipboard(String(paymentStatus.pay_amount), 'amount', 'Amount copied to clipboard');
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, copyToClipboard]);
+
+  const handleCopyCurrency = useCallback(() => {
+    if (paymentStatus?.pay_currency) {
+      copyToClipboard(
+        paymentStatus.pay_currency.toUpperCase(),
+        'currency',
+        'Currency copied to clipboard'
+      );
+    }
+  }, [paymentStatus, copyToClipboard]);
 
   // Generate payment URI for wallet apps (includes amount)
   // memoized so it only recalculates when status changes
@@ -380,7 +414,11 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                             <p className="text-sm font-medium mb-2">Payment Address</p>
                             <div className="flex gap-2 items-center">
                               <Button size="sm" variant="secondary" onClick={handleCopyAddress}>
-                                <Copy className="h-4 w-4" />
+                                {copiedField === 'address' ? (
+                                  <CopyCheck className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
                               </Button>
                               <code className="flex-1 bg-muted p-2 rounded text-sm">
                                 {paymentStatus.pay_address}
@@ -389,14 +427,31 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                           </div>
                           <div>
                             <p className="text-sm font-medium mb-2">Amount to Send</p>
-                            <div className="flex gap-2 items-center">
-                              <Button size="sm" variant="secondary" onClick={handleCopyAmount}>
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                              <code className="flex-1 bg-muted p-2 rounded text-sm">
-                                {paymentStatus.pay_amount}{' '}
-                                {paymentStatus.pay_currency.toUpperCase()}
-                              </code>
+                            <div className="flex gap-2">
+                              <div className="flex flex-1 gap-2 items-center">
+                                <Button size="sm" variant="secondary" onClick={handleCopyAmount}>
+                                  {copiedField === 'amount' ? (
+                                    <CopyCheck className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <code className="flex-1 bg-muted p-2 rounded text-sm">
+                                  {paymentStatus.pay_amount}
+                                </code>
+                              </div>
+                              <div className="flex gap-2 items-center">
+                                <Button size="sm" variant="secondary" onClick={handleCopyCurrency}>
+                                  {copiedField === 'currency' ? (
+                                    <CopyCheck className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <code className="bg-muted p-2 rounded text-sm">
+                                  {paymentStatus.pay_currency.toUpperCase()}
+                                </code>
+                              </div>
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground">
