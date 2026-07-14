@@ -76,7 +76,7 @@ electron-updater publishes to GitHub Releases under `PowerInterviewAI/client` (c
 ## Platform Support
 
 - Windows 10/11 x64 (NSIS installer)
-- macOS Apple Silicon and Intel (DMG + ZIP)
+- macOS 14.4+ Apple Silicon and Intel (DMG + ZIP) - 14.4 is required for system-audio loopback capture
 
 ## Project Structure
 

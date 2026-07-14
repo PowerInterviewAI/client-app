@@ -88,8 +88,9 @@ jobs:
         run: pnpm run build
 
       - name: Build release packages
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        # No signing certificate yet: mac.identity "-" in package.json forces
+        # ad-hoc signing so Apple Silicon builds launch. Leaving auto-discovery
+        # at its default avoids short-circuiting that explicit ad-hoc request.
         run: ${{ matrix.build_command }}
         shell: bash
 
