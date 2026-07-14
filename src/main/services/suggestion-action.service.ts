@@ -186,11 +186,12 @@ export class ActionSuggestionService {
   private async generateSuggestion(taskId: string, transcripts: Transcript[]): Promise<void> {
     const timestamp = DateTimeUtil.now();
     const conf = configStore.getConfig();
+    const interviewConfig = appStateService.getState().interviewConfig;
 
     const payload: GenerateActionSuggestionRequest = {
       config: conf.llmConf,
-      profile_data: conf.interviewConf.profileData,
-      context: conf.interviewConf.context,
+      profile_data: interviewConfig.profileData,
+      context: interviewConfig.context,
       transcripts: transcripts,
       image_names: [...this.uploadedImageNames],
     };

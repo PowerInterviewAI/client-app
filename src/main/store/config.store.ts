@@ -10,11 +10,6 @@ import { LLMConfig } from '../types/llm.js';
 
 // Runtime configuration (matches Config type in frontend)
 export interface RuntimeConfig {
-  interviewConf: {
-    fullName: string;
-    profileData: string;
-    context: string;
-  };
   language: string;
   sessionToken: string;
   rememberMe: boolean;
@@ -32,11 +27,6 @@ export interface RuntimeConfig {
 
 // Default runtime configuration
 const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
-  interviewConf: {
-    fullName: '',
-    profileData: '',
-    context: '',
-  },
   language: 'en',
   sessionToken: '',
   rememberMe: true,
@@ -88,14 +78,6 @@ class ConfigStore {
   updateConfig(updates: Partial<RuntimeConfig>): RuntimeConfig {
     const current = this.getConfig();
     const updated = { ...current, ...updates };
-
-    // Deep merge interview_conf if it's being partially updated
-    if (updates.interviewConf) {
-      updated.interviewConf = {
-        ...current.interviewConf,
-        ...updates.interviewConf,
-      };
-    }
 
     this.store.set('runtime', updated);
     return updated;
@@ -201,27 +183,17 @@ export const configStore = new ConfigStore();
   }
 })(); // migration block
 
-// interviewConf.username/jobDescription were renamed to fullName/context to match
-// the persisted account fields now synced with the backend. Carry over any value
-// already on disk under the old keys so existing installs don't lose their data.
+// interviewConf (full name, profile, context) used to be cached here, but it's now
+// backend-persisted and lives only in-memory (see AccountService/AppStateService).
+// Drop any leftover local copy so it doesn't linger in the store file.
 (() => {
   // eslint-disable-next-line
-  const rawInterviewConf = (configStore as any).store.get('runtime.interviewConf') as
-    | (Partial<RuntimeConfig['interviewConf']> & { username?: string; jobDescription?: string })
+  const raw = (configStore as any).store.get('runtime') as
+    | (Partial<RuntimeConfig> & { interviewConf?: unknown })
     | undefined;
-  if (!rawInterviewConf) return;
-
-  const legacyUsername = rawInterviewConf.username;
-  const legacyJobDescription = rawInterviewConf.jobDescription;
-  const needsFullName = rawInterviewConf.fullName === undefined && legacyUsername !== undefined;
-  const needsContext = rawInterviewConf.context === undefined && legacyJobDescription !== undefined;
-  if (!needsFullName && !needsContext) return;
-
-  configStore.updateConfig({
-    interviewConf: {
-      fullName: needsFullName ? legacyUsername! : (rawInterviewConf.fullName ?? ''),
-      profileData: rawInterviewConf.profileData ?? '',
-      context: needsContext ? legacyJobDescription! : (rawInterviewConf.context ?? ''),
-    },
-  });
-})(); // legacy interviewConf field migration
+  if (raw && 'interviewConf' in raw) {
+    delete raw.interviewConf;
+    // eslint-disable-next-line
+    (configStore as any).store.set('runtime', raw);
+  }
+})(); // drop legacy local interviewConf

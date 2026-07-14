@@ -21,6 +21,7 @@ import { ChangePasswordDialog } from '../change-password-dialog';
 
 interface ProfileGroupProps {
   config?: Config;
+  fullName?: string;
   onProfileClick: () => void;
   onSignOut: () => void;
   getDisabled: (state: RunningState, disableOnRunning?: boolean) => boolean;
@@ -28,6 +29,7 @@ interface ProfileGroupProps {
 
 export function ProfileGroup({
   config,
+  fullName,
   onProfileClick,
   onSignOut,
   getDisabled,
@@ -69,7 +71,7 @@ export function ProfileGroup({
             <div className="max-w-36 overflow-hidden flex items-center gap-2 text-foreground">
               <ChevronUp className="h-4 w-4" />
               <p className="text-sm font-medium truncate">
-                {config?.interviewConf?.fullName || 'Settings'}
+                {fullName || 'Settings'}
               </p>
             </div>
           </Button>

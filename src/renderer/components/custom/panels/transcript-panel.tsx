@@ -2,6 +2,7 @@ import { ArrowDown } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
+import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { Speaker, type Transcript } from '@/types/transcript';
@@ -17,7 +18,8 @@ interface TranscriptPanelProps {
 
 function TranscriptPanel({ transcripts, style, isRunning = false }: TranscriptPanelProps) {
   const { config, updateConfig } = useConfigStore();
-  const username = config?.interviewConf?.fullName ?? '';
+  const { appState } = useAppState();
+  const username = appState?.interviewConfig?.fullName ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState<boolean>(() => config?.autoScrollTranscript ?? true);

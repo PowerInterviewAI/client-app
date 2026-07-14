@@ -51,6 +51,12 @@ export interface ActionSuggestion {
   error: string;
 }
 
+export interface InterviewConfig {
+  fullName: string;
+  profileData: string;
+  context: string;
+}
+
 export interface AppState {
   isStealth: boolean;
   isBackendLive: boolean | null;
@@ -62,4 +68,5 @@ export interface AppState {
   credits?: number;
   userRole?: UserRole;
   providedLLMModel?: string;
+  interviewConfig: InterviewConfig;
 }

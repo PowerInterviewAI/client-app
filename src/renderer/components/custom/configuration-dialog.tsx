@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useConfigStore } from '@/hooks/use-config-store';
+import { useAppState } from '@/hooks/use-app-state';
 import { getElectron } from '@/lib/utils';
 
 import {
@@ -25,7 +25,7 @@ interface ConfigurationDialogProps {
 }
 
 export default function ConfigurationDialog({ isOpen, onOpenChange }: ConfigurationDialogProps) {
-  const { config, loadConfig } = useConfigStore();
+  const { appState } = useAppState();
 
   const [name, setName] = useState('');
   const [profileData, setProfileData] = useState('');
@@ -38,13 +38,13 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
 
     // Queue state updates in a single microtask to avoid cascading renders
     Promise.resolve().then(() => {
-      if (config?.interviewConf) {
-        setName(config.interviewConf.fullName ?? '');
-        setProfileData(config.interviewConf.profileData ?? '');
-        setContext(config.interviewConf.context ?? '');
+      if (appState?.interviewConfig) {
+        setName(appState.interviewConfig.fullName ?? '');
+        setProfileData(appState.interviewConfig.profileData ?? '');
+        setContext(appState.interviewConfig.context ?? '');
       }
     });
-  }, [isOpen, config?.interviewConf]);
+  }, [isOpen, appState?.interviewConfig]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -59,8 +59,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
         throw new Error(result.error || 'Failed to save configuration');
       }
 
-      // Refresh the renderer's cached config from the main-process store
-      await loadConfig();
+      // Account update pushes a fresh app-state broadcast, so no manual refresh needed here
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to save configuration:', error);

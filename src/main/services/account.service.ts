@@ -1,18 +1,20 @@
 import { UsersApi } from '../api/users.js';
-import { configStore } from '../store/config.store.js';
+import { appStateService } from './app-state.service.js';
 
 /**
  * AccountService
- * Keeps the local interviewConf (full name, profile, context) in sync with the
- * account persisted on the backend, so this config follows the user across devices.
+ * Keeps the in-memory interview config (full name, profile, context) in sync with
+ * the account persisted on the backend. Not written to local disk - the backend is
+ * the only durable store, so this always reflects whatever was last fetched/saved
+ * this session.
  */
 export class AccountService {
   private client = new UsersApi();
 
   /**
-   * Pull the authenticated user's persisted account config from the backend
-   * into the local store. Called after login so a device shows the same
-   * config the user last saved anywhere.
+   * Pull the authenticated user's persisted interview config from the backend
+   * into app state. Called after login so a device shows the same config the
+   * user last saved anywhere.
    */
   async pullFromBackend(): Promise<{ success: boolean; error?: string }> {
     try {
@@ -22,8 +24,8 @@ export class AccountService {
       }
 
       const interviewConfig = response.data.interview_config;
-      configStore.updateConfig({
-        interviewConf: {
+      appStateService.updateState({
+        interviewConfig: {
           fullName: interviewConfig?.full_name ?? '',
           profileData: interviewConfig?.profile_data ?? '',
           context: interviewConfig?.context ?? '',
@@ -37,7 +39,7 @@ export class AccountService {
 
   /**
    * Push local interview config changes to the backend, then mirror the
-   * saved values into the local store.
+   * saved values into app state.
    */
   async updateConfig(
     fullName: string,
@@ -54,7 +56,7 @@ export class AccountService {
         return { success: false, error: response.error.message || 'Failed to update account' };
       }
 
-      configStore.updateConfig({ interviewConf: { fullName, profileData, context } });
+      appStateService.updateState({ interviewConfig: { fullName, profileData, context } });
       return { success: true };
     } catch {
       return { success: false, error: 'Failed to update account' };
