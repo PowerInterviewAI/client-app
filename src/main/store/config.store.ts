@@ -10,11 +10,6 @@ import { LLMConfig } from '../types/llm.js';
 
 // Runtime configuration (matches Config type in frontend)
 export interface RuntimeConfig {
-  interviewConf: {
-    username: string;
-    profileData: string;
-    jobDescription: string;
-  };
   language: string;
   sessionToken: string;
   rememberMe: boolean;
@@ -32,11 +27,6 @@ export interface RuntimeConfig {
 
 // Default runtime configuration
 const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
-  interviewConf: {
-    username: '',
-    profileData: '',
-    jobDescription: '',
-  },
   language: 'en',
   sessionToken: '',
   rememberMe: true,
@@ -88,14 +78,6 @@ class ConfigStore {
   updateConfig(updates: Partial<RuntimeConfig>): RuntimeConfig {
     const current = this.getConfig();
     const updated = { ...current, ...updates };
-
-    // Deep merge interview_conf if it's being partially updated
-    if (updates.interviewConf) {
-      updated.interviewConf = {
-        ...current.interviewConf,
-        ...updates.interviewConf,
-      };
-    }
 
     this.store.set('runtime', updated);
     return updated;
@@ -200,3 +182,18 @@ export const configStore = new ConfigStore();
     configStore.updateConfig(migration);
   }
 })(); // migration block
+
+// interviewConf (full name, profile, context) used to be cached here, but it's now
+// backend-persisted and lives only in-memory (see AccountService/AppStateService).
+// Drop any leftover local copy so it doesn't linger in the store file.
+(() => {
+  // eslint-disable-next-line
+  const raw = (configStore as any).store.get('runtime') as
+    | (Partial<RuntimeConfig> & { interviewConf?: unknown })
+    | undefined;
+  if (raw && 'interviewConf' in raw) {
+    delete raw.interviewConf;
+    // eslint-disable-next-line
+    (configStore as any).store.set('runtime', raw);
+  }
+})(); // drop legacy local interviewConf

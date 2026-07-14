@@ -1,5 +1,6 @@
 import { AuthApi } from '../api/auth.js';
 import { configStore } from '../store/config.store.js';
+import { accountService } from './account.service.js';
 import { appStateService } from './app-state.service.js';
 import { disableStealth } from './window-control.service.js';
 
@@ -98,6 +99,9 @@ export class AuthService {
 
         // update app state to logged in
         appStateService.updateState({ isLoggedIn: true });
+
+        // pull this account's synced config (full name, profile, context) from the backend
+        await accountService.pullFromBackend();
 
         return { success: true };
       } catch {

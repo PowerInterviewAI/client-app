@@ -34,7 +34,7 @@ type StateConfig = {
 export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanelProps) {
   const isStealth = useIsStealthMode();
   const { startAssistant, stopAssistant } = useAssistantService();
-  const { runningState } = useAppState();
+  const { runningState, appState } = useAppState();
   const { config } = useConfigStore();
   const [permGateOpen, setPermGateOpen] = useState(false);
 
@@ -44,9 +44,8 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
 
   const checkCanStart = () => {
     const checks: { ok: boolean; message: string }[] = [
-      { ok: !!config?.interviewConf, message: 'Profile is not set' },
-      { ok: !!config?.interviewConf?.username, message: 'Username is not set' },
-      { ok: !!config?.interviewConf?.profileData, message: 'Profile data is not set' },
+      { ok: !!appState?.interviewConfig?.fullName, message: 'Full name is not set' },
+      { ok: !!appState?.interviewConfig?.profileData, message: 'Profile data is not set' },
       {
         ok: !audioInputDeviceNotFound,
         message: `Audio input device "${config?.audioInputDeviceName}" is not found`,
@@ -132,6 +131,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
       <div id="control-panel" className="flex items-center justify-between gap-2 pr-1 pb-0.5">
         <ProfileGroup
           config={config}
+          fullName={appState?.interviewConfig?.fullName}
           onProfileClick={onProfileClick}
           onSignOut={onSignOut}
           getDisabled={getDisabled}

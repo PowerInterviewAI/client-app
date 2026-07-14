@@ -118,6 +118,11 @@ export class ApiClient {
     return this.request<T>('PUT', url, body);
   }
 
+  async patch<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
+    const url = this.buildUrl(path);
+    return this.request<T>('PATCH', url, body);
+  }
+
   async delete<T>(path: string): Promise<ApiResponse<T>> {
     const url = this.buildUrl(path);
     return this.request<T>('DELETE', url);

@@ -53,10 +53,11 @@ class LiveSuggestionService {
 
     try {
       const conf = configStore.getConfig();
+      const interviewConfig = appStateService.getState().interviewConfig;
       const requestBody: GenerateLiveSuggestionRequest = {
         config: conf.llmConf,
-        profile_data: conf.interviewConf.profileData,
-        context: conf.interviewConf.jobDescription,
+        profile_data: interviewConfig.profileData,
+        context: interviewConfig.context,
         transcripts: transcripts,
       };
 

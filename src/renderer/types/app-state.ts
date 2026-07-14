@@ -14,6 +14,12 @@ export enum UserRole {
   Admin = 'admin',
 }
 
+export interface InterviewConfig {
+  fullName: string;
+  profileData: string;
+  context: string;
+}
+
 export interface AppState {
   isLoggedIn: boolean | null;
   isBackendLive: boolean | null;
@@ -24,4 +30,5 @@ export interface AppState {
   credits?: number;
   userRole?: UserRole;
   providedLLMModel?: string;
+  interviewConfig: InterviewConfig;
 }
