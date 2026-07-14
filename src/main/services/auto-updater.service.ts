@@ -30,6 +30,7 @@ export interface UpdateProgressInfo {
 class AutoUpdaterService {
   private mainWindow: BrowserWindow | null = null;
   private updateCheckInProgress = false;
+  private updateDownloaded = false;
 
   constructor() {
     this.setupAutoUpdater();
@@ -85,6 +86,7 @@ class AutoUpdaterService {
     autoUpdater.on('update-downloaded', (info) => {
       console.log('[AutoUpdater] Update downloaded:', info.version);
       this.updateCheckInProgress = false;
+      this.updateDownloaded = true;
       this.notifyRenderer(UpdateStatus.Downloaded, {
         version: info.version,
         releaseDate: info.releaseDate,
@@ -104,7 +106,7 @@ class AutoUpdaterService {
   }
 
   async checkForUpdates(): Promise<void> {
-    if (this.updateCheckInProgress) {
+    if (this.updateCheckInProgress || this.updateDownloaded) {
       return;
     }
 

@@ -16,7 +16,7 @@ export enum UserRole {
 
 export interface AppState {
   isLoggedIn: boolean | null;
-  isBackendLive: boolean;
+  isBackendLive: boolean | null;
   runningState: RunningState;
   transcripts: Transcript[];
   liveSuggestions: LiveSuggestion[];

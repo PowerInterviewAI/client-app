@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 
-import { MainContainerContext } from '@/components/ui/dialog';
+import { MainContainerContext } from '@/hooks/use-main-container';
 import type { PushNotification } from '@/types/push-notification';
 
 import Titlebar from './titlebar';

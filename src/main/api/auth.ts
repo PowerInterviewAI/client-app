@@ -3,10 +3,31 @@
  * Handles user authentication
  */
 
-import { AuthToken, ChangePasswordRequest, LoginRequest, SignupRequest } from '../types/auth.js';
+import {
+  AuthToken,
+  ChangePasswordRequest,
+  LoginRequest,
+  SendVerificationCodeRequest,
+  SignupRequest,
+  VerifyEmailCodeRequest,
+} from '../types/auth.js';
 import { ApiClient, ApiResponse } from './client.js';
 
 export class AuthApi extends ApiClient {
+  /**
+   * Send an email verification code to a prospective user
+   */
+  async sendVerificationCode(data: SendVerificationCodeRequest): Promise<ApiResponse<void>> {
+    return this.post<void>('/api/auth/send-verification-code', data);
+  }
+
+  /**
+   * Verify an email verification code
+   */
+  async verifyEmailCode(data: VerifyEmailCodeRequest): Promise<ApiResponse<void>> {
+    return this.post<void>('/api/auth/verify-email-code', data);
+  }
+
   /**
    * Login with credentials
    */
