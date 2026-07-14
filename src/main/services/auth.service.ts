@@ -16,16 +16,52 @@ export class AuthService {
   private client = new AuthApi();
 
   /**
+   * Send an email verification code to a prospective user.
+   */
+  async sendVerificationCode(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await this.client.sendVerificationCode({ email });
+      if (response.error) {
+        return { success: false, error: response.error.message || 'Failed to send verification code' };
+      }
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Failed to send verification code' };
+    }
+  }
+
+  /**
+   * Verify an email verification code.
+   */
+  async verifyEmailCode(email: string, code: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await this.client.verifyEmailCode({ email, code });
+      if (response.error) {
+        return { success: false, error: response.error.message || 'Invalid or expired verification code' };
+      }
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Invalid or expired verification code' };
+    }
+  }
+
+  /**
    * Create a new account. Returns a simple success/error result.
    */
   async signup(
     username: string,
     email: string,
-    password: string
+    password: string,
+    verificationCode: string
   ): Promise<{ success: boolean; error?: string }> {
     if (email && password) {
       try {
-        const response = await this.client.signup({ username, email, password });
+        const response = await this.client.signup({
+          username,
+          email,
+          password,
+          verification_code: verificationCode,
+        });
         if (response.error) {
           return { success: false, error: response.error.message || 'Signup failed' };
         }

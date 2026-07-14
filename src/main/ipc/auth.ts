@@ -3,11 +3,21 @@ import { ipcMain } from 'electron';
 import { authService } from '../services/auth.service.js';
 
 export function registerAuthHandlers(): void {
+  // Send verification code
+  ipcMain.handle('auth:send-verification-code', async (_event, email: string) => {
+    return authService.sendVerificationCode(email);
+  });
+
+  // Verify email code
+  ipcMain.handle('auth:verify-email-code', async (_event, email: string, code: string) => {
+    return authService.verifyEmailCode(email, code);
+  });
+
   // Signup
   ipcMain.handle(
     'auth:signup',
-    async (_event, username: string, email: string, password: string) => {
-      return authService.signup(username, email, password);
+    async (_event, username: string, email: string, password: string, verificationCode: string) => {
+      return authService.signup(username, email, password, verificationCode);
     }
   );
 
