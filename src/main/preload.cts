@@ -53,6 +53,11 @@ const electronApi = {
       ipcRenderer.invoke('auth:change-password', currentPassword, newPassword),
   },
 
+  account: {
+    update: (fullName: string, profileData: string, context: string) =>
+      ipcRenderer.invoke('account:update', fullName, profileData, context),
+  },
+
   payment: {
     getPlans: () => ipcRenderer.invoke('payment:get-plans'),
     getCurrencies: () => ipcRenderer.invoke('payment:get-currencies'),

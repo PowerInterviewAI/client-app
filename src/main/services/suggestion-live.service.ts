@@ -56,7 +56,7 @@ class LiveSuggestionService {
       const requestBody: GenerateLiveSuggestionRequest = {
         config: conf.llmConf,
         profile_data: conf.interviewConf.profileData,
-        context: conf.interviewConf.jobDescription,
+        context: conf.interviewConf.context,
         transcripts: transcripts,
       };
 

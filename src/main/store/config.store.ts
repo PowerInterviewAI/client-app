@@ -11,9 +11,9 @@ import { LLMConfig } from '../types/llm.js';
 // Runtime configuration (matches Config type in frontend)
 export interface RuntimeConfig {
   interviewConf: {
-    username: string;
+    fullName: string;
     profileData: string;
-    jobDescription: string;
+    context: string;
   };
   language: string;
   sessionToken: string;
@@ -33,9 +33,9 @@ export interface RuntimeConfig {
 // Default runtime configuration
 const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   interviewConf: {
-    username: '',
+    fullName: '',
     profileData: '',
-    jobDescription: '',
+    context: '',
   },
   language: 'en',
   sessionToken: '',
@@ -200,3 +200,28 @@ export const configStore = new ConfigStore();
     configStore.updateConfig(migration);
   }
 })(); // migration block
+
+// interviewConf.username/jobDescription were renamed to fullName/context to match
+// the persisted account fields now synced with the backend. Carry over any value
+// already on disk under the old keys so existing installs don't lose their data.
+(() => {
+  // eslint-disable-next-line
+  const rawInterviewConf = (configStore as any).store.get('runtime.interviewConf') as
+    | (Partial<RuntimeConfig['interviewConf']> & { username?: string; jobDescription?: string })
+    | undefined;
+  if (!rawInterviewConf) return;
+
+  const legacyUsername = rawInterviewConf.username;
+  const legacyJobDescription = rawInterviewConf.jobDescription;
+  const needsFullName = rawInterviewConf.fullName === undefined && legacyUsername !== undefined;
+  const needsContext = rawInterviewConf.context === undefined && legacyJobDescription !== undefined;
+  if (!needsFullName && !needsContext) return;
+
+  configStore.updateConfig({
+    interviewConf: {
+      fullName: needsFullName ? legacyUsername! : (rawInterviewConf.fullName ?? ''),
+      profileData: rawInterviewConf.profileData ?? '',
+      context: needsContext ? legacyJobDescription! : (rawInterviewConf.context ?? ''),
+    },
+  });
+})(); // legacy interviewConf field migration

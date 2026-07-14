@@ -5,6 +5,7 @@
 
 import { HealthCheckApi } from '../api/health-check.js';
 import { safeSleep } from '../utils/sleep.js';
+import { accountService } from './account.service.js';
 import { appStateService } from './app-state.service.js';
 import { authService } from './auth.service.js';
 import { pushNotificationService } from './push-notification.service.js';
@@ -33,6 +34,12 @@ export class HealthCheckService {
         userRole: res.data?.user_role,
         providedLLMModel: res.data?.provided_llm_model,
       });
+
+      // Remembered sessions log the user in here without going through authService.login(),
+      // so this is where a returning device needs to pull its synced account config.
+      if (res.status === 200) {
+        await accountService.pullFromBackend();
+      }
     } catch (error) {
       console.error('[HealthCheckService] Initial client ping error:', error);
       appStateService.updateState({ isLoggedIn: false });

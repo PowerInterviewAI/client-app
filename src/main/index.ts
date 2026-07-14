@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 // Import modules
 import { MIN_HEIGHT, MIN_WIDTH } from './consts.js';
 import { registerGlobalHotkeys, unregisterHotkeys } from './hotkeys.js';
+import { registerAccountHandlers } from './ipc/account.js';
 import { registerAppStateHandlers } from './ipc/app-state.js';
 import { registerAuthHandlers } from './ipc/auth.js';
 import { registerAutoUpdaterHandlers } from './ipc/auto-updater.js';
@@ -182,6 +183,7 @@ app.whenReady().then(async () => {
   registerConfigHandlers();
   registerAppStateHandlers();
   registerAuthHandlers();
+  registerAccountHandlers();
   registerPaymentHandlers();
   registerLLMHandlers();
   registerPermissionHandlers();

@@ -45,7 +45,7 @@ export default function ControlPanel({ onProfileClick, onSignOut }: ControlPanel
   const checkCanStart = () => {
     const checks: { ok: boolean; message: string }[] = [
       { ok: !!config?.interviewConf, message: 'Profile is not set' },
-      { ok: !!config?.interviewConf?.username, message: 'Username is not set' },
+      { ok: !!config?.interviewConf?.fullName, message: 'Full name is not set' },
       { ok: !!config?.interviewConf?.profileData, message: 'Profile data is not set' },
       {
         ok: !audioInputDeviceNotFound,

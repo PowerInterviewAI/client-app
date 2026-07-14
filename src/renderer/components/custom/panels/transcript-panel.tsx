@@ -17,7 +17,7 @@ interface TranscriptPanelProps {
 
 function TranscriptPanel({ transcripts, style, isRunning = false }: TranscriptPanelProps) {
   const { config, updateConfig } = useConfigStore();
-  const username = config?.interviewConf?.username ?? '';
+  const username = config?.interviewConf?.fullName ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState<boolean>(() => config?.autoScrollTranscript ?? true);

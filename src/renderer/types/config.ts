@@ -1,9 +1,9 @@
 import type { LLMConfig } from './llm';
 
 export interface InterviewConf {
-  username: string;
+  fullName: string;
   profileData: string;
-  jobDescription: string;
+  context: string;
 }
 
 export enum Language {

@@ -190,7 +190,7 @@ export class ActionSuggestionService {
     const payload: GenerateActionSuggestionRequest = {
       config: conf.llmConf,
       profile_data: conf.interviewConf.profileData,
-      context: conf.interviewConf.jobDescription,
+      context: conf.interviewConf.context,
       transcripts: transcripts,
       image_names: [...this.uploadedImageNames],
     };

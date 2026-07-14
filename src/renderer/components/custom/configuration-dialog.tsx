@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { getElectron } from '@/lib/utils';
 
 import {
   Dialog,
@@ -14,17 +16,21 @@ import {
   DialogTitle,
 } from '../ui/dialog';
 
+// Kept in sync with the backend's MAX_PROFILE_DATA_LENGTH / MAX_CONTEXT_LENGTH (app/cfg/llm.py)
+const MAX_FIELD_LENGTH = 128_000;
+
 interface ConfigurationDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export default function ConfigurationDialog({ isOpen, onOpenChange }: ConfigurationDialogProps) {
-  const { config, updateConfig } = useConfigStore();
+  const { config, loadConfig } = useConfigStore();
 
   const [name, setName] = useState('');
   const [profileData, setProfileData] = useState('');
-  const [jobDescription, setJobDescription] = useState('');
+  const [context, setContext] = useState('');
+  const [saving, setSaving] = useState(false);
 
   // Initialize form values when dialog opens - runs before paint
   useEffect(() => {
@@ -33,24 +39,34 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
     // Queue state updates in a single microtask to avoid cascading renders
     Promise.resolve().then(() => {
       if (config?.interviewConf) {
-        setName(config.interviewConf.username ?? '');
+        setName(config.interviewConf.fullName ?? '');
         setProfileData(config.interviewConf.profileData ?? '');
-        setJobDescription(config.interviewConf.jobDescription ?? '');
+        setContext(config.interviewConf.context ?? '');
       }
     });
   }, [isOpen, config?.interviewConf]);
 
   const handleSave = async () => {
-    const interviewConf = {
-      username: name,
-      profileData: profileData,
-      jobDescription: jobDescription,
-    };
+    setSaving(true);
     try {
-      await updateConfig({ interviewConf: interviewConf });
+      const electron = getElectron();
+      if (!electron?.account) {
+        throw new Error('Electron API not available');
+      }
+
+      const result = await electron.account.update(name, profileData, context);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save configuration');
+      }
+
+      // Refresh the renderer's cached config from the main-process store
+      await loadConfig();
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to save configuration:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save configuration');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -89,7 +105,7 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
                 onChange={(e) => setProfileData(e.target.value)}
                 placeholder="Enter your profile information. (e.g. your CV/resume, LinkedIn profile, or a brief bio)"
                 className="text-sm min-h-20 max-h-40 overflow-auto"
-                maxLength={60000}
+                maxLength={MAX_FIELD_LENGTH}
               />
             </div>
 
@@ -98,11 +114,11 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
                 Context (Recommended)
               </label>
               <Textarea
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
+                value={context}
+                onChange={(e) => setContext(e.target.value)}
                 placeholder="Enter the context you are targeting. (e.g. the job description, role requirements or any other information)"
                 className="text-sm min-h-20 max-h-40 overflow-auto"
-                maxLength={60000}
+                maxLength={MAX_FIELD_LENGTH}
               />
             </div>
           </div>
@@ -117,9 +133,9 @@ export default function ConfigurationDialog({ isOpen, onOpenChange }: Configurat
               size="sm"
               onClick={handleSave}
               className="bg-primary hover:bg-primary/90"
-              disabled={name.trim() === '' || profileData.trim() === ''}
+              disabled={saving || name.trim() === '' || profileData.trim() === ''}
             >
-              Save Changes
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </DialogFooter>
