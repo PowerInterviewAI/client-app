@@ -25,6 +25,38 @@ function buildStreamingUrl(language: Language): string {
   return `${STREAMING_URL}?language=${encodeURIComponent(language)}`;
 }
 
+/**
+ * Whether the microphone track runs Chromium's automatic gain control.
+ *
+ * Kept as a named constant rather than inlined because it is the flag most likely to move. AGC is
+ * the largest source of coupling-gain instability when the candidate is on speakers: it raises
+ * gain through quiet passages, which amplifies re-captured interviewer audio at exactly the moment
+ * an echo gate is trying to measure how much of it there is. The opposite pull is ASR accuracy for
+ * a quiet candidate. Measure with `test/manual/echo-probe.mjs` before changing it.
+ */
+const MIC_AUTO_GAIN_CONTROL = true;
+
+/**
+ * The constraints every microphone capture in this service opens with.
+ *
+ * The three processing flags are stated rather than left out. Chromium's defaults for an
+ * unspecified flag are already `true` for all three, so writing them changes nothing today - the
+ * point is that it stops changing on its own when Chromium's defaults move under a version bump,
+ * and that there is one place to flip them when the echo probe says which way they should go.
+ *
+ * An absent `deviceId` is the "system default microphone" case, and is deliberately expressed as
+ * an object with no `deviceId` key rather than as `audio: true` - `true` would drop the flags with
+ * it and put that user back on whatever Chromium currently defaults to.
+ */
+function micConstraints(deviceId: string | null): MediaTrackConstraints {
+  return {
+    ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: MIC_AUTO_GAIN_CONTROL,
+  };
+}
+
 // Inline AudioWorklet processor (runs off the main thread)
 const AUDIO_WORKLET_CODE = `
 class AudioSenderWorklet extends AudioWorkletProcessor {
@@ -471,7 +503,7 @@ class LiveTranscriptionService {
 
     const micDeviceId = await this.resolveMicDeviceId(audioInputDeviceName);
     this.micStream = await navigator.mediaDevices.getUserMedia({
-      audio: micDeviceId ? { deviceId: { exact: micDeviceId } } : true,
+      audio: micConstraints(micDeviceId),
       video: false,
     });
 
@@ -550,7 +582,7 @@ class LiveTranscriptionService {
 
     const deviceId = await this.resolveMicDeviceId(deviceName);
     const nextStream = await navigator.mediaDevices.getUserMedia({
-      audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+      audio: micConstraints(deviceId),
       video: false,
     });
 
