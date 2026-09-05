@@ -1,14 +1,35 @@
 import { Captions, CaptionsOff, Keyboard, ListChecks, Route } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import CreditsDisplay from '@/components/custom/credits-display';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProfessionalMode } from '@/hooks/use-professional-mode';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
-import { Hotkey, HOTKEY_GROUPS, HOTKEYS } from '@/lib/hotkeys';
+import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 import { RunningState, UserRole } from '@/types/app-state';
 
+import { HotkeyCheatsheetDialog } from './hotkey-cheatsheet';
 import { RunningIndicator } from './running-indicator';
+
+/**
+ * Renderer-local, not a registered Hotkey: it only needs to work while this window has focus,
+ * unlike the globalShortcut-backed ones in lib/hotkeys.ts that must also fire in stealth mode.
+ */
+function useHotkeyCheatsheetShortcut(onOpen: () => void) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== '?' || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return;
+      e.preventDefault();
+      onOpen();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onOpen]);
+}
 
 interface StatusPanelProps {
   runningState: RunningState;
@@ -34,6 +55,8 @@ export default function StatusPanel({
   // calculate and formatting handled by CreditsDisplay component
   const { enabled: professionalMode } = useProfessionalMode();
   const { visible: transcriptVisible } = useTranscriptPanel();
+  const [hotkeysOpen, setHotkeysOpen] = useState(false);
+  useHotkeyCheatsheetShortcut(() => setHotkeysOpen(true));
 
   return (
     <div id="status-panel" className="flex items-center justify-between text-muted-foreground p-1">
@@ -79,52 +102,15 @@ export default function StatusPanel({
         </TooltipContent>
       </Tooltip>
       <div className="flex-1" />
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            className="h-6 flex items-center justify-center rounded hover:bg-muted text-xs font-medium gap-1 px-2"
-            aria-label="Hotkeys"
-            title="Show keyboard shortcuts"
-          >
-            <Keyboard className="h-4 w-4" /> Show Hotkeys
-          </button>
-        </TooltipTrigger>
-        <TooltipContent sideOffset={4} className="w-2xl rounded-md p-2">
-          <div className="space-y-2">
-            {HOTKEY_GROUPS.map((group) => (
-              <div key={group.label}>
-                <div className="text-[10px] font-semibold text-foreground mb-1 uppercase">
-                  {group.label}
-                </div>
-                <div className="grid grid-cols-3 gap-1">
-                  {group.keys.map((hk) => {
-                    const info = HOTKEYS[hk];
-                    return (
-                      <div key={hk} className="flex items-center gap-1">
-                        <div
-                          className={cn(
-                            'px-1 py-0.5 rounded text-[11px] font-semibold',
-                            hk === Hotkey.StopAll
-                              ? 'bg-destructive/80 text-destructive-foreground'
-                              : hk === Hotkey.ToggleStealth
-                                ? 'bg-primary/80 text-primary-foreground'
-                                : 'bg-muted text-foreground'
-                          )}
-                        >
-                          {info.combo}
-                        </div>
-                        <div className="text-[11px] font-semibold text-foreground">
-                          {info.title}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </TooltipContent>
-      </Tooltip>
+      <button
+        className="h-6 flex items-center justify-center rounded hover:bg-muted text-xs font-medium gap-1 px-2"
+        aria-label="Show keyboard shortcuts"
+        title="Show keyboard shortcuts (?)"
+        onClick={() => setHotkeysOpen(true)}
+      >
+        <Keyboard className="h-4 w-4" /> Show Hotkeys
+      </button>
+      <HotkeyCheatsheetDialog open={hotkeysOpen} onOpenChange={setHotkeysOpen} />
     </div>
   );
 }

@@ -1,22 +1,21 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { LoadingPage } from '@/components/custom/loading';
 import { useAppState } from '@/hooks/use-app-state';
+import HomePage from '@/pages/home';
 
 export default function IndexPage() {
   const { appState } = useAppState();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to main page if backend is live and logged in
     if (appState?.isLoggedIn === false) {
       navigate('/auth/login', { replace: true });
-    } else {
-      navigate('/main', { replace: true });
     }
-  }, [appState?.isBackendLive, appState?.isLoggedIn, navigate]);
+  }, [appState?.isLoggedIn, navigate]);
 
-  // Optionally, render a loading state while checking
-  return <LoadingPage disclaimer="Loading…" />;
+  // Logged-out users are redirected above. Everyone else - including the brief window before
+  // appState has loaded - sees the home dashboard directly; HomePage owns its own loading state
+  // for that window instead of this route showing a separate spinner first.
+  return <HomePage />;
 }

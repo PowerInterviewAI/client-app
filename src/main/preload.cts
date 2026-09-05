@@ -124,6 +124,9 @@ const electronApi = {
   actionSuggestion: {
     clear: () => ipcRenderer.invoke('action-suggestion:clear'),
     stop: () => ipcRenderer.invoke('action-suggestion:stop'),
+    capture: () => ipcRenderer.invoke('action-suggestion:capture'),
+    clearImages: () => ipcRenderer.invoke('action-suggestion:clear-images'),
+    trigger: () => ipcRenderer.invoke('action-suggestion:trigger'),
   },
 
   mockInterview: {

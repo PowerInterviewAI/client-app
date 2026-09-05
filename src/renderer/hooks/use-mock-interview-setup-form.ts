@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { useAppState } from '@/hooks/use-app-state';
 import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
-import { useConfigurationDialog } from '@/hooks/use-configuration-dialog';
 import { getElectron } from '@/lib/utils';
 import { getLanguageOption } from '@/types/language';
 import type { MockInterviewSetup } from '@/types/mock-interview';
@@ -20,9 +20,9 @@ import { MockDifficulty, MockSeniority } from '@/types/mock-interview';
  * gathered here, so there is nothing to duplicate and nothing that can drift out of sync with it.
  */
 export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) => Promise<void>) {
+  const navigate = useNavigate();
   const { appState } = useAppState();
   const { config } = useConfigStore();
-  const { openConfigurationDialog } = useConfigurationDialog();
   const { devices: audioInputDevices, ready: audioDevicesReady } = useAudioInputDevices();
 
   const [seniority, setSeniority] = useState<MockSeniority>(MockSeniority.Mid);
@@ -50,12 +50,12 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
     }
     if (!appState?.interviewConfig?.fullName) {
       toast.error('Full name is not set');
-      openConfigurationDialog();
+      navigate('/settings');
       return false;
     }
     if (!appState?.interviewConfig?.hasProfileData) {
       toast.error('Profile data is not set');
-      openConfigurationDialog();
+      navigate('/settings');
       return false;
     }
     if (noAudioInputDevices) {

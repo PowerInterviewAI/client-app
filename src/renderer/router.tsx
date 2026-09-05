@@ -5,10 +5,12 @@ import ForgotPasswordPage from './pages/auth/forgot-password';
 import AuthLayout from './pages/auth/layout';
 import LoginPage from './pages/auth/login';
 import SignupPage from './pages/auth/signup';
+import DocumentationPage from './pages/documentation';
 import IndexPage from './pages/index';
 import MainPage from './pages/main/index';
 import MockInterviewPage from './pages/mock-interview/index';
 import PaymentPage from './pages/payment';
+import SettingsPage from './pages/settings';
 
 // MainFrame is a layout route rather than a wrapper around RouterProvider so that the chrome it
 // renders - the titlebar and its menu - sits inside the router and can navigate with useNavigate.
@@ -53,6 +55,14 @@ export const router = createHashRouter([
       {
         path: '/payment',
         element: <PaymentPage />,
+      },
+      {
+        path: '/settings',
+        element: <SettingsPage />,
+      },
+      {
+        path: '/documentation',
+        element: <DocumentationPage />,
       },
     ],
   },

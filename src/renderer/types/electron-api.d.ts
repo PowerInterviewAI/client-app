@@ -136,6 +136,9 @@ declare global {
     actionSuggestion: {
       clear: () => Promise<void>;
       stop: () => Promise<void>;
+      capture: () => Promise<void>;
+      clearImages: () => Promise<void>;
+      trigger: () => Promise<void>;
     };
 
     // Mock interview management. State itself travels on AppState.mockInterview, pushed the

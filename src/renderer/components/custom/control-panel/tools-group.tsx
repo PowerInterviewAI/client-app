@@ -1,4 +1,15 @@
-import { Captions, CaptionsOff, FileText, Hash, Loader, Save, Trash2 } from 'lucide-react';
+import {
+  Camera,
+  Captions,
+  CaptionsOff,
+  FileText,
+  Hash,
+  ImageOff,
+  Loader,
+  Save,
+  Sparkles,
+  Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -16,7 +27,7 @@ import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
-import { cn } from '@/lib/utils';
+import { cn, getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 import type { ExportFormat } from '@/types/export';
 
@@ -32,6 +43,24 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   const { visible: transcriptVisible, toggle: onToggleTranscript } = useTranscriptPanel();
   const { confirmDiscard } = useSaveHistoryGuard();
   const [clearing, setClearing] = useState(false);
+  // One flag rather than three: capture/clear-images/trigger all reach the same main-process
+  // action-suggestion service serially, so overlapping calls would race each other for no benefit.
+  const [actionBusy, setActionBusy] = useState(false);
+
+  const runActionSuggestion = async (
+    action: () => Promise<void> | undefined,
+    failureMessage: string
+  ) => {
+    setActionBusy(true);
+    try {
+      await action();
+    } catch (error) {
+      console.error(error);
+      toast.error(failureMessage);
+    } finally {
+      setActionBusy(false);
+    }
+  };
 
   const onClear = async () => {
     // Asked before the spinner goes up, and a no-op when there is nothing but placeholder copy
@@ -118,6 +147,90 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
           </p>
         </TooltipContent>
       </Tooltip>
+
+      <div className="h-5 w-px bg-border" aria-hidden="true" />
+
+      {/* Previously reachable only via their hotkeys (lib/hotkeys.ts), with nothing on screen to
+          point at. Same actions, now also a click. */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              void runActionSuggestion(
+                () => getElectron()?.actionSuggestion.capture(),
+                'Failed to capture screenshot'
+              )
+            }
+            size="sm"
+            className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
+            disabled={getDisabled(runningState) || actionBusy}
+            aria-label="Capture screenshot"
+          >
+            <Camera className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            Capture Screenshot ({HOTKEYS[Hotkey.Capture].combo})
+          </p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              void runActionSuggestion(
+                () => getElectron()?.actionSuggestion.clearImages(),
+                'Failed to clear captures'
+              )
+            }
+            size="sm"
+            className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
+            disabled={getDisabled(runningState) || actionBusy}
+            aria-label="Clear captured screenshots"
+          >
+            <ImageOff className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            Clear Captures ({HOTKEYS[Hotkey.ClearCaptures].combo})
+          </p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              void runActionSuggestion(
+                () => getElectron()?.actionSuggestion.trigger(),
+                'Failed to generate suggestion'
+              )
+            }
+            size="sm"
+            className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
+            disabled={getDisabled(runningState) || actionBusy}
+            aria-label="Generate triggered suggestion"
+          >
+            {actionBusy ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            Generate Suggestion ({HOTKEYS[Hotkey.TriggerWithoutCaptures].combo})
+          </p>
+        </TooltipContent>
+      </Tooltip>
+
+      <div className="h-5 w-px bg-border" aria-hidden="true" />
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
