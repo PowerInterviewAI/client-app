@@ -20,8 +20,10 @@ export interface UserAccount {
    * Whether the client's first-run setup has been finished or skipped for this account.
    *
    * Account-level rather than device-level, so it follows the user to a new machine and a second
-   * account on a shared one gets its own run of the wizard. Absent on a response from a backend
-   * that predates the field, which reads the same as false - the wizard is offered once.
+   * account on a shared one gets its own run of the wizard.
+   *
+   * Optional because a backend that predates the field omits it, which is a different answer
+   * from `false` and is treated as one - see `AccountService.readsAsOnboarded`.
    */
   onboarding_completed?: boolean;
   created_at: number;

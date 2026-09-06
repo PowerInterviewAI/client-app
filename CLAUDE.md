@@ -371,6 +371,8 @@ Hash-based router (required for Electron `file://` protocol). Routes: `/` (the l
 
 `/onboarding` renders regardless of the flag, which is what lets Configuration offer *Run setup* and what makes Skip safe rather than final. The titlebar menu drops Home, Account and Configuration while it is open - Home would bounce straight back, and the other two are what the wizard is in the middle of collecting.
 
+**An absent `onboarding_completed` counts as done**, not as false (`AccountService.readsAsOnboarded`). A backend deployment that predates the field omits it, and reading that as "not done" would put every user of that deployment into the wizard with no way out - the only two exits from it, Finish and Skip, both write through an endpoint that deployment does not have either. Guessing wrong in that direction locks the app; guessing wrong in the other costs a screen nobody saw.
+
 `/auth/forgot-password` is a three-step wizard shaped like the signup one (email -> code -> password), and the reset is code-based rather than an emailed link because a link opens the system browser, which has no way to hand a token back without a registered deep-link protocol handler.
 
 **Step one advances on success alone and never reports "no such account".** The backend answers `forgot-password` identically for a registered and an unregistered address so that the endpoint cannot be used to test who has one, and a UI that reported the difference would hand that oracle straight back - which is why the copy on step two is conditional ("if an account exists for..."). `AuthService.forgotPassword` resolving true means the request went through, nothing more.

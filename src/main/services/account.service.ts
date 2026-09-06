@@ -5,6 +5,7 @@ import {
   getLegacyInterviewConf,
   getLegacyInterviewConfOwner,
 } from '../store/config.store.js';
+import { UserAccount } from '../types/account.js';
 import { InterviewConfig } from '../types/app-state.js';
 import { appStateService } from './app-state.service.js';
 
@@ -32,23 +33,25 @@ export class AccountService {
    * Writes the caller already knows to be authoritative (`updateConfig`, `clearState`) bump the
    * generation directly instead of going through here.
    */
-  private applyIfCurrent(
-    generation: number,
-    config: InterviewConfig,
-    loaded: boolean,
-    onboardingCompleted?: boolean
-  ): boolean {
+  private applyIfCurrent(generation: number, config: InterviewConfig, loaded: boolean): boolean {
     if (generation !== this.generation) return false;
 
     this.generation++;
-    appStateService.updateState({
-      interviewConfig: config,
-      interviewConfigLoaded: loaded,
-      // Omitted by the legacy-migration path, which has no account response to read it from and
-      // must not overwrite what the pull that preceded it established.
-      ...(onboardingCompleted === undefined ? {} : { onboardingCompleted }),
-    });
+    appStateService.updateState({ interviewConfig: config, interviewConfigLoaded: loaded });
     return true;
+  }
+
+  /**
+   * Whether this account has been through the client's first-run setup, as the account reports it.
+   *
+   * **Absent counts as done.** A backend that predates the field omits it, and reading that as
+   * "not done" would put every user of that deployment into the wizard - with no way out, since
+   * the only exits from it write through an endpoint that deployment does not have either.
+   * Guessing wrong in this direction costs a screen nobody saw; wrong in the other direction
+   * locks the app.
+   */
+  private static readsAsOnboarded(account: UserAccount): boolean {
+    return account.onboarding_completed !== false;
   }
 
   /**
@@ -66,6 +69,15 @@ export class AccountService {
 
       const account = response.data;
       const interviewConfig = account.interview_config;
+
+      // Applied here rather than alongside the config below, because the migration branch that
+      // follows returns early and the flag has nothing to do with what it is migrating. Guarded
+      // but not bumping: this is one field off a read, not a write that supersedes anything.
+      if (generation === this.generation) {
+        appStateService.updateState({
+          onboardingCompleted: AccountService.readsAsOnboarded(account),
+        });
+      }
 
       // Pre-sync builds kept this config on local disk only. If the account has none yet,
       // adopt the leftover local copy instead of presenting the user an empty profile.
@@ -86,10 +98,7 @@ export class AccountService {
           profileData: interviewConfig?.profile_data ?? '',
           context: interviewConfig?.context ?? '',
         },
-        true,
-        // Absent against a backend that predates the field, which reads the same as false: the
-        // wizard is offered once rather than assumed to have happened.
-        account.onboarding_completed === true
+        true
       );
       if (interviewConfig) this.discardLegacyConfigIfOwned(account._id);
       return { success: true };
@@ -260,6 +269,10 @@ export class AccountService {
         return { success: false, error: response.error.message || 'Failed to save your setup' };
       }
 
+      // Bumped for the same reason `updateConfig` bumps it: a pull that started before this
+      // write is now stale, and letting it land afterwards would put the wizard back in front of
+      // a user who has just finished it.
+      this.generation++;
       appStateService.updateState({
         onboardingCompleted: response.data?.onboarding_completed ?? completed,
       });
