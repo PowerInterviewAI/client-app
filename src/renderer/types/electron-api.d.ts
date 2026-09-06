@@ -81,6 +81,9 @@ declare global {
         data: { fullName: string; profileData: string; context: string };
         error?: string;
       }>;
+      setOnboardingCompleted: (
+        completed: boolean
+      ) => Promise<{ success: boolean; error?: string }>;
     };
 
     // Payment management

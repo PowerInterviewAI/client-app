@@ -32,11 +32,22 @@ export class AccountService {
    * Writes the caller already knows to be authoritative (`updateConfig`, `clearState`) bump the
    * generation directly instead of going through here.
    */
-  private applyIfCurrent(generation: number, config: InterviewConfig, loaded: boolean): boolean {
+  private applyIfCurrent(
+    generation: number,
+    config: InterviewConfig,
+    loaded: boolean,
+    onboardingCompleted?: boolean
+  ): boolean {
     if (generation !== this.generation) return false;
 
     this.generation++;
-    appStateService.updateState({ interviewConfig: config, interviewConfigLoaded: loaded });
+    appStateService.updateState({
+      interviewConfig: config,
+      interviewConfigLoaded: loaded,
+      // Omitted by the legacy-migration path, which has no account response to read it from and
+      // must not overwrite what the pull that preceded it established.
+      ...(onboardingCompleted === undefined ? {} : { onboardingCompleted }),
+    });
     return true;
   }
 
@@ -75,7 +86,10 @@ export class AccountService {
           profileData: interviewConfig?.profile_data ?? '',
           context: interviewConfig?.context ?? '',
         },
-        true
+        true,
+        // Absent against a backend that predates the field, which reads the same as false: the
+        // wizard is offered once rather than assumed to have happened.
+        account.onboarding_completed === true
       );
       if (interviewConfig) this.discardLegacyConfigIfOwned(account._id);
       return { success: true };
@@ -224,7 +238,35 @@ export class AccountService {
     appStateService.updateState({
       interviewConfig: { fullName: '', profileData: '', context: '' },
       interviewConfigLoaded: false,
+      // Reset with the rest of the account. Left standing, the next user to sign in on this
+      // machine would inherit the previous one's answer and never be offered setup.
+      onboardingCompleted: false,
     });
+  }
+
+  /**
+   * Record that this account has finished (or deliberately skipped) the first-run wizard.
+   *
+   * Mirrored into app state only after the backend confirms the write. The renderer's gate reads
+   * that state, so an optimistic update would let a failed write look like a completed setup
+   * until the next launch pulled the account again and put the wizard back.
+   */
+  async setOnboardingCompleted(
+    completed: boolean
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await this.client.updateOnboarding({ completed });
+      if (response.error) {
+        return { success: false, error: response.error.message || 'Failed to save your setup' };
+      }
+
+      appStateService.updateState({
+        onboardingCompleted: response.data?.onboarding_completed ?? completed,
+      });
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Failed to save your setup' };
+    }
   }
 }
 

@@ -44,6 +44,13 @@ export interface AppState {
   interviewConfig: InterviewConfigSummary;
   interviewConfigLoaded: boolean;
   /**
+   * Whether the signed-in account has finished or skipped the first-run wizard.
+   *
+   * Only meaningful once `interviewConfigLoaded` is true - before that it is the default rather
+   * than an answer, which is why the gate on `/` waits for both.
+   */
+  onboardingCompleted: boolean;
+  /**
    * Whether the arrays above hold a real interview rather than the placeholder copy the panels
    * are seeded with. Derived in main; the renderer only reads it.
    */

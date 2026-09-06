@@ -32,6 +32,10 @@ export async function run(userDataDir) {
         // Backed the control bar's split Start button, which no longer exists. Seeded so the
         // scrub below has something to remove on an upgrading install.
         lastSessionMode: 'live',
+        // Recorded whether the first-run wizard had run on this machine. It lives on the account
+        // now, so the local copy has to go: two answers to a one-answer question is how the
+        // wizard ends up deciding by whichever was read last.
+        onboardingCompleted: true,
         // The pre-rename name for `hintOnlyMode`, set to the mode this install was left on.
         // Both mechanisms that touch it are exercised below: the migration reads it once to
         // carry the choice across, then scrubRetiredKey removes it.
@@ -89,9 +93,6 @@ export async function run(userDataDir) {
     !('professionalMode' in (store.configStore.getStoredRuntime() ?? {}))
   );
 
-  // An install that predates the setup wizard has already been configured the long way round,
-  // so it is migrated straight past it rather than being walked through one on next launch.
-  check('an upgrading install is not sent through onboarding', cfg.onboardingCompleted === true);
 
   store.configStore.updateConfig({ hintOnlyMode: true });
   check('hintOnlyMode is persisted', store.configStore.getStoredRuntime()?.hintOnlyMode === true);
@@ -109,6 +110,10 @@ export async function run(userDataDir) {
   check(
     'the retired lastSessionMode is scrubbed',
     !('lastSessionMode' in (store.configStore.getStoredRuntime() ?? {}))
+  );
+  check(
+    'the retired local onboardingCompleted is scrubbed',
+    !('onboardingCompleted' in (store.configStore.getStoredRuntime() ?? {}))
   );
 
   // Security cleanup: llmConf could hold a real provider API key in plaintext. Removing the

@@ -103,6 +103,15 @@ export interface AppState {
   /** False until the account's config has been read this session; editing is unsafe before then. */
   interviewConfigLoaded: boolean;
   /**
+   * Whether the signed-in account has finished or skipped the first-run wizard.
+   *
+   * Read off the account rather than local config, so it follows the user to a new machine and a
+   * second account on a shared one gets its own run of it. Only meaningful once
+   * `interviewConfigLoaded` is true - before that it is the default, not an answer, and the
+   * renderer's gate waits for both.
+   */
+  onboardingCompleted: boolean;
+  /**
    * Whether there is an interview that saving would actually capture.
    *
    * Derived, never set by a caller - `updateState` strips it off incoming updates. The panels

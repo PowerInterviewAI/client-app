@@ -61,7 +61,11 @@ The default. Restructures both live and triggered suggestions into a bold one-li
 
 ### First-Run Setup
 
-A new install is sent to `/onboarding` before it can reach anything else, and asked once for the six things a first interview needs: profile, job context, language, microphone (with a live level test), suggestion style, and whether the transcript panel is docked. Each step renders the same component the account and configuration pages use. Gated on `onboardingCompleted`, which is local rather than account-level because half of what it sets is a property of the machine; an install that predates the wizard is migrated straight past it. Page: [src/renderer/pages/onboarding/index.tsx](src/renderer/pages/onboarding/index.tsx).
+A user who has not been through setup is sent to `/onboarding` before they can reach anything else, and asked once for the six things a first interview needs: profile, job context, language, microphone (with a live level test), suggestion style, and whether the transcript panel is docked. Each step renders the same component the account and configuration pages use.
+
+Gated on the account's `onboarding_completed`, written through `PATCH /api/users/me/onboarding` - on the account rather than on the machine, so it follows the user to a new device and a second account on a shared one gets its own run of it. The gate waits for `interviewConfigLoaded` as well as the flag, since before the account has been read the flag is a default rather than an answer.
+
+Nothing in it is a trap: Skip is on every step, every setting has a working default, and Configuration can re-run the whole thing (`/onboarding` renders regardless of the flag). The only step that blocks is the profile, because the start sequence refuses to run without a name and a CV - and it says which of the two is missing rather than only disabling the button. Page: [src/renderer/pages/onboarding/index.tsx](src/renderer/pages/onboarding/index.tsx).
 
 ### Navigation
 

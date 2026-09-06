@@ -14,7 +14,7 @@ import { SuggestionModeField } from '@/components/custom/settings/suggestion-mod
 import { TranscriptPanelField } from '@/components/custom/settings/transcript-panel-field';
 import { Button } from '@/components/ui/button';
 import { useAccountForm } from '@/hooks/use-account-form';
-import { useConfigStore } from '@/hooks/use-config-store';
+import { getElectron } from '@/lib/utils';
 
 type StepId = 'profile' | 'context' | 'language' | 'microphone' | 'mode' | 'transcript';
 
@@ -70,10 +70,9 @@ const STEPS: Step[] = [
 /**
  * First-run setup.
  *
- * Reached from `pages/index.tsx` when the local config says this machine has not been set up yet,
- * and never again once finished or skipped (`onboardingCompleted`). Existing installs are
- * migrated straight to completed rather than being walked through a wizard for an app they are
- * already using - see the main-process config store.
+ * Reached from `pages/index.tsx` when the signed-in account has not been through it, and never
+ * again once finished or skipped. The flag lives on the account, not on this machine, so it
+ * follows the user to a new device and a second account on a shared one gets its own run of it.
  *
  * Every step renders the same component the configuration and account pages use, so there is one
  * definition of each setting and no way for the wizard to teach a control that then looks
@@ -83,7 +82,6 @@ const STEPS: Step[] = [
  */
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { updateConfig } = useConfigStore();
   const form = useAccountForm();
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -101,15 +99,15 @@ export default function OnboardingPage() {
   /**
    * Record that setup is done and leave.
    *
-   * The write has to land before the navigate. Home gates on this exact flag, so leaving on a
-   * failed write would bounce the user straight back here with no explanation - a loop, not a
-   * degraded state. On failure they stay put and are told why.
+   * The write has to land before the navigate, and it goes to the account rather than to local
+   * config. Home gates on this exact flag, so leaving on a failed write would bounce the user
+   * straight back here with no explanation - a loop, not a degraded state. On failure they stay
+   * put and are told why.
    */
   const complete = async () => {
-    try {
-      await updateConfig({ onboardingCompleted: true });
-    } catch (e) {
-      console.error('Failed to record that setup is complete', e);
+    const result = await getElectron()?.account?.setOnboardingCompleted(true);
+    if (!result?.success) {
+      console.error('Failed to record that setup is complete', result?.error);
       toast.error('Could not save your setup. Check your connection and try again.');
       return;
     }

@@ -78,6 +78,8 @@ const electronApi = {
       ipcRenderer.invoke('account:update', fullName, profileData, context),
     refresh: () => ipcRenderer.invoke('account:refresh'),
     get: () => ipcRenderer.invoke('account:get'),
+    setOnboardingCompleted: (completed: boolean) =>
+      ipcRenderer.invoke('account:set-onboarding-completed', completed),
   },
 
   payment: {

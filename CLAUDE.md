@@ -365,7 +365,11 @@ whatever claimed it. `test/navigation-guard.test.mjs` pins all three.
 
 ### Routing
 
-Hash-based router (required for Electron `file://` protocol). Routes: `/` (index, redirects based on login state) -> `/auth/login`, `/auth/signup`, or `/auth/forgot-password` -> `/main` (interview UI) -> `/payment`.
+Hash-based router (required for Electron `file://` protocol). Routes: `/` (the launch hub, and the only screen that redirects) -> `/auth/login`, `/auth/signup`, `/auth/forgot-password`, `/onboarding` -> `/main` (live assistant), `/mock-interview`, `/account`, `/configuration`, `/payment`, `/documentation`.
+
+**First-run setup.** `/` sends a signed-in user to `/onboarding` when the account's `onboardingCompleted` is false, and it waits for `interviewConfigLoaded` before acting: the flag lives on the account, so until that account has been read this session its value is the default rather than an answer, and acting sooner would flash the wizard at every user on launch and show it in full to anyone whose pull failed. The wizard writes the flag through `account:set-onboarding-completed`, and only after the backend confirms - an optimistic write would let a failed save look like a finished setup until the next launch put the wizard back. Sign-in lands on `/` rather than `/main` for this reason: `/main` is the one route the gate does not cover.
+
+`/onboarding` renders regardless of the flag, which is what lets Configuration offer *Run setup* and what makes Skip safe rather than final. The titlebar menu drops Home, Account and Configuration while it is open - Home would bounce straight back, and the other two are what the wizard is in the middle of collecting.
 
 `/auth/forgot-password` is a three-step wizard shaped like the signup one (email -> code -> password), and the reset is code-based rather than an emailed link because a link opens the system browser, which has no way to hand a token back without a registered deep-link protocol handler.
 

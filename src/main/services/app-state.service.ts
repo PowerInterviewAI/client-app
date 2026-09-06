@@ -29,6 +29,7 @@ const DEFAULT_STATE: AppState = {
   providedLLMModel: undefined,
   interviewConfig: { fullName: '', profileData: '', context: '' },
   interviewConfigLoaded: false,
+  onboardingCompleted: false,
   hasHistory: false,
   mockInterview: null,
   hasMockContent: false,

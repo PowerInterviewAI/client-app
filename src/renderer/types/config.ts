@@ -30,8 +30,6 @@ export interface Config {
   // sentences. The default; full-sentence mode is the opt-out.
   hintOnlyMode: boolean;
 
-  // Whether the first-run setup wizard has been finished or skipped on this machine
-  onboardingCompleted: boolean;
 
   // Mock interview: also show what the live assistant would have suggested. On by default.
   mockLiveSuggestionsEnabled: boolean;

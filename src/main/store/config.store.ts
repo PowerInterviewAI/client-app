@@ -37,16 +37,6 @@ export interface RuntimeConfig {
   // question. On by default - trying this out is one of the two reasons the feature exists.
   mockLiveSuggestionsEnabled: boolean;
 
-  // Whether the first-run setup wizard has been finished (or deliberately skipped) on this
-  // machine. Local rather than account-level on purpose: half of what the wizard sets - the
-  // microphone above all - is a property of this machine, not of the account.
-  //
-  // The cost of that choice is a second account signing in on a machine where the first has
-  // already been through the wizard: it does not run again, and that user reaches Start with an
-  // empty profile. They are not stranded - the control bar's own check names the missing field
-  // and sends them to the account page - and scoping the flag to an account would trade this for
-  // a worse one, re-running the wizard for the same person on every new machine.
-  onboardingCompleted: boolean;
 
 }
 
@@ -75,9 +65,6 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   // opt-out: showing what the live assistant would have said is the point of trying this
   mockLiveSuggestionsEnabled: true,
 
-  // False for a new install, which is what puts a first launch into the setup wizard. An install
-  // that predates the wizard is migrated to true below rather than sent through it.
-  onboardingCompleted: false,
 
 };
 
@@ -284,12 +271,6 @@ export const configStore = new ConfigStore();
   if (raw?.mockLiveSuggestionsEnabled === undefined) {
     migration.mockLiveSuggestionsEnabled = true;
   }
-  // Absent means this store was written by a build that predates the wizard, so the user has
-  // already configured the app the long way round and should not be walked through it now. A
-  // genuinely new install never reaches here: `defaults` puts the key on disk at construction.
-  if (raw?.onboardingCompleted === undefined) {
-    migration.onboardingCompleted = true;
-  }
   // perform migration only if there are values to set
   if (Object.keys(migration).length > 0) {
     configStore.updateConfig(migration);
@@ -314,6 +295,12 @@ function scrubRetiredKey(key: string): void {
 // `llmConf` backed the removed bring-your-own-API-key feature and could hold a real provider key
 // in plaintext - this one matters for more than tidiness.
 scrubRetiredKey('llmConf');
+
+// `onboardingCompleted` recorded whether the first-run wizard had run on this machine. It lives
+// on the account now, which is the only place that can tell a user who has set up before from a
+// second account on a shared machine - so the local copy is not merely unread, it is a second
+// answer to a question that has one.
+scrubRetiredKey('onboardingCompleted');
 
 // `lastSessionMode` recorded which session the control bar's split Start button should launch
 // by default. That button is gone - starting is a home-screen decision now, where both kinds are

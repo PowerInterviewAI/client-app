@@ -4,7 +4,11 @@
  * (full name, profile, context)
  */
 
-import { UpdateInterviewConfigRequest, UserAccount } from '../types/account.js';
+import {
+  UpdateInterviewConfigRequest,
+  UpdateOnboardingRequest,
+  UserAccount,
+} from '../types/account.js';
 import { ApiClient, ApiResponse } from './client.js';
 
 // These carry the full profile/context payload, so allow well over a plain JSON round-trip,
@@ -24,5 +28,16 @@ export class UsersApi extends ApiClient {
    */
   async updateInterviewConfig(data: UpdateInterviewConfigRequest): Promise<ApiResponse<UserAccount>> {
     return this.patch<UserAccount>('/api/users/me/interview-config', data, REQUEST_TIMEOUT_MS);
+  }
+
+  /**
+   * Record whether the client's first-run setup is done for this account.
+   *
+   * Carries no profile, so the long timeout above is not needed - but it is shared rather than
+   * tuned, because the only thing that makes this request slow is the same thing that makes the
+   * others slow, and one number is easier to keep honest than three.
+   */
+  async updateOnboarding(data: UpdateOnboardingRequest): Promise<ApiResponse<UserAccount>> {
+    return this.patch<UserAccount>('/api/users/me/onboarding', data, REQUEST_TIMEOUT_MS);
   }
 }
