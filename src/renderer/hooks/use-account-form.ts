@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getElectron } from '@/lib/utils';
 
@@ -22,36 +22,66 @@ export function useAccountForm() {
   // overwrite a perfectly good saved profile with the empty form the user is looking at.
   const [loaded, setLoaded] = useState(false);
 
+  /**
+   * Set the moment the user changes any field, and never cleared.
+   *
+   * A fetch that resolves after the user has started typing must not overwrite what they typed.
+   * That is not a theoretical race: the account request runs to 30 seconds, both surfaces render
+   * their fields immediately, and on a slow connection the natural thing to do while a form looks
+   * empty is to start filling it in. The fields are also disabled while `loading`, which closes
+   * the same hole from the other side; this guard is what holds if a caller renders them anyway.
+   */
+  const edited = useRef(false);
+
+  const markEdited = <T,>(set: (value: T) => void) => {
+    return (value: T) => {
+      edited.current = true;
+      set(value);
+    };
+  };
+
   // Loaded straight from main rather than from the tracked app state: that carries only a summary
   // (`InterviewConfigSummary`), and this also picks up what another device may have changed.
-  useEffect(() => {
-    let cancelled = false;
+  const load = useCallback(async (signal: { cancelled: boolean }) => {
     setLoading(true);
     setLoaded(false);
 
-    void (async () => {
-      try {
-        const result = await getElectron()?.account?.get();
-        if (cancelled) return;
+    try {
+      const result = await getElectron()?.account?.get();
+      if (signal.cancelled) return;
 
-        if (result?.data) {
-          setFullName(result.data.fullName);
-          setProfileData(result.data.profileData);
-          setContext(result.data.context);
-        }
-        setLoaded(result?.success ?? false);
-      } catch (error) {
-        console.error('Failed to load your account details:', error);
-        if (!cancelled) setLoaded(false);
-      } finally {
-        if (!cancelled) setLoading(false);
+      if (result?.data && !edited.current) {
+        setFullName(result.data.fullName);
+        setProfileData(result.data.profileData);
+        setContext(result.data.context);
       }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+      setLoaded(result?.success ?? false);
+    } catch (error) {
+      console.error('Failed to load your account details:', error);
+      if (!signal.cancelled) setLoaded(false);
+    } finally {
+      if (!signal.cancelled) setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const signal = { cancelled: false };
+    void load(signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [load]);
+
+  /**
+   * Try the account fetch again after it failed.
+   *
+   * Worth a control rather than only a page reload: the fetch fails on a blip, and the surfaces
+   * that show it - the account page, and the wizard's first step - are both places the user is
+   * sitting still with something to type and no other way forward.
+   */
+  const reload = useCallback(() => {
+    void load({ cancelled: false });
+  }, [load]);
 
   /** Whether there is enough here to run an interview. Mirrors `checkCanStart`'s two checks. */
   const isComplete = fullName.trim() !== '' && profileData.trim() !== '';
@@ -88,15 +118,16 @@ export function useAccountForm() {
 
   return {
     fullName,
-    setFullName,
+    setFullName: markEdited(setFullName),
     profileData,
-    setProfileData,
+    setProfileData: markEdited(setProfileData),
     context,
-    setContext,
+    setContext: markEdited(setContext),
     loading,
     loaded,
     saving,
     isComplete,
+    reload,
     save,
   };
 }

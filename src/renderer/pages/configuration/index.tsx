@@ -1,5 +1,6 @@
-import { Keyboard } from 'lucide-react';
+import { Keyboard, Wand2 } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { HotkeyCheatsheetDialog } from '@/components/custom/hotkey-cheatsheet';
 import PageHeader from '@/components/custom/page-header';
@@ -22,6 +23,7 @@ import { Button } from '@/components/ui/button';
  * the same components, so what the wizard set is what this page shows.
  */
 export default function ConfigurationPage() {
+  const navigate = useNavigate();
   const [hotkeysOpen, setHotkeysOpen] = useState(false);
 
   return (
@@ -33,6 +35,23 @@ export default function ConfigurationPage() {
         <LanguageField />
         <SuggestionModeField />
         <TranscriptPanelField />
+
+        {/* The wizard is not a one-time thing the user is stuck having skipped. Reachable here
+            rather than only on a first launch, which is also what lets it be skippable without
+            that being a decision: `/onboarding` renders regardless of the account's flag, and
+            finishing it simply records the same flag again. */}
+        <div className="flex items-center justify-between gap-3 border-t pt-4">
+          <div>
+            <p className="text-sm font-medium">Setup guide</p>
+            <p className="text-xs text-muted-foreground">
+              Walk through everything on this page, and your profile, one step at a time.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => navigate('/onboarding')}>
+            <Wand2 className="h-4 w-4" aria-hidden="true" />
+            Run setup
+          </Button>
+        </div>
 
         <div className="flex items-center justify-between gap-3 border-t pt-4">
           <div>

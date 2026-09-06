@@ -114,7 +114,7 @@ export function MicrophoneField() {
       {noDevices ? (
         <p className="flex items-start gap-1.5 rounded-md border border-destructive/40 p-3 text-xs text-destructive">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          <span>No microphone was detected. Connect one, then reopen this screen.</span>
+          <span>No microphone was detected. Connect one and it will appear here.</span>
         </p>
       ) : (
         <>

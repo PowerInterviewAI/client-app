@@ -102,6 +102,15 @@ discover on their own is one they will discover during their first real intervie
 Adding a step means adding an entry to `STEPS` in `pages/onboarding/index.tsx` and rendering the
 existing field component for it. Do not write a wizard-only variant of a control.
 
+The wizard is not allowed to become a trap, and a new step must not make it one:
+
+- **Skip stays on every step**, and skipping keeps whatever the user already typed.
+- **Only a setting the app genuinely cannot run without may block Continue** - today that is the
+  profile alone - and a blocked Continue must say what is missing, not merely be disabled.
+- **Every step's setting must have a working default**, so skipping it leaves the app usable.
+- **The step renders the same component its settings page does**, so what the wizard taught is
+  what the user finds later.
+
 ## 7. Definition of done for a new feature/setting
 
 - [ ] Classified into a tier (§1) and placed on the tier's designated surface.

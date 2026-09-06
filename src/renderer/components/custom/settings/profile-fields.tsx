@@ -52,6 +52,11 @@ function RequiredMark() {
  * one step and the job context on the next, while the account page shows all three together. Each
  * takes the shared `AccountForm` so neither surface holds its own copy of the state.
  */
+/**
+ * Every field is disabled while the account is still loading. Not cosmetic: the fetch runs to
+ * 30 seconds, the fields render immediately, and typing into an empty-looking form before it
+ * lands is exactly the case where the response would overwrite what was typed.
+ */
 export function FullNameField({ form }: { form: AccountForm }) {
   return (
     <div className="space-y-2">
@@ -66,6 +71,7 @@ export function FullNameField({ form }: { form: AccountForm }) {
         onChange={(e) => form.setFullName(e.target.value)}
         placeholder="The name you go by in the interview"
         maxLength={MAX_NAME_LENGTH}
+        disabled={form.loading}
       />
     </div>
   );
@@ -86,6 +92,7 @@ export function ProfileField({ form }: { form: AccountForm }) {
         required
         value={form.profileData}
         onChange={(e) => form.setProfileData(e.target.value)}
+        disabled={form.loading}
         placeholder="Paste your CV/resume, LinkedIn profile, or a short bio. Suggestions are written from this, so more detail means answers that sound like you."
         className="min-h-40 max-h-80 overflow-auto text-sm"
         maxLength={MAX_FIELD_LENGTH}
@@ -105,6 +112,7 @@ export function ContextField({ form }: { form: AccountForm }) {
         id="account-context"
         value={form.context}
         onChange={(e) => form.setContext(e.target.value)}
+        disabled={form.loading}
         placeholder="Paste the job description, the role requirements, or anything else about the interview you are preparing for."
         className="min-h-40 max-h-80 overflow-auto text-sm"
         maxLength={MAX_FIELD_LENGTH}

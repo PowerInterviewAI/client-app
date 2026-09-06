@@ -11,7 +11,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import {
@@ -33,6 +33,7 @@ import { RunningState } from '@/types/app-state';
 
 export default function TitlebarMenu({ style }: { style?: React.CSSProperties }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { appState, runningState } = useAppState();
   const { config } = useConfigStore();
   const { isDark, toggleTheme } = useThemeStore();
@@ -41,6 +42,12 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
   const isLoggedIn = appState?.isLoggedIn ?? false;
   // Account actions rewrite state the running assistant depends on; theme, docs and stealth do not.
   const disabled = runningState !== RunningState.Idle;
+
+  // Setup owns the window while it is running. Home bounces straight back here until the wizard
+  // is finished or skipped, and Account and Configuration are the two things it is in the middle
+  // of collecting - so offering all three would be three menu items that look broken. Skip is
+  // the way out, and it is on the screen itself where it can say what skipping costs.
+  const inSetup = location.pathname === '/onboarding';
 
   const handleToggleStealth = () => {
     const electron = getElectron();
@@ -91,22 +98,29 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
               {config?.email}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/')}>
-              <Home className="mr-2 h-4 w-4" />
-              Home
-            </DropdownMenuItem>
-            {/* The same two destinations the home page names, in the same words. Account is
-                disabled mid-session because saving a new profile rewrites state the running
-                assistant reads; configuration is not, because every control on it is meant to be
-                changed during an interview. */}
-            <DropdownMenuItem onClick={() => !disabled && navigate('/account')} disabled={disabled}>
-              <UserRound className="mr-2 h-4 w-4" />
-              Account
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/configuration')}>
-              <SettingsIcon className="mr-2 h-4 w-4" />
-              Configuration
-            </DropdownMenuItem>
+            {!inSetup && (
+              <>
+                <DropdownMenuItem onClick={() => navigate('/')}>
+                  <Home className="mr-2 h-4 w-4" />
+                  Home
+                </DropdownMenuItem>
+                {/* The same two destinations the home page names, in the same words. Account is
+                    disabled mid-session because saving a new profile rewrites state the running
+                    assistant reads; configuration is not, because every control on it is meant
+                    to be changed during an interview. */}
+                <DropdownMenuItem
+                  onClick={() => !disabled && navigate('/account')}
+                  disabled={disabled}
+                >
+                  <UserRound className="mr-2 h-4 w-4" />
+                  Account
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/configuration')}>
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  Configuration
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleToggleStealth}>
               <EyeOff className="mr-2 h-4 w-4" />
