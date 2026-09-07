@@ -307,6 +307,22 @@ async function resolveMicDeviceId(deviceName) {
 async function main() {
   const options = await ipcRenderer.invoke('probe:options');
 
+  // Checked here rather than in the CLI because this is where the numbers it depends on live, and
+  // checked at all because `--min-lag`/`--max-lag` are settable. A lag further from zero than the
+  // history can cover leaves `correlateAt` below its minimum overlap at every candidate, so it
+  // returns null for all of them, no estimate is ever produced, and the summary reports "no
+  // correlated frames" - the headphone answer, from a window that was simply too wide to search.
+  const usableLagMs = (HISTORY_FRAMES - MIN_OVERLAP_FRAMES) * FRAME_MS;
+  const widest = Math.max(Math.abs(options.minLagMs), Math.abs(options.maxLagMs));
+  if (widest > usableLagMs) {
+    throw new ProbeError(
+      `The search window has to stay within +/-${usableLagMs} ms, and this one reaches ` +
+        `${widest} ms. The correlator holds ${HISTORY_FRAMES * FRAME_MS} ms of history and needs ` +
+        `${MIN_OVERLAP_FRAMES * FRAME_MS} ms of overlap at every lag it tests, so a wider window ` +
+        `produces no estimate at all rather than a wider search.`
+    );
+  }
+
   status('acquiring microphone...');
   // enumerateDevices only fills in labels once a capture has been granted, so an unconstrained
   // open comes first and is released immediately.
