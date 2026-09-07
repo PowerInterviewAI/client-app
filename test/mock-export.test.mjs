@@ -69,7 +69,7 @@ export async function run() {
   });
 
   check('a missing role does not reach the title', !withoutRole.includes('undefined'));
-  check('and leaves no dangling separator', withoutRole.includes('# Mock Interview\n'));
+  check('and leaves no dangling separator', withoutRole.includes('# **Mock Interview**\n'));
   const withBlankRole = buildMockExportMarkdown({
     setup: { role: '   ', seniority: 'mid', difficulty: 'standard', question_count: 2 },
     answers: [],
@@ -77,7 +77,16 @@ export async function run() {
     language: Language.English,
   });
 
-  check('a blank role is treated as absent', withBlankRole.includes('# Mock Interview\n'));
+  check('a blank role is treated as absent', withBlankRole.includes('# **Mock Interview**\n'));
+
+  // Both documents are rendered by one docx style sheet that centres H1 and H5 and leaves the
+  // rest ranged left, so the level a label is written at is what decides whether it comes out
+  // centred over its own body text. H5 belongs to the timestamp line and to nothing else: this
+  // file used to reach for it for "Your Answer", "Score" and "Stronger Answer", which put three
+  // centred labels in every question of every exported report.
+  const h5Lines = withReport.split('\n').filter((line) => line.startsWith('#####'));
+  check('the only centred sub-heading is the timestamp', h5Lines.length === 1);
+  check('and it is the timestamp', h5Lines[0].includes('Date/Time'));
   check('includes the overall score', withReport.includes('Score: 82/100'));
   check('includes strengths', withReport.includes('Clear communication'));
   check('includes gaps', withReport.includes('Limited depth on scaling'));
