@@ -28,6 +28,7 @@
  *
  *   pnpm exec electron test/manual/echo-probe.mjs --no-aec
  *   pnpm exec electron test/manual/echo-probe.mjs --no-agc
+ *   pnpm exec electron test/manual/echo-probe.mjs --no-ns
  *
  * Play a recorded interview through the speakers at a normal listening volume for the whole run,
  * and stay quiet - near-end speech is what poisons an ERL estimate.
@@ -94,6 +95,7 @@ let coupledReports = 0;
 let totalReports = 0;
 let lastFrames = 0;
 let stalled = false;
+let deadTracks = false;
 
 ipcMain.handle('probe:options', () => options);
 
@@ -106,6 +108,16 @@ ipcMain.on('probe:ready', (_event, info) => {
     `  applied  : aec=${info.micSettings.echoCancellation} ns=${info.micSettings.noiseSuppression} agc=${info.micSettings.autoGainControl}`
   );
   console.log(`loopback   : ${info.loopbackTracks} audio track(s)`);
+  if (info.loopbackTracks === 0) {
+    // Said here rather than left to be inferred from an empty ref% column forty lines later.
+    // With no reference there is nothing to correlate against, so the run can only report "no
+    // coupling" - the headphone answer, for a reason that has nothing to do with headphones.
+    console.log(
+      '\nWARNING: the loopback capture carries no audio track, so there is no reference to\n' +
+        'correlate against and every result below will read as "no coupling". Check that system\n' +
+        'audio capture is permitted and re-run.'
+    );
+  }
   console.log(
     `\nPlay interviewer audio through the speakers for ${options.seconds}s. Stay quiet.\n`
   );
@@ -114,19 +126,43 @@ ipcMain.on('probe:ready', (_event, info) => {
 });
 
 ipcMain.on('probe:metrics', (_event, m) => {
-  totalReports++;
-  if (m.coupled) coupledReports++;
-
-  // No new frames since the last report means the capture has stopped feeding the graph - an
-  // unplugged device, or a suspended context. Every column below is then a stale reading of a
-  // dead stream, which is worse than no reading at all because it looks like data.
+  // Both health checks run *before* the report is counted. A report the probe is about to refuse
+  // to print is not evidence either way, and `coupled` on such a report is the verdict of an
+  // estimate that ran against audio which is no longer arriving - counting it would let a dead
+  // capture vote on the run's headline finding, which is the one thing these counters exist to
+  // stop.
+  //
+  // No new frames means the graph itself is not running: a suspended AudioContext, or a closed
+  // one. Every column below would then be a stale reading of a dead graph, which is worse than no
+  // reading at all because it looks like data.
+  //
+  // It does NOT catch an unplugged microphone. The worklet is pulled by the destination for the
+  // life of the context and zero-pads a missing input by design, so frames keep arriving at 100/s
+  // after a track dies, with the columns quietly decaying toward the noise floor. That case is
+  // what `deadTracks` covers.
   const advanced = m.frames - lastFrames;
   lastFrames = m.frames;
   if (advanced === 0) {
+    if (m.frames === 0) {
+      // Before the first frame, not after the last one. The graph has not started yet, which is
+      // an ordinary first second - flagging it as a stall would put a "re-run this" warning on
+      // the summary of a run that then went perfectly.
+      console.log('    -- waiting for the first audio frame --');
+      return;
+    }
     stalled = true;
     console.log('    -- no audio frames received since the last report (capture stalled) --');
     return;
   }
+
+  if (m.deadTracks.length > 0) {
+    deadTracks = true;
+    console.log(`    -- ${m.deadTracks.join(' and ')} stopped delivering audio --`);
+    return;
+  }
+
+  totalReports++;
+  if (m.coupled) coupledReports++;
 
   console.log(
     `    ${String(m.delayMs === null ? '--' : m.delayMs).padStart(7)}` +
@@ -172,7 +208,12 @@ ipcMain.on('probe:done', (_event, summary) => {
   const pct = totalReports > 0 ? Math.round((100 * coupledReports) / totalReports) : 0;
   console.log('');
   console.log(`coupled reports    : ${coupledReports}/${totalReports} (${pct}%)`);
-  if (coupledReports === 0) {
+  // The two counters measure different things and can disagree: estimates run twice a second,
+  // reports are sampled once a second, so intermittent coupling can be accepted into `samples`
+  // without a single report tick ever landing on it. "No coupling" therefore has to clear both,
+  // or the summary prints a confident headphone verdict directly underneath a non-zero count of
+  // accepted coupled estimates.
+  if (coupledReports === 0 && !summary.samples) {
     console.log('verdict            : no coupling (headphones, or nothing played through them)');
   } else if (coupledReports >= 3 && pct >= 20) {
     console.log('verdict            : coupled (speakers)');
@@ -184,7 +225,12 @@ ipcMain.on('probe:done', (_event, summary) => {
     console.log('');
     console.log('WARNING: the capture stalled during this run, so the numbers above cover');
     console.log('less audio than the requested duration. Re-run before recording them.');
-    console.log('audio than the requested duration. Re-run before recording them.');
+  }
+  if (deadTracks) {
+    console.log('');
+    console.log('WARNING: a capture track ended mid-run - a device was unplugged, or the screen');
+    console.log('share was stopped from the sharing bar. Reports after that point were discarded,');
+    console.log('so this run covers less audio than requested. Re-run before recording it.');
   }
   app.quit();
 });

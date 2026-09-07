@@ -37,7 +37,7 @@ function buildStreamingUrl(language: Language): string {
 const MIC_AUTO_GAIN_CONTROL = true;
 
 /**
- * The constraints every microphone capture in this service opens with.
+ * The constraints every microphone capture in the app opens with.
  *
  * The three processing flags are stated rather than left out. Chromium's defaults for an
  * unspecified flag are already `true` for all three, so writing them changes nothing today - the
@@ -47,8 +47,13 @@ const MIC_AUTO_GAIN_CONTROL = true;
  * An absent `deviceId` is the "system default microphone" case, and is deliberately expressed as
  * an object with no `deviceId` key rather than as `audio: true` - `true` would drop the flags with
  * it and put that user back on whatever Chromium currently defaults to.
+ *
+ * Exported because "one place" only holds if every caller uses it. The mock service and the
+ * settings microphone test open their own streams, and a second copy of these flags is the same
+ * drift this exists to stop - with the extra sting that the level the test meter shows would be
+ * measured through different processing than the session it is meant to predict.
  */
-function micConstraints(deviceId: string | null): MediaTrackConstraints {
+export function micConstraints(deviceId: string | null): MediaTrackConstraints {
   return {
     ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
     echoCancellation: true,

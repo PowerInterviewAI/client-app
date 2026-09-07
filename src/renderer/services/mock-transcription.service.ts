@@ -1,7 +1,7 @@
 import { getElectron } from '@/lib/utils';
 import { Language } from '@/types/language';
 
-import { AudioWsStream, resolveMicDeviceId } from './live-transcription.service';
+import { AudioWsStream, micConstraints, resolveMicDeviceId } from './live-transcription.service';
 
 /**
  * Microphone-only capture for a mock interview.
@@ -34,14 +34,7 @@ class MockTranscriptionService {
 
     const micDeviceId = await resolveMicDeviceId(audioInputDeviceName);
     this.micStream = await navigator.mediaDevices.getUserMedia({
-      audio: micDeviceId
-        ? {
-            deviceId: { exact: micDeviceId },
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          }
-        : { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      audio: micConstraints(micDeviceId),
       video: false,
     });
 

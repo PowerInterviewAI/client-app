@@ -230,9 +230,14 @@ class CouplingMeter {
       refActivePct: this.activePct(this.refDb),
       micActivePct: this.activePct(this.micDb),
       coupled: this.isCoupled(),
-      // Reported so a stalled capture is visible. Nothing else here would show it: push() simply
-      // stops being called, the report timer keeps firing, and the same numbers print every
-      // second looking exactly like a steady measurement.
+      // Reported so a stalled *graph* is visible. Nothing else here would show it: push() stops
+      // being called, the report timer keeps firing, and the same numbers print every second
+      // looking exactly like a steady measurement.
+      //
+      // This covers a suspended or closed AudioContext, and nothing else. It cannot see a dead
+      // capture: the worklet is pulled by the destination for the life of the context and
+      // zero-pads a missing input on purpose, so frames keep arriving after a track ends. See
+      // `deadTrackNames` in main() for that half.
       frames: this.frames,
     };
   }
@@ -274,7 +279,15 @@ async function main() {
 
   const deviceId = await resolveMicDeviceId(options.device);
   if (options.device && !deviceId) {
-    throw new Error('No audio input device named "' + options.device + '"');
+    // Listed rather than just refused. `--device` matches the OS label exactly, and those labels
+    // are long, parenthesised and easy to get subtly wrong, so the names are the whole answer to
+    // the error - and they have already been enumerated by this point.
+    const labels = (await navigator.mediaDevices.enumerateDevices())
+      .filter((d) => d.kind === 'audioinput')
+      .map((d) => `  ${d.label || '(unlabelled)'}`);
+    throw new Error(
+      `No audio input device named "${options.device}". Available:\n${labels.join('\n')}`
+    );
   }
 
   const micStream = await navigator.mediaDevices.getUserMedia({
@@ -315,6 +328,10 @@ async function main() {
   });
 
   const ctx = new AudioContext();
+  // Chromium can hand back a suspended context. Nothing then reaches the worklet, no frame is
+  // ever produced, and the run prints a full table of blanks before summarising a machine it
+  // never listened to as "no coupling" - which is the headphone verdict.
+  if (ctx.state === 'suspended') await ctx.resume();
   await ctx.audioWorklet.addModule('worklet.js');
 
   const node = new AudioWorkletNode(ctx, 'echo-probe', {
@@ -339,8 +356,35 @@ async function main() {
 
   status('measuring - play interviewer audio through the speakers now');
 
+  /**
+   * Which captures have died, if any.
+   *
+   * The frame counter cannot answer this. The worklet is pulled by the destination for the life
+   * of the context and zero-pads a missing input by design, so frames keep arriving at 100/s
+   * after a track ends - the columns just decay quietly toward the noise floor while still
+   * looking like a measurement, which is the exact failure the frame counter was added to catch.
+   *
+   * `readyState === 'ended'` is the signal, and `muted` deliberately is not: an ended track is a
+   * device that is gone or a screen share the user stopped, while `muted` toggles on ordinary
+   * silence on some platforms and would discard most of a legitimately quiet run.
+   */
+  const deadTrackNames = () => {
+    const dead = [];
+    const ended = (stream) => {
+      const tracks = stream.getAudioTracks();
+      return tracks.length > 0 && tracks.every((t) => t.readyState === 'ended');
+    };
+    if (ended(micStream)) dead.push('microphone');
+    if (ended(displayStream)) dead.push('loopback');
+    return dead;
+  };
+
   const reportTimer = setInterval(() => {
-    ipcRenderer.send('probe:metrics', { ...meter.snapshot(), sampleRate: ctx.sampleRate });
+    ipcRenderer.send('probe:metrics', {
+      ...meter.snapshot(),
+      deadTracks: deadTrackNames(),
+      sampleRate: ctx.sampleRate,
+    });
   }, REPORT_INTERVAL_MS);
 
   setTimeout(() => {
