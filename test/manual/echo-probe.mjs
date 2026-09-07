@@ -30,6 +30,11 @@
  *   pnpm exec electron test/manual/echo-probe.mjs --no-agc
  *   pnpm exec electron test/manual/echo-probe.mjs --no-ns
  *
+ * If the summary says the peak sits at the edge of the search window, it names the flag to widen
+ * it with. The window is `--min-lag=` / `--max-lag=`, in ms, and it is signed:
+ *
+ *   pnpm exec electron test/manual/echo-probe.mjs --min-lag=-1000
+ *
  * Play a recorded interview through the speakers at a normal listening volume for the whole run,
  * and stay quiet - near-end speech is what poisons an ERL estimate.
  *
@@ -46,7 +51,18 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 
 const FLAGS = ['--no-aec', '--no-ns', '--no-agc'];
-const VALUES = ['seconds', 'device'];
+const VALUES = ['seconds', 'device', 'min-lag', 'max-lag'];
+
+// The lag search window, in ms, and deliberately WIDER than the window any gate is expected to
+// ship with (-300..+600). The probe's job includes finding out whether the real value lands near
+// an edge, and a search that stops exactly where the proposed window stops cannot tell "the peak
+// is at the edge" from "the window is too small".
+//
+// Overridable because the first machine actually measured put its peak at -400, the floor of this
+// default, which is the probe reporting that the window is too small - and the summary's answer to
+// that is "widen it and re-run". That should not mean editing renderer.js.
+const DEFAULT_MIN_LAG_MS = -400;
+const DEFAULT_MAX_LAG_MS = 800;
 
 // Rejected rather than ignored, because the whole point of the flags is the A/B: a mistyped
 // `--noaec` that is silently dropped runs with echo cancellation ON and reports a perfectly
@@ -74,8 +90,31 @@ if (!Number.isFinite(seconds) || seconds <= 0) {
   process.exit(2);
 }
 
+/** A lag bound in ms, or its default. Rejected rather than coerced, for the `--seconds` reason. */
+const lagMs = (name, fallback) => {
+  const raw = value(name, null);
+  if (raw === null) return fallback;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) {
+    console.error(`--${name} must be a number of milliseconds, got "${raw}"`);
+    process.exit(2);
+  }
+  return parsed;
+};
+
+const minLagMs = lagMs('min-lag', DEFAULT_MIN_LAG_MS);
+const maxLagMs = lagMs('max-lag', DEFAULT_MAX_LAG_MS);
+if (minLagMs >= maxLagMs) {
+  // Inverted or empty, the lag loop runs zero times, no estimate is ever produced, and the run
+  // reports no correlated frames - which reads exactly like a headphone result.
+  console.error(`--min-lag must be below --max-lag, got ${minLagMs} and ${maxLagMs}`);
+  process.exit(2);
+}
+
 const options = {
   seconds,
+  minLagMs,
+  maxLagMs,
   device: value('device', ''),
   echoCancellation: !flag('--no-aec'),
   noiseSuppression: !flag('--no-ns'),
@@ -246,15 +285,27 @@ ipcMain.on('probe:done', (_event, summary) => {
     console.log(`correlation        : median ${num(summary.correlationMedian, 2)}`);
     console.log(`prominence         : median ${num(summary.prominenceMedian, 2)}`);
     console.log(`erlDb              : median ${num(summary.erlDbMedian)}`);
+    // Said because the two disagree on purpose and it reads as an error otherwise. The table
+    // above samples whatever the latest estimate was, once a second; these medians cover only the
+    // estimates that passed the coupling test, of which there are two per printed row. So they
+    // are drawn from a different and better population, and will read higher than any single row.
+    console.log('                     (medians over accepted estimates only, which run twice per');
+    console.log('                     printed row - so they read higher than the table above)');
     console.log(`search window      : ${summary.searchWindow[0]}..${summary.searchWindow[1]} ms`);
 
     const [lo, hi] = summary.searchWindow;
-    if (summary.delayMsMedian <= lo + 50 || summary.delayMsMedian >= hi - 50) {
+    const atFloor = summary.delayMsMedian <= lo + 50;
+    if (atFloor || summary.delayMsMedian >= hi - 50) {
+      // Names the flag to re-run with, and the value, rather than a constant to go and edit. This
+      // warning is not exotic: it fired on the first machine measured.
+      const widened = atFloor
+        ? `--min-lag=${Math.round(lo - (hi - lo) / 2)}`
+        : `--max-lag=${Math.round(hi + (hi - lo) / 2)}`;
       console.log(
         '\nWARNING: the peak sits at the edge of the search window, so the true delay may'
       );
-      console.log('lie outside it. Widen MIN_LAG_MS/MAX_LAG_MS in renderer.js and re-run before');
-      console.log('treating this number as the real one.');
+      console.log(`lie outside it. Re-run with ${widened} before treating this number as`);
+      console.log('the real one.');
     }
     if (summary.delayMsMedian < 0) {
       console.log('\nNote: the delay is NEGATIVE - the loopback reference arrives after the mic');
@@ -296,7 +347,21 @@ ipcMain.on('probe:done', (_event, summary) => {
     console.log('verdict            : coupled (speakers)');
   } else {
     console.log('verdict            : INCONCLUSIVE - too few coupled reports to call it either');
-    console.log('                     way. Re-run with audio playing for the whole duration.');
+    // The remedy has to match the reason. "Play audio for the whole run" is the right advice only
+    // when the reference was patchy; told to someone whose ref% sat at 80 all run it is simply
+    // wrong, and it sends them to re-run the thing they already did correctly. A reference that
+    // was solid throughout means the coupling itself is marginal on this machine, which is a
+    // finding rather than a mistake.
+    if (peakRefActivePct >= 50) {
+      console.log('                     way, though the reference was playing throughout. The');
+      console.log('                     coupling is marginal here rather than absent: re-run to');
+      console.log(
+        '                     see whether it is stable, and record it as marginal if so.'
+      );
+    } else {
+      console.log('                     way, and the reference was only intermittently active.');
+      console.log('                     Re-run with audio playing for the whole duration.');
+    }
   }
   if (stalled) {
     console.log('');

@@ -24,12 +24,10 @@ const HISTORY_FRAMES = 400; // 4 s
 const XCORR_INTERVAL_MS = 500;
 const REPORT_INTERVAL_MS = 1000;
 
-// Deliberately WIDER than the window the gate is expected to ship with (-300..+600 ms). The
-// probe's whole job is to find out whether the real value lands near an edge, and a search that
-// stops exactly where the proposed window stops cannot tell "the peak is at the edge" from "the
-// window is too small".
-const MIN_LAG_MS = -400;
-const MAX_LAG_MS = 800;
+// The search window's defaults and the reasoning behind them live with the `--min-lag`/`--max-lag`
+// flags in echo-probe.mjs, which is also where they are validated. They arrive here on `options`
+// because the first real machine measured put its peak at the floor of the default window, and the
+// summary's answer to that is "widen it and re-run" - which should not mean editing this file.
 
 // Frames quieter than this carry no reference to correlate against, and including them drags
 // every estimate toward the noise floor.
@@ -65,6 +63,19 @@ const REF_FLOOR_DBFS = -55;
 // measure the real distribution first, then set it.
 const CORR_MIN = 0.5;
 const PROMINENCE_MIN = 0.5;
+
+// The mirror of the reference floor on the microphone side, and not a calibration: an estimate can
+// only be describing re-captured audio if the microphone recorded any. Found by running the probe
+// with the reference playing, which accepted a "coupled" estimate at correlation 0.62 and
+// prominence 0.61 with mic% at 0 and an ERL of -56 dB. That is not an echo 56 dB down, it is the
+// correlator finding structure in a noise floor, at a lag pinned to the edge of the search window.
+//
+// The thresholds above cannot catch this on their own - the surface really does have a sharp peak.
+// And a false "coupled" on a HEADPHONE user is the expensive direction, which is the whole reason
+// prominence exists, so the cheapest physical precondition is required outright rather than left
+// to a correlation score. Real coupling on the same machine ran mic% 24-45, so this rejects the
+// impossible case without touching the measurement.
+const MIC_ACTIVE_MIN_PCT = 5;
 
 const MIN_OVERLAP_FRAMES = 50; // 0.5 s
 const DISPLAY_MEDIA_TIMEOUT_MS = 20000;
@@ -145,7 +156,9 @@ function correlateAt(refDb, micDb, lag) {
 }
 
 class CouplingMeter {
-  constructor() {
+  constructor(minLagMs, maxLagMs) {
+    this.minLagMs = minLagMs;
+    this.maxLagMs = maxLagMs;
     this.refDb = [];
     this.micDb = [];
     this.lastXcorrAt = 0;
@@ -177,8 +190,8 @@ class CouplingMeter {
   }
 
   estimate() {
-    const minLag = Math.round(MIN_LAG_MS / FRAME_MS);
-    const maxLag = Math.round(MAX_LAG_MS / FRAME_MS);
+    const minLag = Math.round(this.minLagMs / FRAME_MS);
+    const maxLag = Math.round(this.maxLagMs / FRAME_MS);
 
     let bestLag = null;
     let bestCorr = -2;
@@ -237,7 +250,9 @@ class CouplingMeter {
       this.correlation >= CORR_MIN &&
       this.prominence !== null &&
       this.prominence >= PROMINENCE_MIN &&
-      this.erlDb !== null
+      this.erlDb !== null &&
+      // The microphone has to have heard something. See MIC_ACTIVE_MIN_PCT.
+      this.activePct(this.micDb) >= MIC_ACTIVE_MIN_PCT
     );
   }
 
@@ -263,7 +278,8 @@ class CouplingMeter {
   }
 
   summary() {
-    if (this.samples.length === 0) return { samples: 0, searchWindow: [MIN_LAG_MS, MAX_LAG_MS] };
+    if (this.samples.length === 0)
+      return { samples: 0, searchWindow: [this.minLagMs, this.maxLagMs] };
     const delays = this.samples.map((s) => s.delayMs);
     const corrs = this.samples.map((s) => s.correlation);
     const proms = this.samples.map((s) => s.prominence);
@@ -276,7 +292,7 @@ class CouplingMeter {
       correlationMedian: median(corrs),
       prominenceMedian: median(proms),
       erlDbMedian: median(erls),
-      searchWindow: [MIN_LAG_MS, MAX_LAG_MS],
+      searchWindow: [this.minLagMs, this.maxLagMs],
     };
   }
 }
@@ -380,7 +396,7 @@ async function main() {
   node.connect(sink);
   sink.connect(ctx.destination);
 
-  const meter = new CouplingMeter();
+  const meter = new CouplingMeter(options.minLagMs, options.maxLagMs);
   node.port.onmessage = (event) => meter.push(event.data.ref, event.data.mic);
 
   status('measuring - play interviewer audio through the speakers now');
