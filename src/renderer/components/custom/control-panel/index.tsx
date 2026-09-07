@@ -180,6 +180,11 @@ export default function ControlPanel() {
     autoStartLiveRequested.current &&
     runningState === RunningState.Idle &&
     audioDevicesReady &&
+    // Undefined until `config:get` resolves, and `startAssistant` reads the session token,
+    // microphone and language straight off it. A hand-pressed Start was always well clear of
+    // that; a start that fires on arrival is not, and starting on an unloaded config opens the
+    // ASR socket with an empty token.
+    config !== undefined &&
     (appState?.interviewConfigLoaded ?? false);
 
   useEffect(() => {
