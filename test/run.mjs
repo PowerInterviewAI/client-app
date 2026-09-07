@@ -52,6 +52,9 @@ for (const module of [
   // Swaps globalThis.fetch for the length of its own run and restores it in a finally, so it is
   // independent of the session-driving tests above and only needs to sit beside them.
   './mock-interview-support.test.mjs',
+  // Drives the shared appStateService singleton's mock keys directly, so it sits with the other
+  // mock files and after the ones that run a real session through the service.
+  './mock-export-guard.test.mjs',
   './mock-transcription-isolation.test.mjs',
   './mock-transcript-turns.test.mjs',
   './mock-tts-playback.test.mjs',
