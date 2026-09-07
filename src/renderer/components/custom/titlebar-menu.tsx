@@ -43,11 +43,16 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
   // Account actions rewrite state the running assistant depends on; theme, docs and stealth do not.
   const disabled = runningState !== RunningState.Idle;
 
-  // Setup owns the window while it is running. Home bounces straight back here until the wizard
-  // is finished or skipped, and Account and Configuration are the two things it is in the middle
-  // of collecting - so offering all three would be three menu items that look broken. Skip is
-  // the way out, and it is on the screen itself where it can say what skipping costs.
-  const inSetup = location.pathname === '/onboarding';
+  // First-run setup owns the window while it is running. Home bounces straight back here until
+  // the wizard is finished or skipped, and Account and Configuration are the two things it is in
+  // the middle of collecting - so offering all three would be three menu items that look broken.
+  // Skip is the way out, and it is on the screen itself where it can say what skipping costs.
+  //
+  // Only for the compulsory run. The same route reached from Configuration's *Run setup* is an
+  // ordinary page the user chose to open, and taking their navigation away there would be the
+  // menu breaking rather than the menu declining to lie.
+  const inSetup =
+    location.pathname === '/onboarding' && !(appState?.onboardingCompleted ?? false);
 
   const handleToggleStealth = () => {
     const electron = getElectron();

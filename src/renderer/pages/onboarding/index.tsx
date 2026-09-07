@@ -117,6 +117,11 @@ export default function OnboardingPage() {
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === STEPS.length - 1;
 
+  // The same screen serves two arrivals. A first run is compulsory and its way out is Skip; a
+  // run started from Configuration's *Run setup* is neither, and calling that one "first-time
+  // setup" with a "Skip for now" button describes something the user is not doing.
+  const isFirstRun = !(appState?.onboardingCompleted ?? false);
+
   // Moved on every step change. Without it the focus ring stays on the Continue button that was
   // just pressed, so a keyboard or screen-reader user is told nothing about the screen having
   // changed under them - and this is the one navigation in the app where a button press replaces
@@ -264,7 +269,7 @@ export default function OnboardingPage() {
         }}
       >
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Set up {APP_NAME}
+          {isFirstRun ? `Set up ${APP_NAME}` : 'Setup guide'}
         </p>
 
         <div className="mt-3 mb-6">
@@ -342,9 +347,11 @@ export default function OnboardingPage() {
               className="text-muted-foreground"
               onClick={() => void handleSkip()}
               disabled={finishing}
-              title="You can run setup again later from Configuration"
+              title={
+                isFirstRun ? 'You can run setup again later from Configuration' : undefined
+              }
             >
-              Skip for now
+              {isFirstRun ? 'Skip for now' : 'Close'}
             </Button>
             <div className="ml-auto flex items-center gap-2">
               {!isFirst && (

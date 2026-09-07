@@ -122,6 +122,10 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
       session.answers.length,
       session.currentQuestion?.text,
       session.currentQuestion?.isFollowUp,
+      // Read into the live turn, and it moves without the text moving: `speechFailed` flips it
+      // for the question already on screen. It currently rides along on the state change in the
+      // same broadcast, which is exactly why leaving it out would be invisible until it did not.
+      session.currentQuestion?.hasAudio,
       session.currentAnswerText,
       session.state,
     ]
