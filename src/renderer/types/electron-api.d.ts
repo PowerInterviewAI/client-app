@@ -218,6 +218,8 @@ declare global {
       decrease: () => void;
       reset: () => void;
       getFactor: () => Promise<number>;
+      /** Resolves with the factor actually applied, which may have been clamped. */
+      setFactor: (factor: number) => Promise<number>;
       onChange: (callback: (percent: number) => void) => () => void;
     };
 

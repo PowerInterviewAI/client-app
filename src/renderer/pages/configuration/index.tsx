@@ -8,6 +8,7 @@ import { LanguageField } from '@/components/custom/settings/language-field';
 import { MicrophoneField } from '@/components/custom/settings/microphone-field';
 import { SuggestionModeField } from '@/components/custom/settings/suggestion-mode-field';
 import { TranscriptPanelField } from '@/components/custom/settings/transcript-panel-field';
+import { ZoomField } from '@/components/custom/settings/zoom-field';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -34,6 +35,7 @@ export default function ConfigurationPage() {
         <MicrophoneField />
         <LanguageField />
         <SuggestionModeField />
+        <ZoomField />
         <TranscriptPanelField />
 
         {/* The wizard is not a one-time thing the user is stuck having skipped. Reachable here

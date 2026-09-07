@@ -13,13 +13,15 @@ import {
 } from '@/components/custom/settings/profile-fields';
 import { SuggestionModeField } from '@/components/custom/settings/suggestion-mode-field';
 import { TranscriptPanelField } from '@/components/custom/settings/transcript-panel-field';
+import { ZoomField } from '@/components/custom/settings/zoom-field';
 import { Button } from '@/components/ui/button';
 import { useAccountForm } from '@/hooks/use-account-form';
 import { useAppState } from '@/hooks/use-app-state';
+import { useOnboardingDismissed } from '@/hooks/use-onboarding-dismissed';
 import { APP_NAME } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 
-type StepId = 'profile' | 'context' | 'language' | 'microphone' | 'mode' | 'transcript';
+type StepId = 'profile' | 'context' | 'language' | 'microphone' | 'mode' | 'zoom' | 'transcript';
 
 interface Step {
   id: StepId;
@@ -31,7 +33,7 @@ interface Step {
 
 /**
  * One thing per step, in the order a first interview needs them: who you are, what you are
- * interviewing for, then the four things that decide how the session behaves.
+ * interviewing for, then the five things that decide how the session looks and behaves.
  *
  * Profile first because it is the only step that can block a start - the start sequence refuses
  * to run without a name and a CV - and the only one that is worth typing rather than picking.
@@ -71,6 +73,13 @@ const STEPS: Step[] = [
     description: 'Change your mind at any time, including mid-interview.',
   },
   {
+    id: 'zoom',
+    label: 'Size',
+    title: 'Is this comfortable to read?',
+    description:
+      'The interview window is small on purpose, so it does not cover the call. Size it now, while you can take your time over it, rather than mid-question.',
+  },
+  {
     id: 'transcript',
     label: 'Transcript',
     title: 'One last thing',
@@ -98,6 +107,7 @@ const STEPS: Step[] = [
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { appState } = useAppState();
+  const dismiss = useOnboardingDismissed((s) => s.dismiss);
   const form = useAccountForm();
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -138,24 +148,32 @@ export default function OnboardingPage() {
         : 'Add your profile to continue.';
 
   /**
-   * Record that setup is done and leave.
-   *
-   * The write has to land before the navigate, and it goes to the account rather than to local
-   * config. Home gates on this exact flag, so leaving on a failed write would bounce the user
-   * straight back here with no explanation - a loop, not a degraded state. On failure they stay
-   * put and are told why.
+   * Record on the account that setup is done. Reports whether the write landed, so Finish can
+   * stay put on a failure while Skip leaves regardless.
    */
-  const complete = async (finished: boolean) => {
+  const complete = async (): Promise<boolean> => {
     const result = await getElectron()?.account?.setOnboardingCompleted(true);
     if (!result?.success) {
       console.error('Failed to record that setup is complete', result?.error);
-      toast.error('Could not save your setup. Check your connection and try again.');
-      return;
+      return false;
     }
+    return true;
+  };
 
+  /**
+   * Leave the wizard.
+   *
+   * `dismiss()` is not redundant with the write above. That write resolves over one IPC message
+   * and the app state carrying its result arrives over another, with nothing ordering the two -
+   * so home still read "setup pending" on this navigate and sent the user straight back in. The
+   * wizard ran twice, every time. The account flag is what makes setup done; this is what makes
+   * it done *now*.
+   */
+  const leave = (finished: boolean) => {
+    dismiss();
     // Said out loud, because the screen they land on says nothing about setup, and a wizard that
     // simply vanishes leaves the user unsure whether it took.
-    if (finished) toast.success("You're all set");
+    if (finished) toast.success('You are all set');
     navigate('/', { replace: true });
   };
 
@@ -174,7 +192,14 @@ export default function OnboardingPage() {
           toast.warning('Setup skipped, but your profile was not saved. Try again from Account.');
         }
       }
-      await complete(false);
+
+      // Left regardless of whether the durable write landed. Refusing to let someone out of a
+      // wizard is a worse outcome than asking them again next launch, and Skip is the control
+      // whose entire meaning is "let me out".
+      if (!(await complete())) {
+        toast.warning('Setup skipped, but we could not record that. It may be offered again.');
+      }
+      leave(false);
     } finally {
       setFinishing(false);
     }
@@ -205,7 +230,13 @@ export default function OnboardingPage() {
     if (isLast) {
       setFinishing(true);
       try {
-        await complete(true);
+        // Finish stays put on a failed write, unlike Skip: the user has just answered six
+        // questions, and leaving on a write that did not land means being asked all six again.
+        if (!(await complete())) {
+          toast.error('Could not save your setup. Check your connection and try again.');
+          return;
+        }
+        leave(true);
       } finally {
         setFinishing(false);
       }
@@ -293,6 +324,7 @@ export default function OnboardingPage() {
           {step.id === 'language' && <LanguageField />}
           {step.id === 'microphone' && <MicrophoneField />}
           {step.id === 'mode' && <SuggestionModeField />}
+          {step.id === 'zoom' && <ZoomField />}
           {step.id === 'transcript' && <TranscriptPanelField />}
         </div>
 

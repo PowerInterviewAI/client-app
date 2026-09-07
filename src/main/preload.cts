@@ -195,6 +195,7 @@ const electronApi = {
     decrease: () => ipcRenderer.send('zoom:out'),
     reset: () => ipcRenderer.send('zoom:reset'),
     getFactor: () => ipcRenderer.invoke('zoom:get-factor'),
+    setFactor: (factor: number) => ipcRenderer.invoke('zoom:set-factor', factor),
     onChange: (callback: (percent: number) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, percent: number) => callback(percent);
       ipcRenderer.on('zoom:level-changed', handler);
