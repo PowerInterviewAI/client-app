@@ -84,8 +84,8 @@ is decided by the question, not by convenience:
   and job context every suggestion is written from, the password. It writes to the backend
   account, so it has a Save button and a form that can be half-filled.
 - **Configuration** (`pages/configuration/index.tsx`) — *how the interview runs*: microphone,
-  language, suggestion style, transcript panel. Every control persists as it is changed, so there
-  is no Save button and nothing can be half-applied.
+  language, suggestion style, interface size, transcript panel. Every control persists as it is
+  changed, so there is no Save button and nothing can be half-applied.
 
 Each setting there is its own component under `components/custom/settings/`, and the account
 fields share `hooks/use-account-form.ts`. That is not decoration: the first-run wizard

@@ -55,13 +55,17 @@ Streaming AI responses generated from the user's CV and job description, trigger
 
 Screenshot-based problem solving. Accepts up to 4 images, sends them to the LLM backend, returns syntax-highlighted code output. Service: [src/main/services/suggestion-action.service.ts](src/main/services/suggestion-action.service.ts).
 
+### Mock Interview Question Delivery
+
+The backend returns each question whole; the session screen writes it out word by word as the interviewer speaks it. The reveal is timed against the first audio chunk actually sounding rather than against the `Speaking` state, because that state begins before the first sentence has been synthesised - timing it against the state would put the words on screen during that silence. Paces at roughly twice speech so the last word lands before the sentence ends, gives up waiting for audio after 2.5s, and shows the whole question at once under `prefers-reduced-motion`. Component: [src/renderer/components/custom/panels/streaming-question.tsx](src/renderer/components/custom/panels/streaming-question.tsx).
+
 ### Hint-Only Mode
 
 The default. Restructures both live and triggered suggestions into a bold one-line core answer plus one bullet per point, however many the answer needs - the same answer full-sentence mode would give, reorganised so the eye finds each point in one pass and stripped of its padding. Bullets stay full speakable sentences rather than keywords, so the candidate can read one out loud as it stands. Switched from the control panel, the configuration page, or with `Ctrl+Shift+F7`, which keeps it reachable in stealth mode. Persisted locally as `hintOnlyMode`; sent to the backend as `mode` on the suggestion request, whose wire values are still `normal` / `professional`.
 
 ### First-Run Setup
 
-A user who has not been through setup is sent to `/onboarding` before they can reach anything else, and asked once for the six things a first interview needs: profile, job context, language, microphone (with a live level test), suggestion style, and whether the transcript panel is docked. Each step renders the same component the account and configuration pages use.
+A user who has not been through setup is sent to `/onboarding` before they can reach anything else, and asked once for the seven things a first interview needs: profile, job context, language, microphone (with a live level test), suggestion style, interface size, and whether the transcript panel is docked. Each step renders the same component the account and configuration pages use.
 
 Gated on the account's `onboarding_completed`, written through `PATCH /api/users/me/onboarding` - on the account rather than on the machine, so it follows the user to a new device and a second account on a shared one gets its own run of it. The gate waits for `interviewConfigLoaded` as well as the flag, since before the account has been read the flag is a default rather than an answer.
 
@@ -69,7 +73,7 @@ Nothing in it is a trap: Skip is on every step, every setting has a working defa
 
 ### Navigation
 
-`/` is a launch hub naming the five things a user comes to the app to do: start a mock interview, start the live assistant, open Account (`/account` - sign-in identity, profile, context, password), open Configuration (`/configuration` - microphone, language, suggestion style, transcript panel), or buy credits.
+`/` is a launch hub naming the five things a user comes to the app to do: start a mock interview, start the live assistant, open Account (`/account` - sign-in identity, profile, context, password), open Configuration (`/configuration` - microphone, language, suggestion style, interface size, transcript panel), or buy credits.
 
 **It is the only place a session begins.** Both launch buttons start one; neither implements starting one. Live hands off to `/main` through router state, because `/main`'s control panel owns the whole start sequence; mock hands off to `/mock-interview` with the setup its dialog collected. `/main` itself carries only Stop - it is the live assistant, not a place to choose one - and shows a way back to `/` on the rare idle visit (a start cancelled at the headphone notice, or the route opened directly). Stopping asks whether to save the interview, clears it, and returns to `/`. See [docs/ux-conventions.md](docs/ux-conventions.md) for where a new capability belongs.
 
