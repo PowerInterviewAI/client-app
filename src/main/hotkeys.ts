@@ -1,6 +1,8 @@
 import { BrowserWindow, globalShortcut } from 'electron';
 
 import { ZOOM_STEP } from './consts.js';
+import { appStateService } from './services/app-state.service.js';
+import { mockInterviewService } from './services/mock-interview.service.js';
 import { actionSuggestionService } from './services/suggestion-action.service.js';
 import {
   moveWindowByArrow,
@@ -11,6 +13,7 @@ import {
   WindowPosition,
 } from './services/window-control.service.js';
 import * as zoomService from './services/zoom.service.js';
+import { isMockInterviewSessionActive } from './types/mock-interview.js';
 
 const isMac = process.platform === 'darwin';
 
@@ -38,8 +41,16 @@ export function registerGlobalHotkeys(): void {
   // Unregister existing hotkeys first
   globalShortcut.unregisterAll();
 
-  // Stop assistant
+  // Stop assistant - or end the mock session, if one is running. There is deliberately no
+  // *start* hotkey for either, so this is the only routing decision this shortcut needs: without
+  // it, pressing it during a mock interview would run the live stop path against a session that
+  // was never started (close to a no-op, but it still walks `runningState` through `Stopping`)
+  // while doing nothing about the session actually on screen.
   registerShortcut(`${BASE}+Q`, () => {
+    if (isMockInterviewSessionActive(appStateService.getState().mockInterview)) {
+      void mockInterviewService.endSession();
+      return;
+    }
     const w = BrowserWindow.getAllWindows()[0];
     if (w && !w.isDestroyed()) {
       w.webContents.send('hotkey:stop-assistant');
@@ -60,13 +71,14 @@ export function registerGlobalHotkeys(): void {
     if (w && !w.isDestroyed()) w.webContents.send('hotkey:toggle-transcript');
   });
 
-  // Toggle professional mode. A function key for the same reason as F8: it stays reachable in
-  // stealth mode, where the control panel carrying the button is hidden. Deliberately not P -
-  // globalShortcut claims accelerators system-wide, and Ctrl+Shift+P would take the command
-  // palette away from every editor on the machine for as long as this app runs.
+  // Switch between hint-only and full-sentence suggestions. A function key for the same reason
+  // as F8: it stays reachable in stealth mode, where the control panel carrying the button is
+  // hidden. Deliberately not P - globalShortcut claims accelerators system-wide, and
+  // Ctrl+Shift+P would take the command palette away from every editor on the machine for as
+  // long as this app runs.
   registerShortcut(`${BASE}+F7`, () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) w.webContents.send('hotkey:toggle-professional-mode');
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey:toggle-suggestion-mode');
   });
 
   // Zoom hotkeys
@@ -195,7 +207,7 @@ export function registerGlobalHotkeys(): void {
   console.log(`  ${mod}+Q : Stop assistant`);
   console.log(`  ${mod}+M : Toggle stealth mode`);
   console.log(`  ${mod}+N : Toggle opacity (stealth only)`);
-  console.log(`  ${mod}+F7 : Toggle professional mode`);
+  console.log(`  ${mod}+F7 : Switch hint-only / full-sentence suggestions`);
   console.log(`  ${mod}+F8 : Toggle transcription dock`);
   console.log(`  ${mod}+1-9 : Place window (numpad layout)`);
   console.log('  Ctrl+Alt+Shift+Arrow : Move window');

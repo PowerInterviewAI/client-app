@@ -120,7 +120,7 @@ export default function PermissionGateDialog({
           />
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter>
           <Button variant="ghost" size="sm" onClick={recheck} disabled={loading}>
             {loading ? 'Checking...' : 'Check Again'}
           </Button>

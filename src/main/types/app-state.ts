@@ -5,6 +5,7 @@
 import { UserRole } from './health-check.js';
 import { Language } from './language.js';
 import { SuggestionMode } from './llm.js';
+import { MockInterviewSessionState } from './mock-interview.js';
 
 export enum Speaker {
   Self = 'self',
@@ -102,6 +103,24 @@ export interface AppState {
   /** False until the account's config has been read this session; editing is unsafe before then. */
   interviewConfigLoaded: boolean;
   /**
+   * Whether the signed-in account has finished or skipped the first-run wizard.
+   *
+   * Read off the account rather than local config, so it follows the user to a new machine and a
+   * second account on a shared one gets its own run of it. Only meaningful once
+   * `interviewConfigLoaded` is true - before that it is the default, not an answer, and the
+   * renderer's gate waits for both.
+   */
+  onboardingCompleted: boolean;
+  /**
+   * The signed-in account's email, as the backend reports it.
+   *
+   * Not the same thing as `ConfigStore.email`, which is a *credential* the login form persists
+   * only when "remember me" is ticked - so it is deliberately blank for a user who declined
+   * that, and stale for the previous user until the next sign-in overwrites it. Anything that
+   * displays who is signed in reads this instead.
+   */
+  accountEmail: string;
+  /**
    * Whether there is an interview that saving would actually capture.
    *
    * Derived, never set by a caller - `updateState` strips it off incoming updates. The panels
@@ -115,6 +134,21 @@ export interface AppState {
    * nothing to save.
    */
   hasHistory: boolean;
+
+  /** Null until a mock interview session has been started at least once this launch. */
+  mockInterview: MockInterviewSessionState | null;
+
+  /**
+   * Whether the mock session holds an answer worth protecting from an unasked close.
+   *
+   * Derived, never set by a caller - `updateState` strips it off incoming updates, the same way
+   * `hasHistory` is. Based on answers that carry real content, not on `answers.length`: a
+   * question the candidate skipped is not content, and a session where every question was
+   * skipped has nothing a close prompt should protect. Independent of `hasHistory` - the two
+   * guard different sessions and must not be combined into one signal-of-truth, only combined
+   * at the one call site (the close guard) that has to ask "is there anything to lose at all".
+   */
+  hasMockContent: boolean;
 }
 
 /** The app state as sent to the renderer, with the interview config reduced to a summary. */

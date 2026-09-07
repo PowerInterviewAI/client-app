@@ -8,6 +8,9 @@ export function registerToolsHandlers(): void {
   ipcMain.handle('tools:export-transcript', async (_event, format: ExportFormat = 'docx') => {
     return toolsService.exportTranscript(format);
   });
+  ipcMain.handle('tools:export-mock-report', async (_event, format: ExportFormat = 'docx') => {
+    return toolsService.exportMockReport(format);
+  });
   ipcMain.handle('tools:clear-all', async () => {
     await toolsService.clearAll();
   });

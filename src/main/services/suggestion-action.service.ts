@@ -20,6 +20,7 @@ import {
   Transcript,
 } from '../types/app-state.js';
 import { GenerateActionSuggestionRequest, SuggestionMode } from '../types/llm.js';
+import { isMockInterviewSessionActive } from '../types/mock-interview.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { getSuggestionErrorMessage } from '../utils/suggestion-error.js';
 import { UuidUtil } from '../utils/uuid.js';
@@ -35,6 +36,22 @@ export class ActionSuggestionService {
 
   hasUploadedImages(): boolean {
     return this.uploadedImageNames.length > 0;
+  }
+
+  /**
+   * Refuse action suggestions during a mock interview, with its own message.
+   *
+   * This block is already true today as a side effect of mock mode never setting
+   * `RunningState.Running` - the three callers below all gate on that first. That is emergent,
+   * not designed: the day mock interview reuses `RunningState` for its own surface-hiding
+   * purposes (a genuinely tempting refactor), the four global hotkeys that reach these methods
+   * go live during practice with nothing failing anywhere. This explicit check is what survives
+   * that change; it is a belt to the `RunningState` brace, not a replacement for it.
+   */
+  private refuseDuringMockInterview(message: string): boolean {
+    if (!isMockInterviewSessionActive(appStateService.getState().mockInterview)) return false;
+    pushNotificationService.pushNotification({ type: 'warning', message });
+    return true;
   }
 
   getSuggestions(isUploading: boolean = false, includePrompt: boolean = true): ActionSuggestion[] {
@@ -73,6 +90,11 @@ export class ActionSuggestionService {
   }
 
   async clearImages(): Promise<void> {
+    if (
+      this.refuseDuringMockInterview('Action suggestions are unavailable during a mock interview.')
+    ) {
+      return;
+    }
     if (appStateService.getState().runningState !== RunningState.Running) {
       pushNotificationService.pushNotification({
         type: 'warning',
@@ -86,6 +108,11 @@ export class ActionSuggestionService {
   }
 
   async captureScreenshot(): Promise<void> {
+    if (
+      this.refuseDuringMockInterview('Action suggestions are unavailable during a mock interview.')
+    ) {
+      return;
+    }
     if (appStateService.getState().runningState !== RunningState.Running) {
       pushNotificationService.pushNotification({
         type: 'warning',
@@ -137,6 +164,12 @@ export class ActionSuggestionService {
   }
 
   async startGenerateSuggestion(): Promise<void> {
+    if (
+      this.refuseDuringMockInterview('Action suggestions are unavailable during a mock interview.')
+    ) {
+      return;
+    }
+
     const appState = appStateService.getState();
 
     if (appState.runningState !== RunningState.Running) {
@@ -212,12 +245,11 @@ export class ActionSuggestionService {
     const interviewConfig = appStateService.getState().interviewConfig;
 
     const payload: GenerateActionSuggestionRequest = {
-      config: conf.llmConf,
       profile_data: interviewConfig.profileData,
       context: interviewConfig.context,
       transcripts: transcripts.slice(-TRANSCRIPT_UPLOAD_LIMIT),
       image_names: [...this.uploadedImageNames],
-      mode: conf.professionalMode ? SuggestionMode.Professional : SuggestionMode.Normal,
+      mode: conf.hintOnlyMode ? SuggestionMode.HintOnly : SuggestionMode.FullSentence,
       language: conf.language,
     };
 

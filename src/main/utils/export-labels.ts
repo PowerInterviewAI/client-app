@@ -15,8 +15,9 @@ import { DEFAULT_LANGUAGE, Language } from '../types/language.js';
  * button on a Spanish interview is an inconvenience to one person for one session; the report is
  * handed to someone who was not there, and may not read English at all.
  *
- * Five nouns, and no attempt at a general localisation layer. The rest of the document is the
- * candidate's name, timestamps and text that already arrived in the right language.
+ * The mock-interview fields below follow it for the same reason: `export-mock-markdown.ts` builds
+ * a report from the model's own scored output (already in the interview's language) plus these
+ * five nouns and two labels wrapped around it.
  */
 export interface ExportLabels {
   /** Heading over the full transcript section. */
@@ -29,6 +30,20 @@ export interface ExportLabels {
   interviewer: string;
   /** Label on the export timestamp under the report title. */
   dateTime: string;
+  /** Title of the mock-interview report document. */
+  mockInterview: string;
+  /** Label before each question in the mock-interview report. */
+  question: string;
+  /** Label before the candidate's transcribed answer. */
+  yourAnswer: string;
+  /** Label before a per-question or overall numeric score. */
+  score: string;
+  /** Heading over the report's strengths list. */
+  strengths: string;
+  /** Heading over the report's gaps list. */
+  gaps: string;
+  /** Label before the model's rewritten, stronger version of an answer. */
+  strongerAnswer: string;
 }
 
 const LABELS: Record<Language, ExportLabels> = {
@@ -38,6 +53,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Suggestion',
     interviewer: 'Interviewer',
     dateTime: 'Date/Time',
+    mockInterview: 'Mock Interview',
+    question: 'Question',
+    yourAnswer: 'Your Answer',
+    score: 'Score',
+    strengths: 'Strengths',
+    gaps: 'Gaps',
+    strongerAnswer: 'Stronger Answer',
   },
   [Language.Spanish]: {
     transcripts: 'Transcripciones',
@@ -45,6 +67,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Sugerencia',
     interviewer: 'Entrevistador',
     dateTime: 'Fecha y hora',
+    mockInterview: 'Entrevista Simulada',
+    question: 'Pregunta',
+    yourAnswer: 'Tu Respuesta',
+    score: 'Puntuación',
+    strengths: 'Fortalezas',
+    gaps: 'Áreas de Mejora',
+    strongerAnswer: 'Respuesta Más Sólida',
   },
   [Language.German]: {
     transcripts: 'Transkripte',
@@ -52,6 +81,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Vorschlag',
     interviewer: 'Interviewer',
     dateTime: 'Datum/Uhrzeit',
+    mockInterview: 'Übungsinterview',
+    question: 'Frage',
+    yourAnswer: 'Deine Antwort',
+    score: 'Bewertung',
+    strengths: 'Stärken',
+    gaps: 'Schwächen',
+    strongerAnswer: 'Stärkere Antwort',
   },
   [Language.French]: {
     transcripts: 'Transcriptions',
@@ -59,6 +95,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Suggestion',
     interviewer: 'Intervieweur',
     dateTime: 'Date/heure',
+    mockInterview: 'Entretien Simulé',
+    question: 'Question',
+    yourAnswer: 'Votre Réponse',
+    score: 'Score',
+    strengths: 'Points Forts',
+    gaps: 'Points à Améliorer',
+    strongerAnswer: 'Réponse Plus Solide',
   },
   [Language.Portuguese]: {
     transcripts: 'Transcrições',
@@ -66,6 +109,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Sugestão',
     interviewer: 'Entrevistador',
     dateTime: 'Data/hora',
+    mockInterview: 'Entrevista Simulada',
+    question: 'Pergunta',
+    yourAnswer: 'Sua Resposta',
+    score: 'Pontuação',
+    strengths: 'Pontos Fortes',
+    gaps: 'Pontos a Melhorar',
+    strongerAnswer: 'Resposta Mais Forte',
   },
   [Language.Italian]: {
     transcripts: 'Trascrizioni',
@@ -73,6 +123,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Suggerimento',
     interviewer: 'Intervistatore',
     dateTime: 'Data/ora',
+    mockInterview: 'Colloquio Simulato',
+    question: 'Domanda',
+    yourAnswer: 'La Tua Risposta',
+    score: 'Punteggio',
+    strengths: 'Punti di Forza',
+    gaps: 'Aree di Miglioramento',
+    strongerAnswer: 'Risposta Più Forte',
   },
   [Language.Dutch]: {
     transcripts: 'Transcripties',
@@ -80,6 +137,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Suggestie',
     interviewer: 'Interviewer',
     dateTime: 'Datum/tijd',
+    mockInterview: 'Proefinterview',
+    question: 'Vraag',
+    yourAnswer: 'Jouw Antwoord',
+    score: 'Score',
+    strengths: 'Sterke Punten',
+    gaps: 'Verbeterpunten',
+    strongerAnswer: 'Sterker Antwoord',
   },
   [Language.Polish]: {
     transcripts: 'Transkrypcje',
@@ -87,6 +151,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Sugestia',
     interviewer: 'Prowadzący rozmowę',
     dateTime: 'Data/godzina',
+    mockInterview: 'Symulacja Rozmowy Kwalifikacyjnej',
+    question: 'Pytanie',
+    yourAnswer: 'Twoja Odpowiedź',
+    score: 'Wynik',
+    strengths: 'Mocne Strony',
+    gaps: 'Obszary do Poprawy',
+    strongerAnswer: 'Mocniejsza Odpowiedź',
   },
   [Language.Russian]: {
     transcripts: 'Расшифровки',
@@ -94,6 +165,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Подсказка',
     interviewer: 'Интервьюер',
     dateTime: 'Дата и время',
+    mockInterview: 'Пробное Собеседование',
+    question: 'Вопрос',
+    yourAnswer: 'Ваш Ответ',
+    score: 'Оценка',
+    strengths: 'Сильные Стороны',
+    gaps: 'Слабые Стороны',
+    strongerAnswer: 'Более Сильный Ответ',
   },
   [Language.Ukrainian]: {
     transcripts: 'Розшифровки',
@@ -101,6 +179,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Підказка',
     interviewer: 'Інтерв’юер',
     dateTime: 'Дата й час',
+    mockInterview: 'Пробна Співбесіда',
+    question: 'Питання',
+    yourAnswer: 'Ваша Відповідь',
+    score: 'Оцінка',
+    strengths: 'Сильні Сторони',
+    gaps: 'Слабкі Сторони',
+    strongerAnswer: 'Сильніша Відповідь',
   },
   [Language.Czech]: {
     transcripts: 'Přepisy',
@@ -108,6 +193,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Návrh',
     interviewer: 'Tazatel',
     dateTime: 'Datum a čas',
+    mockInterview: 'Zkušební Pohovor',
+    question: 'Otázka',
+    yourAnswer: 'Vaše Odpověď',
+    score: 'Skóre',
+    strengths: 'Silné Stránky',
+    gaps: 'Slabé Stránky',
+    strongerAnswer: 'Silnější Odpověď',
   },
   [Language.Romanian]: {
     transcripts: 'Transcrieri',
@@ -115,6 +207,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Sugestie',
     interviewer: 'Intervievator',
     dateTime: 'Data și ora',
+    mockInterview: 'Interviu Simulat',
+    question: 'Întrebare',
+    yourAnswer: 'Răspunsul Tău',
+    score: 'Scor',
+    strengths: 'Puncte Forte',
+    gaps: 'Puncte Slabe',
+    strongerAnswer: 'Răspuns Mai Puternic',
   },
   [Language.Greek]: {
     transcripts: 'Μεταγραφές',
@@ -122,6 +221,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Πρόταση',
     interviewer: 'Συνεντευκτής',
     dateTime: 'Ημερομηνία/ώρα',
+    mockInterview: 'Δοκιμαστική Συνέντευξη',
+    question: 'Ερώτηση',
+    yourAnswer: 'Η Απάντησή σας',
+    score: 'Βαθμολογία',
+    strengths: 'Δυνατά Σημεία',
+    gaps: 'Σημεία Βελτίωσης',
+    strongerAnswer: 'Ισχυρότερη Απάντηση',
   },
   [Language.Hungarian]: {
     transcripts: 'Átiratok',
@@ -129,6 +235,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Javaslat',
     interviewer: 'Kérdező',
     dateTime: 'Dátum/idő',
+    mockInterview: 'Próbainterjú',
+    question: 'Kérdés',
+    yourAnswer: 'Az Ön Válasza',
+    score: 'Pontszám',
+    strengths: 'Erősségek',
+    gaps: 'Fejlesztendő Területek',
+    strongerAnswer: 'Erősebb Válasz',
   },
   [Language.Swedish]: {
     transcripts: 'Transkriptioner',
@@ -136,6 +249,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Förslag',
     interviewer: 'Intervjuare',
     dateTime: 'Datum/tid',
+    mockInterview: 'Övningsintervju',
+    question: 'Fråga',
+    yourAnswer: 'Ditt Svar',
+    score: 'Poäng',
+    strengths: 'Styrkor',
+    gaps: 'Förbättringsområden',
+    strongerAnswer: 'Starkare Svar',
   },
   [Language.Danish]: {
     transcripts: 'Transskriptioner',
@@ -143,6 +263,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Forslag',
     interviewer: 'Interviewer',
     dateTime: 'Dato/klokkeslæt',
+    mockInterview: 'Prøveinterview',
+    question: 'Spørgsmål',
+    yourAnswer: 'Dit Svar',
+    score: 'Score',
+    strengths: 'Styrker',
+    gaps: 'Forbedringspunkter',
+    strongerAnswer: 'Stærkere Svar',
   },
   [Language.Norwegian]: {
     transcripts: 'Transkripsjoner',
@@ -150,6 +277,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Forslag',
     interviewer: 'Intervjuer',
     dateTime: 'Dato/tid',
+    mockInterview: 'Prøveintervju',
+    question: 'Spørsmål',
+    yourAnswer: 'Ditt Svar',
+    score: 'Poengsum',
+    strengths: 'Styrker',
+    gaps: 'Forbedringspunkter',
+    strongerAnswer: 'Sterkere Svar',
   },
   [Language.Finnish]: {
     transcripts: 'Litteroinnit',
@@ -157,6 +291,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Ehdotus',
     interviewer: 'Haastattelija',
     dateTime: 'Päivämäärä/aika',
+    mockInterview: 'Harjoitushaastattelu',
+    question: 'Kysymys',
+    yourAnswer: 'Vastauksesi',
+    score: 'Pisteet',
+    strengths: 'Vahvuudet',
+    gaps: 'Kehityskohteet',
+    strongerAnswer: 'Vahvempi Vastaus',
   },
   [Language.Turkish]: {
     transcripts: 'Transkriptler',
@@ -164,6 +305,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Öneri',
     interviewer: 'Görüşmeci',
     dateTime: 'Tarih/saat',
+    mockInterview: 'Deneme Mülakatı',
+    question: 'Soru',
+    yourAnswer: 'Cevabınız',
+    score: 'Puan',
+    strengths: 'Güçlü Yönler',
+    gaps: 'Geliştirilmesi Gereken Yönler',
+    strongerAnswer: 'Daha Güçlü Cevap',
   },
   [Language.Hindi]: {
     transcripts: 'प्रतिलेख',
@@ -171,6 +319,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'सुझाव',
     interviewer: 'साक्षात्कारकर्ता',
     dateTime: 'दिनांक/समय',
+    mockInterview: 'मॉक इंटरव्यू',
+    question: 'प्रश्न',
+    yourAnswer: 'आपका उत्तर',
+    score: 'स्कोर',
+    strengths: 'ताकतें',
+    gaps: 'सुधार के क्षेत्र',
+    strongerAnswer: 'बेहतर उत्तर',
   },
   [Language.Japanese]: {
     transcripts: '文字起こし',
@@ -178,6 +333,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: '提案',
     interviewer: '面接官',
     dateTime: '日時',
+    mockInterview: '模擬面接',
+    question: '質問',
+    yourAnswer: 'あなたの回答',
+    score: 'スコア',
+    strengths: '強み',
+    gaps: '改善点',
+    strongerAnswer: 'より良い回答',
   },
   [Language.Korean]: {
     transcripts: '대화록',
@@ -185,6 +347,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: '제안',
     interviewer: '면접관',
     dateTime: '날짜/시간',
+    mockInterview: '모의 면접',
+    question: '질문',
+    yourAnswer: '답변',
+    score: '점수',
+    strengths: '강점',
+    gaps: '개선점',
+    strongerAnswer: '더 나은 답변',
   },
   [Language.Chinese]: {
     transcripts: '转录文本',
@@ -192,6 +361,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: '建议',
     interviewer: '面试官',
     dateTime: '日期/时间',
+    mockInterview: '模拟面试',
+    question: '问题',
+    yourAnswer: '你的回答',
+    score: '得分',
+    strengths: '优势',
+    gaps: '待改进之处',
+    strongerAnswer: '更好的回答',
   },
   [Language.Vietnamese]: {
     transcripts: 'Bản ghi',
@@ -199,6 +375,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Gợi ý',
     interviewer: 'Người phỏng vấn',
     dateTime: 'Ngày/giờ',
+    mockInterview: 'Phỏng Vấn Thử',
+    question: 'Câu Hỏi',
+    yourAnswer: 'Câu Trả Lời Của Bạn',
+    score: 'Điểm Số',
+    strengths: 'Điểm Mạnh',
+    gaps: 'Điểm Cần Cải Thiện',
+    strongerAnswer: 'Câu Trả Lời Tốt Hơn',
   },
   [Language.Thai]: {
     transcripts: 'บทถอดเสียง',
@@ -206,6 +389,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'ข้อเสนอแนะ',
     interviewer: 'ผู้สัมภาษณ์',
     dateTime: 'วันที่/เวลา',
+    mockInterview: 'การสัมภาษณ์จำลอง',
+    question: 'คำถาม',
+    yourAnswer: 'คำตอบของคุณ',
+    score: 'คะแนน',
+    strengths: 'จุดแข็ง',
+    gaps: 'จุดที่ควรปรับปรุง',
+    strongerAnswer: 'คำตอบที่ดีกว่า',
   },
   [Language.Indonesian]: {
     transcripts: 'Transkrip',
@@ -213,6 +403,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'Saran',
     interviewer: 'Pewawancara',
     dateTime: 'Tanggal/waktu',
+    mockInterview: 'Wawancara Simulasi',
+    question: 'Pertanyaan',
+    yourAnswer: 'Jawaban Anda',
+    score: 'Skor',
+    strengths: 'Kekuatan',
+    gaps: 'Area yang Perlu Ditingkatkan',
+    strongerAnswer: 'Jawaban yang Lebih Kuat',
   },
   [Language.Arabic]: {
     transcripts: 'النصوص',
@@ -220,6 +417,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'اقتراح',
     interviewer: 'المحاور',
     dateTime: 'التاريخ/الوقت',
+    mockInterview: 'مقابلة تجريبية',
+    question: 'السؤال',
+    yourAnswer: 'إجابتك',
+    score: 'النتيجة',
+    strengths: 'نقاط القوة',
+    gaps: 'نقاط التحسين',
+    strongerAnswer: 'إجابة أقوى',
   },
   [Language.Hebrew]: {
     transcripts: 'תמלולים',
@@ -227,6 +431,13 @@ const LABELS: Record<Language, ExportLabels> = {
     suggestion: 'הצעה',
     interviewer: 'המראיין',
     dateTime: 'תאריך/שעה',
+    mockInterview: 'ראיון תרגול',
+    question: 'שאלה',
+    yourAnswer: 'התשובה שלך',
+    score: 'ציון',
+    strengths: 'חוזקות',
+    gaps: 'נקודות לשיפור',
+    strongerAnswer: 'תשובה חזקה יותר',
   },
 };
 

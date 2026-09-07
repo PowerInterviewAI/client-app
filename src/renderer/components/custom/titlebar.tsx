@@ -1,11 +1,13 @@
+import { Search } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import faviconSvg from '/favicon.svg';
 import CreditsDisplay from '@/components/custom/credits-display';
 import TitlebarMenu from '@/components/custom/titlebar-menu';
+import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
-import { useConfigStore } from '@/hooks/use-config-store';
+import { useCommandPaletteStore } from '@/hooks/use-command-palette';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { APP_NAME, isMac } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
@@ -42,7 +44,7 @@ export default function Titlebar() {
   const handleClose = () => window.electronAPI?.close();
 
   const { appState } = useAppState();
-  const { config } = useConfigStore();
+  const openCommandPalette = useCommandPaletteStore((s) => s.setOpen);
 
   if (isStealth) return null;
 
@@ -67,7 +69,7 @@ export default function Titlebar() {
         {appState?.isLoggedIn && appState?.credits !== undefined && (
           <CreditsDisplay
             credits={appState.credits ?? 0}
-            llmModel={config?.llmConf?.model ?? appState.providedLLMModel ?? ''}
+            llmModel={appState.providedLLMModel ?? ''}
             userRole={appState.userRole}
             style={DRAG}
           />
@@ -79,6 +81,23 @@ export default function Titlebar() {
               <hr className="h-6 border border-border" />
             </>
           )}
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => openCommandPalette(true)}
+                aria-label="Open command palette"
+                style={NO_DRAG}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Search actions ({isMac ? '⌘' : 'Ctrl+'}K)</p>
+            </TooltipContent>
+          </Tooltip>
 
           <TitlebarMenu style={NO_DRAG} />
 

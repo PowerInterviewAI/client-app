@@ -5,7 +5,9 @@ import { getElectron } from '@/lib/utils';
 import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
 import { DEFAULT_LANGUAGE } from '@/types/language';
+import { isMockInterviewSessionActive } from '@/types/mock-interview';
 
+import { getAppStateSnapshot } from './use-app-state';
 import { useConfigStore } from './use-config-store';
 
 interface AssistantService {
@@ -24,6 +26,15 @@ export const useAssistantService = create<AssistantService>((set) => ({
     const electron = getElectron();
     if (!electron) {
       throw new Error('Electron API not available');
+    }
+
+    // Mutually exclusive with a mock session: both want the microphone and an ASR socket, and
+    // running both would bill twice. There is no start hotkey for the live assistant, so this
+    // one check covers every route into it.
+    if (isMockInterviewSessionActive(getAppStateSnapshot()?.mockInterview ?? null)) {
+      const message = 'Stop the mock interview before starting a live session.';
+      set({ error: message });
+      throw new Error(message);
     }
 
     try {

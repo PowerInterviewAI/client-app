@@ -1,12 +1,13 @@
-import { Ellipsis, Play, Square } from 'lucide-react';
-import { useState } from 'react';
+import { Ellipsis, Square } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
 import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
-import { useConfigurationDialog } from '@/hooks/use-configuration-dialog';
+import { useEndLiveSession } from '@/hooks/use-end-live-session';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { isMac } from '@/lib/consts';
@@ -18,9 +19,8 @@ import PermissionGateDialog from '../permission-gate-dialog';
 import ZoomControl from '../zoom-control';
 import { AudioGroup } from './audio-group';
 import { LanguageGroup } from './language-group';
-import { LLMGroup } from './llm-group';
 import { MainGroup } from './main-group';
-import { ProfessionalModeGroup } from './professional-mode-group';
+import { SuggestionModeGroup } from './suggestion-mode-group';
 import { ToolsGroup } from './tools-group';
 
 type StateConfig = {
@@ -32,17 +32,37 @@ type StateConfig = {
 
 export default function ControlPanel() {
   const isStealth = useIsStealthMode();
-  const { startAssistant, stopAssistant } = useAssistantService();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { startAssistant } = useAssistantService();
+  const endLiveSession = useEndLiveSession();
   const { runningState, appState } = useAppState();
   const { config } = useConfigStore();
-  const { openConfigurationDialog } = useConfigurationDialog();
   const { confirmDiscard } = useSaveHistoryGuard();
   const [permGateOpen, setPermGateOpen] = useState(false);
   const [headphoneNoticeOpen, setHeadphoneNoticeOpen] = useState(false);
 
   const { devices: audioInputDevices, ready: audioDevicesReady } = useAudioInputDevices();
 
-  if (isStealth) return null;
+  // Arriving here is how a live session gets started: the home screen and the command palette
+  // ask for it through router state rather than owning a copy of the sequence below.
+  //
+  // Guarded per history entry, not per mount. The state is cleared by the replace below, so a
+  // Back to this entry finds nothing to re-trigger; the key is what stops StrictMode's double
+  // effect acting twice before that replace lands. A ref that latched for the life of the mount
+  // would also swallow the *second* request - the palette firing Start again from `/main`, which
+  // is the same route and therefore the same mount.
+  const consumedNavKey = useRef<string | null>(null);
+  const autoStartLiveRequested = useRef(false);
+  useEffect(() => {
+    const navState = location.state as { autoStartLive?: boolean } | null;
+    if (!navState?.autoStartLive) return;
+    if (consumedNavKey.current === location.key) return;
+
+    consumedNavKey.current = location.key;
+    autoStartLiveRequested.current = true;
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location, navigate]);
 
   const selectedAudioInputDeviceName = config?.audioInputDeviceName ?? '';
 
@@ -72,12 +92,12 @@ export default function ControlPanel() {
       {
         ok: !!appState?.interviewConfig?.fullName,
         message: 'Full name is not set',
-        onFail: openConfigurationDialog,
+        onFail: () => navigate('/account'),
       },
       {
         ok: appState?.interviewConfig?.hasProfileData ?? false,
         message: 'Profile data is not set',
-        onFail: openConfigurationDialog,
+        onFail: () => navigate('/account'),
       },
       {
         ok: !noAudioInputDevices,
@@ -144,21 +164,52 @@ export default function ControlPanel() {
 
     // Before the permission gate, and before anything opens a socket: on speakers the echo is
     // already in the audio by the time the first question is asked, and the failure it causes
-    // is silent. Nothing here can detect the output route, so the user is asked.
-    if (!config?.headphoneNoticeAcknowledged) {
-      setHeadphoneNoticeOpen(true);
-      return;
-    }
-
-    await startAfterNotice();
+    // is silent. Nothing here can detect the output route, so the user is asked - every session,
+    // since whether the call is on speakers is a property of the machine and the meeting, not a
+    // setting that stays true once answered.
+    setHeadphoneNoticeOpen(true);
   };
 
+  // Deferred rather than fired the moment the intent arrives. `checkCanStart` reads the account
+  // config and the enumerated microphones, neither of which has resolved on the first frames
+  // after a route change - starting there would greet the user with "could not load your saved
+  // configuration" for a config that was about to arrive. If they never resolve, nothing happens
+  // and the user is left on an idle console with a way back to the home screen, which is the
+  // honest outcome.
+  const autoStartLiveReady =
+    autoStartLiveRequested.current &&
+    runningState === RunningState.Idle &&
+    audioDevicesReady &&
+    // Undefined until `config:get` resolves, and `startAssistant` reads the session token,
+    // microphone and language straight off it. A hand-pressed Start was always well clear of
+    // that; a start that fires on arrival is not, and starting on an unloaded config opens the
+    // ASR socket with an empty token.
+    config !== undefined &&
+    (appState?.interviewConfigLoaded ?? false);
+
+  useEffect(() => {
+    // The ref is re-checked here, not just folded into `autoStartLiveReady` above: StrictMode
+    // runs this effect twice on mount without a render in between, so the recomputed condition
+    // is not what stops the second run - the ref is.
+    if (!autoStartLiveReady || !autoStartLiveRequested.current) return;
+    autoStartLiveRequested.current = false;
+    void handleStartClick();
+    // handleStartClick is redefined every render and is not a dependency of when this should
+    // fire; the ref above is what makes it happen exactly once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStartLiveReady]);
+
+  if (isStealth) return null;
+
   const stateConfig: Record<RunningState, StateConfig> = {
+    // Inert. `MainGroup` renders a way back to the home screen in this state instead of anything
+    // from here - starting a session is not something this screen offers any more - but the
+    // record is keyed by the enum, so the entry has to exist.
     [RunningState.Idle]: {
-      onClick: handleStartClick,
-      className: 'bg-blue-600 hover:bg-blue-600/90',
-      icon: <Play className="h-3.5 w-3.5" />,
-      label: 'Start',
+      onClick: () => {},
+      className: '',
+      icon: null,
+      label: 'Idle',
     },
     [RunningState.Starting]: {
       onClick: () => {},
@@ -168,8 +219,11 @@ export default function ControlPanel() {
       label: 'Starting',
     },
     [RunningState.Running]: {
+      // Stop is more than a teardown here: it ends the session, offers to keep it, and takes the
+      // candidate back to the home screen. See `useEndLiveSession` for why that offer belongs on
+      // the stop rather than on the next start.
       onClick: async () => {
-        await stopAssistant();
+        await endLiveSession();
       },
       className: 'bg-destructive hover:bg-destructive/90 animate-pulse',
       icon: <Square className="h-3.5 w-3.5" />,
@@ -191,8 +245,8 @@ export default function ControlPanel() {
 
   return (
     <>
-      {/* Reading order is the order of use: start the session, then the things that shape it.
-          Grouping is carried by spacing - gap-1 inside a group, gap-4 between - rather than by a
+      {/* Reading order is the order of use: end the session, then the things that shape it while
+          it runs. Grouping is carried by spacing - gap-1 inside a group, gap-4 between - rather than by a
           rule between every cluster, so the row stays quiet at 32px tall. The one hairline earns
           its place by marking the only boundary that matters, between the action and the settings.
 
@@ -203,11 +257,11 @@ export default function ControlPanel() {
 
         <div className="h-5 w-px bg-border" aria-hidden="true" />
 
-        {/* What the session runs on. Only the model locks while the assistant runs; audio and
-            language stay live, because both are things an interview can get wrong in progress
-            and neither can be fixed by restarting without losing the transcript. Language sits
-            here rather than with the presentation toggles because it is an input as much as an
-            output: it picks the speech model before it picks the answer's language. */}
+        {/* What the session runs on. Both stay live while the assistant runs, because audio and
+            language are things an interview can get wrong in progress and neither can be fixed
+            by restarting without losing the transcript. Language sits here rather than with the
+            presentation toggles because it is an input as much as an output: it picks the speech
+            model before it picks the answer's language. */}
         <div className="flex items-center gap-1">
           <AudioGroup
             audioInputDevices={audioInputDevices}
@@ -215,12 +269,11 @@ export default function ControlPanel() {
             getDisabled={getDisabled}
           />
           <LanguageGroup getDisabled={getDisabled} />
-          <LLMGroup getDisabled={getDisabled} />
         </div>
 
         {/* What the interview produces: how suggestions read, and what to do with the session */}
         <div className="flex items-center gap-1">
-          <ProfessionalModeGroup />
+          <SuggestionModeGroup />
           <ToolsGroup getDisabled={getDisabled} />
         </div>
 

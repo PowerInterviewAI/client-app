@@ -121,6 +121,61 @@ export class ApiClient {
     return this.requestStream('POST', url, body, signal);
   }
 
+  /**
+   * POST a JSON body and read back binary bytes rather than JSON.
+   *
+   * `request<T>` always calls `response.json()`, which a binary body cannot satisfy - this is
+   * the mock interview's `/speak` proxy, which answers audio bytes or a bare `204 No Content`.
+   * That 204 is a normal result (the language has no Aura voice), not an error, so it resolves
+   * to `null` rather than throwing - the caller falls back to a text-only question either way.
+   */
+  async postArrayBuffer(
+    path: string,
+    body?: unknown,
+    timeoutMs?: number
+  ): Promise<ArrayBuffer | null> {
+    const url = this.buildUrl(path);
+    try {
+      const sessionToken = configStore.getConfig().sessionToken;
+      if (sessionToken) {
+        this.setAuthToken(sessionToken);
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: this.headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: timeoutMs ? AbortSignal.timeout(timeoutMs) : undefined,
+      });
+
+      if (response.status === 204) return null;
+
+      if (!response.ok) {
+        const responseContent = await response.text().catch(() => '');
+        throw new ApiRequestError(
+          response.statusText || 'HTTP request failed',
+          response.status,
+          responseContent
+        );
+      }
+
+      return await response.arrayBuffer();
+    } catch (error: unknown) {
+      if (error instanceof ApiRequestError) throw error;
+
+      const timedOut = error instanceof Error && error.name === 'TimeoutError';
+      throw new ApiRequestError(
+        timedOut
+          ? 'The request timed out'
+          : error instanceof Error
+            ? error.message
+            : 'Network request failed',
+        0,
+        null
+      );
+    }
+  }
+
   async put<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
     const url = this.buildUrl(path);
     return this.request<T>('PUT', url, body);

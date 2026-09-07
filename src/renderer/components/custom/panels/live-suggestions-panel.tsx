@@ -43,7 +43,7 @@ function SuggestionAnswer({
   const suffix = trailing ? ' ...' : '';
   const answer = stripDanglingEmphasis(suggestion.answer);
 
-  if (suggestion.mode === SuggestionMode.Professional) {
+  if (suggestion.mode === SuggestionMode.HintOnly) {
     return (
       // The headline is the line that has to land in a glance. SafeMarkdown gives it weight - it
       // renders as `strong` at 600 over regular body - and the size bump here is what separates it

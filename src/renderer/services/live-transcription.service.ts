@@ -86,9 +86,25 @@ class AudioSenderWorklet extends AudioWorkletProcessor {
 registerProcessor('audio-sender-worklet', AudioSenderWorklet);
 `;
 
-type Channel = 'ch_0' | 'ch_1';
+export type Channel = 'ch_0' | 'ch_1';
 
-class AudioWsStream {
+/**
+ * Resolve a stored device name to its current `deviceId`, or the system default if unset/unknown.
+ *
+ * Lifted out of `LiveTranscriptionService` (additive - the method itself is unchanged) so
+ * `mock-transcription.service.ts` can resolve the same stored preference without depending on the
+ * live service or duplicating this lookup.
+ */
+export async function resolveMicDeviceId(deviceName: string): Promise<string | null> {
+  if (!deviceName) return null;
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const match = devices.find(
+    (device) => device.kind === 'audioinput' && device.label === deviceName
+  );
+  return match?.deviceId ?? null;
+}
+
+export class AudioWsStream {
   private ws: WebSocket | null = null;
   private ctx: AudioContext | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
@@ -501,7 +517,7 @@ class LiveTranscriptionService {
     if (!electron) throw new Error('Electron API not available');
     await electron.transcription.setSessionToken(sessionToken);
 
-    const micDeviceId = await this.resolveMicDeviceId(audioInputDeviceName);
+    const micDeviceId = await resolveMicDeviceId(audioInputDeviceName);
     this.micStream = await navigator.mediaDevices.getUserMedia({
       audio: micConstraints(micDeviceId),
       video: false,
@@ -580,7 +596,7 @@ class LiveTranscriptionService {
 
     const seq = ++this.micSwitchSeq;
 
-    const deviceId = await this.resolveMicDeviceId(deviceName);
+    const deviceId = await resolveMicDeviceId(deviceName);
     const nextStream = await navigator.mediaDevices.getUserMedia({
       audio: micConstraints(deviceId),
       video: false,
@@ -615,15 +631,6 @@ class LiveTranscriptionService {
     this.loopbackStream?.getTracks().forEach((track) => track.stop());
     this.micStream = null;
     this.loopbackStream = null;
-  }
-
-  private async resolveMicDeviceId(deviceName: string): Promise<string | null> {
-    if (!deviceName) return null;
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const match = devices.find(
-      (device) => device.kind === 'audioinput' && device.label === deviceName
-    );
-    return match?.deviceId ?? null;
   }
 }
 

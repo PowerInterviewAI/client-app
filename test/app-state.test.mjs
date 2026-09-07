@@ -104,5 +104,56 @@ export async function run() {
     sent.at(-1).payload.transcripts?.[0]?.text === 'Transcripts will be here'
   );
 
+  // hasMockContent is derived the same way hasHistory is - stripped from incoming updates and
+  // recomputed from the mockInterview session, never trusted from the caller. It must also never
+  // contaminate hasHistory, since a close guard reading `hasHistory || hasMockContent` would
+  // otherwise treat the two subjects as one.
+  const mockSession = (answers) => ({
+    state: 'listening',
+    setup: { role: 'Engineer', seniority: 'mid', difficulty: 'standard', question_count: 3 },
+    currentQuestion: null,
+    questionNumber: 1,
+    answers,
+    currentAnswerText: '',
+    report: null,
+    reportError: null,
+    error: null,
+  });
+
+  appStateService.updateState({ mockInterview: mockSession([]) });
+  check(
+    'a mock session with no answers has no content',
+    appStateService.getState().hasMockContent === false
+  );
+  check('and does not flip hasHistory', appStateService.getState().hasHistory === false);
+
+  appStateService.updateState({
+    mockInterview: mockSession([{ question: 'Q1', kind: 'technical', answer: '', skipped: true }]),
+  });
+  check('a skipped question is not content', appStateService.getState().hasMockContent === false);
+
+  appStateService.updateState({
+    mockInterview: mockSession([
+      { question: 'Q1', kind: 'technical', answer: 'A real answer', skipped: false },
+    ]),
+  });
+  check('a real answer is content', appStateService.getState().hasMockContent === true);
+
+  appStateService.updateState({ hasMockContent: false });
+  check(
+    'an incoming hasMockContent is ignored',
+    appStateService.getState().hasMockContent === true
+  );
+
+  // The mock session carries no CV field at all - there is nothing to broadcast that resembles
+  // the live interviewConfig reduction, so the broadcast-size check above already covers it
+  // structurally. This confirms the type-level guarantee holds through updateState too.
+  check(
+    'the mock session broadcasts with no profile_data field',
+    !('profile_data' in appStateService.getRendererState().mockInterview)
+  );
+
+  appStateService.updateState({ mockInterview: null });
+
   return failures;
 }

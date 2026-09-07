@@ -79,15 +79,17 @@ The classifier is deliberately asymmetric, and `test/interviewer-turn.test.mjs` 
 
 Action suggestions are independent of transcripts - triggered by screenshot captures (up to `ACTION_SUGGESTION_MAX_CAPTURES` = 4 images per request).
 
-**Professional mode** (`professionalMode` in ConfigStore, off by default) asks the backend for hints - a headline plus keyword bullets - instead of full sentences. Both suggestion services read the flag once at the top of `generateSuggestion` and send it as `mode` on the request; the backend defaults it to `normal`, so the field is safe to omit against an older deployment.
+**Hint-only mode** (`hintOnlyMode` in ConfigStore, on by default) asks the backend for hints - a headline plus keyword bullets - instead of the full sentences of full-sentence mode. Both suggestion services read the flag once at the top of `generateSuggestion` and send it as `mode` on the request; the backend defaults it to `normal`, so the field is safe to omit against an older deployment.
 
-The `NO_SUGGESTION_NEEDED` sentinel goes through `isNoSuggestionSentinel()` ([src/main/utils/suggestion-sentinel.ts](src/main/utils/suggestion-sentinel.ts)) rather than a direct comparison. It backs up the deterministic gate above for turns the lexicon cannot settle, and it is in-band by nature - a control decision travelling in the answer stream - which is why it is the fallback rather than the mechanism. It is prefix-matched because it runs on every streamed chunk, and it strips leading markdown first: the professional prompt asks for a bold headline on line 1, so a model that carries that format over emits `**NO_SUGGESTION_NEEDED**` and a bare match would leave the sentinel on screen as a card. Unicode format characters are stripped with the emphasis, and that is what makes the fallback hold in Arabic and Hebrew: a model writing right-to-left routinely opens on a directional mark, and U+200F is not whitespace, so it survives `\s` and leaves the comparison starting on a character the sentinel does not - putting `NO_SUGGESTION_NEEDED` on screen as the answer to a question the backend had just decided needed none. `test/suggestion-sentinel.test.mjs` pins both halves - the wrapped forms are suppressed, real answers are not, including a real Hebrew one opening on the same mark.
+The setting was called `professionalMode` until it was renamed for the two modes it actually switches between. Two things survive that rename deliberately. `SuggestionMode`'s wire values are still `normal` / `professional`, because they are the backend's contract (`app/schemas/suggestion.py`) and it deploys separately - the TypeScript members are `FullSentence` / `HintOnly`, the strings are not. And the config store's migration reads the old key once to seed the new one before `scrubRetiredKey` removes it, so an upgrading install keeps the mode it was on rather than being moved onto the new default.
 
-Both live modes render through `SafeMarkdown`, the same component the action panel uses. The normal-mode prompt asks for plain text *with light formatting*, so any bold or bullet the model reached for used to land on screen as literal asterisks. Prose is passed through `withHardBreaks()` ([src/renderer/lib/suggestions.ts](src/renderer/lib/suggestions.ts)) first: Markdown folds a single newline into a space, and the `whitespace-pre-wrap` rendering it replaced showed every newline the model emitted.
+The `NO_SUGGESTION_NEEDED` sentinel goes through `isNoSuggestionSentinel()` ([src/main/utils/suggestion-sentinel.ts](src/main/utils/suggestion-sentinel.ts)) rather than a direct comparison. It backs up the deterministic gate above for turns the lexicon cannot settle, and it is in-band by nature - a control decision travelling in the answer stream - which is why it is the fallback rather than the mechanism. It is prefix-matched because it runs on every streamed chunk, and it strips leading markdown first: the hint-only prompt asks for a bold headline on line 1, so a model that carries that format over emits `**NO_SUGGESTION_NEEDED**` and a bare match would leave the sentinel on screen as a card. Unicode format characters are stripped with the emphasis, and that is what makes the fallback hold in Arabic and Hebrew: a model writing right-to-left routinely opens on a directional mark, and U+200F is not whitespace, so it survives `\s` and leaves the comparison starting on a character the sentinel does not - putting `NO_SUGGESTION_NEEDED` on screen as the answer to a question the backend had just decided needed none. `test/suggestion-sentinel.test.mjs` pins both halves - the wrapped forms are suppressed, real answers are not, including a real Hebrew one opening on the same mark.
+
+Both live modes render through `SafeMarkdown`, the same component the action panel uses. The full-sentence prompt asks for plain text *with light formatting*, so any bold or bullet the model reached for used to land on screen as literal asterisks. Prose is passed through `withHardBreaks()` ([src/renderer/lib/suggestions.ts](src/renderer/lib/suggestions.ts)) first: Markdown folds a single newline into a space, and the `whitespace-pre-wrap` rendering it replaced showed every newline the model emitted.
 
 The backend prompts now ask for inline emphasis on the words an answer turns on, in both modes, so `strong` and `em` are declared explicitly in `SafeMarkdown` rather than left to browser defaults - body copy is deliberately regular weight so that `strong` reads as emphasis against it. Live answers additionally go through `stripDanglingEmphasis()`: the panel re-renders on every streamed chunk, so each emphasized span exists for a few frames as an opening `**` with no closing pair, which Markdown renders as literal asterisks on the card the candidate is reading. It drops that one unmatched marker, leaving the text plain until the span closes. Live only - action suggestions carry code, where an asterisk is a dereference or a glob (`test/suggestion-emphasis.test.mjs` pins both halves, including that a `*` opening a list item is a block marker and never stripped).
 
-Each `LiveSuggestion` still carries the `mode` it was *generated* under, and the panel keys off that rather than the current setting, so toggling mid-interview leaves cards already on screen alone. What the mode selects is the presentation around the Markdown: professional promotes the headline line, normal keeps the 🪄 marker in a column of its own - prepending it to the content instead would swallow whatever structure the answer opens with.
+Each `LiveSuggestion` still carries the `mode` it was *generated* under, and the panel keys off that rather than the current setting, so toggling mid-interview leaves cards already on screen alone. What the mode selects is the presentation around the Markdown: hint-only promotes the headline line, full-sentence keeps the 🪄 marker in a column of its own - prepending it to the content instead would swallow whatever structure the answer opens with.
 
 ### Assistant lifecycle
 
@@ -110,9 +112,9 @@ outside the `try` as an unhandled rejection.
 
 `useMediaDevices` reports `ready` alongside the device list because an empty list means two
 different things - `enumerateDevices()` has not answered yet, and this machine has none - and the
-control panel renders a destructive badge and refuses Start on the second. Reading them as one
-put a red `!` on a working microphone for the first frames after every launch, and refused a Start
-pressed quickly with a message naming a device that was there all along. An unset
+control panel renders a destructive badge and refuses the start on the second. Reading them as one
+put a red `!` on a working microphone for the first frames after every launch, and refused a start
+requested quickly with a message naming a device that was there all along. An unset
 `audioInputDeviceName` is a third state again, and also not "missing": `AudioGroup` is choosing
 the default at that moment, in an effect - never in the render body, where the store write
 re-enters React mid-commit and a failed IPC call rolls the value back into the same condition that
@@ -121,12 +123,30 @@ triggered it, one write per frame.
 ### Saving the interview before it is lost
 
 The transcript and the suggestions live only in main-process memory. Nothing is written to disk
-until an export, so the three actions that empty them - Clear, Start (which opens with
-`clearAll()`), and closing the app - are the only paths in the app that destroy work with no way
-back. All three now ask first, through one dialog:
+until an export, so the actions that empty them - Clear, Start (which opens with `clearAll()`),
+Stop, signing out, and closing the app - are the only paths in the app that destroy work with no
+way back. All of them ask first, through one dialog:
 [save-history-dialog.tsx](src/renderer/components/custom/save-history-dialog.tsx), mounted once in
-`MainFrame` because the three do not share a screen - the control panel is not rendered in stealth
-mode, and the close prompt arrives from main with no component of its own.
+`MainFrame` because they do not share a screen - the control panel is not rendered in stealth
+mode, the close prompt arrives from main with no component of its own, and the stop prompt
+outlives the screen that raised it.
+
+**Signing out destroys it too, and main is what actually drops it.** `authService.logout()` clears
+the transcript, the suggestions and the mock session along with the token - including a mock
+session still running, which `clearAll` will not touch unless the caller opts in. Without that,
+the state stayed in memory and the close guard read `hasHistory` / `hasMockContent` straight off
+it, so the next user to sign in on a shared machine was offered the previous user's interview to
+export. Sign-out is also refused while a *mock* session is active: a mock deliberately leaves
+`runningState` on Idle, so a check on that alone waved it through.
+
+**Stop is the one that is not a guard.** The other reasons are asked *before* the destructive act
+and can be answered with "not now", which leaves the interview alone. `useEndLiveSession`
+([use-end-live-session.ts](src/renderer/hooks/use-end-live-session.ts)) stops the assistant, asks,
+then clears and goes home whatever the answer was - so the dialog drops its Cancel and refuses Esc
+for that reason, because an Esc that read as backing out would silently be the discard. It is
+deliberately not what the stop *hotkey* does: that one fires while the app is hidden mid-screen-
+share, where a modal dialog and a navigation to the dashboard are the opposite of what was asked
+for, and the next Start still asks about the transcript it left behind.
 
 **The question is only worth asking about a real interview, and length cannot tell you that.**
 `setPlaceholderState()` seeds the panels with one transcript and two suggestions so an empty app
@@ -206,7 +226,7 @@ A code this build knows but an older backend does not is resolved back to Englis
 
 `configStore.getConfig()` resolves the language on the way *out*, not on the way in. The disk holds whatever some build wrote - a code a later release dropped, or one an older release never knew - and every consumer reads through `getConfig`, so that is the single place an unknown code can be stopped before it reaches the ASR URL and three request bodies. `test/language.test.mjs` pins it.
 
-**The picker stays live mid-interview**, unlike Model, because an interview that switches language is the case it exists for and not one the candidate can prepare for by restarting. The two halves of the setting move at different speeds and `useInterviewLanguage` is where that is reconciled. Suggestions need nothing: every request reads the config store as it is built, so the next one already follows. The ASR carries its language as a *connection* parameter, so `liveTranscriptionService.setLanguage()` tears both sockets down and re-opens them - a second or two of gap, and whatever utterance was mid-flight is orphaned, which is why the button shows a spinner rather than pretending the change was instant and why the menu says so before the user commits.
+**The picker stays live mid-interview**, because an interview that switches language is the case it exists for and not one the candidate can prepare for by restarting. The two halves of the setting move at different speeds and `useInterviewLanguage` is where that is reconciled. Suggestions need nothing: every request reads the config store as it is built, so the next one already follows. The ASR carries its language as a *connection* parameter, so `liveTranscriptionService.setLanguage()` tears both sockets down and re-opens them - a second or two of gap, and whatever utterance was mid-flight is orphaned, which is why the button shows a spinner rather than pretending the change was instant and why the menu says so before the user commits.
 
 Three guards in `AudioWsStream` make that safe, and all three protect against the same failure - two sockets on one channel, one of them orphaned and still relaying audio into a dead session. `ws.onclose` ignores a close from a socket that is no longer `this.ws`, since that is the tail of a replacement rather than a disconnect; and the `switching` flag suppresses the ordinary backoff reconnect for the close `setLanguage` causes itself, which it then handles immediately instead of after `WS_RETRY_BASE_DELAY_MS`. `connectWebSocket` rebuilds the URL per attempt rather than capturing it, which is what lets a reconnect pick up the new language at all.
 
@@ -258,10 +278,13 @@ cheapest of the three to back out of - cancelling here means the other two were 
 `startAfterNotice` holds everything after it so the dialog can hand the start back without
 duplicating those checks.
 
-`headphoneNoticeAcknowledged` is opt-out rather than opt-in: whether the call is on speakers is a
-property of the machine and the meeting, not a setting, so it can change between sessions on the
-same install. The preference is written when the user goes through, not when they tick the box - a
-tick followed by Cancel would otherwise silence a warning they never acted on.
+Shown before every session, deliberately with no "don't show again": whether the call is on
+speakers is a property of the machine and the meeting, not a setting, and it can change between
+any two sessions on the same install - a permanent silence option would contradict the one fact
+this dialog exists to establish. A `variant` prop (`'live' | 'mock'`) swaps the copy rather than
+the mechanism: the live session's failure mode is a suppressed suggestion (the mic hears its own
+question), while a mock session has no suggestion to suppress, only the transcribed answer's own
+echo tail - so the mock variant names that instead of borrowing the live copy.
 
 ### Audio input device
 
@@ -350,7 +373,15 @@ whatever claimed it. `test/navigation-guard.test.mjs` pins all three.
 
 ### Routing
 
-Hash-based router (required for Electron `file://` protocol). Routes: `/` (index, redirects based on login state) -> `/auth/login`, `/auth/signup`, or `/auth/forgot-password` -> `/main` (interview UI) -> `/payment`.
+Hash-based router (required for Electron `file://` protocol). Routes: `/` (the launch hub, and the only screen that redirects) -> `/auth/login`, `/auth/signup`, `/auth/forgot-password`, `/onboarding` -> `/main` (live assistant), `/mock-interview`, `/account`, `/configuration`, `/payment`, `/documentation`.
+
+**First-run setup.** `/` sends a signed-in user to `/onboarding` when the account's `onboardingCompleted` is false, and it waits for `interviewConfigLoaded` before acting: the flag lives on the account, so until that account has been read this session its value is the default rather than an answer, and acting sooner would flash the wizard at every user on launch and show it in full to anyone whose pull failed. The wizard writes the flag through `account:set-onboarding-completed`, and only after the backend confirms - an optimistic write would let a failed save look like a finished setup until the next launch put the wizard back. Sign-in lands on `/` rather than `/main` for this reason: `/main` is the one route the gate does not cover.
+
+The wizard also holds a session-local dismissal (`use-onboarding-dismissed.ts`) that the gate reads alongside the flag. Its write to the account resolves over one IPC message and the app state carrying the result arrives over another, with nothing ordering the two - so home re-rendered on the old value the instant the wizard navigated to it and sent the user straight back in, running the whole thing twice. The account flag is what makes setup done; the dismissal is what makes it done *now*. It is cleared on sign-out, or the next account to sign in during the same run would inherit it.
+
+`/onboarding` renders regardless of the flag, which is what lets Configuration offer *Run setup* and what makes Skip safe rather than final. The titlebar menu drops Home, Account and Configuration while it is open - Home would bounce straight back, and the other two are what the wizard is in the middle of collecting.
+
+**An absent `onboarding_completed` counts as done**, not as false (`AccountService.readsAsOnboarded`). A backend deployment that predates the field omits it, and reading that as "not done" would put every user of that deployment into the wizard with no way out - the only two exits from it, Finish and Skip, both write through an endpoint that deployment does not have either. Guessing wrong in that direction locks the app; guessing wrong in the other costs a screen nobody saw.
 
 `/auth/forgot-password` is a three-step wizard shaped like the signup one (email -> code -> password), and the reset is code-based rather than an emailed link because a link opens the system browser, which has no way to hand a token back without a registered deep-link protocol handler.
 

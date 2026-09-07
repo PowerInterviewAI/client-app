@@ -22,6 +22,22 @@ export default function useTools() {
     }
   };
 
+  const exportMockReport = async (format: ExportFormat): Promise<string | null> => {
+    setExporting(true);
+    try {
+      const electron = getElectron();
+      if (!electron) {
+        throw new Error('Electron API not available');
+      }
+      return await electron.tools.exportMockReport(format);
+    } catch (error) {
+      console.error('Failed to export mock interview report:', error);
+      throw error;
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const clearAll = async () => {
     const electron = getElectron();
     if (!electron) {
@@ -41,6 +57,7 @@ export default function useTools() {
   return {
     exporting,
     exportTranscript,
+    exportMockReport,
     clearAll,
     setPlaceholderData,
   } as const;

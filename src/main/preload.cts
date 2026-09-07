@@ -44,10 +44,10 @@ const electronApi = {
     return () => ipcRenderer.removeListener('hotkey:toggle-transcript', handler);
   },
 
-  onHotkeyToggleProfessionalMode: (callback: () => void) => {
+  onHotkeyToggleSuggestionMode: (callback: () => void) => {
     const handler = () => callback();
-    ipcRenderer.on('hotkey:toggle-professional-mode', handler);
-    return () => ipcRenderer.removeListener('hotkey:toggle-professional-mode', handler);
+    ipcRenderer.on('hotkey:toggle-suggestion-mode', handler);
+    return () => ipcRenderer.removeListener('hotkey:toggle-suggestion-mode', handler);
   },
 
   config: {
@@ -78,6 +78,8 @@ const electronApi = {
       ipcRenderer.invoke('account:update', fullName, profileData, context),
     refresh: () => ipcRenderer.invoke('account:refresh'),
     get: () => ipcRenderer.invoke('account:get'),
+    setOnboardingCompleted: (completed: boolean) =>
+      ipcRenderer.invoke('account:set-onboarding-completed', completed),
   },
 
   payment: {
@@ -87,12 +89,6 @@ const electronApi = {
     getStatus: (paymentId: string) => ipcRenderer.invoke('payment:get-status', paymentId),
     getHistory: () => ipcRenderer.invoke('payment:get-history'),
     getCredits: () => ipcRenderer.invoke('payment:get-credits'),
-  },
-
-  llm: {
-    listModels: () => ipcRenderer.invoke('llm:list-models'),
-    validate: (config: Record<string, unknown> | null) =>
-      ipcRenderer.invoke('llm:validate', config),
   },
 
   appState: {
@@ -130,6 +126,25 @@ const electronApi = {
   actionSuggestion: {
     clear: () => ipcRenderer.invoke('action-suggestion:clear'),
     stop: () => ipcRenderer.invoke('action-suggestion:stop'),
+    capture: () => ipcRenderer.invoke('action-suggestion:capture'),
+    clearImages: () => ipcRenderer.invoke('action-suggestion:clear-images'),
+    trigger: () => ipcRenderer.invoke('action-suggestion:trigger'),
+  },
+
+  mockInterview: {
+    start: (setup: Record<string, unknown>) => ipcRenderer.invoke('mock-interview:start', setup),
+    synthesizeChunk: (index: number) =>
+      ipcRenderer.invoke('mock-interview:synthesize-chunk', index),
+    speechFinished: () => ipcRenderer.invoke('mock-interview:speech-finished'),
+    speechFailed: () => ipcRenderer.invoke('mock-interview:speech-failed'),
+    ingestAnswer: (payload: { type: 'partial' | 'final'; text: string }) =>
+      ipcRenderer.invoke('mock-interview:ingest-answer', payload),
+    answerFinished: () => ipcRenderer.invoke('mock-interview:answer-finished'),
+    repeatQuestion: () => ipcRenderer.invoke('mock-interview:repeat-question'),
+    answerReady: () => ipcRenderer.invoke('mock-interview:answer-ready'),
+    skipQuestion: () => ipcRenderer.invoke('mock-interview:skip-question'),
+    endSession: () => ipcRenderer.invoke('mock-interview:end-session'),
+    clear: () => ipcRenderer.invoke('mock-interview:clear'),
   },
 
   onPushNotification: (callback: (notification: PushNotification) => void) => {
@@ -142,6 +157,8 @@ const electronApi = {
   tools: {
     exportTranscript: (format: 'docx' | 'md') =>
       ipcRenderer.invoke('tools:export-transcript', format),
+    exportMockReport: (format: 'docx' | 'md') =>
+      ipcRenderer.invoke('tools:export-mock-report', format),
     clearAll: () => ipcRenderer.invoke('tools:clear-all'),
     setPlaceholderData: () => ipcRenderer.invoke('tools:set-placeholder-data'),
     saveImage: (opts: { filename: string; data: number[] }) =>
@@ -178,6 +195,7 @@ const electronApi = {
     decrease: () => ipcRenderer.send('zoom:out'),
     reset: () => ipcRenderer.send('zoom:reset'),
     getFactor: () => ipcRenderer.invoke('zoom:get-factor'),
+    setFactor: (factor: number) => ipcRenderer.invoke('zoom:set-factor', factor),
     onChange: (callback: (percent: number) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, percent: number) => callback(percent);
       ipcRenderer.on('zoom:level-changed', handler);

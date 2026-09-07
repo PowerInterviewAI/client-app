@@ -61,7 +61,7 @@ export function buildExportMarkdown({
   return `${summaryPart}\n\n${transcripts.length > 0 ? transcriptsPart : ''}\n\n${suggestions.length > 0 ? suggestionsPart : ''}`.trim();
 }
 
-export function generateExportFilename(format: ExportFormat): string {
+export function generateExportFilename(format: ExportFormat, prefix: string = 'report'): string {
   const d = new Date();
 
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -78,5 +78,5 @@ export function generateExportFilename(format: ExportFormat): string {
   // extension.
   const ext = format === 'md' ? 'md' : 'docx';
 
-  return `report-${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}.${ext}`;
+  return `${prefix}-${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}.${ext}`;
 }

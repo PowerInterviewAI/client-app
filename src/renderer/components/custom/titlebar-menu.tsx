@@ -1,20 +1,19 @@
 import {
   BookOpen,
-  CreditCard,
   EyeOff,
-  Key,
+  Home,
   LogOut,
   Mail,
   Menu,
   Moon,
   SettingsIcon,
   Sun,
+  UserRound,
 } from 'lucide-react';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import DocumentationDialog from '@/components/custom/documentation-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,27 +26,42 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
-import { useConfigurationDialog } from '@/hooks/use-configuration-dialog';
+import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useThemeStore } from '@/hooks/use-theme-store';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
-
-import { ChangePasswordDialog } from './change-password-dialog';
+import { isMockInterviewSessionActive } from '@/types/mock-interview';
 
 export default function TitlebarMenu({ style }: { style?: React.CSSProperties }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { appState, runningState } = useAppState();
   const { config } = useConfigStore();
   const { isDark, toggleTheme } = useThemeStore();
-  const { logout, changePassword, loading, error, setError } = useAuth();
-  const { openConfigurationDialog } = useConfigurationDialog();
-  const [isDocsOpen, setIsDocsOpen] = useState(false);
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const { logout } = useAuth();
+  const { confirmDiscard } = useSaveHistoryGuard();
 
   const isLoggedIn = appState?.isLoggedIn ?? false;
   // Account actions rewrite state the running assistant depends on; theme, docs and stealth do not.
-  const disabled = runningState !== RunningState.Idle;
+  //
+  // A mock session counts as running. It deliberately leaves `runningState` on Idle - it hides
+  // no window surfaces and holds no ASR socket - so a check on that alone let the candidate sign
+  // out from under an interviewer that was mid-question, which tears down the token the session's
+  // next request needs and leaves the microphone gate to whatever happens to release it.
+  const disabled =
+    runningState !== RunningState.Idle || isMockInterviewSessionActive(appState?.mockInterview ?? null);
+
+  // First-run setup owns the window while it is running. Home bounces straight back here until
+  // the wizard is finished or skipped, and Account and Configuration are the two things it is in
+  // the middle of collecting - so offering all three would be three menu items that look broken.
+  // Skip is the way out, and it is on the screen itself where it can say what skipping costs.
+  //
+  // Only for the compulsory run. The same route reached from Configuration's *Run setup* is an
+  // ordinary page the user chose to open, and taking their navigation away there would be the
+  // menu breaking rather than the menu declining to lie.
+  const inSetup =
+    location.pathname === '/onboarding' && !(appState?.onboardingCompleted ?? false);
 
   const handleToggleStealth = () => {
     const electron = getElectron();
@@ -58,23 +72,12 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
     }
   };
 
-  const handleChangePassword = async (
-    currentPassword: string,
-    newPassword: string
-  ): Promise<boolean> => {
-    let res = false;
-    try {
-      if (await changePassword(currentPassword, newPassword)) {
-        res = true;
-      }
-    } catch (err) {
-      // Error is handled by the useAuth hook
-      console.error('Password change failed:', err);
-    }
-    return res;
-  };
-
   const handleSignOut = async () => {
+    // Asked for the same reason Clear, Start, Stop and closing the app ask: signing out drops the
+    // interview from main-process memory, and nothing has written it to disk unless it was
+    // exported. It was the one path that destroyed it silently.
+    if (!(await confirmDiscard('signout'))) return;
+
     try {
       await logout();
     } catch (err) {
@@ -87,99 +90,83 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
   };
 
   return (
-    <>
-      {/* Non-modal: a modal menu locks body pointer events, and items here change route or open a
-          dialog, either of which can unmount the menu before it releases the lock. */}
-      <DropdownMenu modal={false}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <button
-                aria-label="Menu"
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
-                style={style}
-              >
-                <Menu className="h-4 w-4" />
-              </button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Menu</p>
-          </TooltipContent>
-        </Tooltip>
-        <DropdownMenuContent align="end" side="bottom">
-          {isLoggedIn && (
-            <>
-              <DropdownMenuLabel className="flex items-center">
-                <Mail className="mr-2 h-4 w-4" />
-                {config?.email}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => !disabled && openConfigurationDialog()}
-                disabled={disabled}
-              >
-                <SettingsIcon className="mr-2 h-4 w-4" />
-                Configuration
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  if (disabled) return;
-                  setError(null);
-                  setIsChangePasswordOpen(true);
-                }}
-                disabled={disabled}
-              >
-                <Key className="mr-2 h-4 w-4" />
-                Change password
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/payment')} disabled={disabled}>
-                <CreditCard className="mr-2 h-4 w-4" />
-                Buy Credits
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleToggleStealth}>
-                <EyeOff className="mr-2 h-4 w-4" />
-                Stealth mode ({HOTKEYS[Hotkey.ToggleStealth].combo})
-              </DropdownMenuItem>
-            </>
-          )}
-          <DropdownMenuItem onClick={() => toggleTheme()}>
-            {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-            {isDark ? 'Light mode' : 'Dark mode'}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsDocsOpen(true)}>
-            <BookOpen className="mr-2 h-4 w-4" />
-            Documentation
-          </DropdownMenuItem>
+    // Non-modal: a modal menu locks body pointer events, and items here change route or open a
+    // dialog, either of which can unmount the menu before it releases the lock.
+    <DropdownMenu modal={false}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button
+              aria-label="Menu"
+              className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
+              style={style}
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Menu</p>
+        </TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent align="end" side="bottom">
+        {isLoggedIn && (
+          <>
+            <DropdownMenuLabel className="flex items-center">
+              <Mail className="mr-2 h-4 w-4" />
+              {appState?.accountEmail || config?.email}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {!inSetup && (
+              <>
+                <DropdownMenuItem onClick={() => navigate('/')}>
+                  <Home className="mr-2 h-4 w-4" />
+                  Home
+                </DropdownMenuItem>
+                {/* The same two destinations the home page names, in the same words. Account is
+                    disabled mid-session because saving a new profile rewrites state the running
+                    assistant reads; configuration is not, because every control on it is meant
+                    to be changed during an interview. */}
+                <DropdownMenuItem
+                  onClick={() => !disabled && navigate('/account')}
+                  disabled={disabled}
+                >
+                  <UserRound className="mr-2 h-4 w-4" />
+                  Account
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/configuration')}>
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  Configuration
+                </DropdownMenuItem>
+              </>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleToggleStealth}>
+              <EyeOff className="mr-2 h-4 w-4" />
+              Stealth mode ({HOTKEYS[Hotkey.ToggleStealth].combo})
+            </DropdownMenuItem>
+          </>
+        )}
+        <DropdownMenuItem onClick={() => toggleTheme()}>
+          {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+          {isDark ? 'Light mode' : 'Dark mode'}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/documentation')}>
+          <BookOpen className="mr-2 h-4 w-4" />
+          Documentation
+        </DropdownMenuItem>
 
-          {isLoggedIn && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => !disabled && void handleSignOut()}
-                disabled={disabled}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Rendered unconditionally: gating these on isLoggedIn would unmount an open dialog the
-          moment a session ends, stranding the pointer-events lock it holds. */}
-      <DocumentationDialog open={isDocsOpen} onOpenChange={setIsDocsOpen} />
-
-      <ChangePasswordDialog
-        open={isChangePasswordOpen}
-        onOpenChange={setIsChangePasswordOpen}
-        onChangePassword={handleChangePassword}
-        loading={loading}
-        error={error}
-      />
-    </>
+        {isLoggedIn && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => !disabled && void handleSignOut()} disabled={disabled}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

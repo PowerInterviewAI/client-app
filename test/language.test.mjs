@@ -10,7 +10,8 @@ import { createChecker, loadMain, readSource } from './helpers.mjs';
 export async function run() {
   const { check, failures } = createChecker('language');
 
-  const { Language, DEFAULT_LANGUAGE, resolveLanguage } = await loadMain('types/language.js');
+  const { Language, DEFAULT_LANGUAGE, resolveLanguage, TTS_LANGUAGES } =
+    await loadMain('types/language.js');
   const { transcriptSeparator } = await loadMain('utils/transcript-join.js');
   const { configStore } = await loadMain('store/config.store.js');
 
@@ -53,13 +54,14 @@ export async function run() {
   );
   const entries = [
     ...rendererSource.matchAll(
-      /\{ code: Language\.(\w+), name: '([^']*)', nativeName: '([^']*)', short: '([^']*)' \}/g
+      /\{ code: Language\.(\w+), name: '([^']*)', nativeName: '([^']*)', short: '([^']*)', hasVoice: (true|false) \}/g
     ),
   ].map((m) => ({
     member: m[1],
     name: m[2],
     nativeName: m[3],
     short: m[4],
+    hasVoice: m[5] === 'true',
     code: memberCodes.get(m[1]),
   }));
 
@@ -116,6 +118,32 @@ export async function run() {
   check(
     'every unspaced language is one the picker actually offers',
     ['ja', 'zh', 'th'].every((code) => Object.values(Language).includes(code))
+  );
+
+  // Deepgram's Aura TTS speaks 7 of these 28 languages, mirroring the backend's
+  // DEEPGRAM_TTS_VOICES map. Getting this wrong is quiet in both directions: a language wrongly
+  // marked hasVoice sends a mock-interview /speak request that always comes back empty, and one
+  // wrongly marked false denies a real voice to a user who has one.
+  const ttsLanguages = new Set(['en', 'es', 'de', 'fr', 'nl', 'it', 'ja']);
+  check(
+    'hasVoice is exactly the 7 Aura-supported languages',
+    entries.every((entry) => entry.hasVoice === ttsLanguages.has(entry.code))
+  );
+
+  // Three tables have to agree on which languages Aura speaks, and only two of them were pinned.
+  // The renderer's `hasVoice` above is display metadata - it draws the badge on the setup screen.
+  // The backend's DEEPGRAM_TTS_VOICES is pinned by test_tts_language.py. This one, TTS_LANGUAGES,
+  // is the decisive one: `installQuestion` reads it to set `hasAudio`, which is what decides
+  // whether the session enters Speaking and asks for audio at all.
+  //
+  // Drift here is quiet, and the damaging direction is a language the backend voices going
+  // missing from this set: the session never requests audio, so it is text-only for the rest of
+  // the session while the setup screen still shows the "Voice" badge - no 204, no error, nothing
+  // to see. The other direction recovers on its own (a /speak that answers 204 falls through
+  // speechFailed to the text-only path), which is exactly why only this direction stays silent.
+  check(
+    'TTS_LANGUAGES is exactly the same 7 the picker marks as voiced',
+    JSON.stringify([...TTS_LANGUAGES].sort()) === JSON.stringify([...ttsLanguages].sort())
   );
 
   // The store is the single source for every consumer, so it is where an unknown code has to die.

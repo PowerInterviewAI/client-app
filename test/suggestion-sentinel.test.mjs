@@ -3,7 +3,7 @@
  * matches that string to drop the card instead of showing it. The match is the whole mechanism:
  * miss it and the sentinel itself is what the candidate reads mid-interview.
  *
- * Professional mode is what put pressure on it. That prompt asks for a bold headline on line 1, so
+ * Hint-only mode is what put pressure on it. That prompt asks for a bold headline on line 1, so
  * a model carrying the format over to the sentinel emits it wrapped in **, and a bare-string match
  * fails. Prefix matching also has to keep working, since this runs on every streamed chunk.
  */
@@ -66,10 +66,10 @@ export async function run() {
 
   // The other half: a real answer must never be swallowed, in either mode.
   check(
-    'a professional headline is kept',
+    'a hint-only headline is kept',
     !isNoSuggestionSentinel('**Cut p99 from 1.8s to 210ms on the orders API**')
   );
-  check('a partial professional headline is kept', !isNoSuggestionSentinel('**Cut'));
+  check('a partial hint-only headline is kept', !isNoSuggestionSentinel('**Cut'));
   check('a prose answer is kept', !isNoSuggestionSentinel('No, I owned the migration end to end.'));
   check('a prose answer starting mid-word is kept', !isNoSuggestionSentinel('Nothing'));
 

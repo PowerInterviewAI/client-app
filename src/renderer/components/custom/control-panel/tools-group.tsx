@@ -1,4 +1,15 @@
-import { Captions, CaptionsOff, FileText, Hash, Loader, Save, Trash2 } from 'lucide-react';
+import {
+  Camera,
+  Captions,
+  CaptionsOff,
+  FileText,
+  Hash,
+  ImageOff,
+  Loader,
+  Save,
+  Sparkles,
+  Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -16,7 +27,7 @@ import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
-import { cn } from '@/lib/utils';
+import { cn, getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 import type { ExportFormat } from '@/types/export';
 
@@ -28,10 +39,36 @@ interface ToolsGroupProps {
 
 export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   const { runningState, appState } = useAppState();
-  const { exporting, exportTranscript, clearAll, setPlaceholderData } = useTools();
+  const { exporting, exportTranscript, exportMockReport, clearAll, setPlaceholderData } = useTools();
   const { visible: transcriptVisible, toggle: onToggleTranscript } = useTranscriptPanel();
   const { confirmDiscard } = useSaveHistoryGuard();
   const [clearing, setClearing] = useState(false);
+  // One flag rather than three: capture/clear-images/trigger all reach the same main-process
+  // action-suggestion service serially, so overlapping calls would race each other for no benefit.
+  const [actionBusy, setActionBusy] = useState(false);
+
+  // The three action-suggestion buttons are the exact inverse of every other control on this bar,
+  // and cannot use `getDisabled`: that disables on `Running`, which is the *only* state these
+  // three work in. `captureScreenshot`, `clearImages` and `startGenerateSuggestion` each refuse
+  // outright unless the assistant is running (suggestion-action.service.ts), so gating them the
+  // usual way left them clickable only while idle - where all three answer with a "not running"
+  // warning - and greyed out for the whole interview they exist to be used during.
+  const actionDisabled = runningState !== RunningState.Running || actionBusy;
+
+  const runActionSuggestion = async (
+    action: () => Promise<void> | undefined,
+    failureMessage: string
+  ) => {
+    setActionBusy(true);
+    try {
+      await action();
+    } catch (error) {
+      console.error(error);
+      toast.error(failureMessage);
+    } finally {
+      setActionBusy(false);
+    }
+  };
 
   const onClear = async () => {
     // Asked before the spinner goes up, and a no-op when there is nothing but placeholder copy
@@ -61,7 +98,13 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   // On `hasHistory` rather than on the array lengths, which are never zero: the panels carry
   // placeholder copy on launch and again after every Clear, so the old check let a summarize
   // request be billed for a document about "Transcripts will be here".
-  const nothingToExport = !appState?.hasHistory;
+  //
+  // Subject dispatch mirrors save-history-dialog.tsx: a finished mock session's report can still
+  // be sitting unexported when the candidate is back on this bar (nothing forces a return to
+  // `/main` through Clear), and this button calling `exportTranscript` unconditionally in that
+  // state said "nothing to export" over real, unsaved mock content instead of exporting it.
+  const isMockSubject = appState?.hasMockContent === true && appState?.hasHistory !== true;
+  const nothingToExport = !appState?.hasHistory && !appState?.hasMockContent;
 
   const onExportTranscript = async (format: ExportFormat) => {
     if (nothingToExport) {
@@ -72,7 +115,9 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
     }
 
     try {
-      const filePath = await exportTranscript(format);
+      const filePath = isMockSubject
+        ? await exportMockReport(format)
+        : await exportTranscript(format);
       if (!filePath) return;
       showExportSuccessToast(filePath, format);
     } catch (error) {
@@ -110,6 +155,90 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
           </p>
         </TooltipContent>
       </Tooltip>
+
+      <div className="h-5 w-px bg-border" aria-hidden="true" />
+
+      {/* Previously reachable only via their hotkeys (lib/hotkeys.ts), with nothing on screen to
+          point at. Same actions, now also a click. */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              void runActionSuggestion(
+                () => getElectron()?.actionSuggestion.capture(),
+                'Failed to capture screenshot'
+              )
+            }
+            size="sm"
+            className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
+            disabled={actionDisabled}
+            aria-label="Capture screenshot"
+          >
+            <Camera className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            Capture Screenshot ({HOTKEYS[Hotkey.Capture].combo})
+          </p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              void runActionSuggestion(
+                () => getElectron()?.actionSuggestion.clearImages(),
+                'Failed to clear captures'
+              )
+            }
+            size="sm"
+            className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
+            disabled={actionDisabled}
+            aria-label="Clear captured screenshots"
+          >
+            <ImageOff className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            Clear Captures ({HOTKEYS[Hotkey.ClearCaptures].combo})
+          </p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              void runActionSuggestion(
+                () => getElectron()?.actionSuggestion.trigger(),
+                'Failed to generate suggestion'
+              )
+            }
+            size="sm"
+            className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
+            disabled={actionDisabled}
+            aria-label="Generate triggered suggestion"
+          >
+            {actionBusy ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            Generate Suggestion ({HOTKEYS[Hotkey.TriggerWithoutCaptures].combo})
+          </p>
+        </TooltipContent>
+      </Tooltip>
+
+      <div className="h-5 w-px bg-border" aria-hidden="true" />
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

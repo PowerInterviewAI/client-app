@@ -1,55 +1,7 @@
 import { Transcript } from './app-state.js';
 import { Language } from './language.js';
 
-export enum LLMProvider {
-  OPENAI = 'openai',
-  ANTHROPIC = 'anthropic',
-  GROQ = 'groq',
-  GOOGLE = 'google',
-}
-
-export enum LLMModality {
-  TEXT_INPUT = 'text_input',
-  IMAGE_INPUT = 'image_input',
-  TEXT_OUTPUT = 'text_output',
-  IMAGE_OUTPUT = 'image_output',
-  AUDIO_INPUT = 'audio_input',
-  AUDIO_OUTPUT = 'audio_output',
-}
-
-export interface LLMModelInfo {
-  id: string;
-  provider: LLMProvider;
-  name: string;
-  description: string;
-  modalities: LLMModality[];
-  vision_capable: boolean;
-  context_window: number;
-  max_output_tokens: number;
-  pricing_input: number;
-  pricing_output: number;
-  supports_streaming: boolean;
-  supports_function_calling: boolean;
-  supports_json_mode: boolean;
-  release_date: string | null;
-}
-
-export interface LLMConfig {
-  provider: LLMProvider;
-  apikey: string;
-  model: string;
-}
-
-export interface LLMConfigValidationResult {
-  provider_ok: boolean;
-  apikey_ok: boolean;
-  model_ok: boolean;
-  error: string;
-}
-
 export interface LLMRequest {
-  config: LLMConfig | null;
-
   /**
    * Interview language. Carried on the shared base so the three request kinds cannot drift, and
    * defaulted server-side, so omitting it against an older deployment still means English.
@@ -60,12 +12,17 @@ export interface LLMRequest {
 /**
  * How much prose a suggestion should carry.
  *
- * Normal is full spoken sentences. Professional is a headline plus keyword bullets, for reading
- * at a glance mid-interview. Mirrors `SuggestionMode` in the backend's `app/schemas/suggestion.py`.
+ * Full-sentence mode is answers written out as they would be spoken. Hint-only mode is a headline
+ * plus keyword bullets, for reading at a glance mid-interview, and is the default.
+ *
+ * The wire values are deliberately left as they are. They are the backend's contract
+ * (`SuggestionMode` in its `app/schemas/suggestion.py`), which is deployed separately and still
+ * names these modes the way the client used to; renaming the members without renaming the strings
+ * keeps the client readable without requiring the two to ship together.
  */
 export enum SuggestionMode {
-  Normal = 'normal',
-  Professional = 'professional',
+  FullSentence = 'normal',
+  HintOnly = 'professional',
 }
 
 /**

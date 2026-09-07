@@ -108,3 +108,41 @@ export const OPACITY_DEFAULT = OPACITY_LEVELS[OPACITY_LEVELS.length - 2]; // 0.7
 export const ZOOM_STEP = 0.1; // factor increment/decrement
 export const ZOOM_MIN_FACTOR = 0.5;
 export const ZOOM_MAX_FACTOR = 3.0;
+
+// Mock interview constants
+//
+// How long the microphone stays gated after the interviewer's audio finishes playing, to cover
+// room reverb and Deepgram's own lookahead. The gate itself is released the moment playback ends
+// (or fails) - this is the tail added on top, not the gate's own duration.
+export const MOCK_TTS_TAIL_MS = 600;
+
+// Backstop only, the same role ACTION_LOCK_MAX_HOLD_MS plays for the action-suggestion lock. The
+// gate is released explicitly on every path (ended, error, skip, end-interview); this exists so
+// an `HTMLAudioElement` that never fires either event cannot leave the mic muted for the rest of
+// the session. Well above the longest real question audio.
+export const MOCK_TTS_GATE_MAX_HOLD_MS = 120_000;
+
+// Sentence-chunk bounds for the question text sent to /speak, one chunk at a time so the first
+// chunk starts playing before the whole question has synthesized. Minimum guards against a chunk
+// like "Mr." registering as a full sentence; maximum guards a run-on sentence with no punctuation.
+export const MOCK_SPEECH_CHUNK_MIN_CHARS = 40;
+export const MOCK_SPEECH_CHUNK_MAX_CHARS = 240;
+
+// A candidate who has already been probed on the same question twice should move to the next one
+// regardless of how the answer reads - a third follow-up is a stalled interview, not a thorough
+// one. Enforced client-side as a hard cap on top of the backend's own "next" bias.
+export const MOCK_MAX_FOLLOW_UPS_PER_QUESTION = 2;
+
+// Silence backstop for "Done answering" - a candidate who stops talking for this long without
+// pressing the button is treated as finished. The button is the real mechanism; this only covers
+// someone who forgets it exists. Deliberately generous: a pause to think must not auto-submit.
+export const MOCK_ANSWER_SILENCE_MS = 8_000;
+
+// Backstop for a Listening state that never receives a single word - a dead microphone (unplugged,
+// permission revoked mid-session, a device error), not a candidate who is merely thinking. Far more
+// generous than MOCK_ANSWER_SILENCE_MS because normal think-time before answering starts must never
+// trigger it: this only fires when nothing at all - not one partial transcript - arrives while
+// Listening. Without it, a mic that dies before the candidate says anything left the session
+// waiting forever with no automatic recovery, recoverable only by the candidate noticing and
+// clicking "Skip question" by hand.
+export const MOCK_LISTENING_SILENCE_MS = 60_000;

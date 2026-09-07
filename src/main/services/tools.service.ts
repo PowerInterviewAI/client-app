@@ -7,7 +7,9 @@ import { configStore } from '../store/config.store.js';
 import { ExportFormat } from '../types/export.js';
 import { GenerateSummarizeRequest } from '../types/llm.js';
 import { buildExportMarkdown, generateExportFilename } from '../utils/export-markdown.js';
+import { buildMockExportMarkdown } from '../utils/export-mock-markdown.js';
 import { appStateService } from './app-state.service.js';
+import { mockInterviewService } from './mock-interview.service.js';
 import { actionSuggestionService } from './suggestion-action.service.js';
 import { liveSuggestionService } from './suggestion-live.service.js';
 import { transcriptService } from './transcript.service.js';
@@ -37,7 +39,6 @@ class ToolsService {
     // Call the API to generate the summary text
     const conf = configStore.getConfig();
     const response = await this.llmApi.generateSummary({
-      config: conf.llmConf,
       username,
       transcripts,
       // The exported report is written in the interview's language too. A Spanish interview
@@ -87,11 +88,78 @@ class ToolsService {
     return filePath;
   }
 
-  async clearAll(): Promise<void> {
+  /**
+   * Export the mock interview report - own guard, own filename prefix, own save dialog.
+   *
+   * Guarded on real answer content, the same standard `hasMockContent` uses, so this cannot bill
+   * nothing into a document titled as a record of an interview that did not happen.
+   */
+  async exportMockReport(format: ExportFormat = 'docx'): Promise<string | null> {
+    const session = mockInterviewService.getState();
+    const hasContent = session.answers.some((a) => !a.skipped && a.answer.trim().length > 0);
+    if (!hasContent || !session.setup) {
+      throw new Error('There is nothing to export yet. Answer at least one question first.');
+    }
+
+    const fullMarkdown = buildMockExportMarkdown({
+      setup: session.setup,
+      answers: session.answers,
+      report: session.report,
+      language: mockInterviewService.getLanguage(),
+    });
+
+    const isMarkdown = format === 'md';
+
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: 'Save Mock Interview Report',
+      defaultPath: generateExportFilename(format, 'mock-interview'),
+      filters: isMarkdown
+        ? [{ name: 'Markdown', extensions: ['md'] }]
+        : [{ name: 'Word Document', extensions: ['docx'] }],
+    });
+
+    if (canceled || !filePath) return null;
+
+    if (isMarkdown) {
+      await fs.writeFile(filePath, fullMarkdown, 'utf8');
+      return filePath;
+    }
+
+    const docxBlob = await convertMarkdownToDocx(fullMarkdown, {
+      documentType: 'document',
+      style: {
+        heading1Alignment: 'CENTER',
+        heading5Alignment: 'CENTER',
+      },
+    });
+
+    await fs.writeFile(filePath, Buffer.from(await docxBlob.arrayBuffer()));
+    return filePath;
+  }
+
+  async clearAll(options: { includeActiveMockSession?: boolean } = {}): Promise<void> {
     // Clear in-memory state
     transcriptService.clear();
     liveSuggestionService.clear();
     actionSuggestionService.clear();
+
+    // The mock session is in-memory state too, and leaving it here made "Clear" a lie about the
+    // one subject it did not touch: `hasMockContent` stayed true, so the close guard kept asking
+    // about a session that had been cleared and the save dialog - which picks the mock export
+    // whenever mock content is the only content - would have written a report for it.
+    //
+    // Guarded on `isActive()` by default. The three in-app callers - the Clear button,
+    // `startAssistant` opening a live session, and `useEndLiveSession` dropping a finished one -
+    // only exist in a state a running mock session excludes, so for them this is belt: clearing
+    // a session that is still running would drop the interview out from under the screen showing
+    // it.
+    //
+    // Sign-out is the one caller for which that is not true, and it opts in: there is no screen
+    // left to drop it out from under, and leaving it is how the next user on the machine ends up
+    // being offered it.
+    if (options.includeActiveMockSession || !mockInterviewService.isActive()) {
+      mockInterviewService.clear();
+    }
   }
 
   async setPlaceholderData(): Promise<void> {

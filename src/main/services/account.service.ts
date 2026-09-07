@@ -5,6 +5,7 @@ import {
   getLegacyInterviewConf,
   getLegacyInterviewConfOwner,
 } from '../store/config.store.js';
+import { UserAccount } from '../types/account.js';
 import { InterviewConfig } from '../types/app-state.js';
 import { appStateService } from './app-state.service.js';
 
@@ -41,6 +42,19 @@ export class AccountService {
   }
 
   /**
+   * Whether this account has been through the client's first-run setup, as the account reports it.
+   *
+   * **Absent counts as done.** A backend that predates the field omits it, and reading that as
+   * "not done" would put every user of that deployment into the wizard - with no way out, since
+   * the only exits from it write through an endpoint that deployment does not have either.
+   * Guessing wrong in this direction costs a screen nobody saw; wrong in the other direction
+   * locks the app.
+   */
+  private static readsAsOnboarded(account: UserAccount): boolean {
+    return account.onboarding_completed !== false;
+  }
+
+  /**
    * Pull the authenticated user's persisted interview config from the backend
    * into app state. Called after login so a device shows the same config the
    * user last saved anywhere.
@@ -55,6 +69,16 @@ export class AccountService {
 
       const account = response.data;
       const interviewConfig = account.interview_config;
+
+      // Applied here rather than alongside the config below, because the migration branch that
+      // follows returns early and the flag has nothing to do with what it is migrating. Guarded
+      // but not bumping: this is one field off a read, not a write that supersedes anything.
+      if (generation === this.generation) {
+        appStateService.updateState({
+          onboardingCompleted: AccountService.readsAsOnboarded(account),
+          accountEmail: account.email ?? '',
+        });
+      }
 
       // Pre-sync builds kept this config on local disk only. If the account has none yet,
       // adopt the leftover local copy instead of presenting the user an empty profile.
@@ -224,7 +248,40 @@ export class AccountService {
     appStateService.updateState({
       interviewConfig: { fullName: '', profileData: '', context: '' },
       interviewConfigLoaded: false,
+      // Reset with the rest of the account. Left standing, the next user to sign in on this
+      // machine would inherit the previous one's answer and never be offered setup.
+      onboardingCompleted: false,
+      accountEmail: '',
     });
+  }
+
+  /**
+   * Record that this account has finished (or deliberately skipped) the first-run wizard.
+   *
+   * Mirrored into app state only after the backend confirms the write. The renderer's gate reads
+   * that state, so an optimistic update would let a failed write look like a completed setup
+   * until the next launch pulled the account again and put the wizard back.
+   */
+  async setOnboardingCompleted(
+    completed: boolean
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await this.client.updateOnboarding({ completed });
+      if (response.error) {
+        return { success: false, error: response.error.message || 'Failed to save your setup' };
+      }
+
+      // Bumped for the same reason `updateConfig` bumps it: a pull that started before this
+      // write is now stale, and letting it land afterwards would put the wizard back in front of
+      // a user who has just finished it.
+      this.generation++;
+      appStateService.updateState({
+        onboardingCompleted: response.data?.onboarding_completed ?? completed,
+      });
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Failed to save your setup' };
+    }
   }
 }
 

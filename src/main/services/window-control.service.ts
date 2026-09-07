@@ -3,6 +3,7 @@ import { app, BrowserWindow, screen } from 'electron';
 import { MIN_HEIGHT, MIN_WIDTH, OPACITY_LEVELS } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { RunningState } from '../types/app-state.js';
+import { isMockInterviewSessionActive } from '../types/mock-interview.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
 
@@ -562,6 +563,17 @@ export function toggleStealth(): void {
       type: 'error',
     });
     console.log('⚠️ Stealth mode requires authentication');
+    return;
+  }
+
+  // Mock interview is deliberate practice, not a live call - it needs no always-on-top and no
+  // screen-share hiding, and a click-through, non-focusable window would strand the session
+  // screen the user is looking straight at.
+  if (isMockInterviewSessionActive(appStateService.getState().mockInterview)) {
+    pushNotificationService.pushNotification({
+      message: 'Stealth mode is off during a mock interview. This is practice, not a live call.',
+      type: 'warning',
+    });
     return;
   }
 

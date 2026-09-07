@@ -48,6 +48,23 @@ export const DEFAULT_LANGUAGE = Language.English;
 const LANGUAGE_CODES = new Set<string>(Object.values(Language));
 
 /**
+ * Languages Deepgram's Aura TTS can speak, mirroring the backend's `DEEPGRAM_TTS_VOICES` in
+ * `app/schemas/language.py`. A local fast-skip only - the backend stays the authority and answers
+ * `204` for anything not in its own map, so a client ahead of or behind this list still degrades
+ * to text-only rather than breaking. Kept here so main does not fire a `/speak` request it
+ * already knows will come back empty.
+ */
+export const TTS_LANGUAGES: ReadonlySet<Language> = new Set([
+  Language.English,
+  Language.Spanish,
+  Language.German,
+  Language.French,
+  Language.Dutch,
+  Language.Italian,
+  Language.Japanese,
+]);
+
+/**
  * Map a stored or incoming value onto the enum, falling back to English.
  *
  * The config store holds whatever was written to disk, which may be a language a later build

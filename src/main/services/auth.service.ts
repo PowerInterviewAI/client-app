@@ -2,6 +2,7 @@ import { AuthApi } from '../api/auth.js';
 import { configStore } from '../store/config.store.js';
 import { accountService } from './account.service.js';
 import { appStateService } from './app-state.service.js';
+import { toolsService } from './tools.service.js';
 import { disableStealth } from './window-control.service.js';
 
 /**
@@ -154,6 +155,19 @@ export class AuthService {
       configStore.updateConfig({ sessionToken: '' });
       appStateService.updateState({ isLoggedIn: false });
       accountService.clearState();
+
+      // The interview goes with the session it belonged to. The transcript, the suggestions and
+      // the mock session all live in main-process memory and nothing else dropped them here, so
+      // on a shared machine the next user to sign in inherited the previous one's: the close
+      // guard reads `hasHistory` / `hasMockContent` off exactly this state, and would offer to
+      // export somebody else's interview to them. Never allowed to fail the sign-out itself -
+      // the session is over either way, and a stuck signed-in app is the worse outcome.
+      try {
+        await toolsService.clearAll({ includeActiveMockSession: true });
+        await toolsService.setPlaceholderData();
+      } catch (e) {
+        console.warn('Failed to clear interview state on sign-out:', e);
+      }
 
       // clear credentials if remember me is not checked
       const config = configStore.getConfig();

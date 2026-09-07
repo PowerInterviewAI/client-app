@@ -25,7 +25,11 @@ export function UpdateNotification() {
     const electron = getElectron();
     const state = await electron?.appState.get();
 
-    if (state?.hasHistory) {
+    // Both subjects, the same pair the window-close guard fires on. Installing an update calls
+    // `allowNextClose()` and so goes *past* that guard, making this the only thing standing
+    // between the session and the installer - and checking `hasHistory` alone meant a mock
+    // interview with no live session behind it was destroyed without being offered a save.
+    if (state?.hasHistory || state?.hasMockContent) {
       const proceed = await useSaveHistoryPrompt.getState().prompt('update');
       if (!proceed) return;
     }
