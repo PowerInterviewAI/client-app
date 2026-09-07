@@ -24,11 +24,17 @@
  *   pnpm exec electron test/manual/echo-probe.mjs
  *   pnpm exec electron test/manual/echo-probe.mjs --seconds=60 --device="Microphone (Realtek)"
  *
- * The A/B the constraints work exists for - run each twice and compare `erlDb`:
+ * The A/B the constraints work exists for - compare `erlDb` between:
  *
  *   pnpm exec electron test/manual/echo-probe.mjs --no-aec
  *   pnpm exec electron test/manual/echo-probe.mjs --no-agc
  *   pnpm exec electron test/manual/echo-probe.mjs --no-ns
+ *
+ * Establish the spread of the UNCHANGED configuration first, by running the default several times
+ * over, and treat any difference smaller than that spread as no difference at all. This is not
+ * pedantry: on the first machine measured, two 16 s runs of the same configuration came back 2.8 dB
+ * apart while the aec on/off pair differed by 4.3 dB. Two runs cannot separate those. Use the full
+ * default duration or longer, and repeat, before writing a number down.
  *
  * If the summary says the peak sits at the edge of the search window, it names the flag to widen
  * it with. The window is `--min-lag=` / `--max-lag=`, in ms, and it is signed:
