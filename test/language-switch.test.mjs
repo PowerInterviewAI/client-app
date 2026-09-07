@@ -174,13 +174,22 @@ export async function run() {
   );
 
   // English is sent as no parameter at all, so a session in the default language stays
-  // byte-identical to what every client released before the picker existed sends.
+  // byte-identical to what every client released before the picker existed sends. The same is
+  // true of a live session's channel count, which is the parameter's own default - between them
+  // the whole query string is absent for the ordinary case.
   const url = codeOnly(methodBody(source, 'function buildStreamingUrl('));
   check(
     'the default language is sent as no query parameter',
-    /if \(language === DEFAULT_LANGUAGE\) return STREAMING_URL;/.test(url)
+    /language !== DEFAULT_LANGUAGE\) params\.set\('language'/.test(url)
   );
-  check('any other language is encoded into the query', /encodeURIComponent\(language\)/.test(url));
+  check(
+    'and neither is the default channel count',
+    /channels !== LIVE_STREAM_CHANNELS\) params\.set\('channels'/.test(url)
+  );
+  check(
+    'so an English live session sends a bare URL',
+    /return query \? .+ : STREAMING_URL;/.test(url)
+  );
 
   return failures;
 }

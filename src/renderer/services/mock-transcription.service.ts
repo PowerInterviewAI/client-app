@@ -1,7 +1,11 @@
 import { getElectron } from '@/lib/utils';
 import { Language } from '@/types/language';
 
-import { AudioWsStream, resolveMicDeviceId } from './live-transcription.service';
+import {
+  AudioWsStream,
+  MOCK_STREAM_CHANNELS,
+  resolveMicDeviceId,
+} from './live-transcription.service';
 
 /**
  * Microphone-only capture for a mock interview.
@@ -50,7 +54,18 @@ class MockTranscriptionService {
     };
 
     try {
-      this.channel = new AudioWsStream('ch_1', this.micStream, language, onTranscript);
+      // One socket, and it says so. The backend divides the interview's per-minute price by
+      // this number: left at the default of two it charged half an interval per interval, which
+      // is what made a mock interview cost half of a live one - for a session that additionally
+      // bills a question call, a turn call, a report call and a TTS call per sentence, none of
+      // which are metered at all.
+      this.channel = new AudioWsStream(
+        'ch_1',
+        this.micStream,
+        language,
+        onTranscript,
+        MOCK_STREAM_CHANNELS
+      );
       await this.channel.start();
     } catch (error) {
       // The microphone is already open by this point, and a caller that never saw `start()`

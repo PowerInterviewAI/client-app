@@ -14,15 +14,39 @@ const BACKEND_BASE_URL = import.meta.env.DEV
 const STREAMING_URL = `${BACKEND_BASE_URL.replace('http', 'ws')}/api/asr/streaming`;
 
 /**
+ * How many of these sockets a live session holds open: loopback (`ch_0`) and microphone
+ * (`ch_1`).
+ *
+ * The backend divides the interview's per-minute price by this, so it is what makes the price a
+ * price for the interview rather than for the socket. It used to assume the number rather than be
+ * told it - a flat half per socket - which is correct for exactly this session and wrong for the
+ * mock one, which opens a single socket and was therefore billed at half rate.
+ */
+export const LIVE_STREAM_CHANNELS = 2;
+
+/** A mock interview captures the microphone only - see `mock-transcription.service.ts`. */
+export const MOCK_STREAM_CHANNELS = 1;
+
+/**
  * The streaming URL for one channel.
  *
  * English is sent as no parameter at all rather than as `language=en`. The backend treats an
  * absent language as English, so an English session stays byte-identical to what shipped before
  * the picker existed - which is what the request looks like from every client released before it.
+ *
+ * `channels` does not get the same treatment, and the difference is worth naming: an absent
+ * language means English on every deployment, whereas an absent `channels` means *two*, which is
+ * a mock session's bill halved. It is sent whenever it is not the default for that reason - a
+ * backend that predates the parameter ignores an unknown query parameter and bills exactly what
+ * it billed before, so sending it costs nothing against an older deployment and is the whole fix
+ * against a current one.
  */
-function buildStreamingUrl(language: Language): string {
-  if (language === DEFAULT_LANGUAGE) return STREAMING_URL;
-  return `${STREAMING_URL}?language=${encodeURIComponent(language)}`;
+function buildStreamingUrl(language: Language, channels: number): string {
+  const params = new URLSearchParams();
+  if (language !== DEFAULT_LANGUAGE) params.set('language', language);
+  if (channels !== LIVE_STREAM_CHANNELS) params.set('channels', String(channels));
+  const query = params.toString();
+  return query ? `${STREAMING_URL}?${query}` : STREAMING_URL;
 }
 
 // Inline AudioWorklet processor (runs off the main thread)
@@ -103,7 +127,13 @@ export class AudioWsStream {
       channel: Channel;
       type: 'partial' | 'final';
       text: string;
-    }) => Promise<void>
+    }) => Promise<void>,
+    /**
+     * How many sockets the session this stream belongs to holds open, so the backend can charge
+     * the interview once rather than once per socket. Defaults to the live session's two, which
+     * is what every caller wanted before a mock session existed.
+     */
+    private readonly channels: number = LIVE_STREAM_CHANNELS
   ) {}
 
   async start() {
@@ -332,7 +362,7 @@ export class AudioWsStream {
     return new Promise<void>((resolve, reject) => {
       // Rebuilt per attempt rather than captured once, so a reconnect cannot outlive the
       // language the session opened with.
-      const ws = new WebSocket(buildStreamingUrl(this.language));
+      const ws = new WebSocket(buildStreamingUrl(this.language, this.channels));
       this.ws = ws;
       let settled = false;
 

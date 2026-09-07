@@ -44,8 +44,13 @@ export async function run() {
   // Exactly one AudioWsStream, on ch_1 (mic) - never ch_0 (loopback).
   const channelConstructions = [...source.matchAll(/new AudioWsStream\(/g)];
   check('constructs exactly one AudioWsStream', channelConstructions.length === 1);
-  check("that channel is 'ch_1'", source.includes("new AudioWsStream('ch_1'"));
+  check("that channel is 'ch_1'", /new AudioWsStream\(\s*'ch_1'/.test(source));
   check("it never constructs a 'ch_0' channel", !source.includes("'ch_0'"));
+
+  // And it says so on the socket. The backend divides the interview's per-minute price by the
+  // channel count, whose default is the live session's two - so a mock session that let it
+  // default was billed half of what a live interview costs, with nothing anywhere reporting it.
+  check('it declares its single channel to the backend', source.includes('MOCK_STREAM_CHANNELS'));
 
   // Composes the existing class rather than reimplementing capture - reusing AudioWsStream is
   // what keeps its switchSeq/setStream race guards untouched by this file entirely.
