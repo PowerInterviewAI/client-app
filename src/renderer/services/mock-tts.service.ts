@@ -167,11 +167,11 @@ class MockTtsService {
         const blob = await this.getChunkBlob(i, chunks.length, seq);
         if (seq !== this.playSeq) return;
         if (!blob) throw new Error('Synthesis returned no audio');
-        // Announced for the first chunk only, and after the blob is in hand: this is the moment
-        // sound begins, which is what the on-screen reveal is timed against. Announcing it at the
-        // top of the run would put the words up during the synthesis wait, in silence.
-        if (i === 0) this.notifyAudioStart();
-        await this.playBlob(blob);
+        // Announced for the first chunk only, and from inside `playBlob` - see `onStarted`
+        // there. Announcing it here, with the blob merely in hand, is what put the words on
+        // screen ahead of the voice: decoding an MP3 and getting the output device going is not
+        // free, and the reveal is timed against the first word being *heard*.
+        await this.playBlob(blob, i === 0 ? () => this.notifyAudioStart() : undefined);
       }
       if (seq !== this.playSeq) return;
       await electron.mockInterview.speechFinished();
@@ -287,7 +287,18 @@ class MockTtsService {
     }
   }
 
-  private playBlob(blob: Blob): Promise<void> {
+  /**
+   * @param onStarted Fired once, when this element actually begins to sound.
+   *
+   * The transcript panel reveals the question in step with it, so *when* is the whole point.
+   * `playQuestion` used to call it as soon as the first chunk's blob arrived, which is one
+   * `createObjectURL`, one MP3 decode and one output-device start too early - enough that the
+   * first words were already on screen before anything was audible, which is the gap between the
+   * text and the speech. `playing` is the event that means sound, and it is used rather than
+   * awaiting `play()`: that promise resolves once playback has been *permitted*, which on a
+   * still-buffering element is earlier again.
+   */
+  private playBlob(blob: Blob, onStarted?: () => void): Promise<void> {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
@@ -337,6 +348,14 @@ class MockTtsService {
         reject(new DOMException('playback stopped', 'AbortError'));
       };
       this.settleStoppedPlayback = settle;
+
+      // `playing` can fire again after a stall re-buffers, and the reveal must not restart with
+      // it, so the handler detaches itself. `onStarted` is only passed for the first chunk of a
+      // question anyway - the later ones are a continuation of a voice that has already begun.
+      audio.onplaying = () => {
+        audio.onplaying = null;
+        onStarted?.();
+      };
 
       audio.onended = () => {
         cleanup();

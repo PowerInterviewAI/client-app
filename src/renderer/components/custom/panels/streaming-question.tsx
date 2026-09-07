@@ -81,9 +81,17 @@ export function StreamingQuestion({ text, spoken }: StreamingQuestionProps) {
   // effect so that timer restarts with the question and nothing else.
   const [waitedForAudio, setWaitedForAudio] = useState(false);
 
-  // Nothing to wait for when the question is not going to be spoken, and nothing to animate when
-  // the user has asked for less motion.
-  const started = reduceMotion || !spoken || speechStarted || waitedForAudio;
+  // Nothing to animate when the user has asked for less motion, and nothing to animate when the
+  // question is not going to be spoken either.
+  //
+  // A reveal exists to keep the words in step with a voice. With no voice there is nothing to
+  // keep step with, and pacing the text out anyway is the animation asking the candidate to wait
+  // for a machine that is not doing anything - on the one path where reading the question *is*
+  // the whole of being asked it, and where a cursor blinking after a half-written sentence reads
+  // as the interviewer still thinking. `useSpeechStarted` keeps its subscription either way,
+  // because `speechFailed` can flip `spoken` to false for a question already mid-reveal.
+  const instant = reduceMotion || !spoken;
+  const started = instant || speechStarted || waitedForAudio;
 
   useEffect(() => {
     setShown(0);
@@ -98,7 +106,7 @@ export function StreamingQuestion({ text, spoken }: StreamingQuestionProps) {
 
   useEffect(() => {
     if (!started) return;
-    if (reduceMotion) {
+    if (instant) {
       setShown(words.length);
       return;
     }
@@ -122,7 +130,7 @@ export function StreamingQuestion({ text, spoken }: StreamingQuestionProps) {
     }, perWord);
 
     return () => window.clearInterval(id);
-  }, [started, reduceMotion, words]);
+  }, [started, instant, words]);
 
   const revealed = words.slice(0, shown).join('');
   const done = shown >= words.length;
