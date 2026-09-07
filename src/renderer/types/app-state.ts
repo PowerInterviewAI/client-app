@@ -71,4 +71,12 @@ export interface AppState {
    * see the main-process `AppState`'s docstring for why this is not simply `answers.length`.
    */
   hasMockContent: boolean;
+
+  /**
+   * Whether the backend serves the mock-interview routes, or `null` while that is unknown.
+   *
+   * Only `false` is an answer to act on. See the main-process `AppState`'s docstring for why
+   * `null` reads as available rather than as unavailable.
+   */
+  mockInterviewSupported: boolean | null;
 }

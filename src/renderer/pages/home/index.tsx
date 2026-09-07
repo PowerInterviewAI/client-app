@@ -107,6 +107,11 @@ export default function HomePage() {
   // deliberately leaves `runningState` on Idle - so the live check alone does not cover it.
   const anySessionActive = liveSessionActive || mockSessionActive;
 
+  // A released client can outrun the backend deployment that adds the feature. Only an explicit
+  // `false` closes the card: `null` means the probe has not answered yet, and treating that as
+  // unavailable would grey the card out for the first seconds of every launch.
+  const mockUnsupported = appState?.mockInterviewSupported === false;
+
   const [mockSetupOpen, setMockSetupOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -129,8 +134,13 @@ export default function HomePage() {
     // finished mock session or hidden while the assistant runs - but opening a setup dialog for
     // a session the main process would refuse is a bad enough failure to be worth one line.
     if (liveSessionActive) return;
+
+    // The same reasoning for a backend that cannot serve the session at all. Reachable in a way
+    // the live check is not: "Practise again" sits on a report the candidate is still reading
+    // when the backend is rolled back under them.
+    if (mockUnsupported) return;
     setMockSetupOpen(true);
-    // `liveSessionActive` is read at the moment the request arrives and is not a trigger for it.
+    // Both guards are read at the moment the request arrives and are not triggers for it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, navigate]);
 
@@ -200,12 +210,14 @@ export default function HomePage() {
             icon={<Mic className="h-5 w-5" aria-hidden="true" />}
             title="Start mock interview"
             description={
-              liveSessionActive
-                ? 'Stop the live assistant first - the two cannot share your microphone.'
-                : 'The AI asks, you answer out loud, and you get a scored report at the end.'
+              mockUnsupported
+                ? 'Not available on this server yet. Update the app, or try again later.'
+                : liveSessionActive
+                  ? 'Stop the live assistant first - the two cannot share your microphone.'
+                  : 'The AI asks, you answer out loud, and you get a scored report at the end.'
             }
             onClick={() => setMockSetupOpen(true)}
-            disabled={liveSessionActive}
+            disabled={liveSessionActive || mockUnsupported}
           />
           <LaunchCard
             icon={<Play className="h-5 w-5" aria-hidden="true" />}

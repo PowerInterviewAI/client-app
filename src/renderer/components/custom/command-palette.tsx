@@ -112,6 +112,11 @@ export function CommandPalette() {
     runningState !== RunningState.Idle ||
     isMockInterviewSessionActive(appState?.mockInterview ?? null);
 
+  // Dropped from the list rather than shown disabled, which is what the palette does with every
+  // other action it cannot offer. Only an explicit `false` hides it - see the app state's
+  // `mockInterviewSupported` for why an unanswered probe still counts as available.
+  const mockUnsupported = appState?.mockInterviewSupported === false;
+
   const run = (action: () => void) => {
     setOpen(false);
     action();
@@ -181,14 +186,16 @@ export function CommandPalette() {
                 way the home page names them, because they are the same two actions. */}
             {!isRunning && (
               <>
-                <CommandItem
-                  onSelect={() =>
-                    run(() => navigate('/', { state: { openMockSetup: true } }))
-                  }
-                >
-                  <Mic />
-                  Start mock interview
-                </CommandItem>
+                {!mockUnsupported && (
+                  <CommandItem
+                    onSelect={() =>
+                      run(() => navigate('/', { state: { openMockSetup: true } }))
+                    }
+                  >
+                    <Mic />
+                    Start mock interview
+                  </CommandItem>
+                )}
                 <CommandItem
                   onSelect={() =>
                     run(() => navigate('/main', { state: { autoStartLive: true } }))

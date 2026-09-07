@@ -34,6 +34,7 @@ const DEFAULT_STATE: AppState = {
   hasHistory: false,
   mockInterview: null,
   hasMockContent: false,
+  mockInterviewSupported: null,
 };
 
 /** The three arrays a session fills, and that the placeholder seeds. */

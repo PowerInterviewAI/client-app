@@ -4,6 +4,7 @@
  */
 
 import { HealthCheckApi } from '../api/health-check.js';
+import { MockInterviewApi } from '../api/mock-interview.js';
 import { safeSleep } from '../utils/sleep.js';
 import { accountService } from './account.service.js';
 import { appStateService } from './app-state.service.js';
@@ -29,6 +30,7 @@ function nextFailureInterval(current: number): number {
 export class HealthCheckService {
   private running = false;
   private client = new HealthCheckApi();
+  private mockClient = new MockInterviewApi();
 
   /**
    * Start health check monitoring
@@ -78,6 +80,7 @@ export class HealthCheckService {
   private startBackendLoop(): void {
     (async () => {
       let failureInterval = FAILURE_INTERVAL;
+      let wasLive = false;
 
       while (this.running) {
         let backendLive = false;
@@ -95,6 +98,19 @@ export class HealthCheckService {
         // Update app state
         appStateService.updateState({ isBackendLive: backendLive });
 
+        // On the edge into live, not on every tick: the answer only changes when the process on
+        // the other end is replaced, and that is exactly what a down-then-up looks like from
+        // here. Polling it at the ping rate would add a request every five seconds for the whole
+        // session to learn something that almost never moves.
+        //
+        // Left standing while the backend is down. The last answer is the best one available,
+        // and clearing it would retire the entry point over an outage - the one cause that has
+        // nothing to do with what the backend supports.
+        if (backendLive && !wasLive) {
+          void this.refreshMockInterviewSupport();
+        }
+        wasLive = backendLive;
+
         // Reset on the way back up, so one blip does not leave the app checking slowly for the
         // rest of the session.
         const next = backendLive ? SUCCESS_INTERVAL : failureInterval;
@@ -103,6 +119,29 @@ export class HealthCheckService {
         await safeSleep(next);
       }
     })();
+  }
+
+  /**
+   * Ask the backend whether it serves the mock-interview routes, and record the answer.
+   *
+   * Only writes when the probe came back with something. A probe that never arrived returns
+   * `null` and is dropped here rather than overwriting a known answer with an unknown one.
+   */
+  private async refreshMockInterviewSupport(): Promise<void> {
+    let supported: boolean | null = null;
+    try {
+      supported = await this.mockClient.probeSupport();
+    } catch (error) {
+      console.error('[HealthCheckService] Mock interview probe error:', error);
+      return;
+    }
+
+    if (supported === null) return;
+
+    if (supported !== appStateService.getState().mockInterviewSupported) {
+      console.log(`[HealthCheckService] Mock interview supported by backend: ${supported}`);
+    }
+    appStateService.updateState({ mockInterviewSupported: supported });
   }
 
   /** Client ping loop */

@@ -149,6 +149,20 @@ export interface AppState {
    * at the one call site (the close guard) that has to ask "is there anything to lose at all".
    */
   hasMockContent: boolean;
+
+  /**
+   * Whether the backend serves the mock-interview routes, or `null` before that is known.
+   *
+   * Re-probed every time the backend comes back up rather than once at launch, so a client that
+   * was open across the deployment that adds the feature picks it up instead of staying wrong
+   * until it is restarted.
+   *
+   * `null` is treated as supported by the UI, not as unsupported. The flag exists to retire an
+   * entry point that provably cannot work, and it is only ever certain in one direction: a `404`
+   * is proof of absence, while "not asked yet" and "could not ask" are not proof of anything.
+   * Blocking on those would hide a working feature every time the probe was merely slow.
+   */
+  mockInterviewSupported: boolean | null;
 }
 
 /** The app state as sent to the renderer, with the interview config reduced to a summary. */

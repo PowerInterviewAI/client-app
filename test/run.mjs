@@ -42,6 +42,9 @@ for (const module of [
   // clears the service on every branch, and the service's own clear() resets appState too).
   './mock-action-suggestion-block.test.mjs',
   './mock-interview-gate.test.mjs',
+  // Swaps globalThis.fetch for the length of its own run and restores it in a finally, so it is
+  // independent of the session-driving tests above and only needs to sit beside them.
+  './mock-interview-support.test.mjs',
   './mock-transcription-isolation.test.mjs',
   './mock-transcript-turns.test.mjs',
   './mock-tts-playback.test.mjs',
