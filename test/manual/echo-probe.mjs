@@ -112,6 +112,36 @@ ipcMain.on('probe:ready', (_event, info) => {
   console.log(
     `  applied  : aec=${info.micSettings.echoCancellation} ns=${info.micSettings.noiseSuppression} agc=${info.micSettings.autoGainControl}`
   );
+  // The A/B is scored by running with one flag off and comparing erlDb, which measures nothing if
+  // the platform quietly declined to turn it off: two runs of the same configuration, reported as
+  // a comparison. These constraints are advisory, so Chromium is free to ignore them and say so
+  // only in getSettings(). This is the same failure as the mistyped `--noaec` the argument parser
+  // rejects above, one layer down and not the operator's fault, so it is worth as much noise.
+  const FLAG_KEYS = [
+    ['aec', 'echoCancellation'],
+    ['ns', 'noiseSuppression'],
+    ['agc', 'autoGainControl'],
+  ];
+  const ignored = FLAG_KEYS.filter(
+    ([, key]) => info.micSettings[key] !== undefined && info.micSettings[key] !== options[key]
+  );
+  const unreported = FLAG_KEYS.filter(([, key]) => info.micSettings[key] === undefined);
+  if (ignored.length > 0) {
+    const names = ignored.map(([short]) => short).join(' and ');
+    console.log(
+      `\nWARNING: this device did not apply ${names} as requested. An A/B that differs only in\n` +
+        'that flag is then comparing two runs of the same configuration. Score erlDb on another\n' +
+        'device, or drop that flag from the comparison.'
+    );
+  }
+  if (unreported.length > 0) {
+    const names = unreported.map(([short]) => short).join(', ');
+    console.log(
+      `\nNote: this device does not report ${names} back, so whether the request was honoured\n` +
+        'cannot be confirmed from here.'
+    );
+  }
+
   console.log(`loopback   : ${info.loopbackTracks} audio track(s)`);
   if (info.loopbackTracks === 0) {
     // Said here rather than left to be inferred from an empty ref% column forty lines later.
