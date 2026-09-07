@@ -181,7 +181,16 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
               <span className="h-3 w-3 rounded-full border-2 border-muted-foreground/40 border-t-primary animate-spin" />
             )}
           </div>
-          {statusText && <span className="truncate">{statusText}</span>}
+          {/* `min-w-0` because `truncate` cannot do anything without it: a flex item's default
+              `min-width` is `auto`, so the span would refuse to shrink below its text and push
+              the row wide instead of clipping. `title` carries the whole message for the narrow
+              window where it does clip - the row is a fixed height, so the alternative is
+              wrapping, which is the thing that was moving the panels. */}
+          {statusText && (
+            <span className="min-w-0 truncate" title={statusText}>
+              {statusText}
+            </span>
+          )}
           {showReadyPrompt && (
             <Button
               size="sm"
