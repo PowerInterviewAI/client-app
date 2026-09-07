@@ -1,6 +1,7 @@
 import { ArrowDown } from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { StreamingQuestion } from '@/components/custom/panels/streaming-question';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -21,6 +22,14 @@ interface Turn {
   text: string;
   skipped?: boolean;
   isFollowUp?: boolean;
+  /**
+   * The question being asked right now, which is written out as it is spoken rather than
+   * appearing whole. True for at most one turn, and only while the interviewer is still
+   * speaking - once it is the candidate's turn the whole question stays on screen to be read.
+   */
+  streaming?: boolean;
+  /** Whether that question is going to be spoken, which is what the reveal waits for. */
+  spoken?: boolean;
 }
 
 /**
@@ -62,6 +71,8 @@ function buildTurns(session: MockInterviewSessionState): Turn[] {
       speaker: 'interviewer',
       text: session.currentQuestion.text,
       isFollowUp: session.currentQuestion.isFollowUp,
+      streaming: session.state === MockInterviewState.Speaking,
+      spoken: session.currentQuestion.hasAudio,
     });
 
     // Only once something has actually been transcribed. Pushed on entering `Listening` instead,
@@ -203,6 +214,8 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
                     <p className="text-sm text-muted-foreground italic">
                       {turn.skipped ? 'Skipped' : 'No answer'}
                     </p>
+                  ) : turn.streaming ? (
+                    <StreamingQuestion text={turn.text} spoken={turn.spoken ?? false} />
                   ) : (
                     <p
                       dir="auto"

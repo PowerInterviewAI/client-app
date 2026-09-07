@@ -105,6 +105,34 @@ class MockTtsService {
   private playSeq = 0;
   /** Settles the promise of a playback `stop()` interrupted; null when nothing is playing. */
   private settleStoppedPlayback: (() => void) | null = null;
+  /** Notified the moment a question's first chunk actually starts sounding. */
+  private audioStartListeners = new Set<() => void>();
+
+  /**
+   * Fires when the interviewer's voice actually begins, not when playback is requested.
+   *
+   * The two are seconds apart: `playQuestion` has to synthesise the first sentence before there
+   * is anything to play. The transcript panel reveals the question in step with this rather than
+   * with the state change, so the words arrive with the voice instead of sitting on screen in
+   * silence waiting for it.
+   */
+  onAudioStart(listener: () => void): () => void {
+    this.audioStartListeners.add(listener);
+    return () => {
+      this.audioStartListeners.delete(listener);
+    };
+  }
+
+  private notifyAudioStart(): void {
+    for (const listener of this.audioStartListeners) {
+      try {
+        listener();
+      } catch (e) {
+        // A listener is a UI reveal, never something playback depends on.
+        console.warn('[MockTtsService] audio-start listener threw', e);
+      }
+    }
+  }
 
   setMicTrack(track: MediaStreamTrack | null): void {
     this.gate.setTrack(track);
@@ -139,6 +167,10 @@ class MockTtsService {
         const blob = await this.getChunkBlob(i, chunks.length, seq);
         if (seq !== this.playSeq) return;
         if (!blob) throw new Error('Synthesis returned no audio');
+        // Announced for the first chunk only, and after the blob is in hand: this is the moment
+        // sound begins, which is what the on-screen reveal is timed against. Announcing it at the
+        // top of the run would put the words up during the synthesis wait, in silence.
+        if (i === 0) this.notifyAudioStart();
         await this.playBlob(blob);
       }
       if (seq !== this.playSeq) return;
