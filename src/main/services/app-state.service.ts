@@ -30,6 +30,7 @@ const DEFAULT_STATE: AppState = {
   interviewConfig: { fullName: '', profileData: '', context: '' },
   interviewConfigLoaded: false,
   onboardingCompleted: false,
+  accountEmail: '',
   hasHistory: false,
   mockInterview: null,
   hasMockContent: false,

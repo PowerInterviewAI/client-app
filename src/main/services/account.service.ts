@@ -76,6 +76,7 @@ export class AccountService {
       if (generation === this.generation) {
         appStateService.updateState({
           onboardingCompleted: AccountService.readsAsOnboarded(account),
+          accountEmail: account.email ?? '',
         });
       }
 
@@ -250,6 +251,7 @@ export class AccountService {
       // Reset with the rest of the account. Left standing, the next user to sign in on this
       // machine would inherit the previous one's answer and never be offered setup.
       onboardingCompleted: false,
+      accountEmail: '',
     });
   }
 

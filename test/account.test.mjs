@@ -117,5 +117,54 @@ export async function run() {
     appStateService.getState().interviewConfigLoaded === true
   );
 
+  // --- what sign-out has to take with it ---------------------------------------------------
+  //
+  // Everything the account put into app state is read by something that renders it or decides
+  // with it: `accountEmail` is what every "signed in as" shows, and `onboardingCompleted` is what
+  // the first-run gate reads. Left standing across a sign-out, the next user on a shared machine
+  // is shown the previous user's address and is never offered setup - both silent, and both only
+  // reachable by actually signing two people in.
+  accountService.client.getMe = async () => ({
+    data: {
+      ...account('account-A', CONFIG).data,
+      email: 'jane@example.com',
+      onboarding_completed: true,
+    },
+  });
+  getMe = accountService.client.getMe;
+  await accountService.pullFromBackend();
+
+  check(
+    'the account email reaches app state',
+    appStateService.getState().accountEmail === 'jane@example.com'
+  );
+  check(
+    'so does the onboarding flag',
+    appStateService.getState().onboardingCompleted === true
+  );
+
+  accountService.clearState();
+
+  check('sign-out drops the account email', appStateService.getState().accountEmail === '');
+  check(
+    'sign-out drops the onboarding flag',
+    appStateService.getState().onboardingCompleted === false
+  );
+  check(
+    'and the profile with them',
+    appStateService.getState().interviewConfig.profileData === ''
+  );
+
+  // An account that predates the field omits it, which is not the same answer as false: read as
+  // false it would put every user of that deployment into a wizard whose only exits write to an
+  // endpoint that deployment does not have.
+  accountService.client.getMe = async () => account('account-A', CONFIG);
+  getMe = accountService.client.getMe;
+  await accountService.pullFromBackend();
+  check(
+    'an absent onboarding flag counts as done',
+    appStateService.getState().onboardingCompleted === true
+  );
+
   return failures;
 }

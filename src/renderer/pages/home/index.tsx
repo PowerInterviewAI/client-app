@@ -128,7 +128,9 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, navigate]);
 
-  const email = config?.email;
+  // The account's own email, not the remembered credential: `config.email` is blank whenever the
+  // user declined "remember me", which would report a signed-in user as not signed in.
+  const email = appState?.accountEmail || config?.email;
   const credits = appState?.credits;
   // appState starts null before the first IPC round-trip resolves, and the config arrives over a
   // second one - both need to settle before "no data" is trustworthy.

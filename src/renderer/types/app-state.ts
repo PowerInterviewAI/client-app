@@ -51,6 +51,12 @@ export interface AppState {
    */
   onboardingCompleted: boolean;
   /**
+   * The signed-in account's email. Distinct from `Config.email`, which is a credential the login
+   * form persists only under "remember me" - blank for a user who declined it, and stale for the
+   * previous user until the next sign-in. Read this to display who is signed in.
+   */
+  accountEmail: string;
+  /**
    * Whether the arrays above hold a real interview rather than the placeholder copy the panels
    * are seeded with. Derived in main; the renderer only reads it.
    */

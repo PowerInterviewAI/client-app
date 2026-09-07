@@ -114,7 +114,7 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
           <>
             <DropdownMenuLabel className="flex items-center">
               <Mail className="mr-2 h-4 w-4" />
-              {config?.email}
+              {appState?.accountEmail || config?.email}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {!inSetup && (

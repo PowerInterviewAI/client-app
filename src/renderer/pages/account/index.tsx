@@ -10,6 +10,7 @@ import {
 } from '@/components/custom/settings/profile-fields';
 import { Button } from '@/components/ui/button';
 import { useAccountForm } from '@/hooks/use-account-form';
+import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 
@@ -24,6 +25,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
  */
 export default function AccountPage() {
   const { config } = useConfigStore();
+  const { appState } = useAppState();
   const { changePassword, loading: authLoading, error: authError, setError } = useAuth();
   const form = useAccountForm();
 
@@ -58,7 +60,11 @@ export default function AccountPage() {
       <div className="flex-1 overflow-auto px-4 py-4 w-full max-w-2xl mx-auto space-y-6">
         <div className="rounded-lg border p-3">
           <p className="text-xs text-muted-foreground">Signed in as</p>
-          <p className="truncate text-sm font-medium">{config?.email || 'Loading...'}</p>
+          {/* The account's own email rather than the remembered credential, which is blank for
+              a user who declined "remember me" - see `AppState.accountEmail`. */}
+          <p className="truncate text-sm font-medium">
+            {appState?.accountEmail || config?.email || 'Loading...'}
+          </p>
         </div>
 
         <FullNameField form={form} />
