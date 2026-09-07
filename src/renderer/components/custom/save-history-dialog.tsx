@@ -19,6 +19,12 @@ import type { ExportFormat } from '@/types/export';
 
 import { showExportSuccessToast } from './export-success-toast';
 
+interface Copy {
+  title: string;
+  body: string;
+  discard: string;
+}
+
 /**
  * The action is named in the title and again on the button that goes through with it. "Discard"
  * on its own is the same word for four different losses, and this dialog can appear on a close
@@ -29,35 +35,93 @@ import { showExportSuccessToast } from './export-success-toast';
  * session is already over by the time `stop` appears, and the buffers are dropped the moment it
  * closes. That is why it has no Cancel and cannot be dismissed - see `dismissible` below.
  */
-const COPY: Record<SaveHistoryReason, { title: string; body: string; discard: string }> = {
+const COPY: Record<SaveHistoryReason, Copy> = {
   clear: {
     title: 'Save this interview before clearing?',
-    body: 'Clearing drops the transcript and the suggestions from this session.',
+    body: 'Clearing drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
     discard: 'Clear without saving',
   },
   start: {
     title: 'Save this interview before starting a new one?',
-    body: 'Starting a session drops the transcript and the suggestions from the last one.',
+    body: 'Starting a session drops the transcript and the suggestions from the last one, and nothing is written to disk until you export.',
     discard: 'Start without saving',
   },
   close: {
     title: 'Save this interview before closing?',
-    body: 'Closing drops the transcript and the suggestions from this session.',
+    body: 'Closing drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
     discard: 'Close without saving',
   },
   update: {
     title: 'Save this interview before installing the update?',
-    body: 'Installing restarts the app and drops the transcript and the suggestions from this session.',
+    body: 'Installing restarts the app and drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
     discard: 'Install without saving',
   },
   signout: {
     title: 'Save this interview before signing out?',
-    body: 'Signing out drops the transcript and the suggestions from this session.',
+    body: 'Signing out drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
     discard: 'Sign out without saving',
   },
   stop: {
     title: 'Save this interview?',
-    body: 'Your interview has ended. The transcript and the suggestions are dropped from here.',
+    body: 'Your interview has ended. The transcript and the suggestions are dropped from here, and nothing has been written to disk.',
+    discard: 'Discard and go home',
+  },
+  // Only ever reached with a mock report as the subject, so they carry no live wording to
+  // override below.
+  'mock-done': {
+    title: 'Save your report before you finish?',
+    body: 'Your score, the feedback and every answer you gave exist only in this app until you save them to a file.',
+    discard: 'Finish without saving',
+  },
+  'mock-again': {
+    title: 'Save this report before the next round?',
+    body: 'Practising again starts a fresh interview and replaces this score, its feedback and the answers behind it.',
+    discard: 'Practise again without saving',
+  },
+};
+
+/**
+ * What the same six reasons say when the thing at risk is a mock report rather than a live
+ * interview.
+ *
+ * The live wording is specific in a way that becomes wrong here: it names a transcript and
+ * suggestions, which is a live session's output and not a mock one's. A mock session produces a
+ * score, written feedback and the answers the candidate gave, and the file it writes is a report
+ * rather than a record of a call. Reading "save this interview before clearing" over a scored
+ * report was the version of that mismatch the report screen actually shipped.
+ *
+ * Partial on purpose: `mock-done` and `mock-again` are raised only from that screen and are
+ * already written for it, so an entry here would be a second copy of the same words.
+ */
+const MOCK_COPY: Partial<Record<SaveHistoryReason, Copy>> = {
+  clear: {
+    title: 'Save your mock interview report first?',
+    body: 'Clearing drops this report and the answers behind it, and nothing is written to disk until you save.',
+    discard: 'Clear without saving',
+  },
+  start: {
+    title: 'Save your mock interview report first?',
+    body: 'Starting a session replaces this report and the answers behind it, and nothing is written to disk until you save.',
+    discard: 'Start without saving',
+  },
+  close: {
+    title: 'Save your mock interview report before closing?',
+    body: 'This report and the answers behind it exist only in this app, and closing drops them.',
+    discard: 'Close without saving',
+  },
+  update: {
+    title: 'Save your mock interview report before installing the update?',
+    body: 'Installing restarts the app, which drops this report and the answers behind it.',
+    discard: 'Install without saving',
+  },
+  signout: {
+    title: 'Save your mock interview report before signing out?',
+    body: 'Signing out drops this report and the answers behind it, and nothing has been written to disk.',
+    discard: 'Sign out without saving',
+  },
+  stop: {
+    title: 'Save your mock interview report?',
+    body: 'The interview has ended. This report and the answers behind it are dropped from here, and nothing has been written to disk.',
     discard: 'Discard and go home',
   },
 };
@@ -119,8 +183,14 @@ export default function SaveHistoryDialog() {
     }
   };
 
-  const copy = reason ? COPY[reason] : null;
+  const copy = reason ? (isMockSubject ? (MOCK_COPY[reason] ?? COPY[reason]) : COPY[reason]) : null;
   const busy = saving !== null;
+  // Both formats write the same content, so the choice is one of what to do with the file
+  // afterwards rather than of what is being kept - said once, under the two buttons, instead of
+  // left for the user to infer from two equally-weighted primaries.
+  const formatHint = isMockSubject
+    ? 'Word to share or print, Markdown to keep alongside your notes.'
+    : 'Word to share or print, Markdown to keep as plain text.';
 
   // Every other reason can be answered with "not now" by pressing Esc, and that answer leaves
   // the interview exactly where it was. After a stop there is no "not now" left to mean - the
@@ -141,10 +211,12 @@ export default function SaveHistoryDialog() {
       <DialogContent className="max-w-sm" showCloseButton={dismissible && !busy}>
         <DialogHeader>
           <DialogTitle>{copy?.title}</DialogTitle>
-          <DialogDescription>
-            {copy?.body} Nothing is written to disk until you export, so this is the only chance to
-            keep it.
-          </DialogDescription>
+          {/* The body carries the whole explanation now. It used to be a per-reason sentence
+              followed by one fixed clause about nothing being written to disk "until you
+              export" - which is the live assistant's word for it, and on the mock report screen
+              named an action that has no button. Folding it into each entry lets the mock copy
+              say "save" and lets `stop` say it in the past tense, which is when it is true. */}
+          <DialogDescription>{copy?.body}</DialogDescription>
         </DialogHeader>
 
         <DialogFooter className="flex-col gap-2 sm:flex-col sm:gap-2">
@@ -179,6 +251,7 @@ export default function SaveHistoryDialog() {
               Save as Markdown
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground">{formatHint}</p>
           <div className="flex gap-2">
             {dismissible && (
               <Button

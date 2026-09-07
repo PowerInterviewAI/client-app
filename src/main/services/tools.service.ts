@@ -14,6 +14,22 @@ import { actionSuggestionService } from './suggestion-action.service.js';
 import { liveSuggestionService } from './suggestion-live.service.js';
 import { transcriptService } from './transcript.service.js';
 
+/**
+ * The Word style sheet both exports are rendered with.
+ *
+ * Named and shared rather than repeated at each call site: it is what decides that H1 and H5 are
+ * centred and everything else is ranged left, which is the fact `export-markdown.ts` and
+ * `export-mock-markdown.ts` both write their heading levels against. Two literals that happened
+ * to agree is how the two documents would drift apart the first time one of them was tuned.
+ */
+const MOCK_DOCX_OPTIONS = {
+  documentType: 'document',
+  style: {
+    heading1Alignment: 'CENTER',
+    heading5Alignment: 'CENTER',
+  },
+} as const;
+
 class ToolsService {
   private llmApi: LLMApi = new LLMApi();
 
@@ -76,13 +92,7 @@ class ToolsService {
       return filePath;
     }
 
-    const docxBlob = await convertMarkdownToDocx(fullMarkdown, {
-      documentType: 'document',
-      style: {
-        heading1Alignment: 'CENTER',
-        heading5Alignment: 'CENTER',
-      },
-    });
+    const docxBlob = await convertMarkdownToDocx(fullMarkdown, MOCK_DOCX_OPTIONS);
 
     await fs.writeFile(filePath, Buffer.from(await docxBlob.arrayBuffer()));
     return filePath;
@@ -122,18 +132,16 @@ class ToolsService {
 
     if (isMarkdown) {
       await fs.writeFile(filePath, fullMarkdown, 'utf8');
+      mockInterviewService.markExported();
       return filePath;
     }
 
-    const docxBlob = await convertMarkdownToDocx(fullMarkdown, {
-      documentType: 'document',
-      style: {
-        heading1Alignment: 'CENTER',
-        heading5Alignment: 'CENTER',
-      },
-    });
+    const docxBlob = await convertMarkdownToDocx(fullMarkdown, MOCK_DOCX_OPTIONS);
 
     await fs.writeFile(filePath, Buffer.from(await docxBlob.arrayBuffer()));
+    // After the write, never before it: a cancelled save dialog and a failed write both leave the
+    // report in memory only, which is exactly when the save prompt still has something to ask.
+    mockInterviewService.markExported();
     return filePath;
   }
 

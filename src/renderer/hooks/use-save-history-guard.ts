@@ -5,8 +5,22 @@ import { useAppState } from './use-app-state';
 /**
  * What is about to destroy the interview. Only the copy differs - the choice is the same one
  * every time, and phrasing it in terms of the action is what makes it answerable.
+ *
+ * The last two are the mock report screen's own exits. They were both raised as `clear`, which
+ * is the live assistant's word for emptying the panels and means nothing on a screen showing a
+ * scored report - the dialog asked about "clearing" something the candidate had never been told
+ * was there. A reason per button is what lets each one name the thing it is actually about to
+ * do; see `COPY` in save-history-dialog.tsx.
  */
-export type SaveHistoryReason = 'clear' | 'start' | 'close' | 'update' | 'stop' | 'signout';
+export type SaveHistoryReason =
+  | 'clear'
+  | 'start'
+  | 'close'
+  | 'update'
+  | 'stop'
+  | 'signout'
+  | 'mock-done'
+  | 'mock-again';
 
 interface SaveHistoryPromptStore {
   /** The action awaiting an answer, or null when nothing is being asked. */

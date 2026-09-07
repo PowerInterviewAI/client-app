@@ -209,15 +209,29 @@ export class AppStateService {
     // an unchanged reference means the derived value below cannot have changed either. Skipping
     // the rescan on the hot path avoids trimming every answer string ~20 times a second for a
     // boolean that changes at most once per turn.
-    if (session?.answers === this.state.mockInterview?.answers) {
+    //
+    // `exported` has to be part of that test, not only `answers`. It moves without the answers
+    // moving - that is the whole of what `markExported` does - so a fast path keyed on the array
+    // alone would return the stale `true` for the one write this flag exists to change.
+    if (
+      session?.answers === this.state.mockInterview?.answers &&
+      session?.exported === this.state.mockInterview?.exported
+    ) {
       next.hasMockContent = this.state.hasMockContent;
       return next;
     }
 
     // A skipped question is not content: `answer` is empty for those by construction, so the
     // trim check already excludes them without needing to read the `skipped` flag directly.
+    //
+    // Neither is a session already written to a file. `hasMockContent` drives the save prompt and
+    // the export guard, and for both it has to mean "there is something a save would capture that
+    // is not captured yet" - so a report the candidate has just exported stops raising the prompt
+    // on Done, on Practise again, and on the window close.
     next.hasMockContent =
-      session !== null && session.answers.some((a) => !a.skipped && a.answer.trim().length > 0);
+      session !== null &&
+      !session.exported &&
+      session.answers.some((a) => !a.skipped && a.answer.trim().length > 0);
 
     return next;
   }
