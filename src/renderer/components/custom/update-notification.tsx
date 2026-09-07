@@ -29,7 +29,7 @@ export function UpdateNotification() {
     // `allowNextClose()` and so goes *past* that guard, making this the only thing standing
     // between the session and the installer - and checking `hasHistory` alone meant a mock
     // interview with no live session behind it was destroyed without being offered a save.
-    if (state?.hasHistory || state?.hasMockContent) {
+    if (state?.hasHistory || state?.hasUnsavedMockContent) {
       const proceed = await useSaveHistoryPrompt.getState().prompt('update');
       if (!proceed) return;
     }

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { useAppState } from './use-app-state';
 import { useAssistantService } from './use-assistant-service';
+import { beginInterviewExit } from './use-interview-lock';
 import { useSaveHistoryPrompt } from './use-save-history-guard';
 import useTools from './use-tools';
 
@@ -37,6 +38,13 @@ export function useEndLiveSession() {
   const hasContent = (appState?.hasHistory ?? false) || (appState?.hasMockContent ?? false);
 
   return useCallback(async () => {
+    // Announced before anything is torn down, not before the `navigate` at the end. The
+    // navigation lock reads `runningState` off a coalesced broadcast from main, and
+    // `stopAssistant` writes `Idle` without awaiting it - so this hook can reach its navigate
+    // while the renderer still believes the session is running, and the lock would refuse the one
+    // navigation it is meant to allow. Set here so every early exit below is covered too.
+    beginInterviewExit();
+
     try {
       await stopAssistant();
     } catch (error) {

@@ -86,16 +86,17 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
     <DropdownMenu modal={false}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <button
-              aria-label="Menu"
-              disabled={closed}
-              className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
-              style={style}
-            >
-              <Menu className="h-4 w-4" />
-            </button>
-          </DropdownMenuTrigger>
+          <span className="inline-flex" style={style}>
+            <DropdownMenuTrigger asChild>
+              <button
+                aria-label="Menu"
+                disabled={closed}
+                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+          </span>
         </TooltipTrigger>
         <TooltipContent>
           <p>{closed ? 'Unavailable during an interview' : 'Menu'}</p>

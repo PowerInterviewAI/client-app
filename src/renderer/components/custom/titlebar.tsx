@@ -93,16 +93,17 @@ export default function Titlebar() {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => openCommandPalette(true)}
-                aria-label="Open command palette"
-                disabled={locked}
-                style={NO_DRAG}
-              >
-                <Search className="h-4 w-4" />
-              </Button>
+              <span className="inline-flex" style={NO_DRAG}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => openCommandPalette(true)}
+                  aria-label="Open command palette"
+                  disabled={locked}
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </span>
             </TooltipTrigger>
             <TooltipContent>
               {locked ? (

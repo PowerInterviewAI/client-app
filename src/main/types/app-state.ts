@@ -151,6 +151,20 @@ export interface AppState {
   hasMockContent: boolean;
 
   /**
+   * The same content, minus any that has already been written to a file.
+   *
+   * Two flags rather than one, because two different questions are asked of this and folding
+   * them together breaks whichever one loses. The prompt-and-guard callers - the close guard, the
+   * update notice, `useSaveHistoryGuard` - mean "is there something a save would capture that is
+   * not captured yet", and for them an exported report is nothing to lose. The export callers -
+   * the control bar's Export menu, and the save dialog choosing which of the two exports to
+   * offer - mean "does a mock report exist at all", and for them it very much still does:
+   * narrowing `hasMockContent` to the unsaved sense made saving a report as Word and then again
+   * as Markdown answer "there is nothing to export yet" on the second.
+   */
+  hasUnsavedMockContent: boolean;
+
+  /**
    * Whether the backend serves the mock-interview routes, or `null` before that is known.
    *
    * Re-probed every time the backend comes back up rather than once at launch, so a client that

@@ -187,11 +187,6 @@ class MockTtsService {
     }
   }
 
-  /** Replays the current question from cache. No re-synthesis, no second Deepgram charge. */
-  async repeat(chunks: string[]): Promise<void> {
-    await this.playQuestion(chunks);
-  }
-
   /**
    * Aborts in-flight playback and forces the mic open. Used on Skip, End interview, and the
    * state-driven belt in `use-mock-interview.ts`.

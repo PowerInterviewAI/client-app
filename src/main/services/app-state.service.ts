@@ -34,6 +34,7 @@ const DEFAULT_STATE: AppState = {
   hasHistory: false,
   mockInterview: null,
   hasMockContent: false,
+  hasUnsavedMockContent: false,
   mockInterviewSupported: null,
 };
 
@@ -198,6 +199,7 @@ export class AppStateService {
     // crosses IPC inside a `Partial<AppState>` the renderer composes, and the close guard trusts
     // it - a caller that set it directly would switch the save prompt off with no symptom.
     delete next.hasMockContent;
+    delete next.hasUnsavedMockContent;
 
     if (next.mockInterview === undefined) return next;
 
@@ -218,20 +220,22 @@ export class AppStateService {
       session?.exported === this.state.mockInterview?.exported
     ) {
       next.hasMockContent = this.state.hasMockContent;
+      next.hasUnsavedMockContent = this.state.hasUnsavedMockContent;
       return next;
     }
 
     // A skipped question is not content: `answer` is empty for those by construction, so the
     // trim check already excludes them without needing to read the `skipped` flag directly.
     //
-    // Neither is a session already written to a file. `hasMockContent` drives the save prompt and
-    // the export guard, and for both it has to mean "there is something a save would capture that
-    // is not captured yet" - so a report the candidate has just exported stops raising the prompt
-    // on Done, on Practise again, and on the window close.
-    next.hasMockContent =
-      session !== null &&
-      !session.exported &&
-      session.answers.some((a) => !a.skipped && a.answer.trim().length > 0);
+    const hasContent =
+      session !== null && session.answers.some((a) => !a.skipped && a.answer.trim().length > 0);
+
+    next.hasMockContent = hasContent;
+    // And a report already written to a file is content that no longer needs protecting, which is
+    // what stops Done and Practise again asking to save the file the candidate has just saved. It
+    // is a second flag rather than a narrowing of the one above, because the export surfaces read
+    // that one and mean "does a report exist at all" - see the `AppState` docstring.
+    next.hasUnsavedMockContent = hasContent && !session?.exported;
 
     return next;
   }

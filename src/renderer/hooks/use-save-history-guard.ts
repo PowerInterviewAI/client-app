@@ -69,8 +69,13 @@ export function useSaveHistoryGuard() {
   // mock session along with the live one, and the report screen's own two exits discard a report
   // outright, so a guard that only knew about the live transcript let exactly the content the
   // close prompt protects be thrown away by a button.
+  //
+  // The *unsaved* half of it, which is the question a guard asks. A report the candidate has
+  // already exported has nothing left to lose, and asking about it on Done was asking them to
+  // save the file they had just saved. `hasMockContent` stays available unchanged for the callers
+  // that mean "does a report exist at all" - the two export surfaces.
   const hasMockContent = appState?.hasMockContent ?? false;
-  const hasContent = hasHistory || hasMockContent;
+  const hasContent = hasHistory || (appState?.hasUnsavedMockContent ?? false);
 
   const confirmDiscard = async (reason: SaveHistoryReason): Promise<boolean> => {
     if (!hasContent) return true;

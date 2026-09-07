@@ -1,10 +1,41 @@
 import { useEffect } from 'react';
 import { useBlocker } from 'react-router-dom';
+import { create } from 'zustand';
 
 import { RunningState } from '@/types/app-state';
 import { isMockInterviewSessionActive } from '@/types/mock-interview';
 
 import { useAppState } from './use-app-state';
+
+/**
+ * Set while the app is deliberately ending a session and leaving the screen it ran on.
+ *
+ * The lock below reads `runningState`, which lives in the main process and reaches the renderer
+ * over a coalesced broadcast. `stopAssistant` writes `Idle` and does not await it, so
+ * `useEndLiveSession` can reach its `navigate('/')` while this renderer still believes the session
+ * is running - and the lock would then refuse the one navigation that is supposed to happen,
+ * leaving the candidate on a console whose Stop button has already been used.
+ *
+ * A flag rather than a wait on the broadcast: what makes this navigation legitimate is that the
+ * app itself asked for it, which is knowable here and now, whereas "has main told us yet" is a
+ * race that would only be won most of the time.
+ *
+ * Cleared by the lock itself - when the guarded route unmounts, which is the exit having
+ * succeeded, and whenever a session becomes active again, so a failed exit cannot leave the next
+ * interview unguarded.
+ */
+const useInterviewExit = create<{ exiting: boolean; begin: () => void; clear: () => void }>(
+  (set) => ({
+    exiting: false,
+    begin: () => set({ exiting: true }),
+    clear: () => set({ exiting: false }),
+  })
+);
+
+/** Announce that the app is ending the session and leaving - see `useInterviewExit`. */
+export function beginInterviewExit(): void {
+  useInterviewExit.getState().begin();
+}
 
 /**
  * Whether an interview is under way, in the sense that leaving the screen would end it.
@@ -52,10 +83,20 @@ export function useInterviewLock(): { locked: boolean; liveActive: boolean; mock
 export function useInterviewNavigationLock(active: boolean): void {
   const { appState } = useAppState();
   const signedOut = appState?.isLoggedIn === false;
+  const exiting = useInterviewExit((s) => s.exiting);
+
+  // Cleared on unmount - the exit having worked - and again whenever a session becomes active, so
+  // an exit that never navigated cannot leave the next interview unguarded. Both directions of
+  // the `active` change run the cleanup first, which is harmless: `active` false already answers
+  // the predicate on its own.
+  useEffect(() => {
+    if (active) useInterviewExit.getState().clear();
+    return () => useInterviewExit.getState().clear();
+  }, [active]);
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      active && !signedOut && currentLocation.pathname !== nextLocation.pathname
+      active && !exiting && !signedOut && currentLocation.pathname !== nextLocation.pathname
   );
 
   // Reset in an effect rather than from the predicate: the predicate runs during the router's own

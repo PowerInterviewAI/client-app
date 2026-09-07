@@ -52,6 +52,10 @@ class AppStateManager {
       hasHistory: raw.hasHistory ?? false,
       mockInterview: raw.mockInterview ?? null,
       hasMockContent: raw.hasMockContent ?? false,
+      // Defaults to `hasMockContent` rather than to false, which is the safe direction here for
+      // the same reason `hasHistory` defaults false: a main process that does not send it has no
+      // notion of an exported report either, so every report it does have is unsaved.
+      hasUnsavedMockContent: raw.hasUnsavedMockContent ?? raw.hasMockContent ?? false,
       // Defaults null rather than false, which is the safe direction here: a main process that
       // does not send it leaves the feature reachable instead of retiring it over a field it was
       // never going to set.

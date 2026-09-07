@@ -73,6 +73,12 @@ export interface AppState {
   hasMockContent: boolean;
 
   /**
+   * The same, minus a report already written to a file - see the main-process mirror for why the
+   * two are separate. Guards and prompts read this one; the export surfaces read the one above.
+   */
+  hasUnsavedMockContent: boolean;
+
+  /**
    * Whether the backend serves the mock-interview routes, or `null` while that is unknown.
    *
    * Only `false` is an answer to act on. See the main-process `AppState`'s docstring for why

@@ -42,7 +42,7 @@ export function installCloseGuard(win: BrowserWindow): void {
 
   win.on('close', (event) => {
     const state = appStateService.getState();
-    if (closeConfirmed || !(state.hasHistory || state.hasMockContent)) return;
+    if (closeConfirmed || !(state.hasHistory || state.hasUnsavedMockContent)) return;
 
     // Nobody to ask. A renderer that has crashed or is already torn down would swallow the
     // prompt, and a window that cannot be closed is worse than one that closes unasked.
