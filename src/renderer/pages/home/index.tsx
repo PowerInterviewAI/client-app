@@ -194,107 +194,118 @@ export default function HomePage() {
   };
 
   return (
+    // Centred both ways, not just horizontally. `mx-auto` alone left the column pinned to the
+    // top of a window that is usually much taller than it, so the whole screen sat in the upper
+    // third with an empty half below it. The inner wrapper is `min-h-full` rather than `h-full`
+    // so that centring gives way to scrolling once the content is taller than the window - a
+    // fixed height would clip the sign-out row instead of letting the container scroll to it.
     <div className="flex-1 overflow-auto">
-      <div className="mx-auto w-full max-w-xl px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold">
-            {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Practise against an AI interviewer, or get live help during a real call.
-          </p>
-        </div>
+      <div className="flex min-h-full items-center justify-center">
+        <div className="w-full max-w-xl px-6 py-10">
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold">
+              {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Practise against an AI interviewer, or get live help during a real call.
+            </p>
+          </div>
 
-        <div className="mb-6 space-y-3">
-          <LaunchCard
-            icon={<Mic className="h-5 w-5" aria-hidden="true" />}
-            title="Start mock interview"
-            description={
-              mockUnsupported
-                ? 'Not available on this server yet. Update the app, or try again later.'
-                : liveSessionActive
-                  ? 'Stop the live assistant first - the two cannot share your microphone.'
-                  : 'The AI asks, you answer out loud, and you get a scored report at the end.'
-            }
-            onClick={() => setMockSetupOpen(true)}
-            disabled={liveSessionActive || mockUnsupported}
-          />
-          <LaunchCard
-            icon={<Play className="h-5 w-5" aria-hidden="true" />}
-            title={liveSessionActive ? 'Back to your interview' : 'Start live assistant'}
-            description={
-              liveSessionActive
-                ? 'Your live assistant is already running.'
-                : mockSessionActive
-                  ? 'Finish the mock interview first - the two cannot share your microphone.'
-                  : 'Transcribes your real interview and suggests answers as it happens.'
-            }
-            onClick={handleStartLive}
-            disabled={!liveSessionActive && mockSessionActive}
-          />
-        </div>
+          <div className="mb-6 space-y-3">
+            <LaunchCard
+              icon={<Mic className="h-5 w-5" aria-hidden="true" />}
+              title="Start mock interview"
+              description={
+                mockUnsupported
+                  ? 'Not available on this server yet. Update the app, or try again later.'
+                  : liveSessionActive
+                    ? 'Stop the live assistant first - the two cannot share your microphone.'
+                    : 'The AI asks, you answer out loud, and you get a scored report at the end.'
+              }
+              onClick={() => setMockSetupOpen(true)}
+              disabled={liveSessionActive || mockUnsupported}
+            />
+            <LaunchCard
+              icon={<Play className="h-5 w-5" aria-hidden="true" />}
+              title={liveSessionActive ? 'Back to your interview' : 'Start live assistant'}
+              description={
+                liveSessionActive
+                  ? 'Your live assistant is already running.'
+                  : mockSessionActive
+                    ? 'Finish the mock interview first - the two cannot share your microphone.'
+                    : 'Transcribes your real interview and suggests answers as it happens.'
+              }
+              onClick={handleStartLive}
+              disabled={!liveSessionActive && mockSessionActive}
+            />
+          </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3">
-          <Button variant="outline" className="justify-start" onClick={() => navigate('/account')}>
-            <UserRound className="h-4 w-4" aria-hidden="true" />
-            Account
-          </Button>
-          <Button
-            variant="outline"
-            className="justify-start"
-            onClick={() => navigate('/configuration')}
-          >
-            <SettingsIcon className="h-4 w-4" aria-hidden="true" />
-            Configuration
-          </Button>
-        </div>
-
-        <Card className="mb-6">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6">
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Account</p>
-              <p className="truncate text-sm font-medium">
-                {accountReady ? (email ?? 'Not signed in') : 'Loading...'}
-              </p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Credits</p>
-              <p className="text-sm font-medium">
-                {accountReady ? (credits ?? 'Unavailable') : 'Loading...'}
-              </p>
-            </div>
+          <div className="mb-6 grid grid-cols-2 gap-3">
             <Button
               variant="outline"
-              size="sm"
-              className="ml-auto"
-              onClick={() => navigate('/payment')}
+              className="justify-start"
+              onClick={() => navigate('/account')}
             >
-              <CreditCard className="h-4 w-4" aria-hidden="true" />
-              Buy Credits
+              <UserRound className="h-4 w-4" aria-hidden="true" />
+              Account
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => navigate('/configuration')}
+            >
+              <SettingsIcon className="h-4 w-4" aria-hidden="true" />
+              Configuration
             </Button>
           </div>
-        </Card>
 
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/documentation')}>
-            <BookOpen className="h-4 w-4" aria-hidden="true" />
-            Documentation
-          </Button>
-          {/* Signing out was only ever in the titlebar menu and the command palette, which is a
+          <Card className="mb-6">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6">
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Account</p>
+                <p className="truncate text-sm font-medium">
+                  {accountReady ? (email ?? 'Not signed in') : 'Loading...'}
+                </p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Credits</p>
+                <p className="text-sm font-medium">
+                  {accountReady ? (credits ?? 'Unavailable') : 'Loading...'}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto"
+                onClick={() => navigate('/payment')}
+              >
+                <CreditCard className="h-4 w-4" aria-hidden="true" />
+                Buy Credits
+              </Button>
+            </div>
+          </Card>
+
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/documentation')}>
+              <BookOpen className="h-4 w-4" aria-hidden="true" />
+              Documentation
+            </Button>
+            {/* Signing out was only ever in the titlebar menu and the command palette, which is a
               strange place for the one action that ends everything else on this screen. Refused
               while a session is running, for the same reason the titlebar menu refuses it: it
               tears down the credentials the running assistant is streaming on. */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ml-auto text-muted-foreground"
-            disabled={anySessionActive || signingOut}
-            title={anySessionActive ? 'Stop the interview before signing out' : undefined}
-            onClick={() => void handleSignOut()}
-          >
-            <LogOut className="h-4 w-4" aria-hidden="true" />
-            {signingOut ? 'Signing out...' : 'Sign out'}
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto text-muted-foreground"
+              disabled={anySessionActive || signingOut}
+              title={anySessionActive ? 'Stop the interview before signing out' : undefined}
+              onClick={() => void handleSignOut()}
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              {signingOut ? 'Signing out...' : 'Sign out'}
+            </Button>
+          </div>
         </div>
       </div>
 
