@@ -34,10 +34,14 @@ export function ZoomField() {
     const api = window.electronAPI;
     if (!api?.zoom) return;
 
+    // `prev ?? ...`, never a bare set: this resolves over a round-trip and the subscription below
+    // is live throughout, so a broadcast that lands first - a hotkey pressed while this was in
+    // flight, or the zoom main restores on load - would otherwise be overwritten by the older
+    // value this request set out to fetch.
     api.zoom
       .getFactor()
-      .then((factor) => setPercent(Math.round(factor * 100)))
-      .catch(() => setPercent(100));
+      .then((factor) => setPercent((prev) => prev ?? Math.round(factor * 100)))
+      .catch(() => setPercent((prev) => prev ?? 100));
 
     // Main is the source of truth: it broadcasts after every change, including the ones this
     // component did not make (the hotkeys, the control bar, a zoom restored on load).

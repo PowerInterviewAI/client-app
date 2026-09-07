@@ -1,14 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useBlocker, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { LoadingPage } from '@/components/custom/loading';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useAppState } from '@/hooks/use-app-state';
 import { useMockInterview } from '@/hooks/use-mock-interview';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
 import { getElectron } from '@/lib/utils';
-import { type MockInterviewSetup, MockInterviewState } from '@/types/mock-interview';
+import {
+  isMockInterviewSessionActive,
+  type MockInterviewSetup,
+  MockInterviewState,
+} from '@/types/mock-interview';
 
 import { ReportScreen } from './report';
 import { SessionScreen } from './session';
@@ -27,11 +40,13 @@ import { SessionScreen } from './session';
  * fallback most often, since clearing a finished session back to Idle is the whole of what it
  * does.
  *
- * Known gap: leaving this route mid-session currently ends it outright (scoring whatever was
- * answered) rather than raising a confirmation dialog first, the way closing the app does via
- * the window-close guard. That guard is the one that matters most - it covers Alt+F4, the
- * taskbar close button and Cmd+Q - and is fully wired. A "confirm before navigating away"
- * dialog reusing `save-history-dialog.tsx`'s subject-aware dispatch is a follow-up.
+ * Leaving this route mid-session ends it outright, scoring whatever was answered and dropping
+ * the rest, so it asks first - through `useBlocker` rather than a guard on each way out. The
+ * ways out are the kind of list that grows without anyone remembering it exists: Home and the
+ * two settings pages in the titlebar menu, the same entries in the command palette, and the
+ * palette's own two Start actions, every one of them a single click. Closing the app is covered
+ * separately by the window-close guard, which is what handles Alt+F4, the taskbar button and
+ * Cmd+Q.
  */
 export default function MockInterviewPage() {
   const navigate = useNavigate();
@@ -110,6 +125,28 @@ export default function MockInterviewPage() {
     navigate('/auth/login', { replace: true });
   }, [appState?.isLoggedIn, navigate]);
 
+  /**
+   * Asks before a navigation that would end the interview.
+   *
+   * The unmount fallback below scores whatever has been answered and drops the rest, which is the
+   * right behaviour for a route that has genuinely been left - and the wrong thing to do without
+   * asking, now that there are several one-click ways to leave: Home and the two settings pages
+   * in the titlebar menu, the same entries in the command palette, and the palette's own two
+   * Start actions. Every one of them is a single click away from ending a live interview.
+   *
+   * A blocker rather than a guard on each of those, because the list is exactly the kind that
+   * grows without anyone remembering it exists: this catches the next one too.
+   *
+   * Signing out is deliberately not blocked. `isLoggedIn` going false is main saying the session
+   * is over - an expired token, most often - and there is nothing to stay for.
+   */
+  const sessionActive = isMockInterviewSessionActive(session);
+  const signedOut = appState?.isLoggedIn === false;
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      sessionActive && !signedOut && currentLocation.pathname !== nextLocation.pathname
+  );
+
   // Ends an in-progress session if this page unmounts without going through the report screen -
   // see the module docstring for why this is a fallback rather than the intended UX. Reads
   // `sessionRef` rather than `session` directly: this effect only runs once (mount/unmount), so a
@@ -127,6 +164,39 @@ export default function MockInterviewPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const leaveConfirm = blocker.state === 'blocked' && (
+    <Dialog
+      open
+      // Esc and the overlay mean "not now", which here is staying on the interview.
+      onOpenChange={(next) => {
+        if (!next) blocker.reset();
+      }}
+    >
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>End this mock interview?</DialogTitle>
+          <DialogDescription>
+            Leaving scores what you have answered so far and drops the rest. The report is not
+            saved anywhere unless you export it.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="flex-row gap-2 sm:flex-row">
+          <Button className="flex-1" size="sm" variant="outline" onClick={() => blocker.reset()}>
+            Stay
+          </Button>
+          <Button
+            className="flex-1"
+            size="sm"
+            variant="destructive"
+            onClick={() => blocker.proceed?.()}
+          >
+            End and leave
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 
   if (appState?.isLoggedIn === false) return <LoadingPage disclaimer="Redirecting to login…" />;
   if (appState?.isLoggedIn === null || !appState) return <LoadingPage disclaimer="Loading…" />;
@@ -161,14 +231,19 @@ export default function MockInterviewPage() {
 
   if (state !== MockInterviewState.Idle && session) {
     return (
-      <SessionScreen
-        session={session}
-        onSkip={skipQuestion}
-        onDone={answerFinished}
-        onRepeat={repeatQuestion}
-        onEnd={endSession}
-        onAnswerReady={answerReady}
-      />
+      <>
+        <SessionScreen
+          session={session}
+          onSkip={skipQuestion}
+          onDone={answerFinished}
+          onRepeat={repeatQuestion}
+          onEnd={endSession}
+          onAnswerReady={answerReady}
+        />
+        {/* Rendered here and nowhere else: the blocker only blocks while a session is active,
+            which is exactly the branch this is. */}
+        {leaveConfirm}
+      </>
     );
   }
 
