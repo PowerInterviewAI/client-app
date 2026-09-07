@@ -2,6 +2,7 @@ import {
   Camera,
   Captions,
   CaptionsOff,
+  EyeOff,
   FileText,
   Hash,
   ImageOff,
@@ -39,7 +40,8 @@ interface ToolsGroupProps {
 
 export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   const { runningState, appState } = useAppState();
-  const { exporting, exportTranscript, exportMockReport, clearAll, setPlaceholderData } = useTools();
+  const { exporting, exportTranscript, exportMockReport, clearAll, setPlaceholderData } =
+    useTools();
   const { visible: transcriptVisible, toggle: onToggleTranscript } = useTranscriptPanel();
   const { confirmDiscard } = useSaveHistoryGuard();
   const [clearing, setClearing] = useState(false);
@@ -156,6 +158,37 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
         </TooltipContent>
       </Tooltip>
 
+      {/* Stealth mode lives here and nowhere else.
+          It used to be in the titlebar menu and the command palette, both of which are reachable
+          from every route - the account page, the payment page, the login screen - where hiding
+          the window from a screen capture answers a question nobody is asking. It is a live-call
+          control: the screen share it hides from only exists during a real interview, and this
+          bar is the only surface that only exists on that screen.
+
+          Entering is a click; leaving is the global hotkey, because this bar does not render in
+          stealth mode. That is not a gap - the whole point of stealth is that the app has no
+          visible surface to click - and the status panel that replaces it carries the cheatsheet
+          the combo is documented in. */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() => getElectron()?.toggleStealth()}
+            size="sm"
+            className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
+            aria-label="Enter stealth mode"
+          >
+            <EyeOff className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Stealth Mode ({HOTKEYS[Hotkey.ToggleStealth].combo})</p>
+          <p className="text-xs text-muted-foreground">
+            Hides the app from screen capture. The same shortcut brings it back.
+          </p>
+        </TooltipContent>
+      </Tooltip>
+
       <div className="h-5 w-px bg-border" aria-hidden="true" />
 
       {/* Previously reachable only via their hotkeys (lib/hotkeys.ts), with nothing on screen to
@@ -179,9 +212,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            Capture Screenshot ({HOTKEYS[Hotkey.Capture].combo})
-          </p>
+          <p>Capture Screenshot ({HOTKEYS[Hotkey.Capture].combo})</p>
         </TooltipContent>
       </Tooltip>
       <Tooltip>
@@ -203,9 +234,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            Clear Captures ({HOTKEYS[Hotkey.ClearCaptures].combo})
-          </p>
+          <p>Clear Captures ({HOTKEYS[Hotkey.ClearCaptures].combo})</p>
         </TooltipContent>
       </Tooltip>
       <Tooltip>
@@ -231,9 +260,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            Generate Suggestion ({HOTKEYS[Hotkey.TriggerWithoutCaptures].combo})
-          </p>
+          <p>Generate Suggestion ({HOTKEYS[Hotkey.TriggerWithoutCaptures].combo})</p>
         </TooltipContent>
       </Tooltip>
 

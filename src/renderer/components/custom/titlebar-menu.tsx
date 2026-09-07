@@ -1,6 +1,5 @@
 import {
   BookOpen,
-  EyeOff,
   Home,
   LogOut,
   Mail,
@@ -26,31 +25,33 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useInterviewLock } from '@/hooks/use-interview-lock';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useThemeStore } from '@/hooks/use-theme-store';
-import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
-import { getElectron } from '@/lib/utils';
-import { RunningState } from '@/types/app-state';
-import { isMockInterviewSessionActive } from '@/types/mock-interview';
 
-export default function TitlebarMenu({ style }: { style?: React.CSSProperties }) {
+interface TitlebarMenuProps {
+  style?: React.CSSProperties;
+  /** Closed for the length of an interview - see the trigger's own note in `titlebar.tsx`. */
+  disabled?: boolean;
+}
+
+export default function TitlebarMenu({ style, disabled: closed = false }: TitlebarMenuProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { appState, runningState } = useAppState();
+  const { appState } = useAppState();
   const { config } = useConfigStore();
   const { isDark, toggleTheme } = useThemeStore();
   const { logout } = useAuth();
   const { confirmDiscard } = useSaveHistoryGuard();
 
   const isLoggedIn = appState?.isLoggedIn ?? false;
-  // Account actions rewrite state the running assistant depends on; theme, docs and stealth do not.
-  //
-  // A mock session counts as running. It deliberately leaves `runningState` on Idle - it hides
-  // no window surfaces and holds no ASR socket - so a check on that alone let the candidate sign
-  // out from under an interviewer that was mid-question, which tears down the token the session's
-  // next request needs and leaves the microphone gate to whatever happens to release it.
-  const disabled =
-    runningState !== RunningState.Idle || isMockInterviewSessionActive(appState?.mockInterview ?? null);
+  // Every item here either navigates or rewrites state a running session depends on, and both
+  // are refused mid-interview - so the whole menu is closed rather than each entry disabled
+  // individually. `useInterviewLock` counts a mock session, which cannot be read off
+  // `runningState`: a mock deliberately leaves that on Idle, and the check that missed it let
+  // the candidate sign out from under an interviewer that was mid-question.
+  const { locked } = useInterviewLock();
+  const disabled = locked;
 
   // First-run setup owns the window while it is running. Home bounces straight back here until
   // the wizard is finished or skipped, and Account and Configuration are the two things it is in
@@ -60,17 +61,7 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
   // Only for the compulsory run. The same route reached from Configuration's *Run setup* is an
   // ordinary page the user chose to open, and taking their navigation away there would be the
   // menu breaking rather than the menu declining to lie.
-  const inSetup =
-    location.pathname === '/onboarding' && !(appState?.onboardingCompleted ?? false);
-
-  const handleToggleStealth = () => {
-    const electron = getElectron();
-    if (electron) {
-      electron.toggleStealth();
-    } else {
-      console.warn('Electron API not available for toggling stealth mode');
-    }
-  };
+  const inSetup = location.pathname === '/onboarding' && !(appState?.onboardingCompleted ?? false);
 
   const handleSignOut = async () => {
     // Asked for the same reason Clear, Start, Stop and closing the app ask: signing out drops the
@@ -98,7 +89,8 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
           <DropdownMenuTrigger asChild>
             <button
               aria-label="Menu"
-              className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted"
+              disabled={closed}
+              className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
               style={style}
             >
               <Menu className="h-4 w-4" />
@@ -106,7 +98,7 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Menu</p>
+          <p>{closed ? 'Unavailable during an interview' : 'Menu'}</p>
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" side="bottom">
@@ -140,11 +132,6 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
                 </DropdownMenuItem>
               </>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleToggleStealth}>
-              <EyeOff className="mr-2 h-4 w-4" />
-              Stealth mode ({HOTKEYS[Hotkey.ToggleStealth].combo})
-            </DropdownMenuItem>
           </>
         )}
         <DropdownMenuItem onClick={() => toggleTheme()}>

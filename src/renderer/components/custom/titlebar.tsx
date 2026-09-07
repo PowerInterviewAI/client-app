@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import { useCommandPaletteStore } from '@/hooks/use-command-palette';
+import { useInterviewLock } from '@/hooks/use-interview-lock';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { APP_NAME, isMac } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
@@ -45,6 +46,14 @@ export default function Titlebar() {
 
   const { appState } = useAppState();
   const openCommandPalette = useCommandPaletteStore((s) => s.setOpen);
+
+  // Both titlebar controls go dead for the length of an interview, live or mock. Almost
+  // everything either of them offers is a navigation, and navigating off the interview screen is
+  // refused anyway (`useInterviewNavigationLock`) - so leaving them live meant a palette whose
+  // entries silently did nothing and a menu of items that were either disabled or a dead end.
+  // Disabled at the trigger rather than entry by entry, because the honest answer for the whole
+  // surface is the same one.
+  const { locked } = useInterviewLock();
 
   if (isStealth) return null;
 
@@ -89,17 +98,22 @@ export default function Titlebar() {
                 size="icon-sm"
                 onClick={() => openCommandPalette(true)}
                 aria-label="Open command palette"
+                disabled={locked}
                 style={NO_DRAG}
               >
                 <Search className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Search actions ({isMac ? '⌘' : 'Ctrl+'}K)</p>
+              {locked ? (
+                <p>Unavailable during an interview</p>
+              ) : (
+                <p>Search actions ({isMac ? '⌘' : 'Ctrl+'}K)</p>
+              )}
             </TooltipContent>
           </Tooltip>
 
-          <TitlebarMenu style={NO_DRAG} />
+          <TitlebarMenu style={NO_DRAG} disabled={locked} />
 
           {!isMac && (
             <>
@@ -167,11 +181,7 @@ export default function Titlebar() {
                       stroke="currentColor"
                       strokeWidth={2}
                     >
-                      <path
-                        d="M6 6l12 12M6 18L18 6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                      <path d="M6 6l12 12M6 18L18 6" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </TooltipTrigger>

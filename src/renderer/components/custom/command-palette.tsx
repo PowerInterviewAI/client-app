@@ -2,7 +2,6 @@ import {
   BookOpen,
   Captions as TranscriptIcon,
   CreditCard,
-  EyeOff,
   Home,
   Keyboard,
   ListChecks,
@@ -13,7 +12,6 @@ import {
   Play,
   Route,
   SettingsIcon,
-  Square,
   Sun,
   UserRound,
 } from 'lucide-react';
@@ -34,16 +32,13 @@ import {
 import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useCommandPaletteStore } from '@/hooks/use-command-palette';
-import { useEndLiveSession } from '@/hooks/use-end-live-session';
+import { useInterviewLock } from '@/hooks/use-interview-lock';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
 import { isMac } from '@/lib/consts';
-import { getElectron } from '@/lib/utils';
-import { RunningState } from '@/types/app-state';
-import { isMockInterviewSessionActive } from '@/types/mock-interview';
 
 /**
  * Not a registered Hotkey (lib/hotkeys.ts): like the cheat-sheet's `?`, this only needs the
@@ -75,14 +70,18 @@ function useCommandPaletteHotkey(inert: boolean) {
 
 export function CommandPalette() {
   const isStealth = useIsStealthMode();
-  useCommandPaletteHotkey(isStealth);
+  // Inert during an interview for the same reason it is inert in stealth mode, and stated the
+  // same way: every entry it carries is a navigation, a session start, or a sign-out, and all
+  // three are refused while one is running. Left merely disabled, Cmd/Ctrl+K would still open a
+  // list in which nothing worked; unregistered, the combo goes back to whatever else wants it.
+  const { locked } = useInterviewLock();
+  useCommandPaletteHotkey(isStealth || locked);
 
   const navigate = useNavigate();
   const open = useCommandPaletteStore((s) => s.open);
   const setOpen = useCommandPaletteStore((s) => s.setOpen);
 
-  const { appState, runningState } = useAppState();
-  const endLiveSession = useEndLiveSession();
+  const { appState } = useAppState();
   const { logout } = useAuth();
   const { confirmDiscard } = useSaveHistoryGuard();
   const { hintOnly, toggle: toggleSuggestionMode } = useSuggestionMode();
@@ -93,24 +92,17 @@ export function CommandPalette() {
 
   // Stealth can be turned on while the palette is open - the hotkey for it is global and reaches
   // the app whatever has focus. Closed rather than left standing, so it is not waiting on screen
-  // when stealth comes back off.
+  // when stealth comes back off. A session starting while it is open is the same shape: the two
+  // Start entries are how that happens, and the palette must not survive its own action.
   useEffect(() => {
-    if (isStealth) setOpen(false);
-  }, [isStealth, setOpen]);
+    if (isStealth || locked) setOpen(false);
+  }, [isStealth, locked, setOpen]);
 
   // Stealth mode hides the app's visible surface during screen share - a palette popping up
   // over that would defeat the point, so it stays fully inert (including the hotkey) while active.
-  if (isStealth) return null;
+  if (isStealth || locked) return null;
 
   const isLoggedIn = appState?.isLoggedIn ?? false;
-  const isRunning = runningState === RunningState.Running || runningState === RunningState.Starting;
-
-  // Same rule the titlebar menu and the home page apply, and for the same reason: signing out
-  // tears down the token the running assistant streams on. A mock session counts, and cannot be
-  // read off `runningState` - it deliberately leaves that on Idle.
-  const sessionActive =
-    runningState !== RunningState.Idle ||
-    isMockInterviewSessionActive(appState?.mockInterview ?? null);
 
   // Dropped from the list rather than shown disabled, which is what the palette does with every
   // other action it cannot offer. Only an explicit `false` hides it - see the app state's
@@ -183,35 +175,26 @@ export function CommandPalette() {
             {/* Both starts hand off to `/main` through router state rather than starting anything
                 here: the control panel there owns the whole start sequence, and the palette is
                 reachable from every route, including ones where none of it is mounted. Named the
-                way the home page names them, because they are the same two actions. */}
-            {!isRunning && (
-              <>
-                {!mockUnsupported && (
-                  <CommandItem
-                    onSelect={() =>
-                      run(() => navigate('/', { state: { openMockSetup: true } }))
-                    }
-                  >
-                    <Mic />
-                    Start mock interview
-                  </CommandItem>
-                )}
-                <CommandItem
-                  onSelect={() =>
-                    run(() => navigate('/main', { state: { autoStartLive: true } }))
-                  }
-                >
-                  <Play />
-                  Start live assistant
-                </CommandItem>
-              </>
-            )}
-            {isRunning && (
-              <CommandItem onSelect={() => run(() => void endLiveSession())}>
-                <Square />
-                Stop interview
+                way the home page names them, because they are the same two actions.
+
+                There is no Stop entry any more, and no running-state branch around these two:
+                the palette does not render at all while a session is running, so the only state
+                it is ever open in is the one where starting is what makes sense. Stop lives on
+                the interview screen, which is the only screen reachable while one runs. */}
+            {!mockUnsupported && (
+              <CommandItem
+                onSelect={() => run(() => navigate('/', { state: { openMockSetup: true } }))}
+              >
+                <Mic />
+                Start mock interview
               </CommandItem>
             )}
+            <CommandItem
+              onSelect={() => run(() => navigate('/main', { state: { autoStartLive: true } }))}
+            >
+              <Play />
+              Start live assistant
+            </CommandItem>
             <CommandItem onSelect={() => run(toggleSuggestionMode)}>
               {hintOnly ? <ListChecks /> : <Route className="-scale-y-100" />}
               {hintOnly ? 'Switch to full-sentence mode' : 'Switch to hint-only mode'}
@@ -237,17 +220,12 @@ export function CommandPalette() {
               {isDark ? <Sun /> : <Moon />}
               {isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             </CommandItem>
+            {/* Stealth mode is not offered here. It is a live-interview control - it hides the
+                app from a screen share that is only happening during a real call - and this
+                palette is closed for the whole of one, so an entry here could only ever have
+                been reached when it had nothing to hide. The control bar carries it instead. */}
             {isLoggedIn && (
-              <CommandItem onSelect={() => run(() => getElectron()?.toggleStealth())}>
-                <EyeOff />
-                Toggle Stealth Mode
-              </CommandItem>
-            )}
-            {isLoggedIn && (
-              <CommandItem
-                disabled={sessionActive}
-                onSelect={() => !sessionActive && run(() => void handleSignOut())}
-              >
+              <CommandItem onSelect={() => run(() => void handleSignOut())}>
                 <LogOut />
                 Sign Out
               </CommandItem>

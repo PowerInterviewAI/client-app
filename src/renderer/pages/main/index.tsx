@@ -15,6 +15,7 @@ import TrialUserNotice from '@/components/custom/trial-user-notice';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useInterviewNavigationLock } from '@/hooks/use-interview-lock';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
@@ -51,6 +52,13 @@ export default function MainPage() {
 
   // App state from context
   const { appState } = useAppState();
+
+  // Navigating off the console mid-interview is refused, the same as leaving a mock session.
+  // The assistant keeps streaming behind whatever screen replaced it - the transcript, the
+  // suggestions and the ASR sockets all live in main - so the candidate ends up billed for an
+  // interview they can no longer see and with no Stop control anywhere on screen. Stop itself is
+  // unaffected: `useEndLiveSession` navigates home only after `runningState` is back to Idle.
+  useInterviewNavigationLock((appState?.runningState ?? RunningState.Idle) !== RunningState.Idle);
 
   const { visible: transcriptDockEnabled, toggle: toggleTranscriptDock } = useTranscriptPanel();
   const { toggle: toggleSuggestionMode } = useSuggestionMode();
