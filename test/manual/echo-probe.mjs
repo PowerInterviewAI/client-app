@@ -280,9 +280,12 @@ ipcMain.on('probe:done', (_event, summary) => {
   finished = true;
   console.log('\n=== summary ===');
   if (!summary.samples) {
-    console.log('No correlated frames. Either this is a headphone setup (the good case), or no');
-    console.log('audio was playing through the speakers during the run - check the ref% column.');
-    console.log(`search window: ${summary.searchWindow[0]}..${summary.searchWindow[1]} ms`);
+    // States the fact and stops. Reading it is the verdict's job, which has the ref% history and
+    // the report counts to do it with. This used to offer "a headphone setup (the good case)" as
+    // one of two possibilities, and it now sits directly above a verdict that can tell which -
+    // and sometimes above one saying nothing was measured at all, which it would contradict.
+    console.log('accepted estimates : 0 (no estimate passed the coupling test)');
+    console.log(`search window      : ${summary.searchWindow[0]}..${summary.searchWindow[1]} ms`);
   } else {
     console.log(`accepted estimates : ${summary.samples}`);
     console.log(
