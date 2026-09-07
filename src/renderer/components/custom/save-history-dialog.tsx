@@ -50,6 +50,11 @@ const COPY: Record<SaveHistoryReason, { title: string; body: string; discard: st
     body: 'Installing restarts the app and drops the transcript and the suggestions from this session.',
     discard: 'Install without saving',
   },
+  signout: {
+    title: 'Save this interview before signing out?',
+    body: 'Signing out drops the transcript and the suggestions from this session.',
+    discard: 'Sign out without saving',
+  },
   stop: {
     title: 'Save this interview?',
     body: 'Your interview has ended. The transcript and the suggestions are dropped from here.',

@@ -9,8 +9,10 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { RunningState } from '@/types/app-state';
 import type { MockInterviewSetup } from '@/types/mock-interview';
+import { isMockInterviewSessionActive } from '@/types/mock-interview';
 
 interface LaunchCardProps {
   icon: React.ReactNode;
@@ -87,11 +89,17 @@ export default function HomePage() {
   const { appState, runningState } = useAppState();
   const { config, isLoading: configLoading } = useConfigStore();
   const { logout } = useAuth();
+  const { confirmDiscard } = useSaveHistoryGuard();
 
   // The live assistant and a mock interview are mutually exclusive - both want the microphone and
   // an ASR socket, and the main process refuses the second one. Said here rather than left to
   // that refusal, so the card names the state instead of routing the user to an error.
   const liveSessionActive = runningState !== RunningState.Idle;
+
+  // Signing out tears down the token a mock session's next request needs, and a mock session
+  // deliberately leaves `runningState` on Idle - so the live check alone does not cover it.
+  const anySessionActive =
+    liveSessionActive || isMockInterviewSessionActive(appState?.mockInterview ?? null);
 
   const [mockSetupOpen, setMockSetupOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -143,6 +151,10 @@ export default function HomePage() {
   // would leave two instances reacting to the same `Speaking` transition for the moment before
   // the route swap finishes, which is what plays the question's audio twice.
   const handleSignOut = async () => {
+    // Signing out drops the interview from memory and nothing has written it to disk unless it
+    // was exported, so it asks first - the same guard Clear, Start, Stop and closing the app use.
+    if (!(await confirmDiscard('signout'))) return;
+
     setSigningOut(true);
     try {
       await logout();
@@ -253,10 +265,8 @@ export default function HomePage() {
             variant="ghost"
             size="sm"
             className="ml-auto text-muted-foreground"
-            disabled={liveSessionActive || signingOut}
-            title={
-              liveSessionActive ? 'Stop the live assistant before signing out' : undefined
-            }
+            disabled={anySessionActive || signingOut}
+            title={anySessionActive ? 'Stop the interview before signing out' : undefined}
             onClick={() => void handleSignOut()}
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />

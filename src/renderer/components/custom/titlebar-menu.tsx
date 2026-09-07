@@ -26,10 +26,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useThemeStore } from '@/hooks/use-theme-store';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
+import { isMockInterviewSessionActive } from '@/types/mock-interview';
 
 export default function TitlebarMenu({ style }: { style?: React.CSSProperties }) {
   const navigate = useNavigate();
@@ -38,10 +40,17 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
   const { config } = useConfigStore();
   const { isDark, toggleTheme } = useThemeStore();
   const { logout } = useAuth();
+  const { confirmDiscard } = useSaveHistoryGuard();
 
   const isLoggedIn = appState?.isLoggedIn ?? false;
   // Account actions rewrite state the running assistant depends on; theme, docs and stealth do not.
-  const disabled = runningState !== RunningState.Idle;
+  //
+  // A mock session counts as running. It deliberately leaves `runningState` on Idle - it hides
+  // no window surfaces and holds no ASR socket - so a check on that alone let the candidate sign
+  // out from under an interviewer that was mid-question, which tears down the token the session's
+  // next request needs and leaves the microphone gate to whatever happens to release it.
+  const disabled =
+    runningState !== RunningState.Idle || isMockInterviewSessionActive(appState?.mockInterview ?? null);
 
   // First-run setup owns the window while it is running. Home bounces straight back here until
   // the wizard is finished or skipped, and Account and Configuration are the two things it is in
@@ -64,6 +73,11 @@ export default function TitlebarMenu({ style }: { style?: React.CSSProperties })
   };
 
   const handleSignOut = async () => {
+    // Asked for the same reason Clear, Start, Stop and closing the app ask: signing out drops the
+    // interview from main-process memory, and nothing has written it to disk unless it was
+    // exported. It was the one path that destroyed it silently.
+    if (!(await confirmDiscard('signout'))) return;
+
     try {
       await logout();
     } catch (err) {
