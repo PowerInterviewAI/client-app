@@ -40,6 +40,10 @@ for (const module of [
   // Same harness and the same shared service singleton, so it follows the state machine's own
   // file rather than running beside it.
   './mock-live-hint.test.mjs',
+  // Same again, and it additionally moves the stored language for the length of its own run -
+  // restored in a finally, but it stays next to the other session-driving files rather than
+  // beside `language.test.mjs`, which asserts on what is on disk.
+  './mock-text-only-turn.test.mjs',
   // Drives appStateService.runningState and mockInterview together, so it must run after
   // mock-interview-state seeds no lasting mockInterview state of its own (mock-interview-state
   // clears the service on every branch, and the service's own clear() resets appState too).

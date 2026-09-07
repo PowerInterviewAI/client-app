@@ -183,10 +183,10 @@ export interface MockInterviewSessionState {
   /** The partial/final transcript of the answer currently being given. */
   currentAnswerText: string;
   /**
-   * What the live assistant would have suggested for each question, on by default - practising
-   * with it is one of the two things this feature is for, the other being the interview itself.
-   * See `mockLiveSuggestionsEnabled` in `RuntimeConfig`. One entry per question asked (follow-ups
-   * included), oldest first, in the same shape the live panel already renders.
+   * What the live assistant would have suggested for each question, off unless the candidate
+   * turns it on - see `mockLiveHintsEnabled` in `RuntimeConfig`. Empty for the ordinary run. One
+   * entry per question asked (follow-ups included), oldest first, in the same shape the live
+   * panel already renders.
    */
   liveHints: LiveSuggestion[];
   report: MockReport | null;

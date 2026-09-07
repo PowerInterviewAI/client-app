@@ -94,6 +94,27 @@ class MockInterviewService {
   /** Why the last question generation failed, for the message the setup screen shows. */
   private lastQuestionError = '';
   private silenceTimer: NodeJS.Timeout | null = null;
+  /**
+   * True between installing a question that will not be spoken and the candidate saying they are
+   * ready to answer it.
+   *
+   * A voiced question has a natural boundary: the microphone is gated shut for the whole of the
+   * interviewer's speech, so nothing can be transcribed into the answer until the question is
+   * over. A language with no Aura voice has no such boundary - `installQuestion` goes straight to
+   * `Listening` with the question on screen as text and the microphone already open - so
+   * everything said, coughed or overheard while the candidate is *reading* landed in the answer,
+   * and `MOCK_ANSWER_SILENCE_MS` could then submit it eight seconds later without a word of it
+   * having been meant as one.
+   *
+   * The renderer already gates the turn behind an "I'm ready" button for exactly this question,
+   * and `answerReady()` is where the silence backstop is armed for it. This makes that button
+   * gate the transcript too, rather than only the clock.
+   *
+   * Not set by `speechFailed()`, which also clears `hasAudio`: there the question has already
+   * been read out, at least in part, and a candidate who starts answering the moment the voice
+   * cuts out is answering - dropping that would be the same defect pointed the other way.
+   */
+  private awaitingAnswerReady = false;
   /** Captured at `start()` and fixed for the session - see the docstring on `start`. */
   private language: Language = Language.English;
 
@@ -171,6 +192,7 @@ class MockInterviewService {
     const seq = ++this.sessionSeq;
     this.followUpCount = 0;
     this.finalAnswerText = '';
+    this.awaitingAnswerReady = false;
     this.lastQuestionError = '';
     this.stopLiveHint();
     this.hintsByTimestamp.clear();
@@ -309,6 +331,9 @@ class MockInterviewService {
   private installQuestion(text: string, kind: MockQuestionKind, isFollowUp: boolean): void {
     this.clearSilenceTimer();
     const hasAudio = TTS_LANGUAGES.has(this.language);
+    // A question that will be spoken is gated by the speech itself; one that will not needs the
+    // candidate to say when their answer starts. See `awaitingAnswerReady`.
+    this.awaitingAnswerReady = !hasAudio;
     const question: MockCurrentQuestion = {
       text,
       kind,
@@ -391,6 +416,10 @@ class MockInterviewService {
   /** A partial or final transcript segment of the answer in progress. */
   ingestAnswer(type: 'partial' | 'final', text: string): void {
     if (this.session.state !== MockInterviewState.Listening) return;
+    // The question is on screen as text and the microphone is open, but the candidate is still
+    // reading it - see `awaitingAnswerReady`. Dropped rather than buffered: what is said while
+    // reading a question is not the beginning of the answer to it.
+    if (this.awaitingAnswerReady) return;
     const trimmed = text.trim();
     if (!trimmed) return;
 
@@ -423,6 +452,7 @@ class MockInterviewService {
       return;
     }
     this.clearSilenceTimer();
+    this.awaitingAnswerReady = false;
     const seq = this.sessionSeq;
     const question = this.session.currentQuestion;
     const answerText = this.finalAnswerText.trim();
@@ -497,6 +527,7 @@ class MockInterviewService {
     ) {
       return;
     }
+    this.awaitingAnswerReady = false;
     this.armSilenceTimer(MOCK_LISTENING_SILENCE_MS);
   }
 
@@ -518,6 +549,7 @@ class MockInterviewService {
       return;
     }
     this.clearSilenceTimer();
+    this.awaitingAnswerReady = false;
     const seq = this.sessionSeq;
     const question = this.session.currentQuestion;
     // A partial the candidate had spoken but not submitted no longer applies to a question they
@@ -618,6 +650,7 @@ class MockInterviewService {
   async endSession(): Promise<void> {
     if (!this.isActive()) return;
     this.clearSilenceTimer();
+    this.awaitingAnswerReady = false;
     this.stopLiveHint();
 
     // Whatever the candidate has already said for the question on screen counts as an answer.
@@ -677,6 +710,7 @@ class MockInterviewService {
    */
   clear(): void {
     this.clearSilenceTimer();
+    this.awaitingAnswerReady = false;
     this.stopLiveHint();
     this.hintsByTimestamp.clear();
     this.sessionSeq += 1;
@@ -778,7 +812,7 @@ class MockInterviewService {
     this.stopLiveHint();
 
     const conf = configStore.getConfig();
-    if (!conf.mockLiveSuggestionsEnabled) return;
+    if (!conf.mockLiveHintsEnabled) return;
 
     const controller = new AbortController();
     this.hintAbortController = controller;

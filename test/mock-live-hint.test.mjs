@@ -102,7 +102,7 @@ export async function run() {
   const toListening = () => mockInterviewService.speechFinished();
 
   try {
-    configStore.updateConfig({ mockLiveSuggestionsEnabled: true, hintOnlyMode: false });
+    configStore.updateConfig({ mockLiveHintsEnabled: true, hintOnlyMode: false });
 
     // --- a hint is generated for the question that was just asked -------------------------
     await mockInterviewService.start(setup);
@@ -160,7 +160,7 @@ export async function run() {
 
     // --- the toggle stops the request being made at all -----------------------------------
     mockInterviewService.clear();
-    configStore.updateConfig({ mockLiveSuggestionsEnabled: false });
+    configStore.updateConfig({ mockLiveHintsEnabled: false });
     hintRequests.length = 0;
     questionNumber = 0;
 
@@ -171,7 +171,7 @@ export async function run() {
     check('and leaves the session with no hints', hints().length === 0);
 
     // --- clearing a session drops its hints ------------------------------------------------
-    configStore.updateConfig({ mockLiveSuggestionsEnabled: true });
+    configStore.updateConfig({ mockLiveHintsEnabled: true });
     mockInterviewService.clear();
     questionNumber = 0;
     await mockInterviewService.start(setup);
@@ -183,7 +183,7 @@ export async function run() {
     mockInterviewService.clear();
     globalThis.fetch = originalFetch;
     configStore.updateConfig({
-      mockLiveSuggestionsEnabled: originalConfig.mockLiveSuggestionsEnabled,
+      mockLiveHintsEnabled: originalConfig.mockLiveHintsEnabled,
       hintOnlyMode: originalConfig.hintOnlyMode,
     });
   }

@@ -34,8 +34,8 @@ export interface RuntimeConfig {
   hintOnlyMode: boolean;
 
   // mock interview: also generate what the live assistant would have suggested for each
-  // question. On by default - trying this out is one of the two reasons the feature exists.
-  mockLiveSuggestionsEnabled: boolean;
+  // question. Off by default - see the note on the default value below.
+  mockLiveHintsEnabled: boolean;
 }
 
 // Default runtime configuration
@@ -60,8 +60,13 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   // migration below.
   hintOnlyMode: true,
 
-  // opt-out: showing what the live assistant would have said is the point of trying this
-  mockLiveSuggestionsEnabled: true,
+  // Opt-in, and a reversal: this shipped on by default on the grounds that seeing what the live
+  // assistant would have said is one of the two reasons to run a mock interview. In practice it
+  // is the other one that people run it for - answering the question yourself - and a panel of
+  // model-written answers sitting beside the question while you try to think of your own is the
+  // single thing most likely to stop that working. It is one click away on the session bar for
+  // the run where comparing is the point.
+  mockLiveHintsEnabled: false,
 };
 
 // interviewConf (full name, profile, context) used to be cached under `runtime`, but it's now
@@ -264,8 +269,8 @@ export const configStore = new ConfigStore();
     const legacy = (raw as (StoredRuntime & Record<string, unknown>) | undefined)?.professionalMode;
     migration.hintOnlyMode = typeof legacy === 'boolean' ? legacy : true;
   }
-  if (raw?.mockLiveSuggestionsEnabled === undefined) {
-    migration.mockLiveSuggestionsEnabled = true;
+  if (raw?.mockLiveHintsEnabled === undefined) {
+    migration.mockLiveHintsEnabled = false;
   }
   // perform migration only if there are values to set
   if (Object.keys(migration).length > 0) {
@@ -306,6 +311,14 @@ scrubRetiredKey('lastSessionMode');
 // `professionalMode` was renamed to `hintOnlyMode`, whose migration above reads it one last time
 // to carry the user's choice across. Scrubbed after that, so the two can never disagree.
 scrubRetiredKey('professionalMode');
+
+// `mockLiveSuggestionsEnabled` is `mockLiveHintsEnabled` under its old name and its old default.
+// Deliberately *not* carried across the way `professionalMode` was: that rename kept the user's
+// value because the meaning of the setting had not changed, whereas this one exists to reverse a
+// default that was wrong. Every install that ever launched holds a `true` the migration wrote for
+// it rather than a choice anyone made, so reading those forward would leave the old default in
+// place on every machine the reversal is for. The setting is one click away on the session bar.
+scrubRetiredKey('mockLiveSuggestionsEnabled');
 
 // `headphoneNoticeAcknowledged` was replaced by the mock-interview-aware `HeadphoneNoticeDialog`
 // variant, which no longer has a "do not show this again" option to acknowledge (see its own

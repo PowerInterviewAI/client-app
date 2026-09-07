@@ -113,7 +113,11 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
       ? 'Interviewer is speaking. Your mic is off while the question plays.'
       : state === MockInterviewState.Listening
         ? showReadyPrompt
-          ? 'Read the question, then answer.'
+          ? // Says what the gate actually does now. It used to hold only the silence backstop,
+            // so "read the question, then answer" was true and the microphone was live the whole
+            // time you were reading. It now holds the transcript too, and a candidate who starts
+            // talking before pressing this would otherwise watch their answer go nowhere.
+            'Read the question. Your answer is recorded from when you are ready.'
           : 'Listening…'
         : '';
 
