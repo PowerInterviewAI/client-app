@@ -117,21 +117,8 @@ export function useMockInterview() {
     await window.electronAPI?.mockInterview.endSession();
   };
 
-  const skipQuestion = async (): Promise<void> => {
-    await window.electronAPI?.mockInterview.skipQuestion();
-  };
-
   const answerFinished = async (): Promise<void> => {
     await window.electronAPI?.mockInterview.answerFinished();
-  };
-
-  const repeatQuestion = async (): Promise<void> => {
-    if (!session?.currentQuestion?.chunks.length) return;
-    // Before playback starts, not after: the replay gates the microphone, and main's silence
-    // backstop is what would otherwise submit a half-finished answer while the question is
-    // still being read back. See `mockInterviewService.repeatQuestion`.
-    await window.electronAPI?.mockInterview.repeatQuestion();
-    await mockTtsService.repeat(session.currentQuestion.chunks);
   };
 
   const answerReady = async (): Promise<void> => {
@@ -142,14 +129,5 @@ export function useMockInterview() {
     await window.electronAPI?.mockInterview.clear();
   };
 
-  return {
-    session,
-    startSession,
-    endSession,
-    skipQuestion,
-    answerFinished,
-    repeatQuestion,
-    answerReady,
-    clear,
-  };
+  return { session, startSession, endSession, answerFinished, answerReady, clear };
 }

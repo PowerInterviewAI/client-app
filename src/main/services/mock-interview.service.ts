@@ -66,6 +66,7 @@ function initialSession(): MockInterviewSessionState {
     liveHints: [],
     report: null,
     reportError: null,
+    exported: false,
     error: null,
   };
 }
@@ -116,6 +117,35 @@ class MockInterviewService {
 
   private setState(state: MockInterviewState): void {
     this.session = { ...this.session, state };
+  }
+
+  /**
+   * Append a finished turn, and retire any earlier export along with it.
+   *
+   * `exported` means "everything this session holds is already in a file", and a new answer makes
+   * that untrue. The three callers - a submitted answer, a backstopped skip, and the pending
+   * answer `endSession` rescues - all had their own spread over `answers`, which is exactly the
+   * shape where a fourth would be added without the flag.
+   */
+  private appendAnswer(answer: MockAnswer): void {
+    this.session = {
+      ...this.session,
+      answers: [...this.session.answers, answer],
+      exported: false,
+    };
+  }
+
+  /**
+   * Record that the session has been written to a file.
+   *
+   * Called by `toolsService.exportMockReport` after the write succeeds - never on a cancelled
+   * save dialog or a failed write, which are the two cases where the content is still only in
+   * memory and the prompt still has something to ask about.
+   */
+  markExported(): void {
+    if (this.session.exported) return;
+    this.session = { ...this.session, exported: true };
+    this.broadcast();
   }
 
   /**
@@ -403,13 +433,12 @@ class MockInterviewService {
     // just folded into `answers` for, and pushing the identical answer a second time.
     this.finalAnswerText = '';
 
-    const answer: MockAnswer = {
+    this.appendAnswer({
       question: question.text,
       kind: question.kind,
       answer: answerText,
       skipped: false,
-    };
-    this.session = { ...this.session, answers: [...this.session.answers, answer] };
+    });
     this.setState(MockInterviewState.Evaluating);
     this.broadcast();
 
@@ -472,21 +501,15 @@ class MockInterviewService {
   }
 
   /**
-   * The candidate asked to hear the question again.
+   * Record the current question as unanswered and move on. Always advances, never follows up.
    *
-   * Only the silence backstop cares, and it has to. The replay gates the microphone for its
-   * whole duration, so nothing is transcribed and nothing re-arms the timer - while an
-   * `MOCK_ANSWER_SILENCE_MS` deadline armed by whatever they said before pressing it keeps
-   * counting, fires mid-question, and submits that half-finished answer as though they had
-   * stopped talking. Re-armed at the listening delay, which is what "the question has just been
-   * asked and nothing has been said since" means everywhere else this timer is set.
+   * **No longer reachable from the UI.** Skip was a button on the session bar until it was
+   * removed: it recorded the turn as skipped and scored it as one, which is a cost the candidate
+   * could not see on a control that reads as "move past this". What is left is the one caller
+   * that has to exist - the silence backstop, which reaches here when a question is met with
+   * nothing at all (a dead microphone, or a candidate who has walked away). There is no IPC
+   * channel for it any more, so this is internal to the state machine.
    */
-  repeatQuestion(): void {
-    if (this.session.state !== MockInterviewState.Listening) return;
-    this.armSilenceTimer(MOCK_LISTENING_SILENCE_MS);
-  }
-
-  /** Skip the current question without an answer - always moves on, never follows up. */
   async skipQuestion(): Promise<void> {
     if (
       this.session.state !== MockInterviewState.Listening &&
@@ -504,13 +527,12 @@ class MockInterviewService {
     // same fix on the submit path.
     this.finalAnswerText = '';
     if (question) {
-      const answer: MockAnswer = {
+      this.appendAnswer({
         question: question.text,
         kind: question.kind,
         answer: '',
         skipped: true,
-      };
-      this.session = { ...this.session, answers: [...this.session.answers, answer] };
+      });
     }
     await this.advanceOrScore(seq);
   }
@@ -608,13 +630,12 @@ class MockInterviewService {
     if (pending && this.session.currentQuestion) {
       const question = this.session.currentQuestion;
       this.finalAnswerText = '';
-      this.session = {
-        ...this.session,
-        answers: [
-          ...this.session.answers,
-          { question: question.text, kind: question.kind, answer: pending, skipped: false },
-        ],
-      };
+      this.appendAnswer({
+        question: question.text,
+        kind: question.kind,
+        answer: pending,
+        skipped: false,
+      });
     }
 
     // Ending *during* scoring abandons the report rather than starting another one. The control

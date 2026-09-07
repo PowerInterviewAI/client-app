@@ -99,6 +99,8 @@ export interface MockInterviewSessionState {
   liveHints: LiveSuggestion[];
   report: MockReport | null;
   reportError: string | null;
+  /** True once this session has been written to a file - see the main-process mirror. */
+  exported: boolean;
   error: string | null;
 }
 

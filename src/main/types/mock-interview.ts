@@ -192,6 +192,16 @@ export interface MockInterviewSessionState {
   report: MockReport | null;
   /** Set when report generation failed - the transcript is still shown and still exportable. */
   reportError: string | null;
+  /**
+   * True once everything this session holds has been written to a file.
+   *
+   * The save prompt reads it through `AppState.hasMockContent`. Without it, exporting the report
+   * and then pressing Done was asked to save the very report that had just been saved - the
+   * export writes to disk but nothing recorded that it had, so the guard still saw unsaved
+   * content. Retired by any new answer (`appendAnswer`), because a turn appended after an export
+   * is content that file does not contain.
+   */
+  exported: boolean;
   error: string | null;
 }
 

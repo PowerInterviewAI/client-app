@@ -1,18 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Navigate, useBlocker, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { LoadingPage } from '@/components/custom/loading';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useAppState } from '@/hooks/use-app-state';
+import { useInterviewNavigationLock } from '@/hooks/use-interview-lock';
 import { useMockInterview } from '@/hooks/use-mock-interview';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
@@ -40,28 +32,16 @@ import { SessionScreen } from './session';
  * fallback most often, since clearing a finished session back to Idle is the whole of what it
  * does.
  *
- * Leaving this route mid-session ends it outright, scoring whatever was answered and dropping
- * the rest, so it asks first - through `useBlocker` rather than a guard on each way out. The
- * ways out are the kind of list that grows without anyone remembering it exists: Home and the
- * two settings pages in the titlebar menu, the same entries in the command palette, and the
- * palette's own two Start actions, every one of them a single click. Closing the app is covered
- * separately by the window-close guard, which is what handles Alt+F4, the taskbar button and
- * Cmd+Q.
+ * Navigating away mid-session is refused outright - see `useInterviewNavigationLock`. Ending the
+ * interview is what the End control on the session screen does, and it leaves through the report
+ * rather than past it. Closing the app is covered separately by the window-close guard, which is
+ * what handles Alt+F4, the taskbar button and Cmd+Q.
  */
 export default function MockInterviewPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { appState } = useAppState();
-  const {
-    session,
-    startSession,
-    endSession,
-    skipQuestion,
-    answerFinished,
-    repeatQuestion,
-    answerReady,
-    clear,
-  } =
+  const { session, startSession, endSession, answerFinished, answerReady, clear } =
     useMockInterview();
   const { exportMockReport } = useTools();
   const { confirmDiscard } = useSaveHistoryGuard();
@@ -126,26 +106,19 @@ export default function MockInterviewPage() {
   }, [appState?.isLoggedIn, navigate]);
 
   /**
-   * Asks before a navigation that would end the interview.
+   * Leaving mid-session is refused outright rather than confirmed.
    *
-   * The unmount fallback below scores whatever has been answered and drops the rest, which is the
-   * right behaviour for a route that has genuinely been left - and the wrong thing to do without
-   * asking, now that there are several one-click ways to leave: Home and the two settings pages
-   * in the titlebar menu, the same entries in the command palette, and the palette's own two
-   * Start actions. Every one of them is a single click away from ending a live interview.
+   * It used to raise an "end and leave?" dialog, which made ending the interview a side effect of
+   * navigating - and the ways to navigate are exactly the kind of list that grows quietly: Home
+   * and the two settings pages in the titlebar menu, the same entries in the command palette, and
+   * the palette's own two Start actions. Every one of them was a click away from scoring a
+   * half-finished interview. Ending it is now only what the End control on the session screen
+   * does, and that leaves through the report rather than past it.
    *
-   * A blocker rather than a guard on each of those, because the list is exactly the kind that
-   * grows without anyone remembering it exists: this catches the next one too.
-   *
-   * Signing out is deliberately not blocked. `isLoggedIn` going false is main saying the session
-   * is over - an expired token, most often - and there is nothing to stay for.
+   * The unmount fallback below stays as a belt for a route that is genuinely torn down (a reload,
+   * a sign-out) rather than navigated away from.
    */
-  const sessionActive = isMockInterviewSessionActive(session);
-  const signedOut = appState?.isLoggedIn === false;
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      sessionActive && !signedOut && currentLocation.pathname !== nextLocation.pathname
-  );
+  useInterviewNavigationLock(isMockInterviewSessionActive(session));
 
   // Ends an in-progress session if this page unmounts without going through the report screen -
   // see the module docstring for why this is a fallback rather than the intended UX. Reads
@@ -165,39 +138,6 @@ export default function MockInterviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const leaveConfirm = blocker.state === 'blocked' && (
-    <Dialog
-      open
-      // Esc and the overlay mean "not now", which here is staying on the interview.
-      onOpenChange={(next) => {
-        if (!next) blocker.reset();
-      }}
-    >
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>End this mock interview?</DialogTitle>
-          <DialogDescription>
-            Leaving scores what you have answered so far and drops the rest. The report is not
-            saved anywhere unless you export it.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="flex-row gap-2 sm:flex-row">
-          <Button className="flex-1" size="sm" variant="outline" onClick={() => blocker.reset()}>
-            Stay
-          </Button>
-          <Button
-            className="flex-1"
-            size="sm"
-            variant="destructive"
-            onClick={() => blocker.proceed?.()}
-          >
-            End and leave
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-
   if (appState?.isLoggedIn === false) return <LoadingPage disclaimer="Redirecting to login…" />;
   if (appState?.isLoggedIn === null || !appState) return <LoadingPage disclaimer="Loading…" />;
 
@@ -205,15 +145,19 @@ export default function MockInterviewPage() {
 
   if (state === MockInterviewState.Finished) {
     return (
-      // Both exits ask first. They are the only two paths that destroy a finished report from
-      // inside the app, and the same content is guarded on the window close and in front of an
-      // update install - so leaving these two unguarded meant the protection depended on which
-      // way the user happened to leave.
+      // Both exits ask first, and each names what it is about to do rather than sharing the
+      // live assistant's "clear" wording - see save-history-dialog.tsx. They are the only two
+      // paths that destroy a finished report from inside the app, and the same content is
+      // guarded on the window close and in front of an update install, so leaving these two
+      // unguarded meant the protection depended on which way the user happened to leave.
+      //
+      // A report that has already been exported is not asked about at all: `confirmDiscard`
+      // reads `hasMockContent`, which main drops once the session has been written to a file.
       <ReportScreen
         session={session!}
         onExport={(format) => exportMockReport(format)}
         onPracticeAgain={async () => {
-          if (!(await confirmDiscard('clear'))) return;
+          if (!(await confirmDiscard('mock-again'))) return;
           await clear();
           // Setup has nowhere to happen on this route - back to the home screen, with a flag it
           // reads once to reopen the setup dialog itself, so "practise again" costs one click
@@ -221,7 +165,7 @@ export default function MockInterviewPage() {
           navigate('/', { state: { openMockSetup: true } });
         }}
         onDone={async () => {
-          if (!(await confirmDiscard('clear'))) return;
+          if (!(await confirmDiscard('mock-done'))) return;
           await clear();
           navigate('/');
         }}
@@ -231,19 +175,12 @@ export default function MockInterviewPage() {
 
   if (state !== MockInterviewState.Idle && session) {
     return (
-      <>
-        <SessionScreen
-          session={session}
-          onSkip={skipQuestion}
-          onDone={answerFinished}
-          onRepeat={repeatQuestion}
-          onEnd={endSession}
-          onAnswerReady={answerReady}
-        />
-        {/* Rendered here and nowhere else: the blocker only blocks while a session is active,
-            which is exactly the branch this is. */}
-        {leaveConfirm}
-      </>
+      <SessionScreen
+        session={session}
+        onDone={answerFinished}
+        onEnd={endSession}
+        onAnswerReady={answerReady}
+      />
     );
   }
 

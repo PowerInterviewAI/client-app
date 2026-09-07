@@ -1,11 +1,7 @@
-import { Check, Lightbulb, RotateCcw, Square, X } from 'lucide-react';
+import { Check, Lightbulb, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import {
-  BAR_ACTIVE,
-  BAR_GHOST,
-  BAR_ICON_BUTTON,
-} from '@/components/custom/control-panel/bar';
+import { BAR_ACTIVE, BAR_GHOST, BAR_ICON_BUTTON } from '@/components/custom/control-panel/bar';
 import LiveSuggestionsPanel from '@/components/custom/panels/live-suggestions-panel';
 import MockTranscriptPanel from '@/components/custom/panels/mock-transcript-panel';
 import ZoomControl from '@/components/custom/zoom-control';
@@ -20,9 +16,7 @@ import { isMockInterviewSessionActive, MockInterviewState } from '@/types/mock-i
 
 interface SessionScreenProps {
   session: MockInterviewSessionState;
-  onSkip: () => Promise<void>;
   onDone: () => Promise<void>;
-  onRepeat: () => Promise<void>;
   onEnd: () => Promise<void>;
   onAnswerReady: () => Promise<void>;
 }
@@ -37,16 +31,9 @@ const THINKING_LABEL: Partial<Record<MockInterviewState, string>> = {
   [MockInterviewState.Stopping]: 'Ending the interview…',
 };
 
-export function SessionScreen({
-  session,
-  onSkip,
-  onDone,
-  onRepeat,
-  onEnd,
-  onAnswerReady,
-}: SessionScreenProps) {
+export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: SessionScreenProps) {
   const { state, currentQuestion } = session;
-  const [busy, setBusy] = useState<'skip' | 'done' | 'end' | 'repeat' | null>(null);
+  const [busy, setBusy] = useState<'done' | 'end' | null>(null);
   const [answerReady, setAnswerReady] = useState(currentQuestion?.hasAudio ?? true);
   const levelRingRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -110,9 +97,11 @@ export function SessionScreen({
   };
 
   const showReadyPrompt =
-    state === MockInterviewState.Listening && currentQuestion && !currentQuestion.hasAudio && !answerReady;
+    state === MockInterviewState.Listening &&
+    currentQuestion &&
+    !currentQuestion.hasAudio &&
+    !answerReady;
   const isThinking = state in THINKING_LABEL;
-  const canControl = state === MockInterviewState.Speaking || state === MockInterviewState.Listening;
   // Shown for the whole active session once hints are on, not just once the first one arrives -
   // otherwise the panel would pop in mid-question the moment the first hint request resolves,
   // shifting the transcript panel it sits beside.
@@ -162,9 +151,16 @@ export function SessionScreen({
         {/* Status line: what is currently happening, plus the one control that only makes sense
             in the moment (the "I'm ready" gate for a question with no audio). Kept as a single
             slim row rather than a big centred card - the transcript panel above is what the
-            candidate actually reads. */}
+            candidate actually reads.
+
+            Fixed height, not `py-1` around whatever it happens to contain. The text changes on
+            every state transition and the "I'm ready" button (24px) comes and goes inside it, so
+            an auto-height row grew and shrank under the panels - which re-ran their scroll
+            anchoring and made the whole bottom of the screen jump each time a question was
+            generated. `h-7` is the tallest thing it ever holds, and the message is clipped rather
+            than wrapped for the same reason: a two-line status is one more height. */}
         <div
-          className="flex items-center justify-center gap-2 py-1 text-xs text-muted-foreground shrink-0"
+          className="flex h-7 shrink-0 items-center justify-center gap-2 text-xs text-muted-foreground"
           aria-live="polite"
         >
           <div className="h-4 w-4 flex items-center justify-center shrink-0" aria-hidden="true">
@@ -181,7 +177,7 @@ export function SessionScreen({
               <span className="h-3 w-3 rounded-full border-2 border-muted-foreground/40 border-t-primary animate-spin" />
             )}
           </div>
-          {statusText && <span>{statusText}</span>}
+          {statusText && <span className="truncate">{statusText}</span>}
           {showReadyPrompt && (
             <Button
               size="sm"
@@ -204,14 +200,23 @@ export function SessionScreen({
           height, same icon-button tokens, same reading order (the one consequential action first,
           then the things that shape the turn), same single hairline before the settings, and zoom
           held at the right edge by ml-auto because it changes how the app is viewed rather than
-          what it does. */}
-      <div className="flex items-center gap-4 px-1 pb-1 pt-0.5">
+          what it does.
+
+          `h-11` rather than height by content, for the same reason the status row above is
+          pinned: everything in it is a fixed-height control today, and a row that derives its
+          height from its contents is one conditional control away from resizing the panels above
+          it mid-question. */}
+      <div className="flex h-11 shrink-0 items-center gap-4 px-1 pb-1 pt-0.5">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               size="sm"
               className="h-8 gap-1.5 rounded-lg px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-600/90"
-              disabled={state !== MockInterviewState.Listening || busy !== null || (showReadyPrompt ?? false)}
+              disabled={
+                state !== MockInterviewState.Listening ||
+                busy !== null ||
+                (showReadyPrompt ?? false)
+              }
               onClick={withBusy('done', onDone)}
             >
               <Check className="h-3.5 w-3.5" />
@@ -225,53 +230,14 @@ export function SessionScreen({
 
         <div className="h-5 w-px bg-border" aria-hidden="true" />
 
-        {/* What to do with the question on screen */}
-        <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
-                // `hasAudio` as well as the chunks, because `speechFailed()` clears the first and
-                // keeps the second: after a synthesis failure the question is on screen as text,
-                // and a Repeat offered there would take the microphone for the length of another
-                // failing attempt while the status line still says the candidate is being heard.
-                disabled={
-                  !canControl ||
-                  busy !== null ||
-                  !currentQuestion?.hasAudio ||
-                  !currentQuestion?.chunks.length
-                }
-                aria-label="Repeat question"
-                onClick={withBusy('repeat', onRepeat)}
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Repeat question</p>
-            </TooltipContent>
-          </Tooltip>
+        {/* Repeat and Skip used to sit here. Both were escape hatches from a question rather than
+            ways of answering one, and both cost the interview something the candidate could not
+            see: a skip is recorded as a skipped turn and scored as one, and a repeat gated the
+            microphone for the length of a second reading while the silence backstop kept counting
+            against an answer that could not be given. A real interviewer offers neither.
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
-                disabled={!canControl || busy !== null}
-                aria-label="Skip question"
-                onClick={withBusy('skip', onSkip)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Skip question</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
+            Skipping still exists in main - it is what the silence backstop falls back to when a
+            question is met with nothing at all - it just is not a button any more. */}
 
         {/* What the session produces, and how to end it */}
         <div className="flex items-center gap-1">
@@ -303,7 +269,10 @@ export function SessionScreen({
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn(BAR_ICON_BUTTON, 'text-destructive hover:text-destructive hover:bg-destructive/10')}
+                className={cn(
+                  BAR_ICON_BUTTON,
+                  'text-destructive hover:text-destructive hover:bg-destructive/10'
+                )}
                 // Only while ending is itself in flight, never while another action is. `withBusy`
                 // holds `busy` for the whole main-side transition - an evaluate plus a generate,
                 // each with its own retry and timeout, or the entire playback for a repeat - and
