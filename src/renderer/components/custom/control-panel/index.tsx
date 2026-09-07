@@ -202,14 +202,16 @@ export default function ControlPanel() {
   if (isStealth) return null;
 
   const stateConfig: Record<RunningState, StateConfig> = {
-    // Inert. `MainGroup` renders a way back to the home screen in this state instead of anything
-    // from here - starting a session is not something this screen offers any more - but the
-    // record is keyed by the enum, so the entry has to exist.
+    // Inert, but it still wears Stop. This screen offers exactly one action and `MainGroup`
+    // keeps it in place in every state, disabled where there is nothing to stop; an Idle console
+    // showing a differently-labelled button in the primary slot would read as a different
+    // control rather than an unavailable one. The pulse is dropped - nothing is running to
+    // draw attention to.
     [RunningState.Idle]: {
       onClick: () => {},
-      className: '',
-      icon: null,
-      label: 'Idle',
+      className: 'bg-destructive hover:bg-destructive/90',
+      icon: <Square className="h-3.5 w-3.5" />,
+      label: 'Stop',
     },
     [RunningState.Starting]: {
       onClick: () => {},
@@ -253,7 +255,7 @@ export default function ControlPanel() {
           Zoom is held at the right edge by ml-auto: it changes how the app is viewed rather than
           what it does, and mixing it into the run would make it read as another interview control. */}
       <div id="control-panel" className="flex items-center gap-4 px-1 pb-1 pt-0.5">
-        <MainGroup stateConfig={{ onClick, className, icon, label }} getDisabled={getDisabled} />
+        <MainGroup stateConfig={{ onClick, className, icon, label }} />
 
         <div className="h-5 w-px bg-border" aria-hidden="true" />
 

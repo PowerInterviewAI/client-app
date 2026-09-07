@@ -1,6 +1,3 @@
-import { Home } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
@@ -14,7 +11,6 @@ interface MainGroupProps {
     icon: React.ReactNode;
     label: string;
   };
-  getDisabled: (state: RunningState, disableOnRunning?: boolean) => boolean;
 }
 
 /**
@@ -28,19 +24,22 @@ interface MainGroupProps {
  * same thing, with its own split-button menu and its own memory of which mode you last used, all
  * to answer a question the home screen now asks outright.
  *
- * Idle is therefore a transient state on this route rather than its resting one - the start was
- * cancelled at the headphone notice or the permission gate, or the route was opened directly.
- * The slot holds a way back to where starting happens rather than going empty, because an idle
- * console with nothing in the primary position is a dead end.
+ * The slot holds this one button in every state and enables it only while the assistant is
+ * actually running. Idle, Starting and Stopping have nothing to stop - Idle because the start was
+ * cancelled at the headphone notice or the permission gate, or the route was opened directly, the
+ * other two because a stop is already in flight or the session has not opened yet - so the button
+ * stays put and greys out rather than swapping itself for a different control. A slot that
+ * changes what it does under the cursor is worse than one that is visibly unavailable.
  *
  * Fixed width rather than auto: the label changes with the running state, and an auto-width
  * primary would shift the rest of the bar sideways at the exact moment the user is watching it.
  */
-export function MainGroup({ stateConfig, getDisabled }: MainGroupProps) {
-  const navigate = useNavigate();
+export function MainGroup({ stateConfig }: MainGroupProps) {
   const { runningState } = useAppState();
 
   const { onClick, className, icon, label } = stateConfig;
+
+  const isRunning = runningState === RunningState.Running;
 
   const handleStopClick = async () => {
     try {
@@ -56,46 +55,38 @@ export function MainGroup({ stateConfig, getDisabled }: MainGroupProps) {
     }
   };
 
-  if (runningState === RunningState.Idle) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            onClick={() => navigate('/')}
-            size="sm"
-            variant="outline"
-            className="h-8 w-24 gap-1.5 rounded-lg text-xs font-semibold cursor-pointer"
-          >
-            <Home className="h-3.5 w-3.5" />
-            Home
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Nothing is running</p>
-          <p className="text-xs text-muted-foreground">Start an interview from the home screen</p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
-          onClick={handleStopClick}
-          size="sm"
-          className={cn('h-8 w-24 gap-1.5 rounded-lg text-xs font-semibold cursor-pointer', className)}
-          disabled={getDisabled(runningState, false)}
-        >
-          {icon}
-          {label}
-        </Button>
+        {/* Wrapped: a disabled button fires no pointer events, and without this the tooltip
+            explaining *why* it is disabled would be unreachable in exactly the states that
+            need it. */}
+        <span className="inline-flex shrink-0">
+          <Button
+            onClick={handleStopClick}
+            size="sm"
+            className={cn(
+              'h-8 w-24 gap-1.5 rounded-lg text-xs font-semibold cursor-pointer',
+              className
+            )}
+            disabled={!isRunning}
+          >
+            {icon}
+            {label}
+          </Button>
+        </span>
       </TooltipTrigger>
       <TooltipContent>
         <p>{label} the assistant</p>
-        {runningState === RunningState.Running && (
+        {isRunning ? (
           <p className="text-xs text-muted-foreground">
             Ends the session, offers to save it, and returns home
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            {runningState === RunningState.Idle
+              ? 'Nothing is running - start an interview from the home screen'
+              : 'Available once the session is running'}
           </p>
         )}
       </TooltipContent>
