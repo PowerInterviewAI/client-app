@@ -60,7 +60,9 @@ Handler registration lives in [src/main/ipc/](src/main/ipc/) - one file per doma
 
 ### Transcription and Suggestion Flow
 
-[src/main/services/transcript.service.ts](src/main/services/transcript.service.ts) is the central orchestrator. `transcriptService.ingest(channel, type, text)` merges both audio channels, deduplicates overlapping segments, and decides whether a final `Other` transcript is worth answering - with a `LIVE_SUGGESTION_GAP_MS` guard that suppresses the call if Self spoke recently.
+[src/main/services/transcript.service.ts](src/main/services/transcript.service.ts) is the central orchestrator. `transcriptService.ingest(channel, type, text)` merges both audio channels and decides whether a final `Other` transcript is worth answering - with a `LIVE_SUGGESTION_GAP_MS` guard that suppresses the call if Self spoke recently.
+
+**Nothing deduplicates.** `mergeAdjacentTranscripts` concatenates consecutive blocks from the *same* speaker that fall within `TRANSCRIPT_INTER_TRANSCRIPT_GAP_MS`, and no code anywhere compares the two channels against each other. This line claimed the opposite for a while, which is worth naming because the gap it papered over is the whole of #111: on speakers the microphone re-captures the interviewer, the same words arrive on `ch_0` and `ch_1`, and both are kept. See Headphones below.
 
 - `ch_0` = `Speaker.Other` (interviewer, captured via loopback audio)
 - `ch_1` = `Speaker.Self` (candidate, captured via microphone)
