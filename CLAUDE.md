@@ -173,6 +173,24 @@ transcript - the billed summarize call over nothing that the guard exists to sto
 a different door. The export guard and `nothingToExport` both read the flag now, and
 `test/save-history.test.mjs` pins it.
 
+**A mock report needs two flags, not one, and the difference is which question is being asked.**
+`hasMockContent` means a report exists; `hasUnsavedMockContent` means there is something a save
+would capture that is not captured yet. Both are derived in `withMockContent` and stripped off
+incoming updates, exactly as `hasHistory` is. The guards read the second - the close guard, the
+update notice, `useSaveHistoryGuard` - and the export surfaces read the first: the control bar's
+Export menu and the save dialog choosing which of the two exports to offer. Collapsing them breaks
+whichever caller loses, silently and in opposite directions. Read as "exists", Done and Practise
+again ask the candidate to save the file they saved thirty seconds ago. Read as "unsaved", asking
+for Markdown after Word answers "there is nothing to export yet".
+
+What retires the second flag is `mockInterviewService.markExported()`, called by
+`toolsService.exportMockReport` **after** the write and never on a cancelled save dialog or a
+failed one - those are the two cases where the report is still only in memory. Any answer appended
+afterwards retires it again, which is why the three sites that pushed onto `answers` are one
+`appendAnswer`. The fast path in `withMockContent` tests `exported` as well as the array identity,
+because the flag moves without the answers moving and that is the whole of what `markExported`
+does. `test/mock-export-guard.test.mjs` pins both directions.
+
 **Closing is the one that cannot ask on its own behalf.** Clear and Start are renderer-initiated
 and confirm before they act; a close is decided in main - the window button, Cmd+Q, `app.quit()` -
 and the renderer would hear about it too late to matter. So
@@ -394,6 +412,80 @@ The wizard also holds a session-local dismissal (`use-onboarding-dismissed.ts`) 
 The final step latches on success. `loading` is already back to false while the two-second redirect runs, so a live button there would let a second click resend a code the backend has just spent, toasting a guaranteed failure over the success still on screen.
 
 It also carries its own way out, which the signup wizard does not need. `AuthLayout` renders this card and nothing else - no navigation of its own - and the reset code expires on `PASSWORD_RESET_CODE_EXPIRE_MINUTES` while the user is choosing a password. A failure there is therefore both likely and unrecoverable in place, since retrying the same dead code cannot succeed, so the step offers `Start over` (back to step one, address kept and code dropped) and a link to sign in, and the failure copy sends the user for a new code rather than telling them to try again.
+
+### The interview navigation lock
+
+Navigating off `/main` or `/mock-interview` mid-interview is refused outright
+([use-interview-lock.ts](src/renderer/hooks/use-interview-lock.ts)), not confirmed. The live
+assistant would otherwise keep streaming behind a screen that no longer shows it - the transcript,
+the suggestions and both ASR sockets live in main - with no Stop control anywhere on screen; a mock
+session ends outright, scoring whatever was answered and dropping the rest. The mock route used to
+raise an "end and leave?" dialog instead, which made ending the interview a side effect of
+navigating.
+
+`useBlocker` rather than a guard on each way out, because the list of one-click exits is the kind
+that grows without anyone remembering it exists. The surfaces that raise them are disabled too -
+the titlebar's search button and its whole menu, and the command palette, which stops rendering and
+unregisters Cmd/Ctrl+K rather than opening a list in which nothing works - so the block is the
+backstop and the disabled control is the explanation. A silently refused navigation explains
+nothing.
+
+`useInterviewLock` is the shared predicate, and it replaced four subtly different copies of it. A
+mock session cannot be read off `runningState`: it deliberately leaves that on `Idle`, and one of
+those copies already missed it.
+
+**The one navigation that must not be blocked is the one Stop makes**, and it is a race rather than
+a condition. `stopAssistant` writes `Idle` to main without awaiting it and the renderer learns
+about it over a coalesced broadcast, so `useEndLiveSession` can reach its `navigate('/')` while
+this side still believes the session is running - and the lock would refuse the one navigation it
+exists to allow, stranding the candidate on a console whose Stop has already been used.
+`beginInterviewExit()` says the app itself asked to leave, which is knowable here rather than raced
+for. The lock clears it when the guarded route unmounts, and again whenever a session becomes
+active, so an exit that never navigated cannot leave the next interview unguarded.
+
+**Stealth mode lives on the live control bar and nowhere else.** It was in the titlebar menu and
+the command palette, both reachable from the login screen and the payment page, where hiding the
+window from a screen capture answers a question nobody is asking - the screen share it exists for
+only happens during a real call. Entering is a click; leaving is the global hotkey, because that
+bar does not render in stealth mode, which is the point of it.
+
+### The mock interview turn
+
+**Live suggestions are off by default** (`mockLiveHintsEnabled`, and the rename is the reversal:
+see the scrub note in the config store for why the old key's value is deliberately not carried
+across). A mock interview is for answering the question yourself, and a column of model-written
+answers beside the question while you are trying to think of your own is the one thing most likely
+to stop that working. One click on the session bar for the run where comparing is the point.
+
+**There is no Repeat and no Skip.** Both were escape hatches from a question rather than ways of
+answering one, and both cost the interview something the candidate could not see: a skip is
+recorded as a skipped turn and scored as one, and a repeat gated the microphone for the length of a
+second reading while the silence backstop kept counting against an answer that could not be given.
+Skipping survives as the state machine's own fallback - it is what the silence backstop reaches for
+when a question is met with nothing at all - with no IPC channel.
+
+**A question that will not be spoken needs its own boundary.** A voiced question carries one: the
+microphone is gated shut for the whole of the interviewer's speech, so the answer cannot begin
+before the question ends. A language with no Aura voice has none - `installQuestion` goes straight
+to `Listening` with the words on screen and the microphone already open - so everything said or
+overheard while the candidate was *reading* went into the answer, and `MOCK_ANSWER_SILENCE_MS`
+submitted it eight seconds later. `awaitingAnswerReady` makes the renderer's "I'm ready" gate hold
+the transcript as well as the clock. It is deliberately not armed by `speechFailed`, which also
+clears `hasAudio`: there the question has been read out at least in part, and someone answering the
+moment the voice cuts out is answering. `test/mock-text-only-turn.test.mjs` pins it.
+
+**The reveal starts with the sound, and `playing` is what that means.** `playQuestion` announced it
+as soon as the first chunk's blob arrived - one `createObjectURL`, one MP3 decode and one
+output-device start too early, so the words were on screen before anything was audible. Not
+`play()` resolving either: that means playback has been permitted, which on a still-buffering
+element is earlier again. A question that will not be spoken appears whole, because a reveal exists
+to keep words in step with a voice and there is none.
+
+**The exported report uses the live export's heading scheme**, not one of its own. Both are
+rendered by `MOCK_DOCX_OPTIONS`, which centres H1 and H5 and ranges everything else left - a style
+sheet written for the live report's shape. Picking levels by nesting depth instead put "Your
+Answer", "Score" and "Stronger Answer" at H5, so three centred labels appeared over left-ranged
+body text in every question.
 
 ### Window and Stealth Mode
 
