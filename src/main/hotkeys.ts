@@ -71,13 +71,14 @@ export function registerGlobalHotkeys(): void {
     if (w && !w.isDestroyed()) w.webContents.send('hotkey:toggle-transcript');
   });
 
-  // Toggle professional mode. A function key for the same reason as F8: it stays reachable in
-  // stealth mode, where the control panel carrying the button is hidden. Deliberately not P -
-  // globalShortcut claims accelerators system-wide, and Ctrl+Shift+P would take the command
-  // palette away from every editor on the machine for as long as this app runs.
+  // Switch between hint-only and full-sentence suggestions. A function key for the same reason
+  // as F8: it stays reachable in stealth mode, where the control panel carrying the button is
+  // hidden. Deliberately not P - globalShortcut claims accelerators system-wide, and
+  // Ctrl+Shift+P would take the command palette away from every editor on the machine for as
+  // long as this app runs.
   registerShortcut(`${BASE}+F7`, () => {
     const w = BrowserWindow.getAllWindows()[0];
-    if (w && !w.isDestroyed()) w.webContents.send('hotkey:toggle-professional-mode');
+    if (w && !w.isDestroyed()) w.webContents.send('hotkey:toggle-suggestion-mode');
   });
 
   // Zoom hotkeys
@@ -206,7 +207,7 @@ export function registerGlobalHotkeys(): void {
   console.log(`  ${mod}+Q : Stop assistant`);
   console.log(`  ${mod}+M : Toggle stealth mode`);
   console.log(`  ${mod}+N : Toggle opacity (stealth only)`);
-  console.log(`  ${mod}+F7 : Toggle professional mode`);
+  console.log(`  ${mod}+F7 : Switch hint-only / full-sentence suggestions`);
   console.log(`  ${mod}+F8 : Toggle transcription dock`);
   console.log(`  ${mod}+1-9 : Place window (numpad layout)`);
   console.log('  Ctrl+Alt+Shift+Arrow : Move window');

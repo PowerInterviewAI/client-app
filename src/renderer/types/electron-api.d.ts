@@ -27,7 +27,7 @@ declare global {
     // Hotkey stop assistant event
     onHotkeyStopAssistant: (callback: () => void) => () => void;
     onHotkeyToggleTranscript: (callback: () => void) => () => void;
-    onHotkeyToggleProfessionalMode: (callback: () => void) => () => void;
+    onHotkeyToggleSuggestionMode: (callback: () => void) => () => void;
 
     // Configuration management
     config: {
@@ -81,6 +81,9 @@ declare global {
         data: { fullName: string; profileData: string; context: string };
         error?: string;
       }>;
+      setOnboardingCompleted: (
+        completed: boolean
+      ) => Promise<{ success: boolean; error?: string }>;
     };
 
     // Payment management
@@ -136,6 +139,9 @@ declare global {
     actionSuggestion: {
       clear: () => Promise<void>;
       stop: () => Promise<void>;
+      capture: () => Promise<void>;
+      clearImages: () => Promise<void>;
+      trigger: () => Promise<void>;
     };
 
     // Mock interview management. State itself travels on AppState.mockInterview, pushed the
@@ -212,6 +218,8 @@ declare global {
       decrease: () => void;
       reset: () => void;
       getFactor: () => Promise<number>;
+      /** Resolves with the factor actually applied, which may have been clamped. */
+      setFactor: (factor: number) => Promise<number>;
       onChange: (callback: (percent: number) => void) => () => void;
     };
 

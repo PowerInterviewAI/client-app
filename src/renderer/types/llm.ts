@@ -1,7 +1,8 @@
 /**
- * How much prose a suggestion carries. Mirrors `SuggestionMode` in src/main/types/llm.ts.
+ * How much prose a suggestion carries. Mirrors `SuggestionMode` in src/main/types/llm.ts, wire
+ * values included - see that file for why the strings still read `normal`/`professional`.
  */
 export enum SuggestionMode {
-  Normal = 'normal',
-  Professional = 'professional',
+  FullSentence = 'normal',
+  HintOnly = 'professional',
 }

@@ -46,6 +46,19 @@ export function registerWindowHandlers(): void {
       console.warn('zoom:out handler error', e);
     }
   });
+  // Invoke rather than send, unlike the three above: the settings field that calls this waits
+  // for the applied factor so its readout cannot drift from the window when a value is clamped.
+  ipcMain.handle('zoom:set-factor', (_event, factor: number) => {
+    try {
+      if (typeof factor !== 'number' || !isFinite(factor)) return zoomService.getZoomFactor();
+      zoomService.setZoomFactor(factor);
+      return zoomService.getZoomFactor();
+    } catch (e) {
+      console.warn('zoom:set-factor handler error', e);
+      return 1;
+    }
+  });
+
   ipcMain.on('zoom:reset', () => {
     try {
       zoomService.resetZoom();

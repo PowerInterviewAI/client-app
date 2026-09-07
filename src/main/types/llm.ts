@@ -12,12 +12,17 @@ export interface LLMRequest {
 /**
  * How much prose a suggestion should carry.
  *
- * Normal is full spoken sentences. Professional is a headline plus keyword bullets, for reading
- * at a glance mid-interview. Mirrors `SuggestionMode` in the backend's `app/schemas/suggestion.py`.
+ * Full-sentence mode is answers written out as they would be spoken. Hint-only mode is a headline
+ * plus keyword bullets, for reading at a glance mid-interview, and is the default.
+ *
+ * The wire values are deliberately left as they are. They are the backend's contract
+ * (`SuggestionMode` in its `app/schemas/suggestion.py`), which is deployed separately and still
+ * names these modes the way the client used to; renaming the members without renaming the strings
+ * keeps the client readable without requiring the two to ship together.
  */
 export enum SuggestionMode {
-  Normal = 'normal',
-  Professional = 'professional',
+  FullSentence = 'normal',
+  HintOnly = 'professional',
 }
 
 /**

@@ -16,7 +16,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
-import { useProfessionalMode } from '@/hooks/use-professional-mode';
+import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
 import {
   DOCK_HANDLE_HEIGHT,
@@ -53,7 +53,7 @@ export default function MainPage() {
   const { appState } = useAppState();
 
   const { visible: transcriptDockEnabled, toggle: toggleTranscriptDock } = useTranscriptPanel();
-  const { toggle: toggleProfessionalMode } = useProfessionalMode();
+  const { toggle: toggleSuggestionMode } = useSuggestionMode();
 
   // Listen for hotkey to stop assistant
   useEffect(() => {
@@ -76,13 +76,13 @@ export default function MainPage() {
     return window.electronAPI.onHotkeyToggleTranscript(toggleTranscriptDock);
   }, [toggleTranscriptDock]);
 
-  // Same reasoning for professional mode: the control panel button is gone in stealth mode, and
-  // this is a control the candidate may want to flip mid-question.
+  // Same reasoning for the suggestion mode: the control panel button is gone in stealth mode,
+  // and this is a control the candidate may want to flip mid-question.
   useEffect(() => {
-    if (!window?.electronAPI?.onHotkeyToggleProfessionalMode) return;
+    if (!window?.electronAPI?.onHotkeyToggleSuggestionMode) return;
 
-    return window.electronAPI.onHotkeyToggleProfessionalMode(toggleProfessionalMode);
-  }, [toggleProfessionalMode]);
+    return window.electronAPI.onHotkeyToggleSuggestionMode(toggleSuggestionMode);
+  }, [toggleSuggestionMode]);
 
   // Load config on mount
   useEffect(() => {

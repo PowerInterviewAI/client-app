@@ -9,9 +9,11 @@ export default function AuthLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to main page if already logged in
+    // Home, not `/main`. A user who has just signed in is the one most likely to have nothing
+    // configured yet, and `/main` is the one screen that assumes everything already is - it is
+    // also the route that skips the first-run wizard, which only `/` gates on.
     if (appState?.isLoggedIn === true) {
-      navigate('/main', { replace: true });
+      navigate('/', { replace: true });
     }
   }, [appState?.isLoggedIn, navigate]);
 

@@ -44,6 +44,19 @@ export interface AppState {
   interviewConfig: InterviewConfigSummary;
   interviewConfigLoaded: boolean;
   /**
+   * Whether the signed-in account has finished or skipped the first-run wizard.
+   *
+   * Only meaningful once `interviewConfigLoaded` is true - before that it is the default rather
+   * than an answer, which is why the gate on `/` waits for both.
+   */
+  onboardingCompleted: boolean;
+  /**
+   * The signed-in account's email. Distinct from `Config.email`, which is a credential the login
+   * form persists only under "remember me" - blank for a user who declined it, and stale for the
+   * previous user until the next sign-in. Read this to display who is signed in.
+   */
+  accountEmail: string;
+  /**
    * Whether the arrays above hold a real interview rather than the placeholder copy the panels
    * are seeded with. Derived in main; the renderer only reads it.
    */

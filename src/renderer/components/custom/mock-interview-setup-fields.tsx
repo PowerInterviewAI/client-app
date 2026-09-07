@@ -1,5 +1,4 @@
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
+import { LanguageField } from '@/components/custom/settings/language-field';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
@@ -40,14 +39,14 @@ const SENIORITIES: { value: MockSeniority; label: string }[] = [
 const QUESTION_COUNTS = [3, 5, 8, 12] as const;
 
 /**
- * The form body shared by the full-page setup screen and the control bar's setup dialog -
- * seniority, question count, difficulty, and the current (read-only here) interview language.
+ * The form body shared by every place a mock interview is configured - seniority, question
+ * count, difficulty, and the interview language.
  * Nothing here asks for the CV, job context or role: those come from the same account-level
  * `interviewConfig` the live assistant already reads. The backend frames the interview around
  * whatever role that context names, rather than a short label collected a second time here.
  */
 export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupForm }) {
-  const { seniority, setSeniority, difficulty, setDifficulty, questionCount, setQuestionCount, languageOption } =
+  const { seniority, setSeniority, difficulty, setDifficulty, questionCount, setQuestionCount } =
     form;
 
   return (
@@ -112,29 +111,14 @@ export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupFor
         </RadioGroup>
       </div>
 
-      <div className="space-y-2">
-        <Label>Language</Label>
-        <div className="flex items-center justify-between rounded-md border px-3 py-2">
-          <div className="flex items-center gap-2 text-sm">
-            <span>{languageOption.nativeName}</span>
-            <span className="text-muted-foreground">({languageOption.name})</span>
-          </div>
-          <Badge variant={languageOption.hasVoice ? 'secondary' : 'outline'}>
-            {languageOption.hasVoice ? 'Voice' : 'Text only'}
-          </Badge>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Change the interview language from the main screen&apos;s language picker.
-        </p>
-        {!languageOption.hasVoice && (
-          <Alert>
-            <AlertDescription>
-              The interviewer will write its questions instead of speaking them. You still answer
-              out loud, and the scoring is the same.
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
+      {/* The same control the configuration page and the wizard use, editing the same stored
+          setting - a mock session reads the language the live assistant does. It used to be a
+          read-only row here that told the user to go and change it on another screen, which is a
+          strange thing to say on a dialog whose whole job is configuring the session. */}
+      <LanguageField
+        showVoice
+        description="What the interviewer asks in, what is transcribed, and what your feedback comes back in."
+      />
     </div>
   );
 }

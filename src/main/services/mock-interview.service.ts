@@ -9,7 +9,13 @@ import {
   SUGGESTION_STALL_MS,
 } from '../consts.js';
 import { configStore } from '../store/config.store.js';
-import { LiveSuggestion, RunningState, Speaker, SuggestionState, Transcript } from '../types/app-state.js';
+import {
+  LiveSuggestion,
+  RunningState,
+  Speaker,
+  SuggestionState,
+  Transcript,
+} from '../types/app-state.js';
 import { Language, TTS_LANGUAGES } from '../types/language.js';
 import { GenerateLiveSuggestionRequest, RequestTurnVerdict, SuggestionMode } from '../types/llm.js';
 import {
@@ -41,7 +47,8 @@ import { appStateService } from './app-state.service.js';
  */
 function describeApiError(error: unknown): string {
   if (error instanceof ApiRequestError) {
-    const body = typeof error.content === 'string' ? error.content : JSON.stringify(error.content ?? '');
+    const body =
+      typeof error.content === 'string' ? error.content : JSON.stringify(error.content ?? '');
     const detail = body && body !== '""' ? ` - ${body.slice(0, 300)}` : '';
     return `${error.status} ${error.message}${detail}`;
   }
@@ -455,7 +462,10 @@ class MockInterviewService {
    * before the candidate has read it) is the bug this exists to avoid.
    */
   answerReady(): void {
-    if (this.session.state !== MockInterviewState.Listening || this.session.currentQuestion?.hasAudio) {
+    if (
+      this.session.state !== MockInterviewState.Listening ||
+      this.session.currentQuestion?.hasAudio
+    ) {
       return;
     }
     this.armSilenceTimer(MOCK_LISTENING_SILENCE_MS);
@@ -752,7 +762,7 @@ class MockInterviewService {
     const controller = new AbortController();
     this.hintAbortController = controller;
 
-    const mode = conf.professionalMode ? SuggestionMode.Professional : SuggestionMode.Normal;
+    const mode = conf.hintOnlyMode ? SuggestionMode.HintOnly : SuggestionMode.FullSentence;
     const timestamp = Date.now();
     const hint: LiveSuggestion = {
       timestamp,

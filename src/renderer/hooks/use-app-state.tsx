@@ -43,6 +43,10 @@ class AppStateManager {
       providedLLMModel: raw.providedLLMModel,
       interviewConfig: raw.interviewConfig ?? { fullName: '', hasProfileData: false },
       interviewConfigLoaded: raw.interviewConfigLoaded ?? false,
+      // Defaults false, which is the safe direction: a main process that does not send it offers
+      // the wizard rather than silently retiring it.
+      onboardingCompleted: raw.onboardingCompleted ?? false,
+      accountEmail: raw.accountEmail ?? '',
       // Defaults false, which is the safe direction: an older main that does not send it makes
       // the save prompt silent rather than making it fire on every Clear with nothing to save.
       hasHistory: raw.hasHistory ?? false,

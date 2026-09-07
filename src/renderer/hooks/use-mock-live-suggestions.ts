@@ -7,7 +7,7 @@ import { useConfigStore } from './use-config-store';
  * Whether a mock session also generates what the live assistant would have suggested, plus a
  * toggle that persists the change.
  *
- * Absent means on, unlike `useProfessionalMode` - trying this out is one of the two reasons the
+ * Absent means on, unlike `useSuggestionMode` - trying this out is one of the two reasons the
  * mock interview feature exists, alongside practising the interview itself, so the panel is
  * discoverable by default rather than opt-in.
  */

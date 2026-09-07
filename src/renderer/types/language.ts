@@ -44,8 +44,8 @@ export interface LanguageOption {
   short: string;
   /**
    * Whether Deepgram's Aura TTS can speak this language, mirroring the backend's
-   * `DEEPGRAM_TTS_VOICES`. Only read by the mock interview setup screen - the live picker has no
-   * use for it, since the live assistant never speaks.
+   * `DEEPGRAM_TTS_VOICES`. Surfaced only where a mock interview is being set up - that is what
+   * `LanguageField`'s `showVoice` selects - since the live assistant never speaks.
    */
   hasVoice: boolean;
 }

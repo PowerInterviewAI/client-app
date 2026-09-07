@@ -1,18 +1,21 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { useAppState } from '@/hooks/use-app-state';
 import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
-import { useConfigurationDialog } from '@/hooks/use-configuration-dialog';
 import { getElectron } from '@/lib/utils';
-import { getLanguageOption } from '@/types/language';
 import type { MockInterviewSetup } from '@/types/mock-interview';
 import { MockDifficulty, MockSeniority } from '@/types/mock-interview';
 
 /**
- * State and validation shared by every place a mock interview can be configured and started -
- * the full-page setup screen and the control bar's setup dialog.
+ * State and validation for configuring and starting a mock interview, held apart from
+ * `MockInterviewSetupDialog` so how the form behaves does not depend on where it is presented.
+ *
+ * Holds only what is per-session: seniority, question count and difficulty. The interview
+ * language is not among them - it is one stored setting the live assistant reads too, edited in
+ * the dialog through the shared `LanguageField` rather than copied into this form.
  *
  * Deliberately asks for nothing the account already has. `checkCanStart` reads
  * `interviewConfig.fullName`/`hasProfileData` off the shared account state the live assistant
@@ -20,9 +23,9 @@ import { MockDifficulty, MockSeniority } from '@/types/mock-interview';
  * gathered here, so there is nothing to duplicate and nothing that can drift out of sync with it.
  */
 export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) => Promise<void>) {
+  const navigate = useNavigate();
   const { appState } = useAppState();
   const { config } = useConfigStore();
-  const { openConfigurationDialog } = useConfigurationDialog();
   const { devices: audioInputDevices, ready: audioDevicesReady } = useAudioInputDevices();
 
   const [seniority, setSeniority] = useState<MockSeniority>(MockSeniority.Mid);
@@ -30,9 +33,6 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
   const [questionCount, setQuestionCount] = useState(8);
   const [starting, setStarting] = useState(false);
   const [headphoneNoticeOpen, setHeadphoneNoticeOpen] = useState(false);
-
-  const language = config?.language;
-  const languageOption = getLanguageOption(language);
 
   const selectedAudioInputDeviceName = config?.audioInputDeviceName ?? '';
   const noAudioInputDevices = audioDevicesReady && audioInputDevices.length === 0;
@@ -50,12 +50,12 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
     }
     if (!appState?.interviewConfig?.fullName) {
       toast.error('Full name is not set');
-      openConfigurationDialog();
+      navigate('/account');
       return false;
     }
     if (!appState?.interviewConfig?.hasProfileData) {
       toast.error('Profile data is not set');
-      openConfigurationDialog();
+      navigate('/account');
       return false;
     }
     if (noAudioInputDevices) {
@@ -107,7 +107,6 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
     starting,
     headphoneNoticeOpen,
     setHeadphoneNoticeOpen,
-    languageOption,
     handleStartClick,
     startAfterNotice,
   };

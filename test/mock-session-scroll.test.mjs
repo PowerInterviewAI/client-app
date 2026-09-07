@@ -25,14 +25,14 @@ export async function run() {
   const secondDiv = session.match(/<div className="flex-1[^"]*overflow-y-hidden gap-1">/)?.[0] ?? '';
   check('the panel-and-status column does too', secondDiv.includes('min-h-0'));
 
-  // The Idle fallback on mock-interview/index.tsx redirects now that setup lives on /main - where
-  // the old full-page setup screen used to render harmlessly for one frame, a `<Navigate>` there
-  // actually fires. React mounts a child's own effect before the parent's later ones, so a first
-  // render that reached that branch - true on every fresh navigation, since `session` has not
-  // caught up to the broadcast yet - would send the candidate straight back to /main before the
-  // effect that starts the session ever ran. `autoStarting`'s initial state has to already be
-  // true on that render, not merely set true by an effect later - a run-order property no build
-  // step catches.
+  // The Idle fallback on mock-interview/index.tsx redirects now that setup lives on the home
+  // screen - where the old full-page setup screen used to render harmlessly for one frame, a
+  // `<Navigate>` there actually fires. React mounts a child's own effect before the parent's
+  // later ones, so a first render that reached that branch - true on every fresh navigation,
+  // since `session` has not caught up to the broadcast yet - would send the candidate straight
+  // back out before the effect that starts the session ever ran. `autoStarting`'s initial state
+  // has to already be true on that render, not merely set true by an effect later - a run-order
+  // property no build step catches.
   const index = codeOnly(
     readSource(new URL('../src/renderer/pages/mock-interview/index.tsx', import.meta.url))
   );
@@ -41,7 +41,10 @@ export async function run() {
     'autoStarting is seeded from pendingSetup on the first render, not only set by an effect',
     /useState\(\(\) => Boolean\(pendingSetup\)\)/.test(index)
   );
-  check('the Idle fallback still redirects when nothing is pending', index.includes('<Navigate to="/main"'));
+  check(
+    'the Idle fallback still redirects when nothing is pending',
+    index.includes('<Navigate to="/"')
+  );
 
   return failures;
 }

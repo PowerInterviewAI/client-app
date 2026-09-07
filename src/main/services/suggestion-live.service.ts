@@ -7,11 +7,7 @@ import {
 } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { LiveSuggestion, Speaker, SuggestionState, Transcript } from '../types/app-state.js';
-import {
-  GenerateLiveSuggestionRequest,
-  RequestTurnVerdict,
-  SuggestionMode,
-} from '../types/llm.js';
+import { GenerateLiveSuggestionRequest, RequestTurnVerdict, SuggestionMode } from '../types/llm.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { getSuggestionErrorMessage } from '../utils/suggestion-error.js';
 import { isNoSuggestionSentinel } from '../utils/suggestion-sentinel.js';
@@ -66,7 +62,7 @@ class LiveSuggestionService {
     // Read once, up front. The card and the request must agree on the mode even if the user
     // toggles while this stream is in flight, or the panel would render prose as Markdown.
     const conf = configStore.getConfig();
-    const mode = conf.professionalMode ? SuggestionMode.Professional : SuggestionMode.Normal;
+    const mode = conf.hintOnlyMode ? SuggestionMode.HintOnly : SuggestionMode.FullSentence;
 
     const suggestion: LiveSuggestion = {
       timestamp,

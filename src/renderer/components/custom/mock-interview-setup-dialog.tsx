@@ -19,14 +19,15 @@ interface MockInterviewSetupDialogProps {
 }
 
 /**
- * The control bar's entry point into a mock interview, reachable without leaving the live
- * assistant's own screen. Uses the same profile and job context the live assistant already reads
- * off the account - nothing here asks for a CV or job description a second time.
+ * The way into a mock interview, opened from the home screen's launch card - and from that card
+ * alone, since starting a session is a home-screen decision. Uses the same profile and job
+ * context the live assistant already reads off the account, so nothing here asks for a CV or job
+ * description a second time.
  *
  * Form state (`useMockInterviewSetupForm`) and fields (`MockInterviewSetupFields`) stay split out
- * of this dialog rather than inlined: this is currently its only caller (an earlier full-page
- * setup screen that also used them was removed), but the split keeps the form's own state and
- * validation independent of how it is presented, for whenever a second surface needs it again.
+ * of this dialog rather than inlined. That split is what let this dialog move from the control
+ * bar to the home screen, and earlier let a full-page setup screen be retired, without either of
+ * them changing.
  */
 export function MockInterviewSetupDialog({
   open,

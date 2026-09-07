@@ -6,7 +6,7 @@ import { useAppState } from './use-app-state';
  * What is about to destroy the interview. Only the copy differs - the choice is the same one
  * every time, and phrasing it in terms of the action is what makes it answerable.
  */
-export type SaveHistoryReason = 'clear' | 'start' | 'close' | 'update';
+export type SaveHistoryReason = 'clear' | 'start' | 'close' | 'update' | 'stop' | 'signout';
 
 interface SaveHistoryPromptStore {
   /** The action awaiting an answer, or null when nothing is being asked. */

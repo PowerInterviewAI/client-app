@@ -29,6 +29,8 @@ const DEFAULT_STATE: AppState = {
   providedLLMModel: undefined,
   interviewConfig: { fullName: '', profileData: '', context: '' },
   interviewConfigLoaded: false,
+  onboardingCompleted: false,
+  accountEmail: '',
   hasHistory: false,
   mockInterview: null,
   hasMockContent: false,
@@ -97,7 +99,7 @@ export class AppStateService {
           answer: 'Suggested answers will be here in real-time',
           state: SuggestionState.Success,
           error: '',
-          mode: SuggestionMode.Normal,
+          mode: SuggestionMode.FullSentence,
         },
       ],
       actionSuggestions: [

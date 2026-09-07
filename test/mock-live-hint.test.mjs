@@ -83,7 +83,12 @@ export async function run() {
       return jsonResponse({ action: 'next', follow_up_question: '' });
     }
     if (path.includes('/mock-interview/report')) {
-      return jsonResponse({ overall_score: 80, strengths: ['clear'], gaps: ['depth'], questions: [] });
+      return jsonResponse({
+        overall_score: 80,
+        strengths: ['clear'],
+        gaps: ['depth'],
+        questions: [],
+      });
     }
     if (path.includes('/api/llm/live-suggestion')) {
       hintRequests.push(JSON.parse(init.body));
@@ -97,7 +102,7 @@ export async function run() {
   const toListening = () => mockInterviewService.speechFinished();
 
   try {
-    configStore.updateConfig({ mockLiveSuggestionsEnabled: true, professionalMode: false });
+    configStore.updateConfig({ mockLiveSuggestionsEnabled: true, hintOnlyMode: false });
 
     // --- a hint is generated for the question that was just asked -------------------------
     await mockInterviewService.start(setup);
@@ -106,10 +111,7 @@ export async function run() {
     check('a hint is generated for the first question', hints().length === 1);
     check('and it streams to a terminal success state', streamed);
     check('carrying the question it answers', hints()[0]?.last_question === 'Question 1');
-    check(
-      'and the streamed answer',
-      hints()[0]?.answer === 'Talk about the migration you led.'
-    );
+    check('and the streamed answer', hints()[0]?.answer === 'Talk about the migration you led.');
     check('generated under the configured mode', hints()[0]?.mode === 'normal');
 
     // --- the request the backend actually receives ----------------------------------------
@@ -182,7 +184,7 @@ export async function run() {
     globalThis.fetch = originalFetch;
     configStore.updateConfig({
       mockLiveSuggestionsEnabled: originalConfig.mockLiveSuggestionsEnabled,
-      professionalMode: originalConfig.professionalMode,
+      hintOnlyMode: originalConfig.hintOnlyMode,
     });
   }
 

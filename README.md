@@ -46,7 +46,7 @@ Stay on top of the conversation with live ASR:
 - Personalized responses based on CV and job description
 - Streaming responses in real time
 - Context-aware outputs
-- Natural language responses
+- Two styles: hint-only (a headline plus keyword bullets, the default) or full sentences
 
 #### Action Suggestions
 
@@ -57,9 +57,10 @@ Stay on top of the conversation with live ASR:
 
 ### Smart Configuration
 
-- Profile management (CV, job description, etc.), synced to your account across devices
-- Audio device selection (local to each device)
-- Language support (English)
+- Guided setup on first launch, covering everything a first interview needs
+- **Account**: profile (CV), job context and password, synced to your account across devices
+- **Configuration**: microphone (with a live test), interview language, suggestion style, and
+  transcript panel visibility - local to each device
 - Persistent settings
 
 ### Staying Out of Sight

@@ -249,7 +249,7 @@ export class ActionSuggestionService {
       context: interviewConfig.context,
       transcripts: transcripts.slice(-TRANSCRIPT_UPLOAD_LIMIT),
       image_names: [...this.uploadedImageNames],
-      mode: conf.professionalMode ? SuggestionMode.Professional : SuggestionMode.Normal,
+      mode: conf.hintOnlyMode ? SuggestionMode.HintOnly : SuggestionMode.FullSentence,
       language: conf.language,
     };
 

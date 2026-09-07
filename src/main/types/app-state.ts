@@ -103,6 +103,24 @@ export interface AppState {
   /** False until the account's config has been read this session; editing is unsafe before then. */
   interviewConfigLoaded: boolean;
   /**
+   * Whether the signed-in account has finished or skipped the first-run wizard.
+   *
+   * Read off the account rather than local config, so it follows the user to a new machine and a
+   * second account on a shared one gets its own run of it. Only meaningful once
+   * `interviewConfigLoaded` is true - before that it is the default, not an answer, and the
+   * renderer's gate waits for both.
+   */
+  onboardingCompleted: boolean;
+  /**
+   * The signed-in account's email, as the backend reports it.
+   *
+   * Not the same thing as `ConfigStore.email`, which is a *credential* the login form persists
+   * only when "remember me" is ticked - so it is deliberately blank for a user who declined
+   * that, and stale for the previous user until the next sign-in overwrites it. Anything that
+   * displays who is signed in reads this instead.
+   */
+  accountEmail: string;
+  /**
    * Whether there is an interview that saving would actually capture.
    *
    * Derived, never set by a caller - `updateState` strips it off incoming updates. The panels

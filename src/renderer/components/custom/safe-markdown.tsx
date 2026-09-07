@@ -230,7 +230,7 @@ const components: Components = {
     );
   },
   // Body copy carries no weight of its own. It used to be semibold, which left `**bold**` - the
-  // headline the professional prompt puts on line 1, and any emphasis a model reaches for - with
+  // headline the hint-only prompt puts on line 1, and any emphasis a model reaches for - with
   // one step of contrast against a page already at 600, so nothing in a card stood out. Regular
   // body is what makes the `strong` below legible as emphasis.
   p: function MarkdownP({ children, node, ...props }: PProps) {

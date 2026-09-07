@@ -3,14 +3,13 @@
  * Unified page for payment management with tabs for plans, history, and status
  */
 
-import { ArrowLeft, CreditCard, History, Receipt } from 'lucide-react';
+import { CreditCard, History, Receipt } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 
+import PageHeader from '@/components/custom/page-header';
 import BuyCreditsTab from '@/components/custom/payment/buy-credits-tab';
 import PaymentHistoryTab from '@/components/custom/payment/payment-history-tab';
 import PaymentStatusTab from '@/components/custom/payment/payment-status-tab';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppState } from '@/hooks/use-app-state';
 import { usePayment } from '@/hooks/use-payment';
@@ -18,16 +17,6 @@ import { usePayment } from '@/hooks/use-payment';
 type PaymentTab = 'buy' | 'history' | 'status';
 
 export default function PaymentPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // A reload leaves this page as the first entry in the session history, where navigate(-1) has
-  // nowhere to go and silently does nothing. React Router marks that entry with key 'default'.
-  const handleBack = () => {
-    if (location.key === 'default') navigate('/main', { replace: true });
-    else navigate(-1);
-  };
-
   const [activeTab, setActiveTab] = useState<PaymentTab>('buy');
   const [statusPaymentId, setStatusPaymentId] = useState('');
   const { appState } = useAppState();
@@ -59,35 +48,24 @@ export default function PaymentPage() {
       onValueChange={(value) => setActiveTab(value as PaymentTab)}
       className="w-full flex flex-col bg-background"
     >
-      {/* Header */}
-      <div className="sticky top-0 z-10 border-b bg-background px-4 py-2">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={handleBack}
-            className="flex items-center shrink-0"
-            aria-label="Back to the interview"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          </Button>
-          <h1 className="text-sm font-semibold shrink-0">Buy Credits</h1>
-          <TabsList className="ml-auto">
-            <TabsTrigger value="buy" className="flex items-center gap-1.5">
-              <CreditCard className="h-4 w-4" />
-              <span>Buy Credits</span>
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-1.5">
-              <History className="h-4 w-4" />
-              <span>History</span>
-            </TabsTrigger>
-            <TabsTrigger value="status" className="flex items-center gap-1.5">
-              <Receipt className="h-4 w-4" />
-              <span>Status</span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
-      </div>
+      {/* Header. Falls back to `/main` rather than home: this page is most often opened from the
+          interview screen, on a credits warning the user wants to get back from. */}
+      <PageHeader title="Buy Credits" fallback="/main">
+        <TabsList className="ml-auto">
+          <TabsTrigger value="buy" className="flex items-center gap-1.5">
+            <CreditCard className="h-4 w-4" />
+            <span>Buy Credits</span>
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-1.5">
+            <History className="h-4 w-4" />
+            <span>History</span>
+          </TabsTrigger>
+          <TabsTrigger value="status" className="flex items-center gap-1.5">
+            <Receipt className="h-4 w-4" />
+            <span>Status</span>
+          </TabsTrigger>
+        </TabsList>
+      </PageHeader>
 
       {/* Content */}
       <div className="flex-1 overflow-hidden px-4 py-3 w-full max-w-3xl mx-auto">

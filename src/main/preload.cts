@@ -44,10 +44,10 @@ const electronApi = {
     return () => ipcRenderer.removeListener('hotkey:toggle-transcript', handler);
   },
 
-  onHotkeyToggleProfessionalMode: (callback: () => void) => {
+  onHotkeyToggleSuggestionMode: (callback: () => void) => {
     const handler = () => callback();
-    ipcRenderer.on('hotkey:toggle-professional-mode', handler);
-    return () => ipcRenderer.removeListener('hotkey:toggle-professional-mode', handler);
+    ipcRenderer.on('hotkey:toggle-suggestion-mode', handler);
+    return () => ipcRenderer.removeListener('hotkey:toggle-suggestion-mode', handler);
   },
 
   config: {
@@ -78,6 +78,8 @@ const electronApi = {
       ipcRenderer.invoke('account:update', fullName, profileData, context),
     refresh: () => ipcRenderer.invoke('account:refresh'),
     get: () => ipcRenderer.invoke('account:get'),
+    setOnboardingCompleted: (completed: boolean) =>
+      ipcRenderer.invoke('account:set-onboarding-completed', completed),
   },
 
   payment: {
@@ -124,6 +126,9 @@ const electronApi = {
   actionSuggestion: {
     clear: () => ipcRenderer.invoke('action-suggestion:clear'),
     stop: () => ipcRenderer.invoke('action-suggestion:stop'),
+    capture: () => ipcRenderer.invoke('action-suggestion:capture'),
+    clearImages: () => ipcRenderer.invoke('action-suggestion:clear-images'),
+    trigger: () => ipcRenderer.invoke('action-suggestion:trigger'),
   },
 
   mockInterview: {
@@ -190,6 +195,7 @@ const electronApi = {
     decrease: () => ipcRenderer.send('zoom:out'),
     reset: () => ipcRenderer.send('zoom:reset'),
     getFactor: () => ipcRenderer.invoke('zoom:get-factor'),
+    setFactor: (factor: number) => ipcRenderer.invoke('zoom:set-factor', factor),
     onChange: (callback: (percent: number) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, percent: number) => callback(percent);
       ipcRenderer.on('zoom:level-changed', handler);

@@ -21,4 +21,10 @@ export function registerAccountHandlers(): void {
   ipcMain.handle('account:get', async () => {
     return accountService.getEditableConfig();
   });
+
+  // Records that the first-run wizard is finished or skipped. On the account rather than local
+  // config, so it follows the user across machines.
+  ipcMain.handle('account:set-onboarding-completed', async (_event, completed: boolean) => {
+    return accountService.setOnboardingCompleted(completed);
+  });
 }

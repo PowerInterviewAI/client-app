@@ -55,9 +55,32 @@ Streaming AI responses generated from the user's CV and job description, trigger
 
 Screenshot-based problem solving. Accepts up to 4 images, sends them to the LLM backend, returns syntax-highlighted code output. Service: [src/main/services/suggestion-action.service.ts](src/main/services/suggestion-action.service.ts).
 
-### Professional Mode
+### Leaving a Mock Interview
 
-Optional, off by default. Restructures both live and triggered suggestions into a bold one-line core answer plus one bullet per point, however many the answer needs - the same answer normal mode would give, reorganised so the eye finds each point in one pass and stripped of its padding. Bullets stay full speakable sentences rather than keywords, so the candidate can read one out loud as it stands. Toggled from the control panel or with `Ctrl+Shift+F7`, which keeps it reachable in stealth mode. Persisted locally as `professionalMode`; sent to the backend as `mode` on the suggestion request.
+Navigating away from `/mock-interview` mid-session ends it, scoring whatever was answered and dropping the rest, so a `useBlocker` guard asks first. A blocker rather than a check on each exit, because the exits are numerous and grow: Home and the two settings pages in the titlebar menu, the same entries in the command palette, and the palette's two Start actions. Signing out is not blocked - `isLoggedIn` going false is the backend saying the session is over - and closing the app is covered separately by the window-close guard.
+
+### Mock Interview Question Delivery
+
+The backend returns each question whole; the session screen writes it out word by word as the interviewer speaks it. The reveal is timed against the first audio chunk actually sounding rather than against the `Speaking` state, because that state begins before the first sentence has been synthesised - timing it against the state would put the words on screen during that silence. Paces at roughly twice speech so the last word lands before the sentence ends, gives up waiting for audio after 2.5s, and shows the whole question at once under `prefers-reduced-motion`. Component: [src/renderer/components/custom/panels/streaming-question.tsx](src/renderer/components/custom/panels/streaming-question.tsx).
+
+### Hint-Only Mode
+
+The default. Restructures both live and triggered suggestions into a bold one-line core answer plus one bullet per point, however many the answer needs - the same answer full-sentence mode would give, reorganised so the eye finds each point in one pass and stripped of its padding. Bullets stay full speakable sentences rather than keywords, so the candidate can read one out loud as it stands. Switched from the control panel, the configuration page, or with `Ctrl+Shift+F7`, which keeps it reachable in stealth mode. Persisted locally as `hintOnlyMode`; sent to the backend as `mode` on the suggestion request, whose wire values are still `normal` / `professional`.
+
+### First-Run Setup
+
+A user who has not been through setup is sent to `/onboarding` before they can reach anything else, and asked once for the seven things a first interview needs: profile, job context, language, microphone (with a live level test), suggestion style, interface size, and whether the transcript panel is docked. Each step renders the same component the account and configuration pages use.
+
+Gated on the account's `onboarding_completed`, written through `PATCH /api/users/me/onboarding` - on the account rather than on the machine, so it follows the user to a new device and a second account on a shared one gets its own run of it. The gate waits for `interviewConfigLoaded` as well as the flag, since before the account has been read the flag is a default rather than an answer.
+
+Nothing in it is a trap: Skip is on every step, every setting has a working default, and Configuration can re-run the whole thing (`/onboarding` renders regardless of the flag). The only step that blocks is the profile, because the start sequence refuses to run without a name and a CV - and it says which of the two is missing rather than only disabling the button. Page: [src/renderer/pages/onboarding/index.tsx](src/renderer/pages/onboarding/index.tsx).
+
+### Navigation
+
+`/` is a launch hub naming the five things a user comes to the app to do: start a mock interview, start the live assistant, open Account (`/account` - sign-in identity, profile, context, password), open Configuration (`/configuration` - microphone, language, suggestion style, interface size, transcript panel), or buy credits.
+
+**It is the only place a session begins.** Both launch buttons start one; neither implements starting one. Live hands off to `/main` through router state, because `/main`'s control panel owns the whole start sequence; mock hands off to `/mock-interview` with the setup its dialog collected. `/main` itself carries only Stop - it is the live assistant, not a place to choose one - and shows a way back to `/` on the rare idle visit (a start cancelled at the headphone notice, or the route opened directly). Stopping asks whether to save the interview, clears it, and returns to `/`. See [docs/ux-conventions.md](docs/ux-conventions.md) for where a new capability belongs.
+
 ### Session Window Behaviour
 
 While the assistant is running - or while stealth mode is on - the window is pinned above other windows (`screen-saver` level, and visible over a fullscreen call on macOS) and drops its taskbar button and Dock icon. The two conditions are independent: switching stealth off mid-session leaves both in place until the session actually stops. macOS traffic lights stay visible outside stealth, since the window is still interactive. Service: [src/main/services/window-control.service.ts](src/main/services/window-control.service.ts).
