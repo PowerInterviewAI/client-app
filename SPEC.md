@@ -55,6 +55,10 @@ Streaming AI responses generated from the user's CV and job description, trigger
 
 Screenshot-based problem solving. Accepts up to 4 images, sends them to the LLM backend, returns syntax-highlighted code output. Service: [src/main/services/suggestion-action.service.ts](src/main/services/suggestion-action.service.ts).
 
+### Leaving a Mock Interview
+
+Navigating away from `/mock-interview` mid-session ends it, scoring whatever was answered and dropping the rest, so a `useBlocker` guard asks first. A blocker rather than a check on each exit, because the exits are numerous and grow: Home and the two settings pages in the titlebar menu, the same entries in the command palette, and the palette's two Start actions. Signing out is not blocked - `isLoggedIn` going false is the backend saying the session is over - and closing the app is covered separately by the window-close guard.
+
 ### Mock Interview Question Delivery
 
 The backend returns each question whole; the session screen writes it out word by word as the interviewer speaks it. The reveal is timed against the first audio chunk actually sounding rather than against the `Speaking` state, because that state begins before the first sentence has been synthesised - timing it against the state would put the words on screen during that silence. Paces at roughly twice speech so the last word lands before the sentence ends, gives up waiting for audio after 2.5s, and shows the whole question at once under `prefers-reduced-motion`. Component: [src/renderer/components/custom/panels/streaming-question.tsx](src/renderer/components/custom/panels/streaming-question.tsx).

@@ -124,12 +124,20 @@ triggered it, one write per frame.
 
 The transcript and the suggestions live only in main-process memory. Nothing is written to disk
 until an export, so the actions that empty them - Clear, Start (which opens with `clearAll()`),
-Stop, and closing the app - are the only paths in the app that destroy work with no way back. All
-of them ask first, through one dialog:
+Stop, signing out, and closing the app - are the only paths in the app that destroy work with no
+way back. All of them ask first, through one dialog:
 [save-history-dialog.tsx](src/renderer/components/custom/save-history-dialog.tsx), mounted once in
 `MainFrame` because they do not share a screen - the control panel is not rendered in stealth
 mode, the close prompt arrives from main with no component of its own, and the stop prompt
 outlives the screen that raised it.
+
+**Signing out destroys it too, and main is what actually drops it.** `authService.logout()` clears
+the transcript, the suggestions and the mock session along with the token - including a mock
+session still running, which `clearAll` will not touch unless the caller opts in. Without that,
+the state stayed in memory and the close guard read `hasHistory` / `hasMockContent` straight off
+it, so the next user to sign in on a shared machine was offered the previous user's interview to
+export. Sign-out is also refused while a *mock* session is active: a mock deliberately leaves
+`runningState` on Idle, so a check on that alone waved it through.
 
 **Stop is the one that is not a guard.** The other reasons are asked *before* the destructive act
 and can be answered with "not now", which leaves the interview alone. `useEndLiveSession`
