@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 const comboClass = (hk: Hotkey) =>
   cn(
-    'shrink-0 px-2 py-1 rounded text-[11px] font-semibold whitespace-nowrap',
+    'flex items-center justify-center px-2 py-1 rounded text-[11px] font-semibold whitespace-nowrap',
     hk === Hotkey.StopAll
       ? 'bg-destructive/80 text-destructive-foreground'
       : hk === Hotkey.ToggleStealth
@@ -22,32 +24,41 @@ const comboClass = (hk: Hotkey) =>
  * The full hotkey reference, grouped and described. Shared so the control bar's status panel and
  * the documentation dialog can't drift out of sync the way the two independent copies they
  * replace already had.
+ *
+ * One grid for the whole sheet rather than a stack of rows per group, and that is the point of
+ * it: the combos are different widths (`Ctrl+Shift+Q` against `Ctrl+Alt+Shift+[↑↓←→]`), so rows
+ * laid out as flex pairs started every description at a different x - the eye had no column to
+ * run down. A single `max-content` first column sizes itself to the widest combo *in the sheet*,
+ * so every badge is the same width and every title starts on the same line, across groups as
+ * well as within one. Group labels span both columns rather than opening a grid of their own,
+ * which is what would put each group back on its own measurement.
  */
 export function HotkeyCheatsheet() {
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-[max-content_minmax(0,1fr)] items-start gap-x-3 gap-y-2">
       {HOTKEY_GROUPS.map((group) => (
-        <div key={group.label}>
-          <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+        <Fragment key={group.label}>
+          <h4 className="col-span-2 text-xs font-semibold uppercase text-muted-foreground pt-2 first:pt-0">
             {group.label}
           </h4>
-          <div className="space-y-2">
-            {group.keys.map((hk) => {
-              const info = HOTKEYS[hk];
-              return (
-                <div key={hk} className="flex items-start gap-2">
-                  <div className={comboClass(hk)}>{info.combo}</div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium leading-tight">{info.title}</p>
-                    <p className="text-xs text-muted-foreground leading-tight mt-0.5">
-                      {info.description}
-                    </p>
-                  </div>
+          {group.keys.map((hk) => {
+            const info = HOTKEYS[hk];
+            return (
+              <Fragment key={hk}>
+                {/* justify-center inside a cell the grid has already sized: the badges share a
+                    column width, so a short combo would otherwise sit against its left edge with
+                    a gap the eye reads as a missing character. */}
+                <div className={comboClass(hk)}>{info.combo}</div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium leading-tight">{info.title}</p>
+                  <p className="text-xs text-muted-foreground leading-tight mt-0.5">
+                    {info.description}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+              </Fragment>
+            );
+          })}
+        </Fragment>
       ))}
     </div>
   );
