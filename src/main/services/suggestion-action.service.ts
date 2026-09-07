@@ -8,6 +8,7 @@ import {
   ACTION_TIMEOUT_MS,
   BACKEND_BASE_URL,
   CAPTURE_MAX_EDGE_PX,
+  SUGGESTION_CONNECT_MS,
   SUGGESTION_STALL_MS,
   TRANSCRIPT_UPLOAD_LIMIT,
 } from '../consts.js';
@@ -277,13 +278,20 @@ export class ActionSuggestionService {
     };
 
     try {
-      // Action requests carry up to four screenshots that the backend base64-encodes before
-      // the provider emits a token, so they legitimately start much slower than live ones.
-      armStallTimer(ACTION_SUGGESTION_TTFB_MS);
+      // Two deadlines, not one. This first covers the request reaching the backend at all - the
+      // screenshots have already been uploaded by this point, but the profile and the context
+      // still ride on this body and can run to 128,000 characters each.
+      armStallTimer(SUGGESTION_CONNECT_MS);
       const stream = await this.llmApi.generateActionSuggestionStream(payload, controller.signal);
       if (!stream) {
         throw new Error('Failed to get stream response');
       }
+
+      // The second is the model's, measured from the headers. Action requests carry up to four
+      // screenshots that the backend base64-encodes before the provider emits a token, so they
+      // legitimately start much slower than live ones - and folding the upload into the same
+      // budget was what made a slow uplink read as a slow model.
+      armStallTimer(ACTION_SUGGESTION_TTFB_MS);
 
       const reader = stream.getReader();
       const decoder = new TextDecoder();

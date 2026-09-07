@@ -85,9 +85,26 @@ export const ACTION_TIMEOUT_MS = 30_000; // 30 seconds
 // the failure mode of over-shrinking is silent - a confident answer about a blurry image.
 export const CAPTURE_MAX_EDGE_PX = 1920;
 
-// Time to first byte. Separate budgets: an action request uploads up to four screenshots and
-// the backend base64-encodes them before the provider emits a token, so it starts far slower
-// than a live suggestion. These bound a request that never starts, not total generation time.
+// How long a suggestion request may spend *reaching* the backend - DNS, TLS, the upload, and the
+// response headers coming back. Shared by all three suggestion paths, because none of it depends
+// on what was asked for.
+//
+// This used to be part of the time-to-first-byte budgets below rather than a budget of its own,
+// and the two measure different things. The request body carries the whole profile and the whole
+// context, each of which can run to 128,000 characters, so on a domestic uplink the upload alone
+// is seconds - and every one of those seconds came out of the allowance for the model's first
+// token. The symptom is a timeout error on a request that was working, more often the slower the
+// connection and the longer the CV, which is the opposite of what a timeout should key on.
+//
+// A `StreamingResponse` sends its headers before its generator produces anything, so the moment
+// this deadline covers ends when the backend has accepted the request - not when it has decided
+// anything about it.
+export const SUGGESTION_CONNECT_MS = 15_000;
+
+// Time to the first byte of the answer, measured from the response headers rather than from the
+// request. Separate budgets: an action request uploads up to four screenshots and the backend
+// base64-encodes them before the provider emits a token, so it starts far slower than a live
+// suggestion. These bound a generation that never starts, not one that is merely long.
 export const LIVE_SUGGESTION_TTFB_MS = 20_000;
 export const ACTION_SUGGESTION_TTFB_MS = 45_000;
 

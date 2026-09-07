@@ -2,6 +2,7 @@ import { LLMApi } from '../api/llm.js';
 import {
   LIVE_SUGGESTION_RENDER_DELAY_MS,
   LIVE_SUGGESTION_TTFB_MS,
+  SUGGESTION_CONNECT_MS,
   SUGGESTION_STALL_MS,
   TRANSCRIPT_UPLOAD_LIMIT,
 } from '../consts.js';
@@ -9,7 +10,11 @@ import { configStore } from '../store/config.store.js';
 import { LiveSuggestion, Speaker, SuggestionState, Transcript } from '../types/app-state.js';
 import { GenerateLiveSuggestionRequest, RequestTurnVerdict, SuggestionMode } from '../types/llm.js';
 import { DateTimeUtil } from '../utils/datetime.js';
-import { getSuggestionErrorMessage } from '../utils/suggestion-error.js';
+import {
+  getStallMessage,
+  getSuggestionErrorMessage,
+  type SuggestionStallStage,
+} from '../utils/suggestion-error.js';
 import { isNoSuggestionSentinel } from '../utils/suggestion-sentinel.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { appStateService } from './app-state.service.js';
@@ -105,7 +110,13 @@ class LiveSuggestionService {
     // pending and has already consumed a read request, so looping would leave two outstanding
     // reads on one reader. Aborting makes the read reject on its own.
     let stallTimer: NodeJS.Timeout | null = null;
-    const armStallTimer = (ms: number): void => {
+    // Which of the three deadlines is currently armed, so a stall can say what actually failed.
+    // All three abort the same controller with the same `TimeoutError`, and reporting them with
+    // one message asked the candidate to "try again" for a request that never left the machine -
+    // which is the one case where trying again on the same connection cannot help.
+    let stallStage: SuggestionStallStage = 'connect';
+    const armStallTimer = (ms: number, stage: SuggestionStallStage): void => {
+      stallStage = stage;
       if (stallTimer) clearTimeout(stallTimer);
       stallTimer = setTimeout(() => {
         controller.abort(new DOMException('stalled', 'TimeoutError'));
@@ -123,11 +134,18 @@ class LiveSuggestionService {
         language: conf.language,
       };
 
-      armStallTimer(LIVE_SUGGESTION_TTFB_MS);
+      armStallTimer(SUGGESTION_CONNECT_MS, 'connect');
       const response = await this.llmApi.generateLiveSuggestions(requestBody, controller.signal);
       if (!response) {
         throw new Error('No response from suggestion API');
       }
+
+      // Re-armed on the headers, which is where one deadline becomes two: everything up to here
+      // is the request reaching the backend, and everything after it is the model. Measured as a
+      // single budget - which is what this was - a large profile on a slow uplink spent the
+      // model's allowance before the model had been asked anything, and reported the result as a
+      // timeout.
+      armStallTimer(LIVE_SUGGESTION_TTFB_MS, 'first-token');
 
       const reader = response.getReader();
       const decoder = new TextDecoder('utf-8');
@@ -148,7 +166,7 @@ class LiveSuggestionService {
           const { done, value } = await reader.read();
           if (done) break;
           if (value) {
-            armStallTimer(SUGGESTION_STALL_MS);
+            armStallTimer(SUGGESTION_STALL_MS, 'stream');
             const chunk = decoder.decode(value, { stream: true });
             suggestion.answer += chunk;
 
@@ -196,9 +214,10 @@ class LiveSuggestionService {
           console.error('[LiveSuggestionService] Failed to generate suggestion:', error);
         }
         suggestion.state = SuggestionState.Error;
-        suggestion.error = stalled
-          ? 'The response timed out. Please try again.'
-          : getSuggestionErrorMessage(error);
+        if (stalled) {
+          console.warn(`[LiveSuggestionService] stalled at the ${stallStage} deadline`);
+        }
+        suggestion.error = stalled ? getStallMessage(stallStage) : getSuggestionErrorMessage(error);
         // Publish: a failure is always worth surfacing, even one that failed fast.
         publish();
       }
