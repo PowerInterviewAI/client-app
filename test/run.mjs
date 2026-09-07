@@ -48,6 +48,7 @@ for (const module of [
   './mock-session-scroll.test.mjs',
   './speech-chunks.test.mjs',
   './audio-device-switch.test.mjs',
+  './mic-constraints.test.mjs',
   './language-switch.test.mjs',
   './rtl-rendering.test.mjs',
   './interviewer-turn.test.mjs',

@@ -15,7 +15,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useAudioInputDevice } from '@/hooks/use-audio-input-device';
 import { useConfigStore } from '@/hooks/use-config-store';
-import { resolveMicDeviceId } from '@/services/live-transcription.service';
+import { micConstraints, resolveMicDeviceId } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
 
 /**
@@ -91,8 +91,11 @@ export function MicrophoneField() {
     setTestStarting(true);
     try {
       const deviceId = await resolveMicDeviceId(deviceName);
+      // The same constraints a session opens with, so the level shown here is measured through
+      // the same processing chain the session will use. Opened as `true`, the test stream could
+      // run different gain and noise handling than the capture it is meant to predict.
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+        audio: micConstraints(deviceId),
       });
       setTestStream(stream);
     } catch (e) {

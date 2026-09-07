@@ -1,0 +1,479 @@
+/**
+ * Measures the coupling between the loopback reference and the microphone. Measures only - there
+ * is deliberately no gating here, because this runs *before* the gate exists and is what its
+ * constants get sized from.
+ *
+ * Three numbers come out of it, per machine:
+ *
+ *   delayMs      how far the mic's copy of the interviewer trails the loopback's, and crucially
+ *                its SIGN. The acoustic path is always mic-after-speaker, but what is measured
+ *                here is arrival order at the worklet, and Chromium's getDisplayMedia loopback
+ *                path carries its own latency. If it is the slower of the two, the reference
+ *                arrives after the echo it explains and the lag is negative - which a one-sided
+ *                0..MAX search would miss entirely, on exactly the setup the gate exists for.
+ *   correlation  peak height of the normalised cross-correlation at that lag. This is what
+ *                separates a speaker setup from headphones, and what CORR_MIN gets set from.
+ *   erlDb        echo return loss: how far below the reference the mic's copy sits. This is the
+ *                residual echo level, so it is also the number the echoCancellation and
+ *                autoGainControl A/B is scored on.
+ */
+const { ipcRenderer } = require('electron');
+
+const FRAME_MS = 10;
+const HISTORY_FRAMES = 400; // 4 s
+const XCORR_INTERVAL_MS = 500;
+const REPORT_INTERVAL_MS = 1000;
+
+// The search window's defaults and the reasoning behind them live with the `--min-lag`/`--max-lag`
+// flags in echo-probe.mjs, which is also where they are validated. They arrive here on `options`
+// because the first real machine measured put its peak at the floor of the default window, and the
+// summary's answer to that is "widen it and re-run" - which should not mean editing this file.
+
+// Frames quieter than this carry no reference to correlate against, and including them drags
+// every estimate toward the noise floor.
+const REF_FLOOR_DBFS = -55;
+
+// Peak height alone cannot tell coupling from noise, and this is the single most important thing
+// the probe has measured so far. The search takes the MAX over ~120 candidate lags, and the max of
+// many correlations is biased upward, so unrelated signals score far higher than intuition
+// suggests: measured 0.53 on pure silence and 0.57 on two independent bursty signals. A threshold
+// of 0.5 - which looks entirely reasonable written down - would call both of those "coupled".
+//
+// Getting that wrong has an asymmetric cost. A false "coupled" on a HEADPHONE user is what leads a
+// gate to start cutting a microphone that was never echoing anything.
+//
+// So the discriminator is peak PROMINENCE: how far the best lag stands above the typical lag. A
+// real echo puts a sharp peak on an otherwise flat correlation surface; unrelated signals produce
+// a surface that is uniformly mediocre, with a high maximum and no peak.
+//
+// CORR_MIN is kept alongside it as a cheap floor, not as the discriminator - on its own it is
+// exactly the threshold shown above to be useless. Both must pass.
+//
+// A starting threshold, to be re-derived from real runs rather than trusted. Synthetic signals
+// suggested a comfortable gap - 0.28 for an unrelated pair against 0.87-1.13 for a clean echo -
+// but a live run of this probe on a silent room reached 0.47, which leaves almost nothing between
+// the noise and the threshold. Both ends of the synthetic gap are optimistic: that echo is a
+// perfectly scaled copy and a real one scores lower, while that "unrelated" pair shares a burst
+// grid and so scores higher than truly unrelated audio.
+//
+// This is why the run-level verdict requires several coupled reports rather than one. A single
+// report crossing this line is exactly what a quiet room produces from time to time.
+//
+// The per-second output prints the raw numbers whatever this is set to, which is the point:
+// measure the real distribution first, then set it.
+const CORR_MIN = 0.5;
+const PROMINENCE_MIN = 0.5;
+
+// The mirror of the reference floor on the microphone side, and not a calibration: an estimate can
+// only be describing re-captured audio if the microphone recorded any. Found by running the probe
+// with the reference playing, which accepted a "coupled" estimate at correlation 0.62 and
+// prominence 0.61 with mic% at 0 and an ERL of -56 dB. That is not an echo 56 dB down, it is the
+// correlator finding structure in a noise floor, at a lag pinned to the edge of the search window.
+//
+// The thresholds above cannot catch this on their own - the surface really does have a sharp peak.
+// And a false "coupled" on a HEADPHONE user is the expensive direction, which is the whole reason
+// prominence exists, so the cheapest physical precondition is required outright rather than left
+// to a correlation score. Real coupling on the same machine ran mic% 24-45, so this rejects the
+// impossible case without touching the measurement.
+const MIC_ACTIVE_MIN_PCT = 5;
+
+const MIN_OVERLAP_FRAMES = 50; // 0.5 s
+const DISPLAY_MEDIA_TIMEOUT_MS = 20000;
+
+const status = (text) => {
+  document.getElementById('status').textContent = text;
+};
+
+/**
+ * A failure the person running the probe can fix, as opposed to one that needs the code read.
+ *
+ * The distinction is only there to decide whether a stack trace is printed. The likeliest failure
+ * by far is a mistyped `--device`, whose message is a list of the device names that do exist -
+ * and burying that list under ten frames of Electron internals is the difference between an error
+ * that answers itself and one that has to be squinted at.
+ */
+class ProbeError extends Error {}
+
+const toDb = (power) => 10 * Math.log10(power + 1e-12);
+
+function meanSquare(frame) {
+  let sum = 0;
+  for (let i = 0; i < frame.length; i++) sum += frame[i] * frame[i];
+  return sum / (frame.length || 1);
+}
+
+function median(values) {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = sorted.length >> 1;
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+/**
+ * Pearson correlation of the two log-energy envelopes with the reference shifted by `lag` frames.
+ *
+ * Envelopes rather than the waveforms themselves: the echo path filters the signal heavily, so
+ * sample-level correlation collapses while the energy contour survives. Positive `lag` means the
+ * mic trails the reference.
+ *
+ * A known bias, recorded rather than corrected because correcting it would move every number the
+ * gate is about to be sized from, on judgement rather than on data. The overlap shrinks as |lag|
+ * grows - 400 frames at lag 0 against 320 at +80 - so correlations at the edges of the search are
+ * estimated from ~20% less audio and are correspondingly noisier. The max over lags therefore
+ * leans very slightly outward, on the order of 0.02. Small against the 0.47-0.57 the noise floor
+ * has actually measured, and it cannot reach the summary's "peak sits at the edge" warning, which
+ * only prints for runs that already have accepted coupled estimates. Worth knowing before these
+ * numbers are used to pick a window: equalising the overlap across lags is the fix, and it costs
+ * the widest lag's worth of frames at every lag.
+ */
+function correlateAt(refDb, micDb, lag) {
+  const lo = Math.max(0, lag);
+  const hi = Math.min(micDb.length, refDb.length + lag);
+  const n = hi - lo;
+  if (n < MIN_OVERLAP_FRAMES) return null;
+
+  let sumRef = 0;
+  let sumMic = 0;
+  for (let f = lo; f < hi; f++) {
+    sumRef += refDb[f - lag];
+    sumMic += micDb[f];
+  }
+  const meanRef = sumRef / n;
+  const meanMic = sumMic / n;
+
+  let num = 0;
+  let devRef = 0;
+  let devMic = 0;
+  for (let f = lo; f < hi; f++) {
+    const dr = refDb[f - lag] - meanRef;
+    const dm = micDb[f] - meanMic;
+    num += dr * dm;
+    devRef += dr * dr;
+    devMic += dm * dm;
+  }
+  if (devRef <= 0 || devMic <= 0) return null;
+  return num / Math.sqrt(devRef * devMic);
+}
+
+class CouplingMeter {
+  constructor(minLagMs, maxLagMs) {
+    this.minLagMs = minLagMs;
+    this.maxLagMs = maxLagMs;
+    this.refDb = [];
+    this.micDb = [];
+    this.lastXcorrAt = 0;
+    this.lag = null;
+    this.correlation = null;
+    this.prominence = null;
+    this.erlDb = null;
+    this.samples = [];
+    this.frames = 0;
+  }
+
+  push(ref, mic) {
+    this.frames++;
+    this.refDb.push(toDb(meanSquare(ref)));
+    this.micDb.push(toDb(meanSquare(mic)));
+    if (this.refDb.length > HISTORY_FRAMES) this.refDb.shift();
+    if (this.micDb.length > HISTORY_FRAMES) this.micDb.shift();
+
+    // Paced on the wall clock, which is fine here because frames genuinely arrive at 100/s from a
+    // live capture. Worth knowing before this is copied into the gate: it makes the class
+    // untestable from synthetic input, since a test loop feeds thousands of frames in a few
+    // milliseconds and no interval ever elapses. A gate that needs unit tests should pace on a
+    // frame counter instead.
+    const now = performance.now();
+    if (now - this.lastXcorrAt >= XCORR_INTERVAL_MS) {
+      this.lastXcorrAt = now;
+      this.estimate();
+    }
+  }
+
+  estimate() {
+    const minLag = Math.round(this.minLagMs / FRAME_MS);
+    const maxLag = Math.round(this.maxLagMs / FRAME_MS);
+
+    let bestLag = null;
+    let bestCorr = -2;
+    const all = [];
+    for (let lag = minLag; lag <= maxLag; lag++) {
+      const corr = correlateAt(this.refDb, this.micDb, lag);
+      if (corr === null) continue;
+      all.push(corr);
+      if (corr > bestCorr) {
+        bestCorr = corr;
+        bestLag = lag;
+      }
+    }
+    if (bestLag === null) return;
+
+    this.lag = bestLag;
+    this.correlation = bestCorr;
+    // Against the median rather than the mean: a true echo's peak is broad enough to span several
+    // lags, and those neighbours would drag a mean up with it and hide the very prominence being
+    // measured.
+    this.prominence = bestCorr - median(all);
+
+    // Only over frames with a live reference, or the ratio is two noise floors divided.
+    const ratios = [];
+    const lo = Math.max(0, bestLag);
+    const hi = Math.min(this.micDb.length, this.refDb.length + bestLag);
+    for (let f = lo; f < hi; f++) {
+      const refFrame = this.refDb[f - bestLag];
+      if (refFrame < REF_FLOOR_DBFS) continue;
+      ratios.push(this.micDb[f] - refFrame);
+    }
+    this.erlDb = median(ratios);
+
+    // All three conditions, and each rules out a different way of being wrong: a live reference
+    // (or the ratio is two noise floors divided), a peak worth having, and a peak that actually
+    // stands out from its neighbours rather than merely topping a flat surface.
+    if (this.isCoupled()) {
+      this.samples.push({
+        delayMs: bestLag * FRAME_MS,
+        correlation: bestCorr,
+        prominence: this.prominence,
+        erlDb: this.erlDb,
+      });
+    }
+  }
+
+  activePct(series) {
+    if (series.length === 0) return 0;
+    const active = series.filter((db) => db >= REF_FLOOR_DBFS).length;
+    return (100 * active) / series.length;
+  }
+
+  isCoupled() {
+    return (
+      this.correlation !== null &&
+      this.correlation >= CORR_MIN &&
+      this.prominence !== null &&
+      this.prominence >= PROMINENCE_MIN &&
+      this.erlDb !== null &&
+      // The microphone has to have heard something. See MIC_ACTIVE_MIN_PCT.
+      this.activePct(this.micDb) >= MIC_ACTIVE_MIN_PCT
+    );
+  }
+
+  snapshot() {
+    return {
+      delayMs: this.lag === null ? null : this.lag * FRAME_MS,
+      correlation: this.correlation,
+      prominence: this.prominence,
+      erlDb: this.erlDb,
+      refActivePct: this.activePct(this.refDb),
+      micActivePct: this.activePct(this.micDb),
+      coupled: this.isCoupled(),
+      // Reported so a stalled *graph* is visible. Nothing else here would show it: push() stops
+      // being called, the report timer keeps firing, and the same numbers print every second
+      // looking exactly like a steady measurement.
+      //
+      // This covers a suspended or closed AudioContext, and nothing else. It cannot see a dead
+      // capture: the worklet is pulled by the destination for the life of the context and
+      // zero-pads a missing input on purpose, so frames keep arriving after a track ends. See
+      // `deadTrackNames` in main() for that half.
+      frames: this.frames,
+    };
+  }
+
+  summary() {
+    if (this.samples.length === 0)
+      return { samples: 0, searchWindow: [this.minLagMs, this.maxLagMs] };
+    const delays = this.samples.map((s) => s.delayMs);
+    const corrs = this.samples.map((s) => s.correlation);
+    const proms = this.samples.map((s) => s.prominence);
+    const erls = this.samples.map((s) => s.erlDb).filter((v) => v !== null);
+    return {
+      samples: this.samples.length,
+      delayMsMedian: median(delays),
+      delayMsMin: Math.min(...delays),
+      delayMsMax: Math.max(...delays),
+      correlationMedian: median(corrs),
+      prominenceMedian: median(proms),
+      erlDbMedian: median(erls),
+      searchWindow: [this.minLagMs, this.maxLagMs],
+    };
+  }
+}
+
+async function resolveMicDeviceId(deviceName) {
+  if (!deviceName) return null;
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const match = devices.find((d) => d.kind === 'audioinput' && d.label === deviceName);
+  return match ? match.deviceId : null;
+}
+
+async function main() {
+  const options = await ipcRenderer.invoke('probe:options');
+
+  // Checked here rather than in the CLI because this is where the numbers it depends on live, and
+  // checked at all because `--min-lag`/`--max-lag` are settable. A lag further from zero than the
+  // history can cover leaves `correlateAt` below its minimum overlap at every candidate, so it
+  // returns null for all of them, no estimate is ever produced, and the summary reports "no
+  // correlated frames" - the headphone answer, from a window that was simply too wide to search.
+  const usableLagMs = (HISTORY_FRAMES - MIN_OVERLAP_FRAMES) * FRAME_MS;
+  const widest = Math.max(Math.abs(options.minLagMs), Math.abs(options.maxLagMs));
+  if (widest > usableLagMs) {
+    throw new ProbeError(
+      `The search window has to stay within +/-${usableLagMs} ms, and this one reaches ` +
+        `${widest} ms. The correlator holds ${HISTORY_FRAMES * FRAME_MS} ms of history and needs ` +
+        `${MIN_OVERLAP_FRAMES * FRAME_MS} ms of overlap at every lag it tests, so a wider window ` +
+        `produces no estimate at all rather than a wider search.`
+    );
+  }
+
+  status('acquiring microphone...');
+  // enumerateDevices only fills in labels once a capture has been granted, so an unconstrained
+  // open comes first and is released immediately.
+  const priming = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  priming.getTracks().forEach((t) => t.stop());
+
+  const deviceId = await resolveMicDeviceId(options.device);
+  if (options.device && !deviceId) {
+    // Listed rather than just refused. `--device` matches the OS label exactly, and those labels
+    // are long, parenthesised and easy to get subtly wrong, so the names are the whole answer to
+    // the error - and they have already been enumerated by this point.
+    const labels = (await navigator.mediaDevices.enumerateDevices())
+      .filter((d) => d.kind === 'audioinput')
+      .map((d) => `  ${d.label || '(unlabelled)'}`);
+    throw new ProbeError(
+      `No audio input device named "${options.device}". Available:\n${labels.join('\n')}`
+    );
+  }
+
+  const micStream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
+      echoCancellation: options.echoCancellation,
+      noiseSuppression: options.noiseSuppression,
+      autoGainControl: options.autoGainControl,
+    },
+    video: false,
+  });
+
+  status('acquiring loopback...');
+  await ipcRenderer.invoke('enable-loopback-audio');
+  let displayStream;
+  try {
+    // Bounded the same way live-transcription.service.ts bounds it. Unbounded, a loopback that
+    // never resolves leaves the probe sitting silently with no output and nothing to read.
+    displayStream = await Promise.race([
+      navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }),
+      new Promise((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new ProbeError(
+                `Loopback capture did not start within ${DISPLAY_MEDIA_TIMEOUT_MS / 1000}s. ` +
+                  'Check that this machine permits system audio capture and re-run.'
+              )
+            ),
+          DISPLAY_MEDIA_TIMEOUT_MS
+        )
+      ),
+    ]);
+  } finally {
+    await ipcRenderer.invoke('disable-loopback-audio').catch(() => {});
+  }
+  displayStream.getVideoTracks().forEach((track) => {
+    track.stop();
+    displayStream.removeTrack(track);
+  });
+
+  const micTrack = micStream.getAudioTracks()[0];
+  ipcRenderer.send('probe:ready', {
+    micLabel: micTrack ? micTrack.label : '(none)',
+    micSettings: micTrack ? micTrack.getSettings() : {},
+    loopbackTracks: displayStream.getAudioTracks().length,
+  });
+
+  const ctx = new AudioContext();
+  // Chromium can hand back a suspended context. Nothing then reaches the worklet, no frame is
+  // ever produced, and the run prints a full table of blanks before summarising a machine it
+  // never listened to as "no coupling" - which is the headphone verdict.
+  if (ctx.state === 'suspended') await ctx.resume();
+  await ctx.audioWorklet.addModule('worklet.js');
+
+  const node = new AudioWorkletNode(ctx, 'echo-probe', {
+    numberOfInputs: 2,
+    numberOfOutputs: 1,
+  });
+
+  const refSource = ctx.createMediaStreamSource(displayStream);
+  const micSource = ctx.createMediaStreamSource(micStream);
+  refSource.connect(node, 0, 0);
+  micSource.connect(node, 0, 1);
+
+  // Same silent sink the app uses: the graph needs a path to the destination to be pulled, and
+  // nothing here may reach the speakers - that would feed back into the very signal being measured.
+  const sink = ctx.createGain();
+  sink.gain.value = 0;
+  node.connect(sink);
+  sink.connect(ctx.destination);
+
+  const meter = new CouplingMeter(options.minLagMs, options.maxLagMs);
+  node.port.onmessage = (event) => meter.push(event.data.ref, event.data.mic);
+
+  status('measuring - play interviewer audio through the speakers now');
+
+  /**
+   * Which captures have died, if any.
+   *
+   * The frame counter cannot answer this. The worklet is pulled by the destination for the life
+   * of the context and zero-pads a missing input by design, so frames keep arriving at 100/s
+   * after a track ends - the columns just decay quietly toward the noise floor while still
+   * looking like a measurement, which is the exact failure the frame counter was added to catch.
+   *
+   * `readyState === 'ended'` is the signal, and `muted` deliberately is not: an ended track is a
+   * device that is gone or a screen share the user stopped, while `muted` toggles on ordinary
+   * silence on some platforms and would discard most of a legitimately quiet run.
+   */
+  const deadTrackNames = () => {
+    const dead = [];
+    const ended = (stream) => {
+      const tracks = stream.getAudioTracks();
+      return tracks.length > 0 && tracks.every((t) => t.readyState === 'ended');
+    };
+    if (ended(micStream)) dead.push('microphone');
+    if (ended(displayStream)) dead.push('loopback');
+    return dead;
+  };
+
+  // The run asks the person to do something - play audio, stay quiet - for a fixed stretch, and
+  // the console table is the only thing that moves. A count of the seconds left is what tells
+  // them whether they can stop, without counting printed rows to work it out.
+  const startedAt = performance.now();
+  const reportTimer = setInterval(() => {
+    const left = Math.max(0, Math.ceil(options.seconds - (performance.now() - startedAt) / 1000));
+    status(`measuring - play interviewer audio through the speakers (${left}s left)`);
+    ipcRenderer.send('probe:metrics', {
+      ...meter.snapshot(),
+      deadTracks: deadTrackNames(),
+      sampleRate: ctx.sampleRate,
+    });
+  }, REPORT_INTERVAL_MS);
+
+  setTimeout(() => {
+    clearInterval(reportTimer);
+    status('done - the summary is in the console');
+    // usableLagMs travels with the summary so the "widen the window" advice cannot name a value
+    // this file would then refuse. The limit is a property of the correlator, so it is sent from
+    // where it is derived rather than restated in the CLI.
+    ipcRenderer.send('probe:done', { ...meter.summary(), usableLagMs });
+    micStream.getTracks().forEach((t) => t.stop());
+    displayStream.getTracks().forEach((t) => t.stop());
+    ctx.close();
+  }, options.seconds * 1000);
+}
+
+main().catch((error) => {
+  const message = String(error && error.message ? error.message : error);
+  status('failed: ' + message);
+  ipcRenderer.send('probe:error', {
+    message,
+    // Suppressed for a ProbeError, whose message is already the whole answer. Kept for everything
+    // else, where the probe has hit something it did not anticipate and the frames are the point.
+    stack: error instanceof ProbeError ? null : String(error && error.stack ? error.stack : error),
+  });
+});
