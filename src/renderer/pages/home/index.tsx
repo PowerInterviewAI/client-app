@@ -96,10 +96,16 @@ export default function HomePage() {
   // that refusal, so the card names the state instead of routing the user to an error.
   const liveSessionActive = runningState !== RunningState.Idle;
 
+  // The other half of the same exclusion. The mock card names an active live session; without
+  // this the live card said nothing about an active mock one, and clicking it routed the
+  // candidate to `/main` for a start `startAssistant` refuses - an error toast on a screen they
+  // had no reason to be sent to. Reachable while a mock session is winding down: leaving that
+  // route ends the session, and it stays active through `Stopping`/`Scoring`.
+  const mockSessionActive = isMockInterviewSessionActive(appState?.mockInterview ?? null);
+
   // Signing out tears down the token a mock session's next request needs, and a mock session
   // deliberately leaves `runningState` on Idle - so the live check alone does not cover it.
-  const anySessionActive =
-    liveSessionActive || isMockInterviewSessionActive(appState?.mockInterview ?? null);
+  const anySessionActive = liveSessionActive || mockSessionActive;
 
   const [mockSetupOpen, setMockSetupOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -207,9 +213,12 @@ export default function HomePage() {
             description={
               liveSessionActive
                 ? 'Your live assistant is already running.'
-                : 'Transcribes your real interview and suggests answers as it happens.'
+                : mockSessionActive
+                  ? 'Finish the mock interview first - the two cannot share your microphone.'
+                  : 'Transcribes your real interview and suggests answers as it happens.'
             }
             onClick={handleStartLive}
+            disabled={!liveSessionActive && mockSessionActive}
           />
         </div>
 

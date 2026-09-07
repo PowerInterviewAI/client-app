@@ -47,6 +47,14 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   // action-suggestion service serially, so overlapping calls would race each other for no benefit.
   const [actionBusy, setActionBusy] = useState(false);
 
+  // The three action-suggestion buttons are the exact inverse of every other control on this bar,
+  // and cannot use `getDisabled`: that disables on `Running`, which is the *only* state these
+  // three work in. `captureScreenshot`, `clearImages` and `startGenerateSuggestion` each refuse
+  // outright unless the assistant is running (suggestion-action.service.ts), so gating them the
+  // usual way left them clickable only while idle - where all three answer with a "not running"
+  // warning - and greyed out for the whole interview they exist to be used during.
+  const actionDisabled = runningState !== RunningState.Running || actionBusy;
+
   const runActionSuggestion = async (
     action: () => Promise<void> | undefined,
     failureMessage: string
@@ -164,7 +172,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             }
             size="sm"
             className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
-            disabled={getDisabled(runningState) || actionBusy}
+            disabled={actionDisabled}
             aria-label="Capture screenshot"
           >
             <Camera className="h-4 w-4" />
@@ -188,7 +196,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             }
             size="sm"
             className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
-            disabled={getDisabled(runningState) || actionBusy}
+            disabled={actionDisabled}
             aria-label="Clear captured screenshots"
           >
             <ImageOff className="h-4 w-4" />
@@ -212,7 +220,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             }
             size="sm"
             className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
-            disabled={getDisabled(runningState) || actionBusy}
+            disabled={actionDisabled}
             aria-label="Generate triggered suggestion"
           >
             {actionBusy ? (

@@ -36,8 +36,6 @@ export interface RuntimeConfig {
   // mock interview: also generate what the live assistant would have suggested for each
   // question. On by default - trying this out is one of the two reasons the feature exists.
   mockLiveSuggestionsEnabled: boolean;
-
-
 }
 
 // Default runtime configuration
@@ -64,8 +62,6 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
 
   // opt-out: showing what the live assistant would have said is the point of trying this
   mockLiveSuggestionsEnabled: true,
-
-
 };
 
 // interviewConf (full name, profile, context) used to be cached under `runtime`, but it's now

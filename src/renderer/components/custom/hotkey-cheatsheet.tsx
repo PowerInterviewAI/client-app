@@ -64,7 +64,13 @@ export function HotkeyCheatsheetDialog({ open, onOpenChange }: HotkeyCheatsheetD
       <DialogContent className="max-w-lg w-full max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Keyboard Shortcuts</DialogTitle>
-          <DialogDescription>Press ? anytime to reopen this list.</DialogDescription>
+          {/* Deliberately does not promise a `?` shortcut. That one is registered by
+              `StatusPanel`, which only renders in stealth mode - so "press ? anytime" was untrue
+              everywhere else this dialog is opened from: the configuration page and the command
+              palette. The status panel's own button carries the hint where it does work. */}
+          <DialogDescription>
+            Everything you can reach without touching the app during an interview.
+          </DialogDescription>
         </DialogHeader>
         <div className="overflow-auto flex-1">
           <HotkeyCheatsheet />
