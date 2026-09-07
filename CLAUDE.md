@@ -262,6 +262,24 @@ visible; the damaging half is not. The echo lands as a recent `Self` final, so
 suppresses the live suggestion **for the question that was just asked**, with no error anywhere.
 See #111 for the measurements and the longer-term suppression work.
 
+How much of the interviewer the microphone actually re-captures is a property of the machine, not
+something to reason about, and no constant in a future gate should be picked before it is measured.
+`test/manual/echo-probe.mjs` runs both captures through one worklet and reports the signed
+arrival-order delay, the correlation peak at that lag and the echo return loss, once a second - run
+by hand (`pnpm exec electron test/manual/echo-probe.mjs`), deliberately not in `test/run.mjs`, since
+it needs a desktop session, real speakers, and a person to play audio into them. `--no-aec`,
+`--no-ns` and `--no-agc` drive the A/B on the processing flags below.
+
+Those flags are stated rather than defaulted. Every `getUserMedia` in the app opens through
+`micConstraints()` in
+[live-transcription.service.ts](src/renderer/services/live-transcription.service.ts), which writes
+out `echoCancellation`, `noiseSuppression` and `autoGainControl`. Chromium already defaults all
+three to `true`, so this changes nothing today; the point is that they stop moving on their own
+under a version bump, and that there is one place to flip them from once the probe says which way
+they should go. `test/mic-constraints.test.mjs` fails on any capture that opens its own way instead,
+which is not hypothetical - two of them have already been added, one duplicating the flags and one
+opening with `audio: true`, and neither produced a conflict, a type error or a lint warning.
+
 [headphone-notice-dialog.tsx](src/renderer/components/custom/headphone-notice-dialog.tsx) is shown
 before every session until the user silences it, and it says what actually goes wrong rather than
 recommending headphones for "best results" - the cost of ignoring it is answers that never appear.

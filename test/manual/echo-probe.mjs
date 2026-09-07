@@ -214,12 +214,21 @@ ipcMain.on('probe:done', (_event, summary) => {
   const pct = totalReports > 0 ? Math.round((100 * coupledReports) / totalReports) : 0;
   console.log('');
   console.log(`coupled reports    : ${coupledReports}/${totalReports} (${pct}%)`);
+  // Nothing was measured at all: every report was discarded as stalled or dead, or the run was
+  // too short to produce one. Reaching the "no coupling" branch here would be the worst version
+  // of the failure this whole summary is built to avoid - a confident headphone verdict from a
+  // probe that never took a single valid reading.
+  if (totalReports === 0) {
+    console.log('verdict            : NOTHING MEASURED - not one valid report in the whole run.');
+    console.log('                     Every report was discarded (see any warning below), or the');
+    console.log('                     run was shorter than the one-second report interval.');
+  }
   // The two counters measure different things and can disagree: estimates run twice a second,
   // reports are sampled once a second, so intermittent coupling can be accepted into `samples`
   // without a single report tick ever landing on it. "No coupling" therefore has to clear both,
   // or the summary prints a confident headphone verdict directly underneath a non-zero count of
   // accepted coupled estimates.
-  if (coupledReports === 0 && !summary.samples) {
+  else if (coupledReports === 0 && !summary.samples) {
     console.log('verdict            : no coupling (headphones, or nothing played through them)');
   } else if (coupledReports >= 3 && pct >= 20) {
     console.log('verdict            : coupled (speakers)');
