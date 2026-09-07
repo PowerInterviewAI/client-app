@@ -73,6 +73,16 @@ const status = (text) => {
   document.getElementById('status').textContent = text;
 };
 
+/**
+ * A failure the person running the probe can fix, as opposed to one that needs the code read.
+ *
+ * The distinction is only there to decide whether a stack trace is printed. The likeliest failure
+ * by far is a mistyped `--device`, whose message is a list of the device names that do exist -
+ * and burying that list under ten frames of Electron internals is the difference between an error
+ * that answers itself and one that has to be squinted at.
+ */
+class ProbeError extends Error {}
+
 const toDb = (power) => 10 * Math.log10(power + 1e-12);
 
 function meanSquare(frame) {
@@ -94,6 +104,16 @@ function median(values) {
  * Envelopes rather than the waveforms themselves: the echo path filters the signal heavily, so
  * sample-level correlation collapses while the energy contour survives. Positive `lag` means the
  * mic trails the reference.
+ *
+ * A known bias, recorded rather than corrected because correcting it would move every number the
+ * gate is about to be sized from, on judgement rather than on data. The overlap shrinks as |lag|
+ * grows - 400 frames at lag 0 against 320 at +80 - so correlations at the edges of the search are
+ * estimated from ~20% less audio and are correspondingly noisier. The max over lags therefore
+ * leans very slightly outward, on the order of 0.02. Small against the 0.47-0.57 the noise floor
+ * has actually measured, and it cannot reach the summary's "peak sits at the edge" warning, which
+ * only prints for runs that already have accepted coupled estimates. Worth knowing before these
+ * numbers are used to pick a window: equalising the overlap across lags is the fix, and it costs
+ * the widest lag's worth of frames at every lag.
  */
 function correlateAt(refDb, micDb, lag) {
   const lo = Math.max(0, lag);
@@ -285,7 +305,7 @@ async function main() {
     const labels = (await navigator.mediaDevices.enumerateDevices())
       .filter((d) => d.kind === 'audioinput')
       .map((d) => `  ${d.label || '(unlabelled)'}`);
-    throw new Error(
+    throw new ProbeError(
       `No audio input device named "${options.device}". Available:\n${labels.join('\n')}`
     );
   }
@@ -309,7 +329,16 @@ async function main() {
     displayStream = await Promise.race([
       navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Loopback capture timed out')), DISPLAY_MEDIA_TIMEOUT_MS)
+        setTimeout(
+          () =>
+            reject(
+              new ProbeError(
+                `Loopback capture did not start within ${DISPLAY_MEDIA_TIMEOUT_MS / 1000}s. ` +
+                  'Check that this machine permits system audio capture and re-run.'
+              )
+            ),
+          DISPLAY_MEDIA_TIMEOUT_MS
+        )
       ),
     ]);
   } finally {
@@ -379,7 +408,13 @@ async function main() {
     return dead;
   };
 
+  // The run asks the person to do something - play audio, stay quiet - for a fixed stretch, and
+  // the console table is the only thing that moves. A count of the seconds left is what tells
+  // them whether they can stop, without counting printed rows to work it out.
+  const startedAt = performance.now();
   const reportTimer = setInterval(() => {
+    const left = Math.max(0, Math.ceil(options.seconds - (performance.now() - startedAt) / 1000));
+    status(`measuring - play interviewer audio through the speakers (${left}s left)`);
     ipcRenderer.send('probe:metrics', {
       ...meter.snapshot(),
       deadTracks: deadTrackNames(),
@@ -389,6 +424,7 @@ async function main() {
 
   setTimeout(() => {
     clearInterval(reportTimer);
+    status('done - the summary is in the console');
     ipcRenderer.send('probe:done', meter.summary());
     micStream.getTracks().forEach((t) => t.stop());
     displayStream.getTracks().forEach((t) => t.stop());
@@ -397,6 +433,12 @@ async function main() {
 }
 
 main().catch((error) => {
-  status('failed: ' + error.message);
-  ipcRenderer.send('probe:error', String(error && error.stack ? error.stack : error));
+  const message = String(error && error.message ? error.message : error);
+  status('failed: ' + message);
+  ipcRenderer.send('probe:error', {
+    message,
+    // Suppressed for a ProbeError, whose message is already the whole answer. Kept for everything
+    // else, where the probe has hit something it did not anticipate and the frames are the point.
+    stack: error instanceof ProbeError ? null : String(error && error.stack ? error.stack : error),
+  });
 });

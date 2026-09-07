@@ -97,6 +97,11 @@ let lastFrames = 0;
 let stalled = false;
 let deadTracks = false;
 
+// Whether the run reached an end of its own - a summary or a reported failure. Closing the window
+// is an ordinary thing to do to a window, and without this it ends the process quietly at exit 0,
+// which is indistinguishable from a run that completed and says nothing about the missing summary.
+let finished = false;
+
 ipcMain.handle('probe:options', () => options);
 
 ipcMain.on('probe:ready', (_event, info) => {
@@ -176,6 +181,7 @@ ipcMain.on('probe:metrics', (_event, m) => {
 });
 
 ipcMain.on('probe:done', (_event, summary) => {
+  finished = true;
   console.log('\n=== summary ===');
   if (!summary.samples) {
     console.log('No correlated frames. Either this is a headphone setup (the good case), or no');
@@ -235,28 +241,54 @@ ipcMain.on('probe:done', (_event, summary) => {
   app.quit();
 });
 
-ipcMain.on('probe:error', (_event, message) => {
-  console.error('\nprobe failed:\n' + message);
+ipcMain.on('probe:error', (_event, failure) => {
+  finished = true;
+  // The stack is omitted for the failures the renderer marks as the operator's to fix - a
+  // mistyped `--device`, a loopback that was never permitted. Their message is the whole answer,
+  // and for the device case it is a list of names to copy, which a stack trace only buries.
+  console.error('\nprobe failed:\n' + (failure.stack || failure.message));
   process.exitCode = 1;
   app.quit();
 });
 
-app.whenReady().then(async () => {
-  const win = new BrowserWindow({
-    width: 520,
-    height: 200,
-    title: 'Echo probe',
-    webPreferences: {
-      // A local, hand-run diagnostic that has to reach ipcRenderer from a plain script tag. The
-      // shipped app does the opposite - see navigation-guard.ts - and nothing here loads remote
-      // content.
-      nodeIntegration: true,
-      contextIsolation: false,
-      backgroundThrottling: false,
-    },
+app
+  .whenReady()
+  .then(async () => {
+    const win = new BrowserWindow({
+      width: 520,
+      height: 200,
+      title: 'Echo probe',
+      webPreferences: {
+        // A local, hand-run diagnostic that has to reach ipcRenderer from a plain script tag. The
+        // shipped app does the opposite - see navigation-guard.ts - and nothing here loads remote
+        // content.
+        nodeIntegration: true,
+        contextIsolation: false,
+        backgroundThrottling: false,
+      },
+    });
+
+    await win.loadFile(path.join(HERE, 'echo-probe', 'index.html'));
+  })
+  // Without this a failed load rejects into nothing: the window stays up showing "starting...",
+  // no report ever arrives, and the probe waits for a run that will not begin.
+  .catch((error) => {
+    finished = true;
+    console.error('\nprobe failed to start:\n' + (error && error.stack ? error.stack : error));
+    process.exitCode = 1;
+    app.quit();
   });
 
-  await win.loadFile(path.join(HERE, 'echo-probe', 'index.html'));
+app.on('window-all-closed', () => {
+  // Reached two ways: after `probe:done` or `probe:error` asked the app to quit, which is the
+  // ordinary end, and by the operator closing the window mid-run. Only the second one needs
+  // saying - it produces no summary at all, and silently exiting 0 would leave a half-run looking
+  // like a clean one in a scrollback that no longer shows where it stopped.
+  if (!finished) {
+    console.error('\nThe probe window was closed before the run finished, so there is no summary');
+    console.error('and the reports above cover only part of the requested duration. Re-run and');
+    console.error('let it reach its own end, or pass a shorter --seconds.');
+    process.exitCode = 1;
+  }
+  app.quit();
 });
-
-app.on('window-all-closed', () => app.quit());
