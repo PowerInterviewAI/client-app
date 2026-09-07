@@ -21,8 +21,10 @@ interface OnboardingDismissedStore {
  * done *now*. Skipping sets it even when the write fails, because refusing to let someone out of
  * a wizard is a worse outcome than asking them again next launch.
  *
- * Reset on sign-out. Left standing, the next account to sign in during the same run of the app
- * would inherit a dismissal that was never theirs, and never be offered setup at all.
+ * Reset on sign-out, from `MainFrame` - the app shell, so that every sign-out is seen, including
+ * the ones that happen on a route the index page is not mounted on and the ones main declares
+ * itself when a token expires. Left standing, the next account to sign in during the same run of
+ * the app would inherit a dismissal that was never theirs and never be offered setup at all.
  */
 export const useOnboardingDismissed = create<OnboardingDismissedStore>((set) => ({
   dismissed: false,

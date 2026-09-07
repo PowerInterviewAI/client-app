@@ -9,8 +9,9 @@ export default function IndexPage() {
   const { appState } = useAppState();
   const navigate = useNavigate();
 
+  // Read only. Clearing it belongs to `MainFrame`, which is mounted for every route and so sees
+  // every sign-out - this one sees only the sign-outs that happen while it is on screen.
   const dismissed = useOnboardingDismissed((s) => s.dismissed);
-  const resetDismissed = useOnboardingDismissed((s) => s.reset);
 
   const isLoggedIn = appState?.isLoggedIn;
   const accountLoaded = appState?.interviewConfigLoaded ?? false;
@@ -18,10 +19,6 @@ export default function IndexPage() {
 
   useEffect(() => {
     if (isLoggedIn === false) {
-      // Cleared here rather than at sign-out: this is the one place that knows a session has
-      // ended, and leaving it set would hand the next account to sign in a dismissal that was
-      // never theirs.
-      resetDismissed();
       navigate('/auth/login', { replace: true });
       return;
     }
@@ -39,7 +36,7 @@ export default function IndexPage() {
     if (isLoggedIn === true && accountLoaded && !onboardingCompleted && !dismissed) {
       navigate('/onboarding', { replace: true });
     }
-  }, [isLoggedIn, accountLoaded, onboardingCompleted, dismissed, resetDismissed, navigate]);
+  }, [isLoggedIn, accountLoaded, onboardingCompleted, dismissed, navigate]);
 
   // Logged-out users and first-run users are redirected above. Everyone else - including the
   // brief window before appState has loaded - sees the home dashboard directly; HomePage owns its

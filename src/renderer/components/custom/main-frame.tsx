@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 
+import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { MainContainerContext } from '@/hooks/use-main-container';
+import { useOnboardingDismissed } from '@/hooks/use-onboarding-dismissed';
 import usePointerLockGuard from '@/hooks/use-pointer-lock-guard';
 import type { PushNotification } from '@/types/push-notification';
 
@@ -21,6 +23,17 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadConfig();
   }, [loadConfig]);
+
+  // Watched from the app shell rather than from `/`, because this has to see *every* sign-out.
+  // The index route observes only the ones that happen while it is mounted, so signing out from
+  // Configuration - or having a token expire anywhere - left the dismissal standing, and the next
+  // account to sign in was never offered setup at all.
+  const { appState } = useAppState();
+  const isLoggedIn = appState?.isLoggedIn;
+  const resetOnboardingDismissed = useOnboardingDismissed((s) => s.reset);
+  useEffect(() => {
+    if (isLoggedIn === false) resetOnboardingDismissed();
+  }, [isLoggedIn, resetOnboardingDismissed]);
 
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
   const mainRef = React.useCallback((el: HTMLElement | null) => {
