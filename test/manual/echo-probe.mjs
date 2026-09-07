@@ -302,16 +302,28 @@ ipcMain.on('probe:done', (_event, summary) => {
     const [lo, hi] = summary.searchWindow;
     const atFloor = summary.delayMsMedian <= lo + 50;
     if (atFloor || summary.delayMsMedian >= hi - 50) {
-      // Names the flag to re-run with, and the value, rather than a constant to go and edit. This
-      // warning is not exotic: it fired on the first machine measured.
-      const widened = atFloor
-        ? `--min-lag=${Math.round(lo - (hi - lo) / 2)}`
-        : `--max-lag=${Math.round(hi + (hi - lo) / 2)}`;
       console.log(
         '\nWARNING: the peak sits at the edge of the search window, so the true delay may'
       );
-      console.log(`lie outside it. Re-run with ${widened} before treating this number as`);
-      console.log('the real one.');
+      // Names the flag and the value to re-run with, rather than a constant to go and edit. This
+      // warning is not exotic: it fired on the first machine measured. The suggestion is clamped
+      // to what the correlator can actually search, so it can never name a window the probe would
+      // then reject - and when there is no room left to widen, it says that instead.
+      const span = hi - lo;
+      const target = atFloor
+        ? Math.max(-summary.usableLagMs, Math.round(lo - span / 2))
+        : Math.min(summary.usableLagMs, Math.round(hi + span / 2));
+      if (atFloor ? target < lo : target > hi) {
+        const flag = atFloor ? `--min-lag=${target}` : `--max-lag=${target}`;
+        console.log(`lie outside it. Re-run with ${flag} before treating this number as`);
+        console.log('the real one.');
+      } else {
+        console.log(
+          `lie outside it - but the window already spans the ${summary.usableLagMs} ms the`
+        );
+        console.log('correlator can search, so resolving it needs a longer history rather than a');
+        console.log('wider window. Treat this delay as a lower bound.');
+      }
     }
     if (summary.delayMsMedian < 0) {
       console.log('\nNote: the delay is NEGATIVE - the loopback reference arrives after the mic');

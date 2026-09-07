@@ -457,7 +457,10 @@ async function main() {
   setTimeout(() => {
     clearInterval(reportTimer);
     status('done - the summary is in the console');
-    ipcRenderer.send('probe:done', meter.summary());
+    // usableLagMs travels with the summary so the "widen the window" advice cannot name a value
+    // this file would then refuse. The limit is a property of the correlator, so it is sent from
+    // where it is derived rather than restated in the CLI.
+    ipcRenderer.send('probe:done', { ...meter.summary(), usableLagMs });
     micStream.getTracks().forEach((t) => t.stop());
     displayStream.getTracks().forEach((t) => t.stop());
     ctx.close();
