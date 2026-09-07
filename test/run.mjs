@@ -20,6 +20,9 @@ for (const module of [
   './language.test.mjs',
   './app-state.test.mjs',
   './account.test.mjs',
+  // After account.test.mjs: both swap the accountService singleton's client, and that one's
+  // sequence depends on the pull it sets up for itself.
+  './onboarding-write.test.mjs',
   './stealth-surface.test.mjs',
   './stealth-toggle.test.mjs',
   './stealth-dock.test.mjs',

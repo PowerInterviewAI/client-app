@@ -261,13 +261,20 @@ export class AccountService {
    * Mirrored into app state only after the backend confirms the write. The renderer's gate reads
    * that state, so an optimistic update would let a failed write look like a completed setup
    * until the next launch pulled the account again and put the wizard back.
+   *
+   * **A `404` counts as written.** It is the other half of `readsAsOnboarded`: on a deployment
+   * that predates this endpoint the flag is not a thing that can be recorded, and the same
+   * deployment reports every account as onboarded anyway, so there is nothing for the write to
+   * disagree with. Without this, Finish had no working exit on such a backend - it holds the
+   * user in the wizard on a failed write, so the one screen the deployment cannot support was
+   * also the one screen they could not leave except by skipping it.
    */
   async setOnboardingCompleted(
     completed: boolean
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await this.client.updateOnboarding({ completed });
-      if (response.error) {
+      if (response.error && response.status !== 404) {
         return { success: false, error: response.error.message || 'Failed to save your setup' };
       }
 
