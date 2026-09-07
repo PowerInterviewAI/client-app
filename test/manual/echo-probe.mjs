@@ -88,6 +88,19 @@ loopbackPkg.initMain();
 
 const num = (v, digits = 1) => (v === null || v === undefined ? '  --' : v.toFixed(digits));
 
+/**
+ * Quit with a real exit status.
+ *
+ * `process.exitCode = 1` followed by `app.quit()` does not survive: Electron ends the process
+ * through its own path and the status comes out 0, so every failure here reported success to the
+ * shell. Verified - a `--device` that does not exist printed its error and exited 0. `app.exit`
+ * is the one that carries the code.
+ *
+ * The writes above it are `console.error`, which is synchronous to a TTY and to a pipe on the
+ * platforms this runs on, so the message is out before the process goes.
+ */
+const quitWith = (code) => app.exit(code);
+
 // Counted, not latched. A single coupled report out of forty is noise, not a speaker setup, and
 // the whole reason prominence exists is that spurious single-report verdicts are reachable. A
 // boolean here would let one of them decide the headline finding for the entire run.
@@ -96,6 +109,13 @@ let totalReports = 0;
 let lastFrames = 0;
 let stalled = false;
 let deadTracks = false;
+
+// The loudest the reference ever got, as a percentage of frames above the floor. A run where this
+// stays at zero played nothing for the microphone to re-capture, so it measured nothing about
+// coupling - and that is a different answer from "headphones", which the summary used to offer as
+// an equal possibility rather than ruling it out with the column it already had.
+let peakRefActivePct = 0;
+const REF_ACTIVE_MIN_PCT = 5;
 
 // Whether the run reached an end of its own - a summary or a reported failure. Closing the window
 // is an ordinary thing to do to a window, and without this it ends the process quietly at exit 0,
@@ -198,6 +218,7 @@ ipcMain.on('probe:metrics', (_event, m) => {
 
   totalReports++;
   if (m.coupled) coupledReports++;
+  if (m.refActivePct > peakRefActivePct) peakRefActivePct = m.refActivePct;
 
   console.log(
     `    ${String(m.delayMs === null ? '--' : m.delayMs).padStart(7)}` +
@@ -253,13 +274,24 @@ ipcMain.on('probe:done', (_event, summary) => {
     console.log('                     Every report was discarded (see any warning below), or the');
     console.log('                     run was shorter than the one-second report interval.');
   }
+  // The reference was silent throughout, so nothing was ever played for the microphone to
+  // re-capture. That is not evidence of headphones, and the old wording offered the two as equal
+  // readings of the same result while the ref% column had already told them apart. A run measures
+  // coupling only if something was coupling-capable in the first place.
+  else if (peakRefActivePct < REF_ACTIVE_MIN_PCT) {
+    console.log('verdict            : NOTHING PLAYED - the loopback reference stayed silent for');
+    console.log('                     the whole run (ref% never rose), so there was nothing for');
+    console.log('                     the microphone to re-capture. This says nothing either way');
+    console.log('                     about coupling. Start the audio first, then re-run.');
+  }
   // The two counters measure different things and can disagree: estimates run twice a second,
   // reports are sampled once a second, so intermittent coupling can be accepted into `samples`
   // without a single report tick ever landing on it. "No coupling" therefore has to clear both,
   // or the summary prints a confident headphone verdict directly underneath a non-zero count of
   // accepted coupled estimates.
   else if (coupledReports === 0 && !summary.samples) {
-    console.log('verdict            : no coupling (headphones, or nothing played through them)');
+    console.log('verdict            : no coupling (headphones - audio was playing and the mic did');
+    console.log('                     not pick it up)');
   } else if (coupledReports >= 3 && pct >= 20) {
     console.log('verdict            : coupled (speakers)');
   } else {
@@ -286,8 +318,7 @@ ipcMain.on('probe:error', (_event, failure) => {
   // mistyped `--device`, a loopback that was never permitted. Their message is the whole answer,
   // and for the device case it is a list of names to copy, which a stack trace only buries.
   console.error('\nprobe failed:\n' + (failure.stack || failure.message));
-  process.exitCode = 1;
-  app.quit();
+  quitWith(1);
 });
 
 app
@@ -314,8 +345,7 @@ app
   .catch((error) => {
     finished = true;
     console.error('\nprobe failed to start:\n' + (error && error.stack ? error.stack : error));
-    process.exitCode = 1;
-    app.quit();
+    quitWith(1);
   });
 
 app.on('window-all-closed', () => {
@@ -327,7 +357,8 @@ app.on('window-all-closed', () => {
     console.error('\nThe probe window was closed before the run finished, so there is no summary');
     console.error('and the reports above cover only part of the requested duration. Re-run and');
     console.error('let it reach its own end, or pass a shorter --seconds.');
-    process.exitCode = 1;
+    quitWith(1);
+    return;
   }
   app.quit();
 });
