@@ -32,10 +32,13 @@ const planDescriptions: Record<CreditPlan, string> = {
 
 interface BuyCreditsTabProps {
   credits: number;
+  /** From the backend ping; falls back to the compiled-in mirror while that has not arrived. */
+  creditsPerMinute?: number;
   onPaymentCreated: (paymentId: string) => void;
 }
 
-export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsTabProps) {
+export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCreated }: BuyCreditsTabProps) {
+  const effectiveCreditsPerMinute = creditsPerMinute ?? CREDITS_PER_MINUTE;
   const { plans, currencies, loading, error, createPayment } = usePayment();
   const [selectedPlan, setSelectedPlan] = useState<CreditPlanInfo | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
@@ -71,7 +74,7 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
     if (!open) setCurrencySearch('');
   }, []);
 
-  const availableMinutes = Math.floor(credits / CREDITS_PER_MINUTE);
+  const availableMinutes = Math.floor(credits / effectiveCreditsPerMinute);
   const availableHours = Math.floor(availableMinutes / 60);
   const availableRemMinutes = availableMinutes % 60;
 
@@ -120,7 +123,7 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
               {availableRemMinutes} minute{availableRemMinutes !== 1 ? 's' : ''}
             </>
           )}{' '}
-          (10 credits per minute)
+          ({effectiveCreditsPerMinute} credits per minute)
         </div>
       </div>
 
@@ -140,7 +143,7 @@ export default function BuyCreditsTab({ credits, onPaymentCreated }: BuyCreditsT
             {plans.map((plan) => {
               const isPro = plan.plan === CreditPlan.Pro;
               const isSelected = selectedPlan?.plan === plan.plan;
-              const minutes = Math.floor(plan.credits / CREDITS_PER_MINUTE);
+              const minutes = Math.floor(plan.credits / effectiveCreditsPerMinute);
               const planName = planNames[plan.plan] || plan.plan;
               const planDescription = planDescriptions[plan.plan] || plan.description || '';
 

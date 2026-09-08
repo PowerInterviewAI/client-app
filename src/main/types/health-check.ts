@@ -31,4 +31,11 @@ export interface ClientPingResponse {
   user_role: UserRole;
   /** Absent on a backend that predates per-turn pricing - see `AppState.mockPricing`. */
   mock_pricing?: MockPricing;
+  /**
+   * The price of a live interview, in credits per minute. Optional here even though the
+   * backend always sends it now: this client ships independently of the hand-deployed backend,
+   * so an older deployment still answers without it - see `AppState.creditsPerMinute` for the
+   * fallback that case reads as.
+   */
+  credits_per_minute?: number;
 }

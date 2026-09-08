@@ -36,6 +36,7 @@ interface StatusPanelProps {
   credits: number;
   llmModel: string;
   userRole?: UserRole;
+  creditsPerMinute?: number;
 }
 
 // Filled background rather than a text-color tint: a tint against this panel's muted-foreground
@@ -51,6 +52,7 @@ export default function StatusPanel({
   llmModel,
   credits,
   userRole,
+  creditsPerMinute,
 }: StatusPanelProps) {
   // calculate and formatting handled by CreditsDisplay component
   const { hintOnly } = useSuggestionMode();
@@ -61,7 +63,13 @@ export default function StatusPanel({
   return (
     <div id="status-panel" className="flex items-center justify-between text-muted-foreground p-1">
       <RunningIndicator runningState={runningState} />
-      <CreditsDisplay credits={credits} llmModel={llmModel} userRole={userRole} className="ml-2" />
+      <CreditsDisplay
+        credits={credits}
+        llmModel={llmModel}
+        userRole={userRole}
+        creditsPerMinute={creditsPerMinute}
+        className="ml-2"
+      />
       <Tooltip>
         <TooltipTrigger asChild>
           <div className={cn('ml-2', badgeClass(hintOnly))}>

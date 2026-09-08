@@ -8,6 +8,8 @@ interface CreditsDisplayProps {
   credits: number;
   llmModel?: string;
   userRole?: UserRole;
+  /** From the backend ping; falls back to the compiled-in mirror while that has not arrived. */
+  creditsPerMinute?: number;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -16,11 +18,14 @@ export default function CreditsDisplay({
   credits,
   llmModel,
   userRole,
+  creditsPerMinute,
   className,
   style,
 }: CreditsDisplayProps) {
-  const planLabel = userRole === UserRole.TrialUser ? 'Trial Plan' : 'Pro Plan';
-  const availableMinutes = Math.floor(credits / CREDITS_PER_MINUTE);
+  // Not a real plan name - "Pro" is an actual purchasable SKU (see CreditPlan), so labeling
+  // every non-trial user that way shows a starter or enterprise buyer a plan they never bought.
+  const planLabel = userRole === UserRole.TrialUser ? 'Trial Plan' : 'Paid Plan';
+  const availableMinutes = Math.floor(credits / (creditsPerMinute ?? CREDITS_PER_MINUTE));
 
   const formatDuration = (mins: number) => {
     const hours = Math.floor(mins / 60);

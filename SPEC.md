@@ -103,7 +103,7 @@ Full name, profile/CV, and context are stored on the user's backend account and 
 
 ### Credits and Payments
 
-Purchase and usage tracking via the payment API. Route: `/payment`. Plans and the credit balance are always served by the backend (`/api/payment/plans`, `/api/payment/credits`, plus the balance carried on every 5-second `/api/health-check/ping-client`); the client holds no local pricing, so a failed plan fetch surfaces as an error rather than falling back to stale figures.
+Purchase and usage tracking via the payment API. Route: `/payment`. Plans, the credit balance and the per-minute burn rate are always served by the backend (`/api/payment/plans`, `/api/payment/credits`, plus the balance and `credits_per_minute` carried on every 5-second `/api/health-check/ping-client`); a failed plan fetch surfaces as an error rather than falling back to stale figures. `CREDITS_PER_MINUTE` in `renderer/lib/consts.ts` is a fallback mirror only, used while `AppState.creditsPerMinute` is `undefined` - before the first ping answers, or against a backend old enough not to send it - since the real rate is an env-overridable deployment setting rather than a constant.
 
 ### Auto-Updates
 

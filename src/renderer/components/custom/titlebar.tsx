@@ -80,6 +80,7 @@ export default function Titlebar() {
             credits={appState.credits ?? 0}
             llmModel={appState.providedLLMModel ?? ''}
             userRole={appState.userRole}
+            creditsPerMinute={appState.creditsPerMinute}
             style={DRAG}
           />
         )}
