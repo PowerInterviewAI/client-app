@@ -522,21 +522,41 @@ the transcript as well as the clock. It is deliberately not armed by `speechFail
 clears `hasAudio`: there the question has been read out at least in part, and someone answering the
 moment the voice cuts out is answering. `test/mock-text-only-turn.test.mjs` pins it.
 
-**The reveal and the voice start together, on the question arriving, and neither waits for the
-other.** The reveal used to wait for the first chunk to actually sound - the `playing` event, with
-a 2.5-second fallback for the case where it never came. The intent was to keep the words in step
-with the speech; what it produced was the opposite. Synthesis is a network round trip, so on an
-ordinary connection the wait *was* the fallback: the question sat as a blank line for two and a
-half seconds, the text then went up on the timeout, and the voice arrived after it anyway. Waiting
-cannot make two things simultaneous when one of them is the thing being waited for - only starting
-them at the same moment can, which is what `installQuestion` moving to `Speaking` already does for
-both. From there the reveal's own pacing (about twice speaking speed, capped by a budget) is what
-keeps the text alongside the voice.
+**The question's voice is in hand before the question is on screen, and that is the only way the
+two can start together.** The gap was an ordering, not an animation: `installQuestion` broadcast
+`Speaking`, the renderer saw it, asked for chunk 0 over IPC, and *that* paid the round trip to
+`/speak` - so the words went up and the voice followed a second or two later, every question.
+
+Two things were tried against it from the wrong end and neither could work. The reveal in
+[streaming-question.tsx](src/renderer/components/custom/panels/streaming-question.tsx) waited for
+the first chunk to actually sound (the `playing` event) with a 2.5-second fallback, which on an
+ordinary connection *was* the fallback: a blank question row, then the text on the timeout, then
+the voice after it. Starting the reveal on the question instead removed the blank row and left the
+gap exactly where it was. Waiting for a thing cannot make it simultaneous with the wait.
+
+`primeFirstChunk` moves the round trip in front of the broadcast. The first sentence is
+synthesized during `Generating`, where a spinner is already on screen for the question's own LLM
+call, and the question is installed with its audio already fetched - so the reveal and the voice
+begin within a frame or two of each other and the reveal's pacing (about twice speaking speed,
+capped by a budget) keeps them alongside from there.
+
+Four things that shape hold it up. The wait is capped at `MOCK_TTS_PRIME_MS`, and exceeding it is
+not a failure: the question goes up, the renderer asks for chunk 0, and `synthesizeChunk` hands
+back the *same in-flight promise* rather than starting a second synthesis - the old behaviour,
+minus the double bill, reached only when holding the question back would be worse. The prime is
+matched by the chunk's own text and language, never by index, because the index is the one thing
+two different questions always share. A synthesis that *fails* is dropped rather than cached, so
+the renderer's request goes out fresh and the turn gets one more chance before falling back to
+text-only. And nothing is written or broadcast before the wait, so a session ended during it
+leaves no half-installed question - the `seq` check after the await is what the previously
+synchronous `installQuestion` never needed.
 
 The whole audio-start notification - `onAudioStart`, the listener set, and `playBlob`'s
-`onStarted`/`onplaying` pair - went with it, since revealing the question was the only thing that
-ever subscribed. A question that will not be spoken still appears whole rather than pacing itself
-out, because a reveal exists to keep words in step with a voice and there is none.
+`onStarted`/`onplaying` pair - went with the reveal's wait, since revealing the question was the
+only thing that ever subscribed. A question that will not be spoken still appears whole rather
+than pacing itself out, because a reveal exists to keep words in step with a voice and there is
+none. `test/mock-question-prime.test.mjs` pins the ordering, the single synthesis, the dropped
+failure and the abandoned install.
 
 **The exported report uses the live export's heading scheme**, not one of its own. Both are
 rendered by `MOCK_DOCX_OPTIONS`, which centres H1 and H5 and ranges everything else left - a style

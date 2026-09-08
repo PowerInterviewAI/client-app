@@ -6,6 +6,7 @@ import {
   MOCK_ANSWER_SILENCE_MS,
   MOCK_LISTENING_SILENCE_MS,
   MOCK_MAX_FOLLOW_UPS_PER_QUESTION,
+  MOCK_TTS_PRIME_MS,
   SUGGESTION_CONNECT_MS,
   SUGGESTION_STALL_MS,
 } from '../consts.js';
@@ -77,6 +78,22 @@ function initialSession(): MockInterviewSessionState {
 }
 
 /**
+ * A question's first sentence, synthesized before the question is put on screen.
+ *
+ * Held as the in-flight promise rather than the finished bytes, so a request the prime timed out
+ * on is *joined* by the renderer's own request for chunk 0 instead of being duplicated by it -
+ * one synthesis, billed once, whichever side ends up waiting on it.
+ *
+ * Matched by the chunk's own text and language rather than by an index, because the index is the
+ * one thing two different questions always have in common.
+ */
+interface PrimedChunk {
+  text: string;
+  language: Language;
+  request: Promise<ArrayBuffer | null>;
+}
+
+/**
  * The mock interview's state machine and in-memory session.
  *
  * Mirrors the terminal-state invariant `use-assistant-service.ts` documents for `RunningState`:
@@ -99,6 +116,8 @@ class MockInterviewService {
   /** Why the last question generation failed, for the message the setup screen shows. */
   private lastQuestionError = '';
   private silenceTimer: NodeJS.Timeout | null = null;
+  /** See `primeFirstChunk`. Null between questions and for a language with no voice. */
+  private primedChunk: PrimedChunk | null = null;
   /**
    * True between installing a question that will not be spoken and the candidate saying they are
    * ready to answer it.
@@ -271,7 +290,7 @@ class MockInterviewService {
         if (response.error || !response.data) {
           throw new Error(response.error?.message || 'Failed to generate the next question');
         }
-        this.installQuestion(response.data.text, response.data.kind, isFollowUp);
+        await this.installQuestion(seq, response.data.text, response.data.kind, isFollowUp);
         return;
       } catch (error) {
         if (seq !== this.sessionSeq) return;
@@ -333,9 +352,40 @@ class MockInterviewService {
     }, delayMs);
   }
 
-  private installQuestion(text: string, kind: MockQuestionKind, isFollowUp: boolean): void {
+  /**
+   * Put a question on screen, and start its voice at the same moment.
+   *
+   * **The first sentence is synthesized before any of this is broadcast.** It used to be
+   * synthesized after: the question was installed, `Speaking` went out, the renderer saw it and
+   * only then asked for chunk 0 over IPC, which is a network round trip to /speak. So the words
+   * appeared and the voice began a second or two later, every question - the reveal animation in
+   * `streaming-question.tsx` was written to paper over exactly that gap and could not, because
+   * waiting for a thing cannot make it simultaneous with the wait.
+   *
+   * The wait is paid in `Generating` instead, where the question's own LLM call already has a
+   * spinner on screen, and the question goes up with its audio in hand. `MOCK_TTS_PRIME_MS` caps
+   * it; past that this falls back to what it did before, minus the second billed synthesis - see
+   * `primeFirstChunk`.
+   *
+   * Nothing is written or broadcast before the wait, so a session ended during it (`seq`) leaves
+   * no half-installed question behind: the counter is not advanced, `finalAnswerText` still holds
+   * whatever `endSession`'s resurrect branch may need, and the state is whatever it was.
+   */
+  private async installQuestion(
+    seq: number,
+    text: string,
+    kind: MockQuestionKind,
+    isFollowUp: boolean
+  ): Promise<void> {
+    // Cleared before the wait, not after: the previous question's backstop must not fire into
+    // the gap this opens.
     this.clearSilenceTimer();
     const hasAudio = TTS_LANGUAGES.has(this.language);
+    const chunks = hasAudio ? splitIntoSpeechChunks(text, this.language) : [];
+
+    await this.primeFirstChunk(chunks[0]);
+    if (seq !== this.sessionSeq) return;
+
     // A question that will be spoken is gated by the speech itself; one that will not needs the
     // candidate to say when their answer starts. See `awaitingAnswerReady`.
     this.awaitingAnswerReady = !hasAudio;
@@ -344,7 +394,7 @@ class MockInterviewService {
       kind,
       hasAudio,
       isFollowUp,
-      chunks: hasAudio ? splitIntoSpeechChunks(text, this.language) : [],
+      chunks,
     };
 
     this.finalAnswerText = '';
@@ -375,10 +425,59 @@ class MockInterviewService {
     void this.generateLiveHint(this.sessionSeq, text);
   }
 
+  /**
+   * Synthesize a question's first sentence ahead of putting the question on screen, so the two
+   * start together. A no-op for a question with no chunks - a language with no Aura voice.
+   *
+   * Never throws and never rejects, because it runs inside `generateNextQuestion`'s retry loop,
+   * where a throw would be read as the *question* having failed and would bill a second one.
+   * A synthesis that fails is dropped rather than cached, so the renderer's own request for
+   * chunk 0 goes out fresh and gets one more chance before the turn falls back to text-only.
+   *
+   * The promise is stored, not the bytes, and stored before the wait. That is what makes the cap
+   * safe: when it expires the question goes up while this is still in flight, the renderer asks
+   * for chunk 0, and `synthesizeChunk` hands back this same promise instead of starting a second
+   * synthesis of the same sentence.
+   */
+  private async primeFirstChunk(chunk: string | undefined): Promise<void> {
+    this.primedChunk = null;
+    if (!chunk) return;
+
+    const language = this.language;
+    let entry: PrimedChunk | null = null;
+    const request = this.api.speak({ text: chunk, language }).catch((error: unknown) => {
+      console.warn('[MockInterviewService] pre-synthesis of the first chunk failed:', error);
+      if (entry && this.primedChunk === entry) this.primedChunk = null;
+      return null;
+    });
+    // Assigned synchronously, so the handler above always sees it: a rejection cannot run before
+    // the current task finishes.
+    entry = { text: chunk, language, request };
+    this.primedChunk = entry;
+
+    let timer: NodeJS.Timeout | undefined;
+    await Promise.race([
+      request,
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, MOCK_TTS_PRIME_MS);
+      }),
+    ]);
+    if (timer) clearTimeout(timer);
+  }
+
   /** One chunk's audio, by index into the current question's `chunks`. Null if Aura has no voice. */
   async synthesizeChunk(index: number): Promise<ArrayBuffer | null> {
     const chunk = this.session.currentQuestion?.chunks[index];
     if (!chunk) return null;
+
+    // Chunk 0 is normally already in hand, or already on its way - `installQuestion` starts it
+    // before the question is broadcast. Matched on the sentence rather than the index, because a
+    // stale prime and a new question share indices but never share text.
+    const primed = this.primedChunk;
+    if (primed && primed.text === chunk && primed.language === this.language) {
+      return primed.request;
+    }
+
     return this.api.speak({ text: chunk, language: this.language });
   }
 
@@ -505,7 +604,7 @@ class MockInterviewService {
       followUpQuestion
     ) {
       this.followUpCount += 1;
-      this.installQuestion(followUpQuestion, question.kind, /* isFollowUp */ true);
+      await this.installQuestion(seq, followUpQuestion, question.kind, /* isFollowUp */ true);
       return;
     }
 
@@ -718,6 +817,7 @@ class MockInterviewService {
     this.awaitingAnswerReady = false;
     this.stopLiveHint();
     this.hintsByTimestamp.clear();
+    this.primedChunk = null;
     this.sessionSeq += 1;
     this.followUpCount = 0;
     this.finalAnswerText = '';

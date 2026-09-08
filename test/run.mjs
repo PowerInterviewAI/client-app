@@ -44,6 +44,9 @@ for (const module of [
   // restored in a finally, but it stays next to the other session-driving files rather than
   // beside `language.test.mjs`, which asserts on what is on disk.
   './mock-text-only-turn.test.mjs',
+  // Same harness again. It holds a /speak response open to watch what the session does while the
+  // first sentence is synthesizing, so it clears the service on every branch and in a finally.
+  './mock-question-prime.test.mjs',
   // Drives appStateService.runningState and mockInterview together, so it must run after
   // mock-interview-state seeds no lasting mockInterview state of its own (mock-interview-state
   // clears the service on every branch, and the service's own clear() resets appState too).

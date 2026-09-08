@@ -139,6 +139,21 @@ export const MOCK_TTS_TAIL_MS = 600;
 // the session. Well above the longest real question audio.
 export const MOCK_TTS_GATE_MAX_HOLD_MS = 120_000;
 
+// How long `installQuestion` waits for the question's first sentence to come back from /speak
+// before putting the question on screen without it.
+//
+// The wait is the whole point: the text and the voice have to start together, and synthesis is a
+// network round trip that used to happen *after* the question was broadcast - so the words went
+// up and the voice followed a second or two later. Paid during `Generating`, where a spinner is
+// already on screen for the question's own LLM call, so it reads as that call taking slightly
+// longer rather than as a new pause of its own.
+//
+// The cap exists because exceeding it is not a failure: the question goes up, the renderer asks
+// for chunk 0, and that request joins the synthesis already in flight rather than starting a
+// second one - which is exactly the behaviour this replaced, reached only when synthesis is slow
+// enough that holding the question back would be worse.
+export const MOCK_TTS_PRIME_MS = 5_000;
+
 // Sentence-chunk bounds for the question text sent to /speak, one chunk at a time so the first
 // chunk starts playing before the whole question has synthesized. Minimum guards against a chunk
 // like "Mr." registering as a full sentence; maximum guards a run-on sentence with no punctuation.
