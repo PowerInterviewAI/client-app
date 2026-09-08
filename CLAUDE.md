@@ -306,6 +306,17 @@ cheapest of the three to back out of - cancelling here means the other two were 
 `startAfterNotice` holds everything after it so the dialog can hand the start back without
 duplicating those checks.
 
+**Cancelling it goes home, because backing out of the notice is backing out of the whole start.**
+`/main` is only ever arrived at for a session that is starting or running, and it carries no Start
+of its own - so cancelling used to leave the candidate on an inert console whose one enabled
+control was a way back they had not asked for. Home is where both kinds of session are chosen,
+which is the decision cancelling re-opens. The dialog takes an `onCancel` separate from
+`onOpenChange(false)`, since proceeding closes through that too and a caller reading a close as a
+cancel would run both halves on the one path where the user said yes; Cancel, Esc and a click on
+the overlay all reach it. Nothing is torn down on the way out - the notice is asked before any
+service is touched, and `runningState` is still Idle. The mock setup dialog passes no `onCancel`
+and so still falls back to its own form, which is where cancelling there should land.
+
 Shown before every session, deliberately with no "don't show again": whether the call is on
 speakers is a property of the machine and the meeting, not a setting, and it can change between
 any two sessions on the same install - a permanent silence option would contradict the one fact

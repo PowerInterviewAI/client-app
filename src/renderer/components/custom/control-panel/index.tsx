@@ -162,6 +162,18 @@ export default function ControlPanel() {
     setHeadphoneNoticeOpen(true);
   };
 
+  // Backing out of the headphone notice backs out of the whole start, and this screen only
+  // exists for a session that is starting or running - the console reached this way carries no
+  // Start of its own, so cancelling used to leave the candidate on an inert bar with the one
+  // enabled control being the way back they had not asked for. Home is where both kinds of
+  // session are chosen, which is the decision cancelling here actually re-opens.
+  //
+  // Nothing to tear down: the notice is the first thing Start asks, ahead of the save prompt and
+  // the permission gate, so no service has been touched and `runningState` is still Idle.
+  const handleStartCancelled = () => {
+    navigate('/');
+  };
+
   // Deferred rather than fired the moment the intent arrives. `checkCanStart` reads the account
   // config and the enumerated microphones, neither of which has resolved on the first frames
   // after a route change - starting there would greet the user with "could not load your saved
@@ -241,6 +253,7 @@ export default function ControlPanel() {
         open={headphoneNoticeOpen}
         onOpenChange={setHeadphoneNoticeOpen}
         onProceed={() => void startAfterNotice()}
+        onCancel={handleStartCancelled}
       />
 
       {isMac && (

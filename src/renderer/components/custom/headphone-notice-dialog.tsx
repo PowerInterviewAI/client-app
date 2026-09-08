@@ -15,6 +15,13 @@ interface HeadphoneNoticeDialogProps {
   onOpenChange: (open: boolean) => void;
   onProceed: () => void;
   /**
+   * Backing out, by any of the three routes out of a Radix dialog that are not the primary
+   * button: Cancel, Esc, and a click on the overlay. Separate from `onOpenChange(false)`, which
+   * proceeding also goes through - a caller that treated closing as cancelling would run both
+   * halves on the one path where the user said yes.
+   */
+  onCancel?: () => void;
+  /**
    * Which capture pipeline this session runs, since the two fail differently on speakers and the
    * copy below is specific to the mechanism, not just "sounds better with headphones":
    *
@@ -50,8 +57,16 @@ export default function HeadphoneNoticeDialog({
   open,
   onOpenChange,
   onProceed,
+  onCancel,
   variant = 'live',
 }: HeadphoneNoticeDialogProps) {
+  // Proceeding closes through `onOpenChange` directly, so it never passes through here - Radix
+  // does not call back for a close the caller made itself.
+  const handleDismiss = () => {
+    onOpenChange(false);
+    onCancel?.();
+  };
+
   const handleProceed = () => {
     onOpenChange(false);
     onProceed();
@@ -89,7 +104,7 @@ export default function HeadphoneNoticeDialog({
         };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => (next ? onOpenChange(true) : handleDismiss())}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -106,7 +121,7 @@ export default function HeadphoneNoticeDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" size="sm" onClick={handleDismiss}>
             Cancel
           </Button>
           <Button size="sm" onClick={handleProceed}>
