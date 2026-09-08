@@ -94,7 +94,17 @@ Each `LiveSuggestion` still carries the `mode` it was *generated* under, and the
 ### Assistant lifecycle
 
 `RunningState` is what every control on the bar is gated on, and `Starting` and `Stopping` disable
-all of them - Stop included. So the one invariant `useAssistantService` has to hold is that the
+all of them - Stop included.
+
+**The primary slot holds one control, Stop, and its label does not move.** It used to relabel
+itself `Starting` and `Stopping` and change colour with them, which made the one slot on the
+screen that is a control read as a progress indicator that had swapped itself in for one - and the
+thing it was reporting is already reported by the running indicator, the status panel and the
+button's own tooltip. What is true in those states is simpler and is what the disabled state
+already says: this is Stop, and it is not available yet. There is no Start beside it (that
+decision is the home screen's) and no Home either - Stop already ends the session and returns
+there, and a Home button that left *without* ending it is refused by the navigation lock for the
+whole of an interview anyway, so it was live only on an idle console. So the one invariant `useAssistantService` has to hold is that the
 state always lands back on a terminal value, whatever went wrong on the way. `stopAssistant`
 returns to `Idle` in a `finally`, and tears the four services down through `Promise.allSettled`
 rather than `Promise.all`: `all` rejects on the first one that throws and abandons the other three,

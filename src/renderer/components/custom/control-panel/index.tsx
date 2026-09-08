@@ -1,4 +1,3 @@
-import { Ellipsis, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -22,13 +21,6 @@ import { LanguageGroup } from './language-group';
 import { MainGroup } from './main-group';
 import { SuggestionModeGroup } from './suggestion-mode-group';
 import { ToolsGroup } from './tools-group';
-
-type StateConfig = {
-  onClick: () => void;
-  className: string;
-  icon: React.ReactNode;
-  label: string;
-};
 
 export default function ControlPanel() {
   const isStealth = useIsStealthMode();
@@ -201,45 +193,6 @@ export default function ControlPanel() {
 
   if (isStealth) return null;
 
-  const stateConfig: Record<RunningState, StateConfig> = {
-    // Inert, but it still wears Stop. This screen offers exactly one action and `MainGroup`
-    // keeps it in place in every state, disabled where there is nothing to stop; an Idle console
-    // showing a differently-labelled button in the primary slot would read as a different
-    // control rather than an unavailable one. The pulse is dropped - nothing is running to
-    // draw attention to.
-    [RunningState.Idle]: {
-      onClick: () => {},
-      className: 'bg-destructive hover:bg-destructive/90',
-      icon: <Square className="h-3.5 w-3.5" />,
-      label: 'Stop',
-    },
-    [RunningState.Starting]: {
-      onClick: () => {},
-      className: 'bg-blue-600 hover:bg-blue-600/90',
-      // The label is on screen now, so the trailing dots the icon already animates are dropped
-      icon: <Ellipsis className="h-3.5 w-3.5 animate-pulse" />,
-      label: 'Starting',
-    },
-    [RunningState.Running]: {
-      // Stop is more than a teardown here: it ends the session, offers to keep it, and takes the
-      // candidate back to the home screen. See `useEndLiveSession` for why that offer belongs on
-      // the stop rather than on the next start.
-      onClick: async () => {
-        await endLiveSession();
-      },
-      className: 'bg-destructive hover:bg-destructive/90 animate-pulse',
-      icon: <Square className="h-3.5 w-3.5" />,
-      label: 'Stop',
-    },
-    [RunningState.Stopping]: {
-      onClick: () => {},
-      className: 'bg-destructive hover:bg-destructive/90',
-      icon: <Ellipsis className="h-3.5 w-3.5 animate-pulse" />,
-      label: 'Stopping',
-    },
-  };
-  const { onClick, className, icon, label } = stateConfig[runningState];
-
   const getDisabled = (state: RunningState, disableOnRunning: boolean = true): boolean => {
     if (disableOnRunning && state === RunningState.Running) return true;
     return state === RunningState.Starting || state === RunningState.Stopping;
@@ -255,7 +208,7 @@ export default function ControlPanel() {
           Zoom is held at the right edge by ml-auto: it changes how the app is viewed rather than
           what it does, and mixing it into the run would make it read as another interview control. */}
       <div id="control-panel" className="flex items-center gap-4 px-1 pb-1 pt-0.5">
-        <MainGroup stateConfig={{ onClick, className, icon, label }} />
+        <MainGroup onStop={endLiveSession} />
 
         <div className="h-5 w-px bg-border" aria-hidden="true" />
 
