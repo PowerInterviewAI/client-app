@@ -4,6 +4,16 @@ export const isMac = navigator.platform.toUpperCase().includes('MAC');
 
 export const CREDITS_PER_MINUTE = 10;
 
+/**
+ * The most follow-ups one mock-interview question can draw, mirrored from `main/consts.ts`.
+ *
+ * Used here only to quote the ceiling of a session's price. The cap itself is enforced in the
+ * main process, which is where the follow-up count lives; a copy that drifts high would overstate
+ * the quote and a copy that drifts low would understate it, so it is a mirror rather than a
+ * second opinion.
+ */
+export const MOCK_MAX_FOLLOW_UPS_PER_QUESTION = 2;
+
 // maximum allowable RTT change (ms) before restarting audio agent
 export const MAX_RTT_DIFF = 50;
 export const MAX_AUDIO_DELAY_MS = 500;

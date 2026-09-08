@@ -566,6 +566,54 @@ sheet written for the live report's shape. Picking levels by nesting depth inste
 Answer", "Score" and "Stronger Answer" at H5, so three centred labels appeared over left-ranged
 body text in every question.
 
+### What a mock interview costs
+
+A live interview is metered per minute; a mock one is priced per question, follow-up and report,
+and its ASR socket is not metered at all. The reason is how the two spend their wall clock: every
+minute of a real interview is a minute of value, while a mock session spends a large part of its
+clock in `Generating`, `Speaking`, `Evaluating` and `Scoring` - none of which the candidate can act
+during - and most of the rest on think-time, which is the behaviour the feature exists to train.
+Billing that by the second charges for the app talking to itself, and leaves the candidate unable
+to find out what a session costs before starting it.
+
+**The prices arrive on the ping** (`AppState.mockPricing`, from `ClientPingResponse.mock_pricing`)
+rather than being mirrored as constants, because the backend owns them and a stale copy here would
+quote a number the user is not charged. `undefined` is not free and is not zero - it means the
+backend predates per-turn pricing and is still metering a mock by the minute, so the client quotes
+nothing and gates nothing, which is exactly what it did before any of this existed.
+
+**Two numbers are quoted, and the smaller one is the promise.** `mockSessionPrice()` is every
+question plus the report, and it is what the start gate reserves; `mockSessionCeiling()` adds the
+maximum follow-ups and is the number you are never charged more than. Follow-ups are charged only
+as they are asked, and the backend declines one rather than let it eat into the rest of the
+session - so quoting the ceiling as the price would refuse a five-question mock to someone holding
+200 credits for a session that will almost certainly cost 170.
+
+**A length the balance cannot cover is disabled in the picker, not refused on Start.** The answer
+to "not enough credits" is then a shorter interview the candidate can choose on the spot rather
+than a dead end. `checkCanStart`'s own credit check is the backstop for the case where *every*
+length is out of reach, and it carries the route out (a Buy credits action). The home screen's mock
+card says the same thing one level earlier, against the shortest session there is, so the candidate
+is not sent into a dialog in which nothing is selectable.
+
+**A 402 is not retried.** `generateNextQuestion` retries once on failure, which is right for a
+provider blip and pointless for a balance: a second attempt cannot succeed and only doubles the
+wait before the candidate is told. It is also reported differently - the backend's message already
+names the price and the balance, so it is passed through rather than prefixed with "could not
+generate the first question", which describes a fault the candidate does not have.
+
+**The client declares how it expects to be billed, and it is the only party that can.**
+`MockBilling.PerTurn` goes on all three charged requests and `metered=0` goes on the mock socket,
+because only this side knows whether that socket is asking to be metered. An older backend ignores
+both and bills by the minute; an older client sends neither and is billed by the minute. No mixed
+state charges twice, which is the only outcome that must not happen.
+
+The mock socket sends **both** `channels=1` and `metered=0`, and the pairing is what a tidy-up
+breaks. `channels=1` looks redundant once `metered=0` exists, but it is what keeps the older
+behaviour correct against a backend that ignores `metered`: the default of two assumes the live
+session's pair of sockets, so dropping it would halve every mock interview's bill on every
+deployment not yet updated. `test/mock-billing-contract.test.mjs` pins both halves.
+
 ### Window and Stealth Mode
 
 The main window reference is passed to `windowControlService` and `zoomService` after creation. Window bounds persist to Electron Store on `close` and are restored on next launch with minimum-size clamping (`MIN_WIDTH` / `MIN_HEIGHT` from [src/main/consts.ts](src/main/consts.ts)).

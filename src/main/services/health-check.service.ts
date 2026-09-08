@@ -50,6 +50,10 @@ export class HealthCheckService {
         credits: res.data?.credits,
         userRole: res.data?.user_role,
         providedLLMModel: res.data?.provided_llm_model,
+        // Undefined on a backend that predates per-turn pricing, and carried through as
+        // undefined rather than defaulted: the mock setup dialog reads the absence as "this
+        // deployment still meters a mock by the minute", and a zero would read as free.
+        mockPricing: res.data?.mock_pricing,
       });
     } catch (error) {
       console.error('[HealthCheckService] Initial client ping error:', error);
@@ -178,6 +182,7 @@ export class HealthCheckService {
               credits: res.data?.credits,
               providedLLMModel: res.data?.provided_llm_model,
               userRole: res.data?.user_role,
+              mockPricing: res.data?.mock_pricing,
             });
           }
           failureInterval = FAILURE_INTERVAL;

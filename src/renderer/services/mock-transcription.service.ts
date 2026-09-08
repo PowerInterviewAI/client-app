@@ -5,6 +5,7 @@ import {
   AudioWsStream,
   MOCK_STREAM_CHANNELS,
   resolveMicDeviceId,
+  StreamMetering,
 } from './live-transcription.service';
 
 /**
@@ -54,17 +55,21 @@ class MockTranscriptionService {
     };
 
     try {
-      // One socket, and it says so. The backend divides the interview's per-minute price by
-      // this number: left at the default of two it charged half an interval per interval, which
-      // is what made a mock interview cost half of a live one - for a session that additionally
-      // bills a question call, a turn call, a report call and a TTS call per sentence, none of
-      // which are metered at all.
+      // Both billing parameters, and both are load-bearing against a different deployment.
+      //
+      // `metered=0` is the one that matters against a current backend: a mock interview is
+      // charged per question, follow-up and report, so charging its socket by the minute as well
+      // would bill one session twice. `MOCK_STREAM_CHANNELS` is what keeps the older behaviour
+      // right against a backend that predates that - it ignores `metered` and meters the socket,
+      // and without `channels=1` it would meter it at half rate, since the default of two
+      // assumes the live session's pair of sockets.
       this.channel = new AudioWsStream(
         'ch_1',
         this.micStream,
         language,
         onTranscript,
-        MOCK_STREAM_CHANNELS
+        MOCK_STREAM_CHANNELS,
+        StreamMetering.Unmetered
       );
       await this.channel.start();
     } catch (error) {

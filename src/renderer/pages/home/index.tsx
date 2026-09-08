@@ -11,9 +11,20 @@ import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { cn } from '@/lib/utils';
-import { RunningState } from '@/types/app-state';
+import { mockSessionPrice, RunningState } from '@/types/app-state';
 import type { MockInterviewSetup } from '@/types/mock-interview';
 import { isMockInterviewSessionActive } from '@/types/mock-interview';
+
+/**
+ * The shortest interview the setup dialog offers, and therefore the cheapest one there is.
+ *
+ * Mirrored from `QUESTION_COUNTS` in `mock-interview-setup-fields.tsx` rather than imported, so
+ * this card does not pull the whole form in to ask one question. A copy that drifts *up* would
+ * hide the card from someone who could afford a session; one that drifts down would offer a
+ * dialog in which every length is disabled - the second is the recoverable direction, and it is
+ * the one a stale copy of a list whose first entry only ever shrinks would take.
+ */
+const SHORTEST_MOCK_QUESTION_COUNT = 3;
 
 interface LaunchCardProps {
   icon: React.ReactNode;
@@ -116,6 +127,17 @@ export default function HomePage() {
   // `false` closes the card: `null` means the probe has not answered yet, and treating that as
   // unavailable would grey the card out for the first seconds of every launch.
   const mockUnsupported = appState?.mockInterviewSupported === false;
+
+  // The cheapest mock the setup dialog offers, so this card can say "you cannot afford any of
+  // them" rather than sending the candidate into a dialog where every length is disabled.
+  //
+  // Only when the backend has quoted prices. Without them a mock is still metered by the minute
+  // and there is nothing to check, which is what an older deployment does - so the absence must
+  // never read as unaffordable.
+  const shortestMockPrice = appState?.mockPricing
+    ? mockSessionPrice(appState.mockPricing, SHORTEST_MOCK_QUESTION_COUNT)
+    : null;
+  const mockUnaffordable = shortestMockPrice !== null && (appState?.credits ?? 0) < shortestMockPrice;
 
   const [mockSetupOpen, setMockSetupOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -236,9 +258,11 @@ export default function HomePage() {
                   ? 'Not available on this server yet. Update the app, or try again later.'
                   : liveSessionActive
                     ? 'Stop the live assistant first - the two cannot share your microphone.'
-                    : 'The AI asks, you answer out loud, and you get a scored report at the end.'
+                    : mockUnaffordable
+                      ? `Not enough credits - the shortest mock costs ${shortestMockPrice}. Buy more to practise.`
+                      : 'The AI asks, you answer out loud, and you get a scored report at the end.'
               }
-              onClick={() => setMockSetupOpen(true)}
+              onClick={() => (mockUnaffordable ? navigate('/payment') : setMockSetupOpen(true))}
               disabled={liveSessionActive || mockUnsupported}
             />
             <LaunchCard

@@ -46,8 +46,21 @@ const QUESTION_COUNTS = [3, 5, 8, 12] as const;
  * whatever role that context names, rather than a short label collected a second time here.
  */
 export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupForm }) {
-  const { seniority, setSeniority, difficulty, setDifficulty, questionCount, setQuestionCount } =
-    form;
+  const {
+    seniority,
+    setSeniority,
+    difficulty,
+    setDifficulty,
+    questionCount,
+    setQuestionCount,
+    credits,
+    priceOf,
+    ceilingOf,
+    canAfford,
+  } = form;
+
+  const price = priceOf(questionCount);
+  const ceiling = ceilingOf(questionCount);
 
   return (
     <div className="space-y-6">
@@ -77,15 +90,34 @@ export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupFor
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              {/* A length the balance cannot see through to its report is disabled rather than
+                  left to be refused on Start, so the answer to "not enough credits" is a shorter
+                  interview the user can pick right here instead of a dead end. */}
               {QUESTION_COUNTS.map((n) => (
-                <SelectItem key={n} value={String(n)}>
+                <SelectItem key={n} value={String(n)} disabled={!canAfford(n)}>
                   {n} questions, about {Math.round(n * 2.5)} minutes
+                  {canAfford(n) ? '' : ' - not enough credits'}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
       </div>
+
+      {/* What this will cost, before the candidate commits to it.
+          Two numbers, and the smaller one is the promise: every question and the report are
+          guaranteed once the session starts, and follow-ups are charged only as they are asked -
+          the backend declines one rather than let it eat into the rest of the session. So the
+          ceiling is the number you are never charged more than, not the one to expect.
+          Nothing is shown at all against a backend that predates per-turn pricing, which still
+          meters a mock by the minute and has no per-question price to quote. */}
+      {price !== null && ceiling !== null && (
+        <p className="text-xs text-muted-foreground">
+          Costs <span className="font-medium text-foreground">{price} credits</span>
+          {ceiling > price && <>, up to {ceiling} if the interviewer follows up on every answer</>}.
+          You have {credits.toLocaleString()}.
+        </p>
+      )}
 
       <div className="space-y-2">
         {/* No htmlFor: this labels the group via aria-labelledby below, not one control. */}

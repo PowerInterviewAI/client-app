@@ -28,6 +28,25 @@ export const LIVE_STREAM_CHANNELS = 2;
 export const MOCK_STREAM_CHANNELS = 1;
 
 /**
+ * Whether this socket should be charged by the minute.
+ *
+ * A live interview is: every minute of a real interview is a minute of value the product is
+ * delivering, and a clock is the right unit for it. A mock interview is not, and asks for
+ * `Unmetered` - it pays per question, follow-up and report instead, and metering it as well would
+ * bill one session twice. Most of a mock session's wall clock is the product generating a
+ * question, speaking it, scoring the turn or writing the report, none of which the candidate can
+ * act during, and the rest is think-time, which is the behaviour the feature exists to train.
+ *
+ * The backend does not take this on trust - see `stealthUnavailableReason`'s sibling reasoning in
+ * `asr.py`: it is honoured only while a paid-for mock turn holds a billing lease open, so a
+ * forged `metered=0` on a live session buys nothing.
+ */
+export const enum StreamMetering {
+  Metered = 1,
+  Unmetered = 0,
+}
+
+/**
  * The streaming URL for one channel.
  *
  * English is sent as no parameter at all rather than as `language=en`. The backend treats an
@@ -40,11 +59,22 @@ export const MOCK_STREAM_CHANNELS = 1;
  * backend that predates the parameter ignores an unknown query parameter and bills exactly what
  * it billed before, so sending it costs nothing against an older deployment and is the whole fix
  * against a current one.
+ *
+ * `metered` follows `channels` exactly, and for the same reason it must: a mock session sends
+ * **both**. An older backend ignores `metered` and bills the socket by the minute, which is what
+ * `channels=1` is there to make correct; a current one honours `metered` and bills nothing here,
+ * at which point `channels` is moot. Dropping `channels` once `metered` existed would halve every
+ * mock interview's bill on every deployment that has not been updated yet.
  */
-function buildStreamingUrl(language: Language, channels: number): string {
+function buildStreamingUrl(
+  language: Language,
+  channels: number,
+  metering: StreamMetering
+): string {
   const params = new URLSearchParams();
   if (language !== DEFAULT_LANGUAGE) params.set('language', language);
   if (channels !== LIVE_STREAM_CHANNELS) params.set('channels', String(channels));
+  if (metering !== StreamMetering.Metered) params.set('metered', String(metering));
   const query = params.toString();
   return query ? `${STREAMING_URL}?${query}` : STREAMING_URL;
 }
@@ -133,7 +163,8 @@ export class AudioWsStream {
      * the interview once rather than once per socket. Defaults to the live session's two, which
      * is what every caller wanted before a mock session existed.
      */
-    private readonly channels: number = LIVE_STREAM_CHANNELS
+    private readonly channels: number = LIVE_STREAM_CHANNELS,
+    private readonly metering: StreamMetering = StreamMetering.Metered
   ) {}
 
   async start() {
@@ -362,7 +393,7 @@ export class AudioWsStream {
     return new Promise<void>((resolve, reject) => {
       // Rebuilt per attempt rather than captured once, so a reconnect cannot outlive the
       // language the session opened with.
-      const ws = new WebSocket(buildStreamingUrl(this.language, this.channels));
+      const ws = new WebSocket(buildStreamingUrl(this.language, this.channels, this.metering));
       this.ws = ws;
       let settled = false;
 

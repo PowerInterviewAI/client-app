@@ -2,7 +2,7 @@
  * Application State Types
  */
 
-import { UserRole } from './health-check.js';
+import { MockPricing, UserRole } from './health-check.js';
 import { Language } from './language.js';
 import { SuggestionMode } from './llm.js';
 import { MockInterviewSessionState } from './mock-interview.js';
@@ -177,6 +177,15 @@ export interface AppState {
    * Blocking on those would hide a working feature every time the probe was merely slow.
    */
   mockInterviewSupported: boolean | null;
+  /**
+   * What a mock interview costs per unit of work, or `undefined` before the backend has said.
+   *
+   * `undefined` is not free and is not a price of zero - it means this backend predates per-turn
+   * pricing and is still metering a mock session by the minute on its ASR socket. The client
+   * reads it as "quote nothing and gate nothing", which is exactly the behaviour it had before
+   * any of this existed. See `MockBilling` on the backend for the whole compatibility story.
+   */
+  mockPricing?: MockPricing;
 }
 
 /** The app state as sent to the renderer, with the interview config reduced to a summary. */

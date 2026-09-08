@@ -110,7 +110,29 @@ interface MockQuestionHistoryEntry {
   answer: string;
 }
 
-export interface GenerateMockQuestionRequest extends LLMRequest {
+/**
+ * How this client expects the work it is asking for to be paid for.
+ *
+ * The switch that makes per-turn pricing safe across a hand-deployed backend and a client that
+ * ships on its own schedule. A mock interview used to be billed by the minute, on the wall clock
+ * of an ASR socket held open for the whole session; it is now billed per question, follow-up and
+ * report, and its socket asks not to be metered at all (`metered=0`).
+ *
+ * Only this side knows which of those two it is doing, because only this side opens the socket -
+ * so it says. An older client that says nothing is billed exactly as it was, and a newer client
+ * against an older backend has both halves ignored and is also billed exactly as it was. No
+ * combination charges twice, which is the only outcome that must not happen.
+ */
+export enum MockBilling {
+  PerTurn = 'per_turn',
+}
+
+/** The billing declaration shared by the three mock requests that are charged for. */
+interface BilledMockRequest extends LLMRequest {
+  billing: MockBilling;
+}
+
+export interface GenerateMockQuestionRequest extends BilledMockRequest {
   setup: MockInterviewSetup;
   profile_data: string;
   context: string;
@@ -127,14 +149,23 @@ export interface GenerateMockQuestionRequest extends LLMRequest {
   question_number: number;
 }
 
-export interface EvaluateMockTurnRequest extends LLMRequest {
+export interface EvaluateMockTurnRequest extends BilledMockRequest {
   question: string;
   answer: string;
   kind: MockQuestionKind;
   follow_up_count: number;
+  /**
+   * How many questions are still to be asked after this turn.
+   *
+   * Billing only. A follow-up is charged as an extra on top of the price the session was quoted,
+   * so the backend declines one when paying for it would leave the session unable to finish the
+   * questions it promised. It cannot work that out on its own: `history` counts turns, so it runs
+   * ahead of the question number wherever a follow-up was asked.
+   */
+  remaining_questions: number;
 }
 
-export interface GenerateMockReportRequest extends LLMRequest {
+export interface GenerateMockReportRequest extends BilledMockRequest {
   setup: MockInterviewSetup;
   profile_data: string;
   context: string;
