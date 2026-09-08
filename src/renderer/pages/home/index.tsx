@@ -10,6 +10,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
+import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 import type { MockInterviewSetup } from '@/types/mock-interview';
 import { isMockInterviewSessionActive } from '@/types/mock-interview';
@@ -26,6 +27,11 @@ interface LaunchCardProps {
  * One of the two ways to start. A card rather than a button because the choice between them is
  * the whole point of this screen, and a title alone does not say which one a first-time user
  * wants - the description under it does.
+ *
+ * The icon sits above the title rather than beside it, and the pair share a row rather than
+ * stacking. Side by side each card is about half as wide, which is where a description that used
+ * to be one line becomes three; taking the 40px icon out of that width is what pays for them, and
+ * it is the same trade the whole screen is making - see the page's own note.
  *
  * `disabled` is a real removal from the tab order and not just a grey fill: the one case that
  * uses it - a mock interview while the live assistant runs - is refused by the main process
@@ -45,22 +51,21 @@ function LaunchCard({ icon, title, description, onClick, disabled = false }: Lau
           onClick();
         }
       }}
-      className={
+      className={cn(
+        'gap-3 py-4',
         disabled
           ? 'cursor-not-allowed opacity-60 outline-none'
           : 'cursor-pointer outline-none transition-colors hover:border-primary focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50'
-      }
+      )}
     >
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+      <CardHeader className="gap-1.5 px-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
             {icon}
           </div>
-          <div className="min-w-0">
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
+          <CardTitle className="truncate text-sm">{title}</CardTitle>
         </div>
+        <CardDescription className="text-xs">{description}</CardDescription>
       </CardHeader>
     </Card>
   );
@@ -197,13 +202,24 @@ export default function HomePage() {
     // Centred both ways, not just horizontally. `mx-auto` alone left the column pinned to the
     // top of a window that is usually much taller than it, so the whole screen sat in the upper
     // third with an empty half below it. The inner wrapper is `min-h-full` rather than `h-full`
-    // so that centring gives way to scrolling once the content is taller than the window - a
-    // fixed height would clip the sign-out row instead of letting the container scroll to it.
+    // so that centring gives way to scrolling once the content is taller than the window - which
+    // at the sizes below only happens well past the default zoom, and clipping the sign-out row
+    // instead would be worse than a scrollbar nobody normally sees.
+    //
+    // **The layout is built to fit the smallest window the app allows**, which is MIN_WIDTH x
+    // MIN_HEIGHT (840x600) from `main/consts.ts`, less the 36px titlebar. It did not: a single
+    // narrow column of full-width rows ran about 580px against 564px of room, so the front door
+    // opened on a scrollbar and a sign-out button below the fold. Nothing here was removed to
+    // fix that - the screen is the same six things - they are laid out across the width the
+    // window already has instead of down a column half of it wide. The two launch cards share a
+    // row, the account strip carries Buy Credits on its own line rather than above one, and the
+    // three navigations are one row of three. Vertical rhythm went from 8/6-step gaps to 4, and
+    // the outer padding from py-10 to py-6.
     <div className="flex-1 overflow-auto">
       <div className="flex min-h-full items-center justify-center">
-        <div className="w-full max-w-xl px-6 py-10">
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold">
+        <div className="w-full max-w-3xl px-6 py-6">
+          <div className="mb-5">
+            <h1 className="text-xl font-semibold">
               {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -211,9 +227,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="mb-6 space-y-3">
+          <div className="mb-4 grid grid-cols-2 gap-3">
             <LaunchCard
-              icon={<Mic className="h-5 w-5" aria-hidden="true" />}
+              icon={<Mic className="h-4 w-4" aria-hidden="true" />}
               title="Start mock interview"
               description={
                 mockUnsupported
@@ -226,7 +242,7 @@ export default function HomePage() {
               disabled={liveSessionActive || mockUnsupported}
             />
             <LaunchCard
-              icon={<Play className="h-5 w-5" aria-hidden="true" />}
+              icon={<Play className="h-4 w-4" aria-hidden="true" />}
               title={liveSessionActive ? 'Back to your interview' : 'Start live assistant'}
               description={
                 liveSessionActive
@@ -240,7 +256,36 @@ export default function HomePage() {
             />
           </div>
 
-          <div className="mb-6 grid grid-cols-2 gap-3">
+          {/* A bordered strip rather than a Card: the same rule around the same content, without
+              the 48px of vertical padding a Card carries for content that is one line tall. */}
+          <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border bg-card px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Account</p>
+              <p className="truncate text-sm font-medium">
+                {accountReady ? (email ?? 'Not signed in') : 'Loading...'}
+              </p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Credits</p>
+              <p className="text-sm font-medium">
+                {accountReady ? (credits ?? 'Unavailable') : 'Loading...'}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto"
+              onClick={() => navigate('/payment')}
+            >
+              <CreditCard className="h-4 w-4" aria-hidden="true" />
+              Buy Credits
+            </Button>
+          </div>
+
+          {/* Documentation joins the other two navigations rather than sitting on a row of its
+              own under them - it is the same kind of thing, and the row it used to share with
+              Sign out made a destination and the way out of the app look like a pair. */}
+          <div className="mb-3 grid grid-cols-3 gap-3">
             <Button
               variant="outline"
               className="justify-start"
@@ -257,47 +302,25 @@ export default function HomePage() {
               <SettingsIcon className="h-4 w-4" aria-hidden="true" />
               Configuration
             </Button>
-          </div>
-
-          <Card className="mb-6">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6">
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Account</p>
-                <p className="truncate text-sm font-medium">
-                  {accountReady ? (email ?? 'Not signed in') : 'Loading...'}
-                </p>
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Credits</p>
-                <p className="text-sm font-medium">
-                  {accountReady ? (credits ?? 'Unavailable') : 'Loading...'}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto"
-                onClick={() => navigate('/payment')}
-              >
-                <CreditCard className="h-4 w-4" aria-hidden="true" />
-                Buy Credits
-              </Button>
-            </div>
-          </Card>
-
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/documentation')}>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => navigate('/documentation')}
+            >
               <BookOpen className="h-4 w-4" aria-hidden="true" />
               Documentation
             </Button>
-            {/* Signing out was only ever in the titlebar menu and the command palette, which is a
+          </div>
+
+          {/* Signing out was only ever in the titlebar menu and the command palette, which is a
               strange place for the one action that ends everything else on this screen. Refused
               while a session is running, for the same reason the titlebar menu refuses it: it
               tears down the credentials the running assistant is streaming on. */}
+          <div className="flex justify-end">
             <Button
               variant="ghost"
               size="sm"
-              className="ml-auto text-muted-foreground"
+              className="text-muted-foreground"
               disabled={anySessionActive || signingOut}
               title={anySessionActive ? 'Stop the interview before signing out' : undefined}
               onClick={() => void handleSignOut()}

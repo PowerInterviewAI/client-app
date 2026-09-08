@@ -521,6 +521,14 @@ body text in every question.
 
 The main window reference is passed to `windowControlService` and `zoomService` after creation. Window bounds persist to Electron Store on `close` and are restored on next launch with minimum-size clamping (`MIN_WIDTH` / `MIN_HEIGHT` from [src/main/consts.ts](src/main/consts.ts)).
 
+**840x600 is a size the app is actually used at, so screens are laid out to fit it**, less the
+36px titlebar. The home screen did not: six full-width rows down a column half the window wide
+came to roughly 580px against 564px of room, so the app's front door opened on a scrollbar with
+the sign-out row below the fold. Nothing was dropped to fix it - the two launch cards share a row,
+the account strip carries Buy Credits on its own line, and the three navigations are one row of
+three, which is spending the width the window already has rather than the height it does not.
+The outer container keeps `overflow-auto` as a safety valve for large zoom factors.
+
 The app keeps itself off the surfaces a screen share exposes, but only where it has to. There is never a desktop shortcut (the NSIS installer creates none, and `build/installer.nsh` deletes one left by an older install). The taskbar button and the macOS Dock icon are driven by `applySurfaceVisibility()` in [src/main/services/window-control.service.ts](src/main/services/window-control.service.ts) - `setSkipTaskbar(hidden)` plus, on macOS, `app.setActivationPolicy('accessory')` + `app.dock.hide()` going in and `'regular'` + `app.dock.show()` coming out. There is deliberately no `LSUIElement` in the packaged Info.plist: it would pin the app to accessory from launch and there would be no Dock icon to give back.
 
 `hidden` comes from `shouldHideSurfaces()`, which is `_stealth || isAssistantRunning()`. **The two inputs are independent, not nested.** A running assistant is when a screen share is most likely live, so it hides the same surfaces stealth does; leaving stealth mid-session must therefore *not* hand the taskbar button back. The macOS traffic lights are the deliberate exception - they follow `_stealth` alone, because a merely running window is still focusable and interactive and needs its close and minimise buttons. `test/running-surface.test.mjs` pins all of it.
