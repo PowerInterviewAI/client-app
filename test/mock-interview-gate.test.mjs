@@ -21,10 +21,7 @@ export async function run() {
     source,
     'async playQuestion(chunks: string[]): Promise<void> {'
   );
-  const playBlobBody = methodBody(
-    source,
-    'private playBlob(blob: Blob, onStarted?: () => void): Promise<void> {'
-  );
+  const playBlobBody = methodBody(source, 'private playBlob(blob: Blob): Promise<void> {');
 
   check('MicGate.acquire exists', acquireBody.length > 0);
   check('MicGate.release exists', releaseBody.length > 0);

@@ -105,34 +105,6 @@ class MockTtsService {
   private playSeq = 0;
   /** Settles the promise of a playback `stop()` interrupted; null when nothing is playing. */
   private settleStoppedPlayback: (() => void) | null = null;
-  /** Notified the moment a question's first chunk actually starts sounding. */
-  private audioStartListeners = new Set<() => void>();
-
-  /**
-   * Fires when the interviewer's voice actually begins, not when playback is requested.
-   *
-   * The two are seconds apart: `playQuestion` has to synthesise the first sentence before there
-   * is anything to play. The transcript panel reveals the question in step with this rather than
-   * with the state change, so the words arrive with the voice instead of sitting on screen in
-   * silence waiting for it.
-   */
-  onAudioStart(listener: () => void): () => void {
-    this.audioStartListeners.add(listener);
-    return () => {
-      this.audioStartListeners.delete(listener);
-    };
-  }
-
-  private notifyAudioStart(): void {
-    for (const listener of this.audioStartListeners) {
-      try {
-        listener();
-      } catch (e) {
-        // A listener is a UI reveal, never something playback depends on.
-        console.warn('[MockTtsService] audio-start listener threw', e);
-      }
-    }
-  }
 
   setMicTrack(track: MediaStreamTrack | null): void {
     this.gate.setTrack(track);
@@ -167,11 +139,7 @@ class MockTtsService {
         const blob = await this.getChunkBlob(i, chunks.length, seq);
         if (seq !== this.playSeq) return;
         if (!blob) throw new Error('Synthesis returned no audio');
-        // Announced for the first chunk only, and from inside `playBlob` - see `onStarted`
-        // there. Announcing it here, with the blob merely in hand, is what put the words on
-        // screen ahead of the voice: decoding an MP3 and getting the output device going is not
-        // free, and the reveal is timed against the first word being *heard*.
-        await this.playBlob(blob, i === 0 ? () => this.notifyAudioStart() : undefined);
+        await this.playBlob(blob);
       }
       if (seq !== this.playSeq) return;
       await electron.mockInterview.speechFinished();
@@ -283,17 +251,13 @@ class MockTtsService {
   }
 
   /**
-   * @param onStarted Fired once, when this element actually begins to sound.
+   * Play one synthesized chunk, resolving when it finishes and rejecting on every other outcome.
    *
-   * The transcript panel reveals the question in step with it, so *when* is the whole point.
-   * `playQuestion` used to call it as soon as the first chunk's blob arrived, which is one
-   * `createObjectURL`, one MP3 decode and one output-device start too early - enough that the
-   * first words were already on screen before anything was audible, which is the gap between the
-   * text and the speech. `playing` is the event that means sound, and it is used rather than
-   * awaiting `play()`: that promise resolves once playback has been *permitted*, which on a
-   * still-buffering element is earlier again.
+   * Nothing outside waits to be told when the sound begins any more: the question's reveal starts
+   * with the question rather than with the first audible word, because the two can only be
+   * simultaneous if they are started together (see `streaming-question.tsx`).
    */
-  private playBlob(blob: Blob, onStarted?: () => void): Promise<void> {
+  private playBlob(blob: Blob): Promise<void> {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
@@ -343,14 +307,6 @@ class MockTtsService {
         reject(new DOMException('playback stopped', 'AbortError'));
       };
       this.settleStoppedPlayback = settle;
-
-      // `playing` can fire again after a stall re-buffers, and the reveal must not restart with
-      // it, so the handler detaches itself. `onStarted` is only passed for the first chunk of a
-      // question anyway - the later ones are a continuation of a voice that has already begun.
-      audio.onplaying = () => {
-        audio.onplaying = null;
-        onStarted?.();
-      };
 
       audio.onended = () => {
         cleanup();

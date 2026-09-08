@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { mockTtsService } from '@/services/mock-tts.service';
-
 /**
  * Longest the whole reveal is allowed to take, and the slowest it goes for a short question.
  *
@@ -15,37 +13,12 @@ const MS_PER_WORD = 120;
 const MS_BUDGET = 3000;
 const MS_MIN_PER_WORD = 30;
 
-/**
- * How long the reveal waits for the voice before giving up and showing the question anyway.
- *
- * Waiting for audio is what puts the words in step with the speech, but it is not worth an empty
- * question row: synthesis can be slow, and it can fail in ways that only surface later. Past this
- * the text is what matters and the alignment is not.
- */
-const MS_WAIT_FOR_AUDIO = 2500;
-
-/**
- * True once the interviewer's voice has begun for *this* question.
- *
- * Keyed on the question rather than kept as a bare "has spoken" flag, so the answer resets for
- * every new question: the listener records which question it fired for, and only that one reads
- * as started. Resubscribing per question rather than reading the key out of a ref - the
- * subscription is a set insert, and a ref written during render is not a thing to do for it.
- */
-function useSpeechStarted(questionKey: string): boolean {
-  const [startedFor, setStartedFor] = useState<string | null>(null);
-
-  useEffect(() => mockTtsService.onAudioStart(() => setStartedFor(questionKey)), [questionKey]);
-
-  return startedFor === questionKey;
-}
-
 interface StreamingQuestionProps {
   text: string;
   /**
    * Whether this question is going to be spoken. False for a language with no voice, and for a
-   * question whose synthesis failed - both of which put the text on screen with nothing to wait
-   * for.
+   * question whose synthesis failed - both of which put the text on screen with nothing to pace
+   * it against.
    */
   spoken: boolean;
 }
@@ -59,15 +32,18 @@ interface StreamingQuestionProps {
  * it, does not read as someone asking a question - it reads as a page loading and then a
  * recording playing.
  *
- * The reveal starts with the sound rather than with the state change. `Speaking` begins before
- * there is any audio, since the first sentence still has to be synthesised, so timing the reveal
- * against the state would put the words up during that silence.
+ * **The reveal and the voice start together, both on the question arriving.** It used to wait for
+ * the first audio chunk to actually sound, with a 2.5-second fallback for the case where that
+ * never happened. Synthesis is a network call, so that wait was routinely the whole of the
+ * fallback: the words then went up after the wait rather than with the question, and the voice
+ * arrived after them anyway. Waiting cannot make the two simultaneous - only starting them at the
+ * same moment can - and the reveal's own pacing is what keeps the text alongside the speech from
+ * there.
  *
  * Respects `prefers-reduced-motion`, where the whole question appears at once - this is
  * decoration on content the candidate has to read, so it is the animation that gives way.
  */
 export function StreamingQuestion({ text, spoken }: StreamingQuestionProps) {
-  const speechStarted = useSpeechStarted(text);
   const words = useMemo(() => text.split(/(\s+)/), [text]);
 
   const [shown, setShown] = useState(0);
@@ -77,10 +53,6 @@ export function StreamingQuestion({ text, spoken }: StreamingQuestionProps) {
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Armed when the wait for audio has run out. Kept as state rather than folded into the reveal
-  // effect so that timer restarts with the question and nothing else.
-  const [waitedForAudio, setWaitedForAudio] = useState(false);
-
   // Nothing to animate when the user has asked for less motion, and nothing to animate when the
   // question is not going to be spoken either.
   //
@@ -88,24 +60,16 @@ export function StreamingQuestion({ text, spoken }: StreamingQuestionProps) {
   // keep step with, and pacing the text out anyway is the animation asking the candidate to wait
   // for a machine that is not doing anything - on the one path where reading the question *is*
   // the whole of being asked it, and where a cursor blinking after a half-written sentence reads
-  // as the interviewer still thinking. `useSpeechStarted` keeps its subscription either way,
-  // because `speechFailed` can flip `spoken` to false for a question already mid-reveal.
+  // as the interviewer still thinking.
   const instant = reduceMotion || !spoken;
-  const started = instant || speechStarted || waitedForAudio;
 
+  // Declared before the reveal below so a new question resets the count first and the interval
+  // that follows starts from the beginning of it rather than from the previous question's tail.
   useEffect(() => {
     setShown(0);
-    setWaitedForAudio(false);
   }, [text]);
 
   useEffect(() => {
-    if (!spoken || reduceMotion) return;
-    const id = window.setTimeout(() => setWaitedForAudio(true), MS_WAIT_FOR_AUDIO);
-    return () => window.clearTimeout(id);
-  }, [text, spoken, reduceMotion]);
-
-  useEffect(() => {
-    if (!started) return;
     if (instant) {
       setShown(words.length);
       return;
@@ -130,7 +94,7 @@ export function StreamingQuestion({ text, spoken }: StreamingQuestionProps) {
     }, perWord);
 
     return () => window.clearInterval(id);
-  }, [started, instant, words]);
+  }, [instant, words]);
 
   const revealed = words.slice(0, shown).join('');
   const done = shown >= words.length;

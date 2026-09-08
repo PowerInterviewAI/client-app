@@ -474,12 +474,21 @@ the transcript as well as the clock. It is deliberately not armed by `speechFail
 clears `hasAudio`: there the question has been read out at least in part, and someone answering the
 moment the voice cuts out is answering. `test/mock-text-only-turn.test.mjs` pins it.
 
-**The reveal starts with the sound, and `playing` is what that means.** `playQuestion` announced it
-as soon as the first chunk's blob arrived - one `createObjectURL`, one MP3 decode and one
-output-device start too early, so the words were on screen before anything was audible. Not
-`play()` resolving either: that means playback has been permitted, which on a still-buffering
-element is earlier again. A question that will not be spoken appears whole, because a reveal exists
-to keep words in step with a voice and there is none.
+**The reveal and the voice start together, on the question arriving, and neither waits for the
+other.** The reveal used to wait for the first chunk to actually sound - the `playing` event, with
+a 2.5-second fallback for the case where it never came. The intent was to keep the words in step
+with the speech; what it produced was the opposite. Synthesis is a network round trip, so on an
+ordinary connection the wait *was* the fallback: the question sat as a blank line for two and a
+half seconds, the text then went up on the timeout, and the voice arrived after it anyway. Waiting
+cannot make two things simultaneous when one of them is the thing being waited for - only starting
+them at the same moment can, which is what `installQuestion` moving to `Speaking` already does for
+both. From there the reveal's own pacing (about twice speaking speed, capped by a budget) is what
+keeps the text alongside the voice.
+
+The whole audio-start notification - `onAudioStart`, the listener set, and `playBlob`'s
+`onStarted`/`onplaying` pair - went with it, since revealing the question was the only thing that
+ever subscribed. A question that will not be spoken still appears whole rather than pacing itself
+out, because a reveal exists to keep words in step with a voice and there is none.
 
 **The exported report uses the live export's heading scheme**, not one of its own. Both are
 rendered by `MOCK_DOCX_OPTIONS`, which centres H1 and H5 and ranges everything else left - a style
