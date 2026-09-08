@@ -7,7 +7,6 @@ import {
   ListChecks,
   LogOut,
   Mic,
-  MonitorPlay,
   Moon,
   Play,
   Route,
@@ -146,14 +145,15 @@ export function CommandPalette() {
         <CommandList>
           <CommandEmpty>No matching action.</CommandEmpty>
 
+          {/* No entry for `/main`. The live console is not a destination you visit - it is where
+              a running session is, and the only two ways onto it are starting one (below) and
+              coming back to one already running (the home screen's own card). Sending an idle
+              user there landed them on a bar whose every control is disabled, with the sole
+              working one being the way back. */}
           <CommandGroup heading="Go to">
             <CommandItem onSelect={() => run(() => navigate('/'))}>
               <Home />
               Home
-            </CommandItem>
-            <CommandItem onSelect={() => run(() => navigate('/main'))}>
-              <MonitorPlay />
-              Interview console
             </CommandItem>
             <CommandItem onSelect={() => run(() => navigate('/account'))}>
               <UserRound />
