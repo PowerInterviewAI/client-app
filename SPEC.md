@@ -61,7 +61,19 @@ Navigating away from `/mock-interview` mid-session ends it, scoring whatever was
 
 ### Mock Interview Question Delivery
 
-The backend returns each question whole; the session screen writes it out word by word as the interviewer speaks it. The reveal is timed against the first audio chunk actually sounding rather than against the `Speaking` state, because that state begins before the first sentence has been synthesised - timing it against the state would put the words on screen during that silence. Paces at roughly twice speech so the last word lands before the sentence ends, gives up waiting for audio after 2.5s, and shows the whole question at once under `prefers-reduced-motion`. Component: [src/renderer/components/custom/panels/streaming-question.tsx](src/renderer/components/custom/panels/streaming-question.tsx).
+The backend returns each question whole; the session screen writes it out word by word as the interviewer speaks it, and the two start together.
+
+Keeping them together is an ordering rather than an animation. The question's first sentence is synthesised in the main process **before** the session moves to `Speaking`, during `Generating` where a spinner is already on screen for the question's own model call, so the words and the voice begin within a frame or two of each other. The reveal then paces at roughly twice speech, so the last word lands before the sentence ends, and shows the whole question at once under `prefers-reduced-motion` or when the language has no voice.
+
+Earlier attempts worked on this from the other end - having the reveal wait for the first audio chunk to sound, with a 2.5s fallback - and could not succeed: synthesis is a network round trip that happened after the question was broadcast, so on an ordinary connection the wait *was* the fallback and the voice still arrived after the text. Components: [streaming-question.tsx](src/renderer/components/custom/panels/streaming-question.tsx), and `primeFirstChunk` in [mock-interview.service.ts](src/main/services/mock-interview.service.ts).
+
+### What a Mock Interview Costs
+
+A live interview is metered per minute; a mock one is priced per question (20 credits), follow-up (10) and report (40), and its transcription socket is not metered at all. The two spend their wall clock differently: a mock session spends much of it generating the question, speaking it, scoring the turn and writing the report - none of which the candidate can act during - and most of the rest on think-time, which is the behaviour the feature exists to train.
+
+The prices come from the backend on the 5-second ping, never from local constants, so a quote can never name a number the user is not charged. The setup dialog shows two: what the session is guaranteed to cost, and the ceiling if the interviewer follows up on every answer. The smaller one is the promise - every question quoted and the report are guaranteed once the session starts, and a follow-up is declined rather than allowed to eat into them.
+
+A length the balance cannot cover is disabled in the question-count picker with the reason, so the answer to "not enough credits" is a shorter interview chosen on the same screen; the home screen's mock card says the same thing one level earlier, against the shortest session there is. A backend that predates per-turn pricing sends no prices, and the client then quotes nothing and gates nothing.
 
 ### Hint-Only Mode
 
