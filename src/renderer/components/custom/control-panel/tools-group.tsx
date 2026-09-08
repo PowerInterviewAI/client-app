@@ -57,6 +57,10 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
   // warning - and greyed out for the whole interview they exist to be used during.
   const actionDisabled = runningState !== RunningState.Running || actionBusy;
 
+  // Same reasoning, same state, and deliberately not folded into `actionDisabled`: that one also
+  // carries `actionBusy`, which has nothing to do with whether hiding the window makes sense.
+  const stealthDisabled = runningState !== RunningState.Running;
+
   const runActionSuggestion = async (
     action: () => Promise<void> | undefined,
     failureMessage: string
@@ -165,26 +169,40 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
           control: the screen share it hides from only exists during a real interview, and this
           bar is the only surface that only exists on that screen.
 
+          Being on this bar is not on its own enough, which is why it is disabled off `Running`
+          rather than merely present. This screen is reachable with nothing running - a cancelled
+          start, or the route opened directly - and entering stealth there takes the taskbar
+          button, the Dock icon and mouse input away from an app with nothing to hide. Main
+          refuses it too (`stealthUnavailableReason`); this is the half that says so before the
+          click rather than after it.
+
           Entering is a click; leaving is the global hotkey, because this bar does not render in
           stealth mode. That is not a gap - the whole point of stealth is that the app has no
           visible surface to click - and the status panel that replaces it carries the cheatsheet
           the combo is documented in. */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            onClick={() => getElectron()?.toggleStealth()}
-            size="sm"
-            className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
-            aria-label="Enter stealth mode"
-          >
-            <EyeOff className="h-4 w-4" />
-          </Button>
+          {/* Wrapped, like the Stop button: a disabled button fires no pointer events, so the
+              tooltip saying why it is unavailable would be unreachable without this. */}
+          <span className="inline-flex">
+            <Button
+              variant="ghost"
+              onClick={() => getElectron()?.toggleStealth()}
+              size="sm"
+              className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
+              disabled={stealthDisabled}
+              aria-label="Enter stealth mode"
+            >
+              <EyeOff className="h-4 w-4" />
+            </Button>
+          </span>
         </TooltipTrigger>
         <TooltipContent>
           <p>Stealth Mode ({HOTKEYS[Hotkey.ToggleStealth].combo})</p>
           <p className="text-xs text-muted-foreground">
-            Hides the app from screen capture. The same shortcut brings it back.
+            {stealthDisabled
+              ? 'Available once the live interview is running - there is nothing to hide from yet.'
+              : 'Hides the app from screen capture. The same shortcut brings it back.'}
           </p>
         </TooltipContent>
       </Tooltip>

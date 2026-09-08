@@ -83,7 +83,11 @@ export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
   [Hotkey.ToggleStealth]: {
     combo: `${BASE}M`,
     title: 'Toggle Stealth',
-    description: 'Toggle stealth mode ON or OFF',
+    // Entering is refused unless a live interview is running (see `stealthUnavailableReason` in
+    // window-control.service.ts), and this sheet is where the combo is documented for the one
+    // mode with no visible control to explain itself - so it says so rather than leaving the
+    // refusal to a toast.
+    description: 'Hide from screen capture during a live interview. The same keys bring it back.',
   },
   [Hotkey.Opacity]: {
     combo: `${BASE}N`,

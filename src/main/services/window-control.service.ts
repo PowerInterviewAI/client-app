@@ -222,6 +222,18 @@ function applyAlwaysOnTop(pinned: boolean): void {
  * stopping moves `shouldHideSurfaces()` without going through `enableStealth`/`disableStealth`.
  */
 export function refreshWindowSurfaces(): void {
+  // Stealth does not outlive the session it was entered for. It is a live-call control - see
+  // `stealthUnavailableReason()` - so a run that ends takes it with it, and this is the one place
+  // every ending passes through. Left to the renderer's stop path alone it would be one of
+  // several: the stop hotkey, a teardown decided in main, a session that ends while the window is
+  // hidden. Any of those missing it leaves the app click-through, invisible to a screen capture
+  // and unfocusable, with no interview on screen to explain why and only a global hotkey out.
+  if (_stealth && !isAssistantRunning()) {
+    // Applies the surfaces itself, so returning here is not skipping that.
+    disableStealth();
+    return;
+  }
+
   applySurfaceVisibility();
 }
 
@@ -553,35 +565,72 @@ export function disableStealth(): void {
 }
 
 /**
- * Toggle stealth mode on/off
+ * Why entering stealth is refused right now, or `null` when it is available.
+ *
+ * **Stealth is a live-interview control, and this is where that is enforced.** What it does is
+ * hide the window from a screen capture and pin it over the call; the screen share it hides from
+ * only exists during a real interview. Everywhere else it is a mode with nothing to hide that
+ * takes the taskbar button, the Dock icon, the traffic lights and mouse input away - so a hotkey
+ * pressed on the home screen, on the account page or on the login form left the app apparently
+ * gone, with the same hotkey as the only way back. The button on the control bar was already
+ * only on the interview screen; the global shortcut and `window:set-stealth` were not, and they
+ * are the routes that reached everywhere else.
+ *
+ * Only *entering* is gated. Leaving is never refused from anywhere: the bar that carries the
+ * button does not render in stealth mode, so the hotkey is the only way out and a gate on it
+ * would be a trap rather than a guard.
  */
-export function toggleStealth(): void {
-  // Check if user is logged in
-  if (!appStateService.getState().isLoggedIn) {
-    pushNotificationService.pushNotification({
-      message: 'You must be logged in to use stealth mode.',
-      type: 'error',
-    });
-    console.log('⚠️ Stealth mode requires authentication');
-    return;
-  }
+function stealthUnavailableReason(): string | null {
+  const state = appStateService.getState();
+
+  if (!state.isLoggedIn) return 'You must be logged in to use stealth mode.';
 
   // Mock interview is deliberate practice, not a live call - it needs no always-on-top and no
   // screen-share hiding, and a click-through, non-focusable window would strand the session
-  // screen the user is looking straight at.
-  if (isMockInterviewSessionActive(appStateService.getState().mockInterview)) {
-    pushNotificationService.pushNotification({
-      message: 'Stealth mode is off during a mock interview. This is practice, not a live call.',
-      type: 'warning',
-    });
+  // screen the user is looking straight at. Named separately from the check below because a mock
+  // session deliberately leaves `runningState` on Idle, so the answer "start a live interview
+  // first" would be the wrong thing to say to someone who is mid-interview already.
+  if (isMockInterviewSessionActive(state.mockInterview)) {
+    return 'Stealth mode is off during a mock interview. This is practice, not a live call.';
+  }
+
+  // The same predicate `shouldHideSurfaces()` reads, so the two cannot disagree about when a
+  // session is on air. `Starting` is deliberately not enough: nothing is being captured yet, and
+  // a start that fails leaves stealth on over a console that never opened.
+  if (!isAssistantRunning()) {
+    return 'Stealth mode is only available during a live interview.';
+  }
+
+  return null;
+}
+
+/**
+ * Enter stealth mode if the session allows it, saying why if it does not.
+ *
+ * The single entry point for turning it *on*: both the global hotkey and `window:set-stealth`
+ * come through here, so the gate cannot be bypassed by whichever route a later change forgets.
+ */
+export function requestStealth(): void {
+  const reason = stealthUnavailableReason();
+  if (reason) {
+    pushNotificationService.pushNotification({ message: reason, type: 'warning' });
+    console.log(`⚠️ Stealth mode refused: ${reason}`);
     return;
   }
 
+  enableStealth();
+}
+
+/**
+ * Toggle stealth mode on/off
+ */
+export function toggleStealth(): void {
   if (_stealth) {
     disableStealth();
-  } else {
-    enableStealth();
+    return;
   }
+
+  requestStealth();
 }
 
 /**

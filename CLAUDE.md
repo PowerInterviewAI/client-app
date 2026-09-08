@@ -470,6 +470,33 @@ window from a screen capture answers a question nobody is asking - the screen sh
 only happens during a real call. Entering is a click; leaving is the global hotkey, because that
 bar does not render in stealth mode, which is the point of it.
 
+**Moving the button was not enough, because the button was never the only way in.** The global
+shortcut is registered with `globalShortcut` and fires from every screen and from outside the app
+entirely, and `window:set-stealth` is an IPC channel with no screen attached at all - so stealth
+was still one keypress away on the home page, the account page and the login form, where it takes
+the taskbar button, the Dock icon, the traffic lights and mouse input away from an app that has
+nothing to hide, leaving the same shortcut as the only way back. `stealthUnavailableReason()` in
+[window-control.service.ts](src/main/services/window-control.service.ts) is where that is now
+decided, and both routes in go through `requestStealth()`, so the answer cannot differ by route.
+It refuses three cases with a message that names which one: signed out, a mock session (practice,
+not a live call - and a mock deliberately leaves `runningState` on Idle, so it has to be tested
+separately), and no live interview running. The last reads `isAssistantRunning()`, the same
+predicate `shouldHideSurfaces()` uses, so the two cannot disagree about when a session is on air;
+`Starting` is deliberately not enough, since nothing is being captured yet and a start that fails
+would leave stealth on over a console that never opened.
+
+**Only entering is gated, and only entering ever can be.** Leaving is refused from nowhere: the
+bar carrying the button does not render in stealth mode, so the hotkey is the sole way out and a
+guard on it would be a trap rather than a check. The same asymmetry is why the IPC handler splits
+- `requestStealth()` going in, `disableStealth()` coming out - since `stopAssistant` sends that
+second one at the end of every session.
+
+**And a session that ends takes stealth with it.** `refreshWindowSurfaces()` drops it when the
+running state leaves `Running`, which is the one place in main every start and end passes through.
+The renderer's stop path already asked for that, but it is one of several ways a session ends, and
+any of the others missing it leaves the window click-through, invisible to a screen capture and
+unfocusable, with no interview on screen to explain why.
+
 ### The mock interview turn
 
 **Live suggestions are off by default** (`mockLiveHintsEnabled`, and the rename is the reversal:

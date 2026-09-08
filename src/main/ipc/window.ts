@@ -1,8 +1,6 @@
 import { ipcMain } from 'electron';
 
 import { ZOOM_STEP } from '../consts.js';
-import { appStateService } from '../services/app-state.service.js';
-import { pushNotificationService } from '../services/push-notification.service.js';
 import * as windowControls from '../services/window-control.service.js';
 import * as zoomService from '../services/zoom.service.js';
 
@@ -67,18 +65,14 @@ export function registerWindowHandlers(): void {
     }
   });
 
+  // Entering goes through `requestStealth`, which is where every reason it can be refused lives -
+  // signed out, a mock session, no live interview running. Leaving calls `disableStealth`
+  // directly and is never refused: `stopAssistant` sends this at the end of every session, and a
+  // guard there would be a guard against turning stealth *off*.
   ipcMain.on('window:set-stealth', (_event, isStealth: boolean) => {
     try {
-      if (!appStateService.getState().isLoggedIn) {
-        pushNotificationService.pushNotification({
-          message: 'You must be logged in to use stealth mode.',
-          type: 'error',
-        });
-        return;
-      }
-
       if (isStealth) {
-        windowControls.enableStealth();
+        windowControls.requestStealth();
       } else {
         windowControls.disableStealth();
       }
