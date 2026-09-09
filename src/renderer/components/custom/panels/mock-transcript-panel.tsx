@@ -101,6 +101,9 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
   const username = appState?.interviewConfig?.fullName || 'You';
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState<boolean>(() => config?.autoScrollTranscript ?? true);
+  // A callback ref rather than a `useRef`, because the observer below has to be re-attached when
+  // this element is swapped out - the empty state renders in its place until the first question.
+  const [contentEl, setContentEl] = useState<HTMLDivElement | null>(null);
 
   /**
    * Scrolls this panel's own scroller, and nothing else.
@@ -115,10 +118,10 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
    * the wrappers so the column has nothing to scroll; scrolling this element by name means the
    * panel could not move anything above it even if it did.
    */
-  const scrollToEnd = useCallback(() => {
+  const scrollToEnd = useCallback((behavior: ScrollBehavior = 'smooth') => {
     const el = scrollerRef.current;
     if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    el.scrollTo({ top: el.scrollHeight, behavior });
   }, []);
 
   useEffect(() => {
@@ -157,9 +160,39 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
   const progressValue = totalQuestions > 0 ? (questionNumber / totalQuestions) * 100 : 0;
   const isRunning = isMockInterviewSessionActive(session);
 
+  /**
+   * Follows the transcript whenever the content itself grows, not only when `turns` changes.
+   *
+   * `turns` is a list of finished strings, so watching it alone misses the reveal entirely: the
+   * question arrives whole and `StreamingQuestion` writes it out in the DOM, so for the whole
+   * time the voice is speaking - which is most of what there is to follow - the effect below
+   * never fires and the panel sat still, catching up only on the next state change. That is the
+   * "auto-scroll only works once the voice ends" of it. The same gap covers anything else that
+   * changes height on its own: a reflow when the dock is resized, or a font finishing loading.
+   *
+   * A ResizeObserver on the list is the general form - it fires on the content box actually
+   * getting taller, whatever made it taller - and only at the moments that matter, since
+   * revealing a word mid-line does not change the height at all.
+   *
+   * Instant rather than smooth, and this is the path essentially every auto-scroll now takes
+   * (a new turn grows the list too, so the observer fires there as well and its scroll lands on
+   * top of the effect below). Growth arrives a line at a time, and re-targeting a running smooth
+   * animation on every wrap leaves the panel permanently trailing the text it is meant to be
+   * showing. Smooth is kept for the button, where the reader asked for one long jump.
+   */
+  useEffect(() => {
+    if (!autoScroll || !contentEl || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => scrollToEnd('auto'));
+    observer.observe(contentEl);
+    return () => observer.disconnect();
+  }, [autoScroll, contentEl, scrollToEnd]);
+
+  // Covers what the observer cannot see: a turn swapped for one of the same height, and the first
+  // render after the list appears, before the observer above is attached to it.
   useEffect(() => {
     if (!autoScroll) return;
-    scrollToEnd();
+    scrollToEnd('auto');
   }, [turns, autoScroll, scrollToEnd]);
 
   return (
@@ -214,7 +247,7 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
             <p className="text-sm text-muted-foreground">Preparing your first question…</p>
           </div>
         ) : (
-          <div className="divide-y divide-border/50">
+          <div ref={setContentEl} className="divide-y divide-border/50">
             {turns.map((turn) => (
               <div key={turn.key} className="flex gap-2 py-2 max-w-3xl mx-auto">
                 <span
@@ -263,7 +296,7 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
         <Button
           size="icon-sm"
           className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
-          onClick={scrollToEnd}
+          onClick={() => scrollToEnd()}
           aria-label="Scroll to bottom"
         >
           <ArrowDown className="size-4" />
