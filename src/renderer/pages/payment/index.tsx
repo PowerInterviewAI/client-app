@@ -70,7 +70,11 @@ export default function PaymentPage() {
       {/* Content */}
       <div className="flex-1 overflow-hidden px-4 py-3 w-full max-w-3xl mx-auto">
         <TabsContent value="buy" className="flex-1 mt-0">
-          <BuyCreditsTab credits={remainingCredits} onPaymentCreated={handlePaymentCreated} />
+          <BuyCreditsTab
+            credits={remainingCredits}
+            creditsPerMinute={appState?.creditsPerMinute}
+            onPaymentCreated={handlePaymentCreated}
+          />
         </TabsContent>
 
         <TabsContent value="history" className="flex-1 mt-0">

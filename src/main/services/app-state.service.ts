@@ -27,6 +27,7 @@ const DEFAULT_STATE: AppState = {
   credits: undefined,
   userRole: undefined,
   providedLLMModel: undefined,
+  creditsPerMinute: undefined,
   interviewConfig: { fullName: '', profileData: '', context: '' },
   interviewConfigLoaded: false,
   onboardingCompleted: false,

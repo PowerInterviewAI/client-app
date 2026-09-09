@@ -1,5 +1,5 @@
 import { ArrowDown } from 'lucide-react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { StreamingQuestion } from '@/components/custom/panels/streaming-question';
 import { Badge } from '@/components/ui/badge';
@@ -99,8 +99,30 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
   const { appState } = useAppState();
   const { config, updateConfig } = useConfigStore();
   const username = appState?.interviewConfig?.fullName || 'You';
-  const endRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState<boolean>(() => config?.autoScrollTranscript ?? true);
+  // A callback ref rather than a `useRef`, because the observer below has to be re-attached when
+  // this element is swapped out - the empty state renders in its place until the first question.
+  const [contentEl, setContentEl] = useState<HTMLDivElement | null>(null);
+
+  /**
+   * Scrolls this panel's own scroller, and nothing else.
+   *
+   * It used to be `endRef.scrollIntoView({ behavior: 'smooth' })` on a sentinel at the end of the
+   * list, which reaches upward by definition: it brings the element into view inside *every*
+   * scrollable ancestor, and Chromium counts a box with `overflow: hidden` as one. The session
+   * screen's panel-and-status column is exactly that, and while a question was being spoken with
+   * the transcript already longer than the panel it had something to scroll - so each smooth
+   * scroll here dragged the column too, taking the status line and the control bar under it up
+   * with it before they settled back. `session.tsx` closes the other half of that by clamping
+   * the wrappers so the column has nothing to scroll; scrolling this element by name means the
+   * panel could not move anything above it even if it did.
+   */
+  const scrollToEnd = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+  }, []);
 
   useEffect(() => {
     if (typeof config?.autoScrollTranscript === 'boolean') {
@@ -138,10 +160,40 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
   const progressValue = totalQuestions > 0 ? (questionNumber / totalQuestions) * 100 : 0;
   const isRunning = isMockInterviewSessionActive(session);
 
+  /**
+   * Follows the transcript whenever the content itself grows, not only when `turns` changes.
+   *
+   * `turns` is a list of finished strings, so watching it alone misses the reveal entirely: the
+   * question arrives whole and `StreamingQuestion` writes it out in the DOM, so for the whole
+   * time the voice is speaking - which is most of what there is to follow - the effect below
+   * never fires and the panel sat still, catching up only on the next state change. That is the
+   * "auto-scroll only works once the voice ends" of it. The same gap covers anything else that
+   * changes height on its own: a reflow when the dock is resized, or a font finishing loading.
+   *
+   * A ResizeObserver on the list is the general form - it fires on the content box actually
+   * getting taller, whatever made it taller - and only at the moments that matter, since
+   * revealing a word mid-line does not change the height at all.
+   *
+   * Instant rather than smooth, and this is the path essentially every auto-scroll now takes
+   * (a new turn grows the list too, so the observer fires there as well and its scroll lands on
+   * top of the effect below). Growth arrives a line at a time, and re-targeting a running smooth
+   * animation on every wrap leaves the panel permanently trailing the text it is meant to be
+   * showing. Smooth is kept for the button, where the reader asked for one long jump.
+   */
+  useEffect(() => {
+    if (!autoScroll || !contentEl || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => scrollToEnd('auto'));
+    observer.observe(contentEl);
+    return () => observer.disconnect();
+  }, [autoScroll, contentEl, scrollToEnd]);
+
+  // Covers what the observer cannot see: a turn swapped for one of the same height, and the first
+  // render after the list appears, before the observer above is attached to it.
   useEffect(() => {
     if (!autoScroll) return;
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [turns, autoScroll]);
+    scrollToEnd('auto');
+  }, [turns, autoScroll, scrollToEnd]);
 
   return (
     <Card className="relative flex flex-col w-full h-full bg-card p-0 rounded-md gap-1">
@@ -184,13 +236,18 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
 
       {totalQuestions > 0 && <Progress value={progressValue} className="h-1 rounded-none shrink-0" />}
 
-      <div className="flex-1 overflow-y-auto px-2 py-1">
+      {/* `overflow-x-hidden` is not decoration: `overflow-y-auto` on its own leaves the other
+          axis computing to `auto` rather than staying visible, so the vertical scrollbar
+          appearing on a long transcript narrowed the content by ten pixels and could bring a
+          horizontal one in behind it - which shortens the content box again. Turn text wraps
+          (`wrap-break-word`), so there is nothing here that horizontal scrolling would reach. */}
+      <div ref={scrollerRef} className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-1">
         {turns.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center p-4">
             <p className="text-sm text-muted-foreground">Preparing your first question…</p>
           </div>
         ) : (
-          <div className="divide-y divide-border/50">
+          <div ref={setContentEl} className="divide-y divide-border/50">
             {turns.map((turn) => (
               <div key={turn.key} className="flex gap-2 py-2 max-w-3xl mx-auto">
                 <span
@@ -233,14 +290,13 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
             ))}
           </div>
         )}
-        <div ref={endRef} />
       </div>
 
       {!autoScroll && (
         <Button
           size="icon-sm"
           className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
-          onClick={() => endRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => scrollToEnd()}
           aria-label="Scroll to bottom"
         >
           <ArrowDown className="size-4" />

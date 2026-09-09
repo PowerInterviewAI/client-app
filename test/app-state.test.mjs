@@ -155,5 +155,33 @@ export async function run() {
 
   appStateService.updateState({ mockInterview: null });
 
+  // creditsPerMinute is a deployment setting relayed from the ping, not a constant - it must
+  // start unset (the fallback lives in the renderer's compiled-in mirror, not here), reach the
+  // renderer once the backend answers, and behave like every other ping-relayed field under the
+  // no-op broadcast dedup above.
+  check(
+    'creditsPerMinute starts undefined - an old backend that never sends it must not look priced',
+    appStateService.getState().creditsPerMinute === undefined
+  );
+
+  appStateService.updateState({ creditsPerMinute: 12 });
+  check(
+    'creditsPerMinute is applied',
+    appStateService.getState().creditsPerMinute === 12
+  );
+  check(
+    'creditsPerMinute reaches the renderer view',
+    appStateService.getRendererState().creditsPerMinute === 12
+  );
+
+  appStateService.flushRenderer();
+  const beforeRepeatedPing = sent.length;
+  appStateService.updateState({ creditsPerMinute: 12 });
+  appStateService.flushRenderer();
+  check(
+    'an unchanged creditsPerMinute does not rebroadcast',
+    sent.length === beforeRepeatedPing
+  );
+
   return failures;
 }

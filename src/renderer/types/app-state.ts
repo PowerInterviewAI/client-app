@@ -94,6 +94,16 @@ export interface AppState {
    * answers, and only one of them is a price.
    */
   mockPricing?: MockPricing;
+  /**
+   * The price of a live interview, in credits per minute, or `undefined` before the backend has
+   * said (or before main answers it at all).
+   *
+   * `CREDITS_PER_MINUTE` in `lib/consts.ts` is a fallback mirror of this, used only while this
+   * is `undefined` - the real value is a deployment setting, not a constant, so a "minutes
+   * remaining" figure computed from the mirror can silently disagree with what the backend
+   * actually charges.
+   */
+  creditsPerMinute?: number;
 }
 
 /**

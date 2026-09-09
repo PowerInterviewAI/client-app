@@ -22,8 +22,44 @@ export async function run() {
   const outerDiv = session.match(/<div className="flex-1[^"]*w-full bg-background p-1 space-y-1">/)?.[0] ?? '';
   check('the route root clamps its height rather than growing to fit its content', outerDiv.includes('min-h-0'));
 
-  const secondDiv = session.match(/<div className="flex-1[^"]*overflow-y-hidden gap-1">/)?.[0] ?? '';
+  const secondDiv = session.match(/<div className="flex-1[^"]*overflow-hidden gap-1">/)?.[0] ?? '';
   check('the panel-and-status column does too', secondDiv.includes('min-h-0'));
+
+  // And the two wrappers inside it, which are the last link in that chain: they set no
+  // `overflow` either, so their floor is their content's min-content height - and the panel they
+  // hold is `h-full`, which reads as `auto` while that floor is being computed, making the floor
+  // the whole transcript. Past the point where the transcript is longer than the row, each
+  // wrapper was taller than the row that holds it and the panel overflowed the column above.
+  const wrappers = session.match(/<div className="flex-1 min-w-0[^"]*">/g) ?? [];
+  check(
+    'both panel wrappers clamp their height too',
+    wrappers.length === 2 && wrappers.every((w) => w.includes('min-h-0'))
+  );
+
+  // Hidden is not the same as not scrollable: Chromium scrolls an `overflow: hidden` box
+  // programmatically, and `scrollIntoView` brings its target into view inside *every* scrollable
+  // ancestor rather than only the nearest one. With the column above having anything to scroll,
+  // the transcript's own auto-scroll dragged it - and the status line and control bar under it -
+  // on every question while the interviewer was speaking. Scrolling the panel's own scroller
+  // reaches nothing outside the panel.
+  const panel = codeOnly(
+    readSource(
+      new URL('../src/renderer/components/custom/panels/mock-transcript-panel.tsx', import.meta.url)
+    )
+  );
+  check(
+    'the mock transcript scrolls its own container rather than reaching up through ancestors',
+    !panel.includes('scrollIntoView') && /scrollerRef\.current/.test(panel)
+  );
+
+  // One axis hidden and the other left `visible` is not expressible: the visible axis computes to
+  // `auto`. Both of these are meant to clip rather than scroll sideways, and a horizontal
+  // scrollbar in either is ten pixels of height taken out of the bottom of the screen.
+  check('the panel-and-status column clips both axes', !/overflow-y-hidden/.test(session));
+  check(
+    'the transcript scroller pins its horizontal axis',
+    panel.includes('overflow-y-auto overflow-x-hidden')
+  );
 
   // The Idle fallback on mock-interview/index.tsx redirects now that setup lives on the home
   // screen - where the old full-page setup screen used to render harmlessly for one frame, a

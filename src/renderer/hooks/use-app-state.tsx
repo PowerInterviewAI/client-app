@@ -41,6 +41,14 @@ class AppStateManager {
       credits: raw.credits,
       userRole: raw.userRole,
       providedLLMModel: raw.providedLLMModel,
+      // Was missing from this object entirely - every write to `AppState.mockPricing` from main
+      // was silently dropped here, so the mock-interview affordability gate this field exists to
+      // drive never actually engaged: `pricing` in the setup form and `appState?.mockPricing` on
+      // the home card were always undefined, which both read the same way "this backend predates
+      // per-turn pricing" does - quote nothing, gate nothing - even against a backend that does
+      // send it.
+      mockPricing: raw.mockPricing,
+      creditsPerMinute: raw.creditsPerMinute,
       interviewConfig: raw.interviewConfig ?? { fullName: '', hasProfileData: false },
       interviewConfigLoaded: raw.interviewConfigLoaded ?? false,
       // Defaults false, which is the safe direction: a main process that does not send it offers

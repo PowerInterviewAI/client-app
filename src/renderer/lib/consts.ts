@@ -2,6 +2,13 @@ export const APP_NAME = 'Power Interview AI';
 
 export const isMac = navigator.platform.toUpperCase().includes('MAC');
 
+/**
+ * Fallback only, for while `AppState.creditsPerMinute` is `undefined` - before the first ping
+ * answers, or against a backend old enough not to send it. The real price is a deployment
+ * setting on the backend (`CREDITS_PER_MINUTE` in `app/cfg/payment.py`, env-overridable), not a
+ * constant, so this mirror can silently disagree with what is actually charged and must never be
+ * read as authoritative once the real value is known.
+ */
 export const CREDITS_PER_MINUTE = 10;
 
 /**

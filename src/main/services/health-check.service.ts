@@ -27,6 +27,18 @@ function nextFailureInterval(current: number): number {
   return Math.min(current * FAILURE_BACKOFF_FACTOR, MAX_FAILURE_INTERVAL);
 }
 
+/**
+ * The per-minute rate is the divisor behind every "minutes remaining" figure the UI shows, and it
+ * is now a number the backend supplies rather than a compiled-in constant. A zero or a negative -
+ * a misconfigured `CREDITS_PER_MINUTE` env override, which is the whole reason this is served
+ * rather than compiled in - would divide a balance into `Infinity` or a negative duration and
+ * render it. Anything that is not a usable rate is reported as absent, which is a case the
+ * renderer already handles: it falls back to its own mirror.
+ */
+function usableRate(value: number | undefined): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
 export class HealthCheckService {
   private running = false;
   private client = new HealthCheckApi();
@@ -54,6 +66,10 @@ export class HealthCheckService {
         // undefined rather than defaulted: the mock setup dialog reads the absence as "this
         // deployment still meters a mock by the minute", and a zero would read as free.
         mockPricing: res.data?.mock_pricing,
+        // Same reasoning: undefined here means "not answered yet", not free and not the
+        // compiled-in default - the renderer falls back to its own mirror for that case. An
+        // unusable rate is folded into that same absence; see `usableRate`.
+        creditsPerMinute: usableRate(res.data?.credits_per_minute),
       });
     } catch (error) {
       console.error('[HealthCheckService] Initial client ping error:', error);
@@ -183,6 +199,7 @@ export class HealthCheckService {
               providedLLMModel: res.data?.provided_llm_model,
               userRole: res.data?.user_role,
               mockPricing: res.data?.mock_pricing,
+              creditsPerMinute: usableRate(res.data?.credits_per_minute),
             });
           }
           failureInterval = FAILURE_INTERVAL;

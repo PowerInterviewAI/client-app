@@ -375,6 +375,7 @@ export default function MainPage() {
           credits={appState?.credits ?? 0}
           llmModel={appState?.providedLLMModel ?? ''}
           userRole={appState?.userRole}
+          creditsPerMinute={appState?.creditsPerMinute}
         />
       )}
 

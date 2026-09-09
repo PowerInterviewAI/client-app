@@ -186,6 +186,18 @@ export interface AppState {
    * any of this existed. See `MockBilling` on the backend for the whole compatibility story.
    */
   mockPricing?: MockPricing;
+  /**
+   * The price of a live interview, in credits per minute, or `undefined` before the backend has
+   * said.
+   *
+   * `undefined` does not mean free and does not mean the shipped default - it means this ping
+   * has not answered yet, or came from a backend old enough not to send it, and the renderer
+   * falls back to its own compiled-in mirror for exactly that case. The real value is a
+   * deployment setting (`CREDITS_PER_MINUTE` in the backend's config, env-overridable) rather
+   * than a constant, so a "minutes remaining" figure computed from a compiled-in number can
+   * silently disagree with what the backend actually charges.
+   */
+  creditsPerMinute?: number;
 }
 
 /** The app state as sent to the renderer, with the interview config reduced to a summary. */

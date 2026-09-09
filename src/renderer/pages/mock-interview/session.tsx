@@ -137,13 +137,32 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
         Mock interview session
       </h1>
 
-      <div className="flex-1 min-h-0 flex flex-col overflow-y-hidden gap-1">
+      {/* `overflow-hidden`, not `overflow-y-hidden`. Setting one axis to hidden and leaving the
+          other `visible` is not a thing CSS can express: the visible axis computes to `auto`
+          instead, so this column carried a live `overflow-x: auto` and would grow a horizontal
+          scrollbar - ten pixels tall, immediately above the control bar - the moment anything
+          inside it overran the width. Both axes clip here; neither of them is meant to scroll. */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden gap-1">
+        {/* `min-h-0` on both panel wrappers for the same reason the two columns above carry it,
+            and it is the last link in that chain rather than a repetition of it: these two set
+            no `overflow` of their own, so their minimum height is their content's - and their
+            content is a panel whose `h-full` reads as `auto` while that minimum is being
+            computed, which makes it the whole transcript. Once the transcript is longer than the
+            row, the wrapper's floor is taller than the row, and the panel overflows the column
+            above by however much the transcript overruns.
+
+            Nothing of that is visible - the column clips it - but clipping is what makes the
+            column scrollable, and `scrollIntoView` inside the panel then scrolled *it* as well
+            as the transcript, dragging the status line and the control bar up and letting them
+            settle back. The panel now scrolls only itself (see mock-transcript-panel.tsx); this
+            is the other half, so the column has no scroll range to be dragged by in the first
+            place. */}
         <div className="flex-1 min-h-0 flex gap-1">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 min-h-0">
             <MockTranscriptPanel session={session} />
           </div>
           {showHintsPanel && (
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 min-h-0">
               <LiveSuggestionsPanel
                 suggestions={session.liveHints}
                 isRunning={state === MockInterviewState.Listening}
