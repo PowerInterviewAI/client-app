@@ -1,5 +1,5 @@
 import { ArrowDown } from 'lucide-react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { StreamingQuestion } from '@/components/custom/panels/streaming-question';
 import { Badge } from '@/components/ui/badge';
@@ -99,8 +99,27 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
   const { appState } = useAppState();
   const { config, updateConfig } = useConfigStore();
   const username = appState?.interviewConfig?.fullName || 'You';
-  const endRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState<boolean>(() => config?.autoScrollTranscript ?? true);
+
+  /**
+   * Scrolls this panel's own scroller, and nothing else.
+   *
+   * It used to be `endRef.scrollIntoView({ behavior: 'smooth' })` on a sentinel at the end of the
+   * list, which reaches upward by definition: it brings the element into view inside *every*
+   * scrollable ancestor, and Chromium counts a box with `overflow: hidden` as one. The session
+   * screen's panel-and-status column is exactly that, and while a question was being spoken with
+   * the transcript already longer than the panel it had something to scroll - so each smooth
+   * scroll here dragged the column too, taking the status line and the control bar under it up
+   * with it before they settled back. `session.tsx` closes the other half of that by clamping
+   * the wrappers so the column has nothing to scroll; scrolling this element by name means the
+   * panel could not move anything above it even if it did.
+   */
+  const scrollToEnd = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     if (typeof config?.autoScrollTranscript === 'boolean') {
@@ -140,8 +159,8 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
 
   useEffect(() => {
     if (!autoScroll) return;
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [turns, autoScroll]);
+    scrollToEnd();
+  }, [turns, autoScroll, scrollToEnd]);
 
   return (
     <Card className="relative flex flex-col w-full h-full bg-card p-0 rounded-md gap-1">
@@ -184,7 +203,12 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
 
       {totalQuestions > 0 && <Progress value={progressValue} className="h-1 rounded-none shrink-0" />}
 
-      <div className="flex-1 overflow-y-auto px-2 py-1">
+      {/* `overflow-x-hidden` is not decoration: `overflow-y-auto` on its own leaves the other
+          axis computing to `auto` rather than staying visible, so the vertical scrollbar
+          appearing on a long transcript narrowed the content by ten pixels and could bring a
+          horizontal one in behind it - which shortens the content box again. Turn text wraps
+          (`wrap-break-word`), so there is nothing here that horizontal scrolling would reach. */}
+      <div ref={scrollerRef} className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-1">
         {turns.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center p-4">
             <p className="text-sm text-muted-foreground">Preparing your first question…</p>
@@ -233,14 +257,13 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
             ))}
           </div>
         )}
-        <div ref={endRef} />
       </div>
 
       {!autoScroll && (
         <Button
           size="icon-sm"
           className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
-          onClick={() => endRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={scrollToEnd}
           aria-label="Scroll to bottom"
         >
           <ArrowDown className="size-4" />
