@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { useAppState } from '@/hooks/use-app-state';
@@ -34,6 +35,24 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoggedIn === false) resetOnboardingDismissed();
   }, [isLoggedIn, resetOnboardingDismissed]);
+
+  // And so is the redirect, for exactly the same reason. It used to live on `/` alone - the one
+  // route that cannot be signed out of without being on it - while sign-out is reachable from
+  // every route, through the titlebar menu and the command palette, both mounted here. Signing
+  // out from Configuration, Payment, Account, Documentation or an interview therefore left the
+  // user sitting on a page they were no longer authenticated for, with no way to a sign-in
+  // screen but the menu they had just used. A token expiring does the same thing to the same
+  // flag, from main, on whatever route the user happens to be on.
+  //
+  // The whole of `/auth` is excluded rather than just `/auth/login`: a signed-out user is
+  // already where they belong on all three of those routes, and redirecting would throw someone
+  // out of the signup or forgot-password flow they had just opened.
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const onAuthRoute = pathname === '/auth' || pathname.startsWith('/auth/');
+  useEffect(() => {
+    if (isLoggedIn === false && !onAuthRoute) navigate('/auth/login', { replace: true });
+  }, [isLoggedIn, onAuthRoute, navigate]);
 
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
   const mainRef = React.useCallback((el: HTMLElement | null) => {

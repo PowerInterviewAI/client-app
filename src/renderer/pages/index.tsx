@@ -18,11 +18,6 @@ export default function IndexPage() {
   const onboardingCompleted = appState?.onboardingCompleted ?? false;
 
   useEffect(() => {
-    if (isLoggedIn === false) {
-      navigate('/auth/login', { replace: true });
-      return;
-    }
-
     // Three conditions, and each covers a different way of being wrong.
     //
     // `interviewConfigLoaded`: the flag lives on the account, so until that account has been
@@ -38,7 +33,8 @@ export default function IndexPage() {
     }
   }, [isLoggedIn, accountLoaded, onboardingCompleted, dismissed, navigate]);
 
-  // Logged-out users and first-run users are redirected above. Everyone else - including the
+  // First-run users are redirected above, signed-out users by `MainFrame`. Everyone else -
+  // including the
   // brief window before appState has loaded - sees the home dashboard directly; HomePage owns its
   // own loading state for that window instead of this route showing a separate spinner first.
   return <HomePage />;
