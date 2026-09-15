@@ -316,7 +316,9 @@ class MockInterviewService {
         if (response.status === HTTP_PAYMENT_REQUIRED) {
           this.lastQuestionError = response.error?.message || 'Not enough credits';
           this.lastQuestionUnaffordable = true;
-          console.warn(`[MockInterviewService] question refused for credits: ${this.lastQuestionError}`);
+          console.warn(
+            `[MockInterviewService] question refused for credits: ${this.lastQuestionError}`
+          );
           await this.finishToScoring(seq);
           return;
         }
@@ -616,7 +618,8 @@ class MockInterviewService {
     // tests the follow-up against the report alone, on a session that is already inconsistent.
     const remainingQuestions = Math.max(
       0,
-      (this.session.setup?.question_count ?? this.session.questionNumber) - this.session.questionNumber
+      (this.session.setup?.question_count ?? this.session.questionNumber) -
+        this.session.questionNumber
     );
 
     let action: MockTurnAction = MockTurnAction.Next;
@@ -800,6 +803,12 @@ class MockInterviewService {
         report: response.data,
         reportError: null,
         rescoring: false,
+        // The same rule `appendAnswer` follows: a score that arrives after an export is content
+        // that file does not contain. Unreachable before `retryScoring` existed - a report only
+        // ever arrived before there was anything to export it from - but the report screen offers
+        // Export beside the failure, so a candidate can save the answers, retry, and otherwise be
+        // waved past by Done and Practise again for a score that was never written anywhere.
+        exported: false,
         state: MockInterviewState.Finished,
       };
     } catch (error) {

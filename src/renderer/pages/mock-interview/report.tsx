@@ -4,7 +4,12 @@ import { toast } from 'sonner';
 
 import { showExportSuccessToast } from '@/components/custom/export-success-toast';
 import { SafeMarkdown } from '@/components/custom/safe-markdown';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -88,8 +93,10 @@ export function ReportScreen({
         </h1>
         {reportError && (
           <Alert variant="destructive">
-            <AlertDescription className="space-y-3">
-              <span className="block">
+            {/* `gap-3` overrides AlertDescription's own `gap-1`: it is a grid, and the default
+                gap is sized for two lines of copy rather than copy followed by a control. */}
+            <AlertDescription className="gap-3">
+              <span>
                 The overall score could not be produced ({reportError}). Your answers are still
                 shown below and can still be exported.
               </span>
@@ -206,7 +213,9 @@ export function ReportScreen({
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-muted-foreground">Stronger answer</p>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Stronger answer
+                            </p>
                             <SafeMarkdown content={scored.stronger_answer} />
                           </div>
                         </>
@@ -251,7 +260,12 @@ export function ReportScreen({
             </Button>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={busy !== null} onClick={() => void practiceAgain()}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy !== null}
+              onClick={() => void practiceAgain()}
+            >
               Practise again
             </Button>
             <Button size="sm" disabled={busy !== null} onClick={() => void done()}>

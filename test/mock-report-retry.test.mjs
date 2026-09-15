@@ -111,6 +111,13 @@ export async function run() {
     // The retry is held open so the in-flight shape can be read. It must stay on `Finished`:
     // `Scoring` is an active session, which would re-arm the navigation lock and replace the
     // report screen the candidate is looking at with the session screen.
+    //
+    // Exported first, from the same screen the retry is offered on: the report screen keeps
+    // Export beside the failure, so saving the answers and then retrying is an ordinary thing to
+    // do and the score has to retire that export when it lands.
+    mockInterviewService.markExported();
+    check('the answers can be exported first', mockInterviewService.getState().exported === true);
+
     holdNextReport();
     state.reportShouldFail = false;
     const retry = mockInterviewService.retryScoring();
@@ -132,6 +139,14 @@ export async function run() {
     check(
       'and is still Finished',
       mockInterviewService.getState().state === MockInterviewState.Finished
+    );
+
+    // A score that arrives after an export is content that file does not contain, so the retry
+    // retires `exported` the way a new answer does - otherwise Done and Practise again wave the
+    // candidate past a score that was never written anywhere.
+    check(
+      'a retried report retires the earlier export',
+      mockInterviewService.getState().exported === false
     );
 
     // Nothing left to recover, so nothing to charge for: a retry against a report that already

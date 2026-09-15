@@ -37,7 +37,10 @@ const MOCK_REPORT_MAX_MS = 240_000;
 
 export function mockReportTimeoutMs(questionCount: number): number {
   const questions = Number.isFinite(questionCount) ? Math.max(0, questionCount) : 0;
-  return Math.min(MOCK_REPORT_MAX_MS, MOCK_REPORT_BASE_MS + questions * MOCK_REPORT_PER_QUESTION_MS);
+  return Math.min(
+    MOCK_REPORT_MAX_MS,
+    MOCK_REPORT_BASE_MS + questions * MOCK_REPORT_PER_QUESTION_MS
+  );
 }
 
 // The probe below is one unauthenticated round-trip against a route that is never going to do
