@@ -30,6 +30,7 @@ export interface Config {
   // sentences. The default; full-sentence mode is the opt-out.
   hintOnlyMode: boolean;
 
-  // Mock interview: also show what the live assistant would have suggested. Off by default.
+  // Mock interview: also show what the live assistant would have suggested. The default; the
+  // session bar turns it off for the run where composing unaided is the point.
   mockLiveHintsEnabled: boolean;
 }

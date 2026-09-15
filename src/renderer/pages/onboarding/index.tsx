@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { LoadingPage } from '@/components/custom/loading';
 import { LanguageField } from '@/components/custom/settings/language-field';
 import { MicrophoneField } from '@/components/custom/settings/microphone-field';
+import { MockHintsField } from '@/components/custom/settings/mock-hints-field';
 import {
   ContextField,
   FullNameField,
@@ -21,7 +22,15 @@ import { useOnboardingDismissed } from '@/hooks/use-onboarding-dismissed';
 import { APP_NAME } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 
-type StepId = 'profile' | 'context' | 'language' | 'microphone' | 'mode' | 'zoom' | 'transcript';
+type StepId =
+  | 'profile'
+  | 'context'
+  | 'language'
+  | 'microphone'
+  | 'mode'
+  | 'mock-hints'
+  | 'zoom'
+  | 'transcript';
 
 interface Step {
   id: StepId;
@@ -33,7 +42,7 @@ interface Step {
 
 /**
  * One thing per step, in the order a first interview needs them: who you are, what you are
- * interviewing for, then the five things that decide how the session looks and behaves.
+ * interviewing for, then the six things that decide how a session looks and behaves.
  *
  * Profile first because it is the only step that can block a start - the start sequence refuses
  * to run without a name and a CV - and the only one that is worth typing rather than picking.
@@ -73,6 +82,13 @@ const STEPS: Step[] = [
     description: 'Change your mind at any time, including mid-interview.',
   },
   {
+    id: 'mock-hints',
+    label: 'Practice',
+    title: 'Hints while you practise?',
+    description:
+      'Practice interviews are the ones you run against yourself. This decides whether they hand you the answer as well.',
+  },
+  {
     id: 'zoom',
     label: 'Size',
     title: 'Is this comfortable to read?',
@@ -101,8 +117,8 @@ const STEPS: Step[] = [
  * that collect them, so a user who closes the app halfway through still keeps what they typed.
  *
  * Nothing here is a trap. Skip is on every step, every setting has a working default, and
- * Configuration can re-run the whole thing later - which is what lets this screen ask six
- * questions without any of them being a decision the user has to get right now.
+ * Configuration can re-run the whole thing later - which is what lets this screen ask as much as
+ * it does without any of it being a decision the user has to get right now.
  */
 export default function OnboardingPage() {
   const navigate = useNavigate();
@@ -235,8 +251,9 @@ export default function OnboardingPage() {
     if (isLast) {
       setFinishing(true);
       try {
-        // Finish stays put on a failed write, unlike Skip: the user has just answered six
-        // questions, and leaving on a write that did not land means being asked all six again.
+        // Finish stays put on a failed write, unlike Skip: the user has just worked through
+        // every step, and leaving on a write that did not land means being asked again from the
+        // top.
         if (!(await complete())) {
           toast.error('Could not save your setup. Check your connection and try again.');
           return;
@@ -252,7 +269,7 @@ export default function OnboardingPage() {
   };
 
   // Signed out, this screen has no account to read or write and every step would fail. Sent
-  // where `/` sends them, rather than rendering six steps that cannot save.
+  // where `/` sends them, rather than rendering a wizard whose every step fails to save.
   if (appState?.isLoggedIn === false) return <Navigate to="/auth/login" replace />;
   if (appState?.isLoggedIn !== true) return <LoadingPage disclaimer="Loading…" />;
 
@@ -329,6 +346,7 @@ export default function OnboardingPage() {
           {step.id === 'language' && <LanguageField />}
           {step.id === 'microphone' && <MicrophoneField />}
           {step.id === 'mode' && <SuggestionModeField />}
+          {step.id === 'mock-hints' && <MockHintsField />}
           {step.id === 'zoom' && <ZoomField />}
           {step.id === 'transcript' && <TranscriptPanelField />}
         </div>
@@ -347,9 +365,7 @@ export default function OnboardingPage() {
               className="text-muted-foreground"
               onClick={() => void handleSkip()}
               disabled={finishing}
-              title={
-                isFirstRun ? 'You can run setup again later from Configuration' : undefined
-              }
+              title={isFirstRun ? 'You can run setup again later from Configuration' : undefined}
             >
               {isFirstRun ? 'Skip for now' : 'Close'}
             </Button>
