@@ -50,6 +50,9 @@ for (const module of [
   // Drives appStateService.runningState and mockInterview together, so it must run after
   // mock-interview-state seeds no lasting mockInterview state of its own (mock-interview-state
   // clears the service on every branch, and the service's own clear() resets appState too).
+  // Same harness and the same service singleton again - it drives a session to a failed report
+  // and then retries it, so it sits with the other session-driving files.
+  './mock-report-retry.test.mjs',
   './mock-action-suggestion-block.test.mjs',
   './mock-interview-gate.test.mjs',
   // Swaps globalThis.fetch for the length of its own run and restores it in a finally, so it is
