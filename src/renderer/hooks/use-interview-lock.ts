@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useBlocker } from 'react-router-dom';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { type BlockerFunction, useBlocker } from 'react-router-dom';
 import { create } from 'zustand';
 
 import { RunningState } from '@/types/app-state';
@@ -94,9 +94,45 @@ export function useInterviewNavigationLock(active: boolean): void {
     return () => useInterviewExit.getState().clear();
   }, [active]);
 
+  // The predicate is stable and reads the answer off a ref, rather than closing over this
+  // render's values.
+  //
+  // `useBlocker` hands the function to the router from a `useEffect`, so the router holds
+  // whatever the *previous* committed render gave it. `<Navigate>` navigates from an effect of
+  // its own, and a child's passive effect runs before its parent's - so a route that renders a
+  // redirect in the same commit as the state change that permits it was asked the question with
+  // last render's answer, and refused. The blocked navigation is then dropped by `reset()` below
+  // and `<Navigate>` never retries (its dep array is stable), leaving the route rendering
+  // nothing at all: ending a mock interview with no answers recorded resets the session to Idle
+  // and landed on a blank screen instead of the home page.
+  //
+  // A layout effect is what closes that window. Layout effects for the whole tree run during the
+  // commit, before any passive effect in it, so the ref is current by the time any child asks to
+  // navigate. `/main` only ever escaped this because `useEndLiveSession` awaits several IPC
+  // round trips between `beginInterviewExit()` and its own `navigate`, which is a timing
+  // accident rather than a guard.
+  //
+  // Writing the ref in the render body would cover one case further - layout effects themselves
+  // run child-first, so a child that navigated from one of its own would still read this render's
+  // predecessor - but no caller does that, and a render React discards would leave the router
+  // holding values that were never committed. A commit is the earliest point at which the answer
+  // is true, and it is the same point react-router's own `useNavigateStable` writes its `activeRef`
+  // from.
+  const predicateRef = useRef({ active, exiting, signedOut });
+  useLayoutEffect(() => {
+    predicateRef.current = { active, exiting, signedOut };
+  });
+
   const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      active && !exiting && !signedOut && currentLocation.pathname !== nextLocation.pathname
+    useCallback<BlockerFunction>(({ currentLocation, nextLocation }) => {
+      const current = predicateRef.current;
+      return (
+        current.active &&
+        !current.exiting &&
+        !current.signedOut &&
+        currentLocation.pathname !== nextLocation.pathname
+      );
+    }, [])
   );
 
   // Reset in an effect rather than from the predicate: the predicate runs during the router's own

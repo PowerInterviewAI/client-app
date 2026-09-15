@@ -76,6 +76,9 @@ for (const module of [
   './suggestion-emphasis.test.mjs',
   './suggestion-truncate.test.mjs',
   './navigation-guard.test.mjs',
+  // Source-level and independent of everything above: it reads the renderer's navigation lock
+  // and the mock route off disk, so it sits with the other source-level checks.
+  './interview-lock.test.mjs',
   './mac-update-util.test.mjs',
   './change-password.test.mjs',
   './password-reset.test.mjs',
