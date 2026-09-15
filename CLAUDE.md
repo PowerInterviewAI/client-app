@@ -481,6 +481,18 @@ round trips between `beginInterviewExit()` and its `navigate`, which is a timing
 than a guard. `test/interview-lock.test.mjs` pins it, source-level, for the same reason the device
 tests are.
 
+**A redirect that works has to carry the reason with it.** `session.error` is how main explains an
+Idle it arrived at on its own, and nothing in the renderer read it - which did not show while that
+branch was unreachable, and would have turned a blank screen into a silent bounce to the launch
+cards the moment it was. The case it exists for is a dead or muted microphone: the silence backstop
+skips its way through a session whose questions have already been billed, `finishToScoring` resets
+with a message naming the microphone, and the candidate is owed it. `/mock-interview` reports it
+deduplicated by the message rather than from one place, because both places see the same string and
+neither can be dropped - `start()` writes it onto the session *and* throws, so the broadcast races
+the rejection, while a microphone the renderer cannot open fails before main hears about it at all.
+The ref is seeded from whatever is on the session at mount, which is an earlier session's ending:
+`start()` clears it, but this route mounts before it runs.
+
 **Stealth mode lives on the live control bar and nowhere else.** It was in the titlebar menu and
 the command palette, both reachable from the login screen and the payment page, where hiding the
 window from a screen capture answers a question nobody is asking - the screen share it exists for

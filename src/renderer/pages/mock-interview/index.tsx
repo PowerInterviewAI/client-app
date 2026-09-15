@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -72,6 +72,37 @@ export default function MockInterviewPage() {
   // waiting keeps that render on the loading screen instead.
   const [autoStarting, setAutoStarting] = useState(() => Boolean(pendingSetup));
 
+  /**
+   * Say why the session ended, exactly once, whichever side says it first.
+   *
+   * `session.error` is how main explains an Idle it arrived at on its own, and until now nothing
+   * in the renderer read it. It did not show while the Idle branch below was unreachable - the
+   * navigation lock was refusing that redirect and the route rendered nothing at all - and with
+   * the redirect working it would have become a silent bounce to the home screen instead. The
+   * case that matters is a dead or muted microphone: the silence backstop skips its way through
+   * a session whose questions have already been billed, `finishToScoring` resets to Idle with a
+   * message naming the microphone, and being returned to the launch cards with no explanation
+   * leaves the candidate nothing to act on.
+   *
+   * Deduplicated by the message rather than reported from one place, because both places see the
+   * same string and neither can be dropped: `start()` writes it onto the session *and* throws,
+   * so the broadcast and the rejection race, while a microphone the renderer cannot open fails
+   * before main hears about it at all and has only the rejection.
+   *
+   * Seeded from whatever is already on the session at mount, which is a message some earlier
+   * session's ending left behind - `start()` clears it, but this route mounts before it runs.
+   */
+  const reportedError = useRef<string | null>(sessionRef.current?.error ?? null);
+  const reportError = useCallback((message: string) => {
+    if (reportedError.current === message) return;
+    reportedError.current = message;
+    toast.error(message);
+  }, []);
+
+  useEffect(() => {
+    if (session?.error) reportError(session.error);
+  }, [session?.error, reportError]);
+
   useEffect(() => {
     if (!pendingSetup || autoStartRequested.current) return;
     if (sessionRef.current && sessionRef.current.state !== MockInterviewState.Idle) return;
@@ -79,7 +110,7 @@ export default function MockInterviewPage() {
     setAutoStarting(true);
     startSession(pendingSetup).catch((error) => {
       console.error('Failed to auto-start mock interview:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to start the mock interview');
+      reportError(error instanceof Error ? error.message : 'Failed to start the mock interview');
       setAutoStarting(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -16,6 +16,19 @@
  */
 import { codeOnly, createChecker, readSource } from './helpers.mjs';
 
+/** The slice from the first `open` at or after `from` to its matching `close`, or ''. */
+function balanced(source, from, open, close) {
+  if (from < 0) return '';
+  const start = source.indexOf(open, from);
+  if (start === -1) return '';
+  let depth = 0;
+  for (let i = start; i < source.length; i++) {
+    if (source[i] === open) depth++;
+    else if (source[i] === close && --depth === 0) return source.slice(start, i + 1);
+  }
+  return '';
+}
+
 export async function run() {
   const { check, failures } = createChecker('interview-lock');
 
@@ -25,7 +38,16 @@ export async function run() {
 
   check('the lock still blocks through useBlocker', source.includes('useBlocker('));
 
-  const predicate = source.slice(source.indexOf('useBlocker('));
+  // Both slices are bounded rather than run to the end of the file. The closure check below
+  // forbids naming `active` at all, and the ref is *written* from `{ active, exiting, signedOut }`
+  // a few lines above - so an unbounded slice would fail the moment someone moved the layout
+  // effect under the blocker call, with a message describing a defect that is not there.
+  const blockerCall = balanced(source, source.indexOf('useBlocker('), '(', ')');
+  // Falling back to the whole call rather than to nothing: an arrow with a concise body - which
+  // is the shape the bug had - has no braces to bound, and an empty slice would pass every check
+  // below by containing none of what they forbid.
+  const predicate = balanced(blockerCall, blockerCall.indexOf('=>'), '{', '}') || blockerCall;
+
   check(
     'the predicate reads the current answer off a ref',
     predicate.includes('predicateRef.current')
@@ -45,7 +67,10 @@ export async function run() {
   // raced.
   check(
     'the predicate is stable across renders',
-    /useBlocker\(\s*useCallback\b/.test(source) && /,\s*\[\]\s*\)\s*\);/.test(predicate)
+    /useBlocker\(\s*useCallback\b/.test(source) &&
+      /,\s*\[\s*\]\s*\)$/.test(
+        balanced(blockerCall, blockerCall.indexOf('useCallback'), '(', ')').trim()
+      )
   );
 
   // The ordering itself. A plain `useEffect` here runs *after* a child's, which is precisely the
@@ -53,11 +78,15 @@ export async function run() {
   const refWrite = source.indexOf('predicateRef.current = ');
   const layout = source.lastIndexOf('useLayoutEffect(', refWrite);
   check('the ref is written from a layout effect', refWrite !== -1 && layout !== -1);
+
+  // Prettier is not enforced in this repo, so this asks for the shape rather than the spacing:
+  // an argument list that is only the effect body is one that runs on every render.
+  const layoutCall = balanced(source, layout, '(', ')');
   check(
     'that layout effect runs on every render rather than on a dependency change',
-    /useLayoutEffect\(\(\) => \{\s*predicateRef\.current = \{ active, exiting, signedOut \};\s*\}\);/.test(
-      source
-    )
+    /^\(\s*\(\s*\)\s*=>/.test(layoutCall) &&
+      /predicateRef\.current\s*=\s*\{\s*active,\s*exiting,\s*signedOut\s*\}/.test(layoutCall) &&
+      !/,\s*\[/.test(layoutCall.slice(layoutCall.lastIndexOf('}')))
   );
 
   // The redirect this exists to let through: ending a mock interview with nothing recorded

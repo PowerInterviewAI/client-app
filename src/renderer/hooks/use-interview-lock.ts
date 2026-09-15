@@ -111,6 +111,13 @@ export function useInterviewNavigationLock(active: boolean): void {
   // navigate. `/main` only ever escaped this because `useEndLiveSession` awaits several IPC
   // round trips between `beginInterviewExit()` and its own `navigate`, which is a timing
   // accident rather than a guard.
+  //
+  // Writing the ref in the render body would cover one case further - layout effects themselves
+  // run child-first, so a child that navigated from one of its own would still read this render's
+  // predecessor - but no caller does that, and a render React discards would leave the router
+  // holding values that were never committed. A commit is the earliest point at which the answer
+  // is true, and it is the same point react-router's own `useNavigateStable` writes its `activeRef`
+  // from.
   const predicateRef = useRef({ active, exiting, signedOut });
   useLayoutEffect(() => {
     predicateRef.current = { active, exiting, signedOut };
