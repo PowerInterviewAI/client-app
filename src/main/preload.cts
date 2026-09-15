@@ -141,6 +141,7 @@ const electronApi = {
       ipcRenderer.invoke('mock-interview:ingest-answer', payload),
     answerFinished: () => ipcRenderer.invoke('mock-interview:answer-finished'),
     answerReady: () => ipcRenderer.invoke('mock-interview:answer-ready'),
+    retryScoring: () => ipcRenderer.invoke('mock-interview:retry-scoring'),
     endSession: () => ipcRenderer.invoke('mock-interview:end-session'),
     clear: () => ipcRenderer.invoke('mock-interview:clear'),
   },

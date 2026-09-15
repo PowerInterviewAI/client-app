@@ -35,6 +35,10 @@ export function registerMockInterviewHandlers(): void {
     mockInterviewService.answerReady();
   });
 
+  ipcMain.handle('mock-interview:retry-scoring', async () => {
+    await mockInterviewService.retryScoring();
+  });
+
   ipcMain.handle('mock-interview:end-session', async () => {
     await mockInterviewService.endSession();
   });
