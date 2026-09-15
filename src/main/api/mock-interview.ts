@@ -18,8 +18,30 @@ import { ApiClient, ApiResponse } from './client.js';
 // non-streaming JSON reply rather than the first chunk of a stream.
 const MOCK_QUESTION_TIMEOUT_MS = 30_000;
 const MOCK_TURN_TIMEOUT_MS = 15_000;
-const MOCK_REPORT_TIMEOUT_MS = 60_000;
 const MOCK_SPEAK_TIMEOUT_MS = 20_000;
+
+// The report is the one call whose duration scales with the session, so it is the one call a
+// single number cannot cover. `MockReport` carries a score, a justification *and* a full rewritten
+// answer for every question, so a twelve-turn session asks for several times the generation a
+// three-turn one does - and the flat 60s this replaced was calibrated to neither. Long sessions
+// hit it routinely, which is what "scoring sometimes times out" was: an abort on the client while
+// the backend went on to finish the report and charge for it.
+//
+// Wall clock rather than a stall timer, unlike the streaming paths. The reply is one JSON body, so
+// nothing arrives until the whole thing is generated and there is no progress to detect - the
+// ceiling is what keeps the deadline honest, and End stays live for the whole of `Scoring` as the
+// manual way out of a request that really has hung.
+const MOCK_REPORT_BASE_MS = 45_000;
+const MOCK_REPORT_PER_QUESTION_MS = 20_000;
+const MOCK_REPORT_MAX_MS = 240_000;
+
+export function mockReportTimeoutMs(questionCount: number): number {
+  const questions = Number.isFinite(questionCount) ? Math.max(0, questionCount) : 0;
+  return Math.min(
+    MOCK_REPORT_MAX_MS,
+    MOCK_REPORT_BASE_MS + questions * MOCK_REPORT_PER_QUESTION_MS
+  );
+}
 
 // The probe below is one unauthenticated round-trip against a route that is never going to do
 // any work, so it can be far tighter than the calls that generate something.
@@ -34,8 +56,17 @@ export class MockInterviewApi extends ApiClient {
     return this.post<MockTurnDecision>('/api/mock-interview/turn', data, MOCK_TURN_TIMEOUT_MS);
   }
 
+  /**
+   * Scored off the turns actually being sent rather than the session's configured length, so a
+   * session that ended early is not held to a deadline for questions it never asked and one that
+   * ran long on follow-ups gets the time they cost.
+   */
   async generateReport(data: GenerateMockReportRequest): Promise<ApiResponse<MockReport>> {
-    return this.post<MockReport>('/api/mock-interview/report', data, MOCK_REPORT_TIMEOUT_MS);
+    return this.post<MockReport>(
+      '/api/mock-interview/report',
+      data,
+      mockReportTimeoutMs(data.questions.length)
+    );
   }
 
   /**

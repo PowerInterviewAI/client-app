@@ -154,6 +154,7 @@ declare global {
       ingestAnswer: (payload: { type: 'partial' | 'final'; text: string }) => Promise<void>;
       answerFinished: () => Promise<void>;
       answerReady: () => Promise<void>;
+      retryScoring: () => Promise<void>;
       endSession: () => Promise<void>;
       clear: () => Promise<void>;
     };

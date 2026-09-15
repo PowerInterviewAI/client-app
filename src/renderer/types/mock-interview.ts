@@ -99,6 +99,8 @@ export interface MockInterviewSessionState {
   liveHints: LiveSuggestion[];
   report: MockReport | null;
   reportError: string | null;
+  /** A retry of a failed report is in flight - see the main-process mirror. */
+  rescoring: boolean;
   /** True once this session has been written to a file - see the main-process mirror. */
   exported: boolean;
   error: string | null;

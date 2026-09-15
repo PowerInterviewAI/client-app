@@ -224,6 +224,14 @@ export interface MockInterviewSessionState {
   /** Set when report generation failed - the transcript is still shown and still exportable. */
   reportError: string | null;
   /**
+   * A retry of a failed report is in flight (`retryScoring`).
+   *
+   * Separate from the `Scoring` state on purpose: this runs while the session is already
+   * `Finished`, so that the report screen keeps the candidate's answers on screen and the
+   * navigation lock stays off. See `retryScoring`.
+   */
+  rescoring: boolean;
+  /**
    * True once everything this session holds has been written to a file.
    *
    * The save prompt reads it through `AppState.hasMockContent`. Without it, exporting the report

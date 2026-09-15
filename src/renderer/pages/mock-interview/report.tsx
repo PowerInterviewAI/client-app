@@ -4,7 +4,12 @@ import { toast } from 'sonner';
 
 import { showExportSuccessToast } from '@/components/custom/export-success-toast';
 import { SafeMarkdown } from '@/components/custom/safe-markdown';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +20,7 @@ import type { MockInterviewSessionState } from '@/types/mock-interview';
 interface ReportScreenProps {
   session: MockInterviewSessionState;
   onExport: (format: 'docx' | 'md') => Promise<string | null>;
+  onRetryScoring: () => Promise<void>;
   onPracticeAgain: () => Promise<void>;
   onDone: () => Promise<void>;
 }
@@ -26,17 +32,30 @@ function scoreVerdict(score: number): string {
   return 'Needs work';
 }
 
-export function ReportScreen({ session, onExport, onPracticeAgain, onDone }: ReportScreenProps) {
-  const { report, reportError, answers } = session;
+export function ReportScreen({
+  session,
+  onExport,
+  onRetryScoring,
+  onPracticeAgain,
+  onDone,
+}: ReportScreenProps) {
+  const { report, reportError, rescoring, answers } = session;
   const [saving, setSaving] = useState<'docx' | 'md' | null>(null);
   const [busy, setBusy] = useState<'again' | 'done' | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   // This screen replaces SessionScreen the moment the session reaches Finished, not through a
   // real navigation, so nothing else moves focus here on its own.
+  //
+  // Keyed on the report arriving rather than on mount alone, because a successful retry is the
+  // same kind of replacement one step further in: it unmounts the failure alert along with the
+  // Score again button the candidate just pressed, which drops focus to the body and loses their
+  // place in a screen that has just filled up with the score they were waiting for. The flag
+  // only ever flips once per session, so nothing steals focus while they are reading.
+  const hasReport = report !== null;
   useEffect(() => {
     headingRef.current?.focus();
-  }, []);
+  }, [hasReport]);
 
   const save = async (format: 'docx' | 'md') => {
     setSaving(format);
@@ -81,9 +100,31 @@ export function ReportScreen({ session, onExport, onPracticeAgain, onDone }: Rep
         </h1>
         {reportError && (
           <Alert variant="destructive">
-            <AlertDescription>
-              The overall score could not be produced ({reportError}). Your answers are still shown
-              below and can still be exported.
+            {/* `gap-3` overrides AlertDescription's own `gap-1`: it is a grid, and the default
+                gap is sized for two lines of copy rather than copy followed by a control. */}
+            <AlertDescription className="gap-3">
+              <span>
+                The overall score could not be produced ({reportError}). Your answers are still
+                shown below and can still be exported.
+              </span>
+              {/* The answers are kept, so scoring can be asked for again without re-running the
+                  interview. Not automatic - see `retryScoring` in the service for why the spend
+                  is the candidate's to make. */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={rescoring}
+                onClick={() => void onRetryScoring()}
+              >
+                {rescoring ? (
+                  <>
+                    <Loader className="animate-spin" />
+                    Scoring…
+                  </>
+                ) : (
+                  'Score again'
+                )}
+              </Button>
             </AlertDescription>
           </Alert>
         )}
@@ -179,7 +220,9 @@ export function ReportScreen({ session, onExport, onPracticeAgain, onDone }: Rep
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-muted-foreground">Stronger answer</p>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Stronger answer
+                            </p>
                             <SafeMarkdown content={scored.stronger_answer} />
                           </div>
                         </>
@@ -224,7 +267,12 @@ export function ReportScreen({ session, onExport, onPracticeAgain, onDone }: Rep
             </Button>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={busy !== null} onClick={() => void practiceAgain()}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy !== null}
+              onClick={() => void practiceAgain()}
+            >
               Practise again
             </Button>
             <Button size="sm" disabled={busy !== null} onClick={() => void done()}>

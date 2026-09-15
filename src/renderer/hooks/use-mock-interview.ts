@@ -113,6 +113,10 @@ export function useMockInterview() {
     }
   };
 
+  const retryScoring = async (): Promise<void> => {
+    await window.electronAPI?.mockInterview.retryScoring();
+  };
+
   const endSession = async (): Promise<void> => {
     await window.electronAPI?.mockInterview.endSession();
   };
@@ -129,5 +133,5 @@ export function useMockInterview() {
     await window.electronAPI?.mockInterview.clear();
   };
 
-  return { session, startSession, endSession, answerFinished, answerReady, clear };
+  return { session, startSession, endSession, retryScoring, answerFinished, answerReady, clear };
 }

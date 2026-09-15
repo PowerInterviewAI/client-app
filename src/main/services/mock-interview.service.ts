@@ -76,6 +76,7 @@ function initialSession(): MockInterviewSessionState {
     liveHints: [],
     report: null,
     reportError: null,
+    rescoring: false,
     exported: false,
     error: null,
   };
@@ -315,7 +316,9 @@ class MockInterviewService {
         if (response.status === HTTP_PAYMENT_REQUIRED) {
           this.lastQuestionError = response.error?.message || 'Not enough credits';
           this.lastQuestionUnaffordable = true;
-          console.warn(`[MockInterviewService] question refused for credits: ${this.lastQuestionError}`);
+          console.warn(
+            `[MockInterviewService] question refused for credits: ${this.lastQuestionError}`
+          );
           await this.finishToScoring(seq);
           return;
         }
@@ -615,7 +618,8 @@ class MockInterviewService {
     // tests the follow-up against the report alone, on a session that is already inconsistent.
     const remainingQuestions = Math.max(
       0,
-      (this.session.setup?.question_count ?? this.session.questionNumber) - this.session.questionNumber
+      (this.session.setup?.question_count ?? this.session.questionNumber) -
+        this.session.questionNumber
     );
 
     let action: MockTurnAction = MockTurnAction.Next;
@@ -760,13 +764,30 @@ class MockInterviewService {
 
     this.setState(MockInterviewState.Scoring);
     this.broadcast();
+    await this.requestReport(seq);
+  }
 
-    if (!this.session.setup) return;
+  /**
+   * Ask the backend to score the session, landing on `Finished` whatever happens.
+   *
+   * Split out of `finishToScoring` because `retryScoring()` re-runs exactly this and nothing
+   * around it - the guards, the state change and the reset-with-a-reason above all belong to
+   * reaching the end of an interview, not to the request itself.
+   *
+   * A missing setup is a failure rather than an early return, which is what it used to be. By
+   * here the state is already `Scoring`, and `Scoring` has no control that ends it except End -
+   * so returning stranded the session on a spinner instead of holding the terminal-state
+   * invariant this file's tests pin.
+   */
+  private async requestReport(seq: number): Promise<void> {
     try {
+      const setup = this.session.setup;
+      if (!setup) throw new Error('The interview setup is no longer available.');
+
       const interviewConfig = appStateService.getState().interviewConfig;
       const request: GenerateMockReportRequest = {
         language: this.language,
-        setup: this.session.setup,
+        setup,
         profile_data: interviewConfig.profileData,
         context: interviewConfig.context,
         questions: this.session.answers.map((a) => ({ question: a.question, answer: a.answer })),
@@ -781,18 +802,62 @@ class MockInterviewService {
         ...this.session,
         report: response.data,
         reportError: null,
+        rescoring: false,
+        // The same rule `appendAnswer` follows: a score that arrives after an export is content
+        // that file does not contain. Unreachable before `retryScoring` existed - a report only
+        // ever arrived before there was anything to export it from - but the report screen offers
+        // Export beside the failure, so a candidate can save the answers, retry, and otherwise be
+        // waved past by Done and Practise again for a score that was never written anywhere.
+        exported: false,
         state: MockInterviewState.Finished,
       };
     } catch (error) {
       if (seq !== this.sessionSeq) return;
+      // Logged for the same reason the question path logs its own failures: this is the end of a
+      // session the candidate has paid for, and the reason it produced nothing was the one thing
+      // neither the screen nor the log recorded.
+      const message = describeApiError(error);
+      console.error(`[MockInterviewService] scoring failed: ${message}`, error);
       this.session = {
         ...this.session,
         report: null,
-        reportError: error instanceof Error ? error.message : 'Failed to score the interview',
+        reportError: message,
+        rescoring: false,
         state: MockInterviewState.Finished,
       };
     }
     this.broadcast();
+  }
+
+  /**
+   * Score the session again after a failed attempt, because the candidate asked.
+   *
+   * The report is the only charged call in a session whose failure was terminal: the answers stay
+   * on screen and stay exportable, but the score they were billed for could not be obtained by any
+   * route short of paying for a whole second interview.
+   *
+   * Deliberately a button rather than the automatic retry `generateNextQuestion` has. A timeout on
+   * this call says nothing about whether the backend finished and billed the attempt that timed
+   * out, so a silent second attempt can spend twice on the candidate's behalf - and at this call's
+   * deadline it would also double the wait before they are told anything at all. Asked for on a
+   * screen that already has their answers on it, the spend is their decision.
+   *
+   * Stays on `Finished` rather than returning to `Scoring`: `Scoring` is an active session, so it
+   * would re-arm the navigation lock and swap the report screen the candidate is looking at for
+   * the session screen, which has no question left to show. `rescoring` carries the in-flight
+   * state instead.
+   */
+  async retryScoring(): Promise<void> {
+    if (this.session.state !== MockInterviewState.Finished) return;
+    if (this.session.rescoring || !this.session.reportError) return;
+    // The same guard `finishToScoring` applies before the first attempt - a billed report over a
+    // session with no real answers scores an interview that did not happen.
+    if (!this.hasRealAnswers()) return;
+
+    const seq = this.sessionSeq;
+    this.session = { ...this.session, rescoring: true };
+    this.broadcast();
+    await this.requestReport(seq);
   }
 
   /**
