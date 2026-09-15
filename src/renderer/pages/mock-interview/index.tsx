@@ -41,7 +41,7 @@ export default function MockInterviewPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { appState } = useAppState();
-  const { session, startSession, endSession, answerFinished, answerReady, clear } =
+  const { session, startSession, endSession, retryScoring, answerFinished, answerReady, clear } =
     useMockInterview();
   const { exportMockReport } = useTools();
   const { confirmDiscard } = useSaveHistoryGuard();
@@ -187,6 +187,7 @@ export default function MockInterviewPage() {
       <ReportScreen
         session={session!}
         onExport={(format) => exportMockReport(format)}
+        onRetryScoring={retryScoring}
         onPracticeAgain={async () => {
           if (!(await confirmDiscard('mock-again'))) return;
           await clear();

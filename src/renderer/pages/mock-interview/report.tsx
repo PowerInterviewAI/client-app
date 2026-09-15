@@ -15,6 +15,7 @@ import type { MockInterviewSessionState } from '@/types/mock-interview';
 interface ReportScreenProps {
   session: MockInterviewSessionState;
   onExport: (format: 'docx' | 'md') => Promise<string | null>;
+  onRetryScoring: () => Promise<void>;
   onPracticeAgain: () => Promise<void>;
   onDone: () => Promise<void>;
 }
@@ -26,8 +27,14 @@ function scoreVerdict(score: number): string {
   return 'Needs work';
 }
 
-export function ReportScreen({ session, onExport, onPracticeAgain, onDone }: ReportScreenProps) {
-  const { report, reportError, answers } = session;
+export function ReportScreen({
+  session,
+  onExport,
+  onRetryScoring,
+  onPracticeAgain,
+  onDone,
+}: ReportScreenProps) {
+  const { report, reportError, rescoring, answers } = session;
   const [saving, setSaving] = useState<'docx' | 'md' | null>(null);
   const [busy, setBusy] = useState<'again' | 'done' | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -81,9 +88,29 @@ export function ReportScreen({ session, onExport, onPracticeAgain, onDone }: Rep
         </h1>
         {reportError && (
           <Alert variant="destructive">
-            <AlertDescription>
-              The overall score could not be produced ({reportError}). Your answers are still shown
-              below and can still be exported.
+            <AlertDescription className="space-y-3">
+              <span className="block">
+                The overall score could not be produced ({reportError}). Your answers are still
+                shown below and can still be exported.
+              </span>
+              {/* The answers are kept, so scoring can be asked for again without re-running the
+                  interview. Not automatic - see `retryScoring` in the service for why the spend
+                  is the candidate's to make. */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={rescoring}
+                onClick={() => void onRetryScoring()}
+              >
+                {rescoring ? (
+                  <>
+                    <Loader className="animate-spin" />
+                    Scoring…
+                  </>
+                ) : (
+                  'Score again'
+                )}
+              </Button>
             </AlertDescription>
           </Alert>
         )}
