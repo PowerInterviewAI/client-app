@@ -153,8 +153,8 @@ class LiveSuggestionService {
       // Promote out of Pending as soon as the response exists, not on the first chunk. A
       // stream that yields zero chunks used to leave the card Pending forever: the terminal
       // check below only fires for Loading, and no timeout rescues it because the stream
-      // ended rather than stalled. An upstream that emits only a <think> block reaches here
-      // with nothing to yield, since _strip_think_stream swallows the whole buffer.
+      // ended rather than stalled. A model reply carrying no content at all still reaches here
+      // that way - the backend logs it and closes the stream, with nothing to forward.
       // Refresh, not publish. The response headers land before the backend's gate has decided
       // anything - it holds the body back, not the response - so publishing here would render
       // the exact card the delay above exists to withhold.
