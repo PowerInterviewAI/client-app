@@ -6,22 +6,23 @@ import { HotkeyCheatsheetDialog } from '@/components/custom/hotkey-cheatsheet';
 import PageHeader from '@/components/custom/page-header';
 import { LanguageField } from '@/components/custom/settings/language-field';
 import { MicrophoneField } from '@/components/custom/settings/microphone-field';
+import { MockHintsField } from '@/components/custom/settings/mock-hints-field';
 import { SuggestionModeField } from '@/components/custom/settings/suggestion-mode-field';
 import { TranscriptPanelField } from '@/components/custom/settings/transcript-panel-field';
 import { ZoomField } from '@/components/custom/settings/zoom-field';
 import { Button } from '@/components/ui/button';
 
 /**
- * How the interview runs: the microphone, the language, how suggestions read, and whether the
- * transcript is docked.
+ * How the interview runs: the microphone, the language, how suggestions read, whether practice
+ * interviews show them at all, and whether the transcript is docked.
  *
  * Every control here writes straight through to the config store as it is changed - there is no
  * Save button, because there is nothing to batch and nothing that could be half-applied. That is
  * the other reason this is not a tab of the account page, which does have a Save and does need
  * one.
  *
- * These are the same four settings the first-run wizard walks a new user through, rendered from
- * the same components, so what the wizard set is what this page shows.
+ * These are the same settings the first-run wizard walks a new user through, rendered from the
+ * same components, so what the wizard set is what this page shows.
  */
 export default function ConfigurationPage() {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function ConfigurationPage() {
         <MicrophoneField />
         <LanguageField />
         <SuggestionModeField />
+        <MockHintsField />
         <ZoomField />
         <TranscriptPanelField />
 

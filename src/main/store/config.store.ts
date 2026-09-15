@@ -34,7 +34,7 @@ export interface RuntimeConfig {
   hintOnlyMode: boolean;
 
   // mock interview: also generate what the live assistant would have suggested for each
-  // question. Off by default - see the note on the default value below.
+  // question. On by default - see the note on the default value below.
   mockLiveHintsEnabled: boolean;
 }
 
@@ -60,13 +60,15 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   // migration below.
   hintOnlyMode: true,
 
-  // Opt-in, and a reversal: this shipped on by default on the grounds that seeing what the live
-  // assistant would have said is one of the two reasons to run a mock interview. In practice it
-  // is the other one that people run it for - answering the question yourself - and a panel of
-  // model-written answers sitting beside the question while you try to think of your own is the
-  // single thing most likely to stop that working. It is one click away on the session bar for
-  // the run where comparing is the point.
-  mockLiveHintsEnabled: false,
+  // On by default. It was turned off on the grounds that a panel of model-written answers beside
+  // the question stops the candidate composing their own, which is true and is not the whole of
+  // it: off by default with the only control on the session bar, most people never found out the
+  // comparison existed, and a hint they have to discover mid-question is worse than one they
+  // chose in advance. It is asked outright in the first-run wizard now and settable from
+  // Configuration, so the default is what someone who has not thought about it gets rather than
+  // the only answer they are ever offered - and the session bar still turns it off for the run
+  // where composing unaided is the point.
+  mockLiveHintsEnabled: true,
 };
 
 // interviewConf (full name, profile, context) used to be cached under `runtime`, but it's now
@@ -270,7 +272,12 @@ export const configStore = new ConfigStore();
     migration.hintOnlyMode = typeof legacy === 'boolean' ? legacy : true;
   }
   if (raw?.mockLiveHintsEnabled === undefined) {
-    migration.mockLiveHintsEnabled = false;
+    // `mockLiveSuggestionsEnabled` is the pre-rename name, and it is read forward for the same
+    // reason `professionalMode` is: the setting means what it meant and now defaults the way it
+    // defaulted, so a stored value is either the same default or a choice worth keeping.
+    const legacy = (raw as (StoredRuntime & Record<string, unknown>) | undefined)
+      ?.mockLiveSuggestionsEnabled;
+    migration.mockLiveHintsEnabled = typeof legacy === 'boolean' ? legacy : true;
   }
   // perform migration only if there are values to set
   if (Object.keys(migration).length > 0) {
@@ -312,12 +319,8 @@ scrubRetiredKey('lastSessionMode');
 // to carry the user's choice across. Scrubbed after that, so the two can never disagree.
 scrubRetiredKey('professionalMode');
 
-// `mockLiveSuggestionsEnabled` is `mockLiveHintsEnabled` under its old name and its old default.
-// Deliberately *not* carried across the way `professionalMode` was: that rename kept the user's
-// value because the meaning of the setting had not changed, whereas this one exists to reverse a
-// default that was wrong. Every install that ever launched holds a `true` the migration wrote for
-// it rather than a choice anyone made, so reading those forward would leave the old default in
-// place on every machine the reversal is for. The setting is one click away on the session bar.
+// `mockLiveSuggestionsEnabled` is `mockLiveHintsEnabled` under its old name, whose migration
+// above reads it one last time. Scrubbed after that, so the two can never disagree.
 scrubRetiredKey('mockLiveSuggestionsEnabled');
 
 // `headphoneNoticeAcknowledged` was replaced by the mock-interview-aware `HeadphoneNoticeDialog`

@@ -501,11 +501,21 @@ unfocusable, with no interview on screen to explain why.
 
 ### The mock interview turn
 
-**Live suggestions are off by default** (`mockLiveHintsEnabled`, and the rename is the reversal:
-see the scrub note in the config store for why the old key's value is deliberately not carried
-across). A mock interview is for answering the question yourself, and a column of model-written
+**Live suggestions are on by default** (`mockLiveHintsEnabled`), and the setting is asked outright
+rather than only discoverable. It was turned off for a real reason - a column of model-written
 answers beside the question while you are trying to think of your own is the one thing most likely
-to stop that working. One click on the session bar for the run where comparing is the point.
+to stop you composing your own - but that reason argues for asking the question, not for answering
+it silently. With the only control on the session bar, a candidate had to already know the
+comparison existed to find it, mid-question, which is the worst moment to go looking; so most
+people never met it at all. `MockHintsField` now renders the setting on the configuration page and
+as its own step in the first-run wizard, and the session bar still turns it off for the run where
+composing unaided is the point.
+
+The pre-rename key `mockLiveSuggestionsEnabled` is read forward again, the way `professionalMode`
+is: while the default was reversed it deliberately was not, because every stored `true` was the old
+migration's write rather than a choice and reading those forward would have undone the reversal on
+every machine it was for. The default now matches the old one, so a stored value is either that
+same default or a real choice, and there is nothing left to protect against.
 
 **There is no Repeat and no Skip.** Both were escape hatches from a question rather than ways of
 answering one, and both cost the interview something the candidate could not see: a skip is

@@ -40,6 +40,10 @@ export async function run(userDataDir) {
         // Both mechanisms that touch it are exercised below: the migration reads it once to
         // carry the choice across, then scrubRetiredKey removes it.
         professionalMode: false,
+        // The pre-rename name for `mockLiveHintsEnabled`, set to a real choice rather than the
+        // default of the day. Carried across for the same reason `professionalMode` is, and
+        // scrubbed afterwards for the same reason too.
+        mockLiveSuggestionsEnabled: false,
       },
     })
   );
@@ -93,7 +97,6 @@ export async function run(userDataDir) {
     !('professionalMode' in (store.configStore.getStoredRuntime() ?? {}))
   );
 
-
   store.configStore.updateConfig({ hintOnlyMode: true });
   check('hintOnlyMode is persisted', store.configStore.getStoredRuntime()?.hintOnlyMode === true);
 
@@ -101,6 +104,26 @@ export async function run(userDataDir) {
   check(
     'hintOnlyMode survives an unrelated write',
     store.configStore.getConfig().hintOnlyMode === true
+  );
+
+  // Mock live hints default to on, so an upgrading install that had turned them off must come
+  // back off rather than being handed the new default - which is exactly what would happen if the
+  // migration stopped reading the pre-rename key.
+  check('mock live hints carry the upgrading choice across', cfg.mockLiveHintsEnabled === false);
+  check(
+    'and the pre-rename mock hints key is scrubbed',
+    !('mockLiveSuggestionsEnabled' in (store.configStore.getStoredRuntime() ?? {}))
+  );
+
+  // The other half of that: absent on disk has to read as on. Every consumer reads through
+  // getConfig, so this is the backfill the main-process service actually sees - a default flipped
+  // in one of the two places and not the other is invisible until a session runs.
+  const withoutHints = { ...(store.configStore.getStoredRuntime() ?? {}) };
+  delete withoutHints.mockLiveHintsEnabled;
+  store.configStore.setStoredRuntime(withoutHints);
+  check(
+    'an absent mockLiveHintsEnabled reads as on',
+    store.configStore.getConfig().mockLiveHintsEnabled === true
   );
 
   // `lastSessionMode` backed the control bar's split Start button, which no longer exists.

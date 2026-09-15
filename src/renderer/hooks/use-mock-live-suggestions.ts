@@ -7,22 +7,30 @@ import { useConfigStore } from './use-config-store';
  * Whether a mock session also generates what the live assistant would have suggested, plus a
  * toggle that persists the change.
  *
- * Absent means **off**, the same direction `hintOnlyMode` is read in and the opposite of what
- * this setting used to do. A mock interview is for answering the question yourself, and a panel
- * of model-written answers beside the question while you are trying to think of your own is the
- * one thing most likely to stop that working - so it is opt-in, for the run where comparing your
- * answer against the assistant's is actually the point.
+ * Absent means **on**, the same direction `hintOnlyMode` is read in, and the main-process store
+ * backfills the same default - so the two sides agree about a config written before the setting
+ * existed. Turning it off is what a candidate does for the run where composing the answer
+ * unaided is the point, and it is asked in the first-run wizard rather than only discoverable
+ * on the session bar.
+ *
+ * Shared by the session bar, the configuration page and the onboarding wizard. `toggle` reads
+ * the store imperatively so it stays referentially stable.
  */
 export function useMockLiveSuggestions() {
   const { config } = useConfigStore();
 
-  const toggle = useCallback(() => {
-    const { config: current, updateConfig } = useConfigStore.getState();
-    updateConfig({ mockLiveHintsEnabled: current?.mockLiveHintsEnabled !== true }).catch((e) => {
+  const persist = useCallback((enabled: boolean) => {
+    const { updateConfig } = useConfigStore.getState();
+    updateConfig({ mockLiveHintsEnabled: enabled }).catch((e) => {
       console.error('Failed to save mock live suggestions setting', e);
       toast.error('Failed to save live suggestions setting');
     });
   }, []);
 
-  return { enabled: config?.mockLiveHintsEnabled === true, toggle };
+  const toggle = useCallback(() => {
+    const { config: current } = useConfigStore.getState();
+    persist(current?.mockLiveHintsEnabled === false);
+  }, [persist]);
+
+  return { enabled: config?.mockLiveHintsEnabled !== false, setEnabled: persist, toggle };
 }
