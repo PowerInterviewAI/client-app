@@ -83,10 +83,10 @@ const STEPS: Step[] = [
   },
   {
     id: 'mock-hints',
-    label: 'Practice',
-    title: 'Hints while you practise?',
+    label: 'Mock interview',
+    title: 'Hints in a mock interview?',
     description:
-      'Practice interviews are the ones you run against yourself. This decides whether they hand you the answer as well.',
+      'A mock interview is where you practise against the AI interviewer. This decides whether it hands you the answer as well.',
   },
   {
     id: 'zoom',
