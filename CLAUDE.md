@@ -466,6 +466,21 @@ exists to allow, stranding the candidate on a console whose Stop has already bee
 for. The lock clears it when the guarded route unmounts, and again whenever a session becomes
 active, so an exit that never navigated cannot leave the next interview unguarded.
 
+**And the predicate has to be current, which is not the same as being correct.** `useBlocker` hands
+its function to the router from a `useEffect`, so the router holds whatever the *previous*
+committed render gave it - while `<Navigate>` navigates from an effect of its own, and a child's
+passive effect runs before its parent's. A route that renders a redirect in the same commit as the
+state change permitting it was therefore asked the question with last render's answer, and refused;
+`reset()` then dropped that navigation and `<Navigate>` never asked again, its dep array being
+stable. Ending a mock interview with nothing recorded resets the session to Idle, and
+`/mock-interview` then rendered `null` for the rest of the session - a blank screen where the home
+page should have been. The predicate is a stable `useCallback` reading `active` / `exiting` /
+`signedOut` off a ref written in a **layout** effect, which runs during the commit ahead of every
+passive effect in it. `/main` only ever escaped this because `useEndLiveSession` awaits several IPC
+round trips between `beginInterviewExit()` and its `navigate`, which is a timing accident rather
+than a guard. `test/interview-lock.test.mjs` pins it, source-level, for the same reason the device
+tests are.
+
 **Stealth mode lives on the live control bar and nowhere else.** It was in the titlebar menu and
 the command palette, both reachable from the login screen and the payment page, where hiding the
 window from a screen capture answers a question nobody is asking - the screen share it exists for
