@@ -108,16 +108,15 @@ export async function run() {
     check('with an error', mockInterviewService.getState().reportError !== null);
     check('and nothing in flight', mockInterviewService.getState().rescoring === false);
 
-    // The retry is held open so the in-flight shape can be read. It must stay on `Finished`:
-    // `Scoring` is an active session, which would re-arm the navigation lock and replace the
-    // report screen the candidate is looking at with the session screen.
-    //
     // Exported first, from the same screen the retry is offered on: the report screen keeps
     // Export beside the failure, so saving the answers and then retrying is an ordinary thing to
-    // do and the score has to retire that export when it lands.
+    // do, and the score has to retire that export when it lands.
     mockInterviewService.markExported();
     check('the answers can be exported first', mockInterviewService.getState().exported === true);
 
+    // The retry is held open so the in-flight shape can be read. It must stay on `Finished`:
+    // `Scoring` is an active session, which would re-arm the navigation lock and replace the
+    // report screen the candidate is looking at with the session screen.
     holdNextReport();
     state.reportShouldFail = false;
     const retry = mockInterviewService.retryScoring();

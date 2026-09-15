@@ -46,9 +46,16 @@ export function ReportScreen({
 
   // This screen replaces SessionScreen the moment the session reaches Finished, not through a
   // real navigation, so nothing else moves focus here on its own.
+  //
+  // Keyed on the report arriving rather than on mount alone, because a successful retry is the
+  // same kind of replacement one step further in: it unmounts the failure alert along with the
+  // Score again button the candidate just pressed, which drops focus to the body and loses their
+  // place in a screen that has just filled up with the score they were waiting for. The flag
+  // only ever flips once per session, so nothing steals focus while they are reading.
+  const hasReport = report !== null;
   useEffect(() => {
     headingRef.current?.focus();
-  }, []);
+  }, [hasReport]);
 
   const save = async (format: 'docx' | 'md') => {
     setSaving(format);
