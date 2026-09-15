@@ -13,7 +13,7 @@ import { ZoomField } from '@/components/custom/settings/zoom-field';
 import { Button } from '@/components/ui/button';
 
 /**
- * How the interview runs: the microphone, the language, how suggestions read, whether practice
+ * How the interview runs: the microphone, the language, how suggestions read, whether mock
  * interviews show them at all, and whether the transcript is docked.
  *
  * Every control here writes straight through to the config store as it is changed - there is no
