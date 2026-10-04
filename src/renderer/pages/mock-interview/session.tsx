@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMicLevel } from '@/hooks/use-mic-level';
 import { useMockLiveSuggestions } from '@/hooks/use-mock-live-suggestions';
+import { type Translation, useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { mockTranscriptionService } from '@/services/mock-transcription.service';
 import type { MockInterviewSessionState } from '@/types/mock-interview';
@@ -21,17 +22,26 @@ interface SessionScreenProps {
   onAnswerReady: () => Promise<void>;
 }
 
-const THINKING_LABEL: Partial<Record<MockInterviewState, string>> = {
-  [MockInterviewState.Starting]: 'Starting…',
-  [MockInterviewState.Generating]: 'Thinking of the next question…',
-  [MockInterviewState.Evaluating]: 'Thinking…',
-  [MockInterviewState.Scoring]: 'Scoring the interview…',
-  // Reached by "End interview", and the only state that had neither a spinner nor a line: the
-  // screen sat unchanged with a dead control bar while the session was being wound up.
-  [MockInterviewState.Stopping]: 'Ending the interview…',
-};
+/**
+ * The states that show a spinner and a line about what is happening, each naming the locale key
+ * that says it. Built from `t` rather than held as a constant, so a language change reaches a
+ * screen that is already waiting on one of them.
+ *
+ * `Stopping` is reached by "End interview", and it is the state that used to have neither a
+ * spinner nor a line: the screen sat unchanged with a dead control bar while the session was
+ * being wound up.
+ */
+const thinkingLabels = (t: Translation): Partial<Record<MockInterviewState, string>> => ({
+  [MockInterviewState.Starting]: t.mock.session.starting,
+  [MockInterviewState.Generating]: t.mock.session.generating,
+  [MockInterviewState.Evaluating]: t.mock.session.evaluating,
+  [MockInterviewState.Scoring]: t.mock.session.scoring,
+  [MockInterviewState.Stopping]: t.mock.session.stopping,
+});
 
 export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: SessionScreenProps) {
+  const t = useT();
+  const THINKING_LABEL = thinkingLabels(t);
   const { state, currentQuestion } = session;
   const [busy, setBusy] = useState<'done' | 'end' | null>(null);
   const [answerReady, setAnswerReady] = useState(currentQuestion?.hasAudio ?? true);
@@ -110,15 +120,11 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
   const statusText = isThinking
     ? THINKING_LABEL[state]
     : state === MockInterviewState.Speaking
-      ? 'Interviewer is speaking. Your mic is off while the question plays.'
+      ? t.mock.session.speaking
       : state === MockInterviewState.Listening
         ? showReadyPrompt
-          ? // Says what the gate actually does now. It used to hold only the silence backstop,
-            // so "read the question, then answer" was true and the microphone was live the whole
-            // time you were reading. It now holds the transcript too, and a candidate who starts
-            // talking before pressing this would otherwise watch their answer go nowhere.
-            'Read the question. Your answer is recorded from when you are ready.'
-          : 'Listening…'
+          ? t.mock.session.readThenReady
+          : t.mock.session.listening
         : '';
 
   return (
@@ -134,7 +140,7 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
       {/* Visually hidden: the panels below carry their own visible headings, but the route still
           needs a landmark for screen-reader heading navigation to land on. */}
       <h1 ref={headingRef} tabIndex={-1} className="sr-only">
-        Mock interview session
+        {t.mock.session.heading}
       </h1>
 
       {/* `overflow-hidden`, not `overflow-y-hidden`. Setting one axis to hidden and leaving the
@@ -222,7 +228,7 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
                 void onAnswerReady();
               }}
             >
-              I&apos;m ready
+              {t.mock.session.ready}
             </Button>
           )}
         </div>
@@ -252,11 +258,11 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
               onClick={withBusy('done', onDone)}
             >
               <Check className="h-3.5 w-3.5" />
-              Done answering
+              {t.mock.session.doneAnswering}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Submit your answer and move on</p>
+            <p>{t.mock.session.doneAnsweringTooltip}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -280,18 +286,16 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
                 size="sm"
                 className={cn(BAR_ICON_BUTTON, hintsEnabled ? BAR_ACTIVE : BAR_GHOST)}
                 aria-pressed={hintsEnabled}
-                aria-label="Toggle live suggestions"
+                aria-label={t.mock.session.toggleHints}
                 onClick={toggleHints}
               >
                 <Lightbulb className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Live Suggestions: {hintsEnabled ? 'On' : 'Off'}</p>
+              <p>{hintsEnabled ? t.mock.session.hintsOn : t.mock.session.hintsOff}</p>
               <p className="text-xs text-muted-foreground">
-                {hintsEnabled
-                  ? 'Shows what the live assistant would answer'
-                  : 'Practise without a hint'}
+                {hintsEnabled ? t.mock.session.hintsOnHint : t.mock.session.hintsOffHint}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -313,14 +317,14 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
                 // `sessionSeq` is what makes ending mid-transition safe: the call already running
                 // sees the generation move and abandons its own result.
                 disabled={busy === 'end'}
-                aria-label="End interview"
+                aria-label={t.mock.session.endInterview}
                 onClick={withBusy('end', onEnd)}
               >
                 <Square className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>End interview</p>
+              <p>{t.mock.session.endInterview}</p>
             </TooltipContent>
           </Tooltip>
         </div>

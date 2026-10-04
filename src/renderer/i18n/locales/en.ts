@@ -812,6 +812,171 @@ export const en = {
     openInstaller: 'Open Installer',
     restartNow: 'Restart Now',
   },
+
+  mock: {
+    setup: {
+      title: 'Mock interview',
+      description: 'The AI asks, you answer out loud. Nothing is saved unless you export it.',
+      start: 'Start mock interview',
+      starting: 'Starting…',
+      seniority: 'Seniority',
+      seniorityOptions: {
+        junior: 'Junior',
+        mid: 'Mid-level',
+        senior: 'Senior',
+        staff: 'Staff+',
+      },
+      questions: 'Questions',
+      /** `about 8 minutes` is the shape; the count drives the plural in both columns. */
+      questionOption: (count: number, minutes: number) =>
+        `${count} questions, about ${minutes} minutes`,
+      cannotAfford: ' - not enough credits',
+      difficulty: 'Difficulty',
+      difficultyOptions: {
+        easy: {
+          label: 'Warm-up',
+          description: 'Straightforward questions, one clear ask each.',
+        },
+        standard: {
+          label: 'Standard',
+          description: 'What an ordinary interviewer would actually ask.',
+        },
+        hard: {
+          label: 'Hard',
+          description: 'Probing questions on trade-offs and edge cases.',
+        },
+      },
+      languageDescription:
+        'What the interviewer asks in, what is transcribed, and what your feedback comes back in.',
+      /**
+       * Two numbers, and the smaller one is the promise: every question and the report are
+       * guaranteed once the session starts, while follow-ups are charged only as they are asked.
+       */
+      price: (price: number) => `${price} credits`,
+      priceLead: 'Costs ',
+      priceCeiling: (ceiling: number) =>
+        `, up to ${ceiling} if the interviewer follows up on every answer`,
+      balance: (credits: number) => `You have ${credits.toLocaleString()}.`,
+    },
+
+    session: {
+      heading: 'Mock interview session',
+      starting: 'Starting…',
+      generating: 'Thinking of the next question…',
+      evaluating: 'Thinking…',
+      scoring: 'Scoring the interview…',
+      stopping: 'Ending the interview…',
+      speaking: 'Interviewer is speaking. Your mic is off while the question plays.',
+      /**
+       * Says what the gate actually does. It holds the transcript as well as the clock, so a
+       * candidate who starts talking before pressing it would watch their answer go nowhere.
+       */
+      readThenReady: 'Read the question. Your answer is recorded from when you are ready.',
+      listening: 'Listening…',
+      ready: "I'm ready",
+      doneAnswering: 'Done answering',
+      doneAnsweringTooltip: 'Submit your answer and move on',
+      toggleHints: 'Toggle live suggestions',
+      hintsOn: 'Live Suggestions: On',
+      hintsOff: 'Live Suggestions: Off',
+      hintsOnHint: 'Shows what the live assistant would answer',
+      hintsOffHint: 'Practise without a hint',
+      endInterview: 'End interview',
+      startFailed: 'Failed to start the mock interview',
+      startingPage: 'Starting mock interview…',
+    },
+
+    report: {
+      heading: 'Mock interview report',
+      verdictExcellent: 'Excellent',
+      verdictStrong: 'Strong',
+      verdictDeveloping: 'Developing',
+      verdictNeedsWork: 'Needs work',
+      scoreFailed: (reason: string) =>
+        `The overall score could not be produced (${reason}). Your answers are still shown below and can still be exported.`,
+      scoreAgain: 'Score again',
+      scoring: 'Scoring…',
+      overallScore: 'Overall score',
+      strengths: 'Strengths',
+      gaps: 'Gaps',
+      nothingNoted: 'Nothing specific noted.',
+      perQuestion: 'Per-question breakdown',
+      yourAnswer: 'Your answer',
+      noAnswerRecorded: '(no answer recorded)',
+      score: 'Score',
+      strongerAnswer: 'Stronger answer',
+      saveAsWord: 'Save as Word',
+      saveAsMarkdown: 'Save as Markdown',
+      exportFailed: 'Failed to export the report',
+      practiseAgain: 'Practise again',
+      done: 'Done',
+    },
+  },
+
+  mainRoute: {
+    redirectingToLogin: 'Redirecting to login…',
+    authenticating: 'Authenticating…',
+    transcriptionHidden: 'Transcription is hidden',
+  },
+
+  documentation: {
+    intro: (appName: string) =>
+      `${appName} is an AI-powered assistant that enhances your interview experience with real-time suggestions, on-screen code recommendations.`,
+    docsLead: 'For full documentation, visit ',
+    docsLinkText: 'powerinterviewai.com/docs',
+    docsTrailing: '. Press Cmd/Ctrl+K anywhere in the app to search for an action.',
+
+    lostWindow: {
+      title: 'Lost the window?',
+      body: (appName: string) =>
+        `In stealth mode ${appName} leaves the taskbar and the macOS Dock so it is not visible when you share your screen, which also means a minimized window has no button to click. Just launch ${appName} again: it does not start a second copy, it brings this window back. Outside stealth mode the usual taskbar button and Dock icon are there.`,
+    },
+
+    language: {
+      title: 'Interviewing in another language',
+      oneSetting:
+        "One setting covers the whole session: which speech model transcribes the call, what language suggestions are written in, and the language of the exported report. Set it from the language button on the control bar, from the configuration page, or in the mock interview's setup dialog - they all change the same thing.",
+      supported: (count: number) => `${count} languages are supported: `,
+      midInterview:
+        'You can change it mid-interview. Suggestions follow immediately, from the next answer onward. Speech recognition takes a moment longer: it reconnects, so the sentence being spoken at that instant may be cut short in the transcript.',
+      textOnly:
+        'In a mock interview, a language marked “text only” in the setup dialog has no voice available: the interviewer writes its questions instead of speaking them. You still answer out loud and the scoring is unchanged.',
+      /**
+       * The app's own chrome is a second, separate setting, and this is the only place that
+       * says so in full - the two are routinely different for the same user.
+       */
+      appLanguageTitle: 'The app is in its own language',
+      appLanguageBody:
+        'The language above is the interview. The language the app itself is written in - its buttons, headings and messages - is a separate setting on the configuration page, and it is also the first thing the first-run setup asks. Neither is guessed from the other: a Russian speaker interviewing in English wants an English transcript and a Russian app.',
+    },
+
+    microphone: {
+      title: 'Changing microphone mid-interview',
+      body: 'The microphone button on the control bar stays available while an interview is running. If your headset dies, is unplugged, or was the wrong device to begin with, pick another one there rather than stopping the assistant - stopping it clears the transcript and the suggestions with it.',
+      immediate:
+        'The change takes effect immediately and transcription keeps running, so nothing is cut short. If the device you pick cannot be opened - unplugged, or in use by another app - the interview carries on using the previous one and the app says so.',
+    },
+
+    suggestionStyle: {
+      title: 'Hint-only vs. full-sentence suggestions',
+      body: 'Hint-only is the default: each suggestion arrives as a one-line headline plus keyword bullets, so you can take it in at a glance and keep talking. Full-sentence writes the answer out the way it would be spoken - more to read, less to improvise.',
+      switching: (combo: string) =>
+        `Switch between them on the control bar, on the configuration page, or with ${combo}, which works in stealth mode too. Suggestions already on screen keep the style they were generated in; only the next one changes.`,
+    },
+
+    settings: {
+      title: 'Where your settings live',
+      accountLabel: 'Account',
+      accountBody:
+        ' holds who you are - the name you go by, the profile or CV your suggestions are written from, the job context you are interviewing against, and your password.',
+      configurationLabel: 'Configuration',
+      configurationBody:
+        ' holds how the interview runs - the app language, your microphone (with a test), the interview language, the suggestion style, and whether the transcript panel is docked. Nothing there needs saving; each change takes effect as you make it.',
+      both: 'Both are on the home screen, in the titlebar menu, and in the Cmd/Ctrl+K palette. A new install is walked through all of it once on first launch.',
+    },
+
+    hotkeys: 'Hotkeys',
+  },
 };
 
 export type Translation = typeof en;

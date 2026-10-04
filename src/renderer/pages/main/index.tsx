@@ -19,6 +19,7 @@ import { useInterviewNavigationLock } from '@/hooks/use-interview-lock';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
+import { useT } from '@/i18n';
 import {
   DOCK_HANDLE_HEIGHT,
   isMac,
@@ -33,6 +34,7 @@ import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
 import { type Transcript } from '@/types/transcript';
 
 export default function MainPage() {
+  const t = useT();
   const navigate = useNavigate();
 
   const { config, isLoading: configLoading, loadConfig, updateConfig } = useConfigStore();
@@ -290,17 +292,17 @@ export default function MainPage() {
 
   // Show loading if not logged in (fallback)
   if (appState?.isLoggedIn === false) {
-    return <LoadingPage disclaimer="Redirecting to login…" />;
+    return <LoadingPage disclaimer={t.mainRoute.redirectingToLogin} />;
   }
 
   // Show loading if auth status is unknown
   if (appState?.isLoggedIn === null) {
-    return <LoadingPage disclaimer="Authenticating…" />;
+    return <LoadingPage disclaimer={t.mainRoute.authenticating} />;
   }
 
   // Show loading if config or app state is not loaded yet
   if (configLoading || !appState) {
-    return <LoadingPage disclaimer="Loading…" />;
+    return <LoadingPage disclaimer={t.common.loading} />;
   }
 
   return (
@@ -339,7 +341,7 @@ export default function MainPage() {
 
         {!hasSuggestions && !showTranscriptDock && (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-sm text-muted-foreground">Transcription is hidden</p>
+            <p className="text-sm text-muted-foreground">{t.mainRoute.transcriptionHidden}</p>
           </div>
         )}
 

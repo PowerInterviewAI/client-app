@@ -34,6 +34,15 @@ const LATIN_BY_DESIGN = new Set([
   'Markdown',
   'Word',
   'Markdown (.md)',
+  // Seniority levels. Russian-language job postings and recruiters use these in Latin script
+  // almost without exception, so translating them would make the picker read as a translation
+  // of a job ad rather than as one.
+  'Junior',
+  'Middle',
+  'Senior',
+  'Staff+',
+  // A domain.
+  'powerinterviewai.com/docs',
 ]);
 
 export async function run() {

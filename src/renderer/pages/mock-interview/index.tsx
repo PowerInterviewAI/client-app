@@ -8,6 +8,7 @@ import { useInterviewNavigationLock } from '@/hooks/use-interview-lock';
 import { useMockInterview } from '@/hooks/use-mock-interview';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
+import { useT } from '@/i18n';
 import { getElectron } from '@/lib/utils';
 import {
   isMockInterviewSessionActive,
@@ -38,6 +39,7 @@ import { SessionScreen } from './session';
  * what handles Alt+F4, the taskbar button and Cmd+Q.
  */
 export default function MockInterviewPage() {
+  const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
   const { appState } = useAppState();
@@ -110,7 +112,7 @@ export default function MockInterviewPage() {
     setAutoStarting(true);
     startSession(pendingSetup).catch((error) => {
       console.error('Failed to auto-start mock interview:', error);
-      reportError(error instanceof Error ? error.message : 'Failed to start the mock interview');
+      reportError(error instanceof Error ? error.message : t.mock.session.startFailed);
       setAutoStarting(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -169,8 +171,10 @@ export default function MockInterviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (appState?.isLoggedIn === false) return <LoadingPage disclaimer="Redirecting to login…" />;
-  if (appState?.isLoggedIn === null || !appState) return <LoadingPage disclaimer="Loading…" />;
+  if (appState?.isLoggedIn === false)
+    return <LoadingPage disclaimer={t.mainRoute.redirectingToLogin} />;
+  if (appState?.isLoggedIn === null || !appState)
+    return <LoadingPage disclaimer={t.common.loading} />;
 
   const state = session?.state ?? MockInterviewState.Idle;
 
@@ -220,7 +224,7 @@ export default function MockInterviewPage() {
   // rendering anything of its own. A start that fails clears the flag in its own `catch`, so the
   // branch below is still reachable rather than this being a dead end.
   if (autoStarting) {
-    return <LoadingPage disclaimer="Starting mock interview…" />;
+    return <LoadingPage disclaimer={t.mock.session.startingPage} />;
   }
 
   // Idle with nothing pending - a start that just failed (the toast already said why), or this
