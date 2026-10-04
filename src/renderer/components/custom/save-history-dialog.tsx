@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAppState } from '@/hooks/use-app-state';
-import { useSaveHistoryPrompt } from '@/hooks/use-save-history-guard';
+import { type SaveHistoryReason, useSaveHistoryPrompt } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
 import { useT } from '@/i18n';
 import { getElectron } from '@/lib/utils';
@@ -81,10 +81,16 @@ export default function SaveHistoryDialog() {
   // `t.saveHistory.mock` is partial on purpose: `mock-done` and `mock-again` are raised only
   // from the report screen and are already written for it, so an entry there would be a second
   // copy of the same words.
+  //
+  // Read through a `Partial` view rather than cast `reason` into the narrower key union. The cast
+  // would be asserting something false - `reason` really can be `mock-done`, which that object
+  // really does not have - and it is the `??` below that handles it. The view says the lookup can
+  // miss; the cast said it cannot and then relied on it doing so anyway.
+  const mockCopy: Partial<Record<SaveHistoryReason, (typeof t.saveHistory.live)['clear']>> =
+    t.saveHistory.mock;
   const copy = reason
     ? isMockSubject
-      ? (t.saveHistory.mock[reason as keyof typeof t.saveHistory.mock] ??
-        t.saveHistory.live[reason])
+      ? (mockCopy[reason] ?? t.saveHistory.live[reason])
       : t.saveHistory.live[reason]
     : null;
   const busy = saving !== null;

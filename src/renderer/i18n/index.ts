@@ -44,10 +44,25 @@ function readCache(): UiLanguage {
 
 let paintTimeLanguage = readCache();
 
-/** The UI language in force, falling back to the paint-time cache until the config arrives. */
+// Applied here as well as in `useUiLanguageSync`, because this runs at module load and that runs
+// in an effect after the first paint. `lang` picks the font fallback, so setting it later means
+// the first frames are laid out with the wrong one and then reflow.
+try {
+  document.documentElement.lang = paintTimeLanguage;
+} catch {
+  // No document in a non-browser context. Nothing to do and nothing to report.
+}
+
+/**
+ * The UI language in force, falling back to the paint-time cache until the config arrives.
+ *
+ * Keyed on whether the config has loaded at all rather than on the value being truthy: a config
+ * that arrives carrying a language this build has no locale for must resolve to English, and
+ * testing the value would read that case as "not loaded yet" and sit on the cache instead.
+ */
 export function useUiLanguageCode(): UiLanguage {
-  const stored = useConfigStore((s) => s.config?.uiLanguage);
-  return stored ? resolveUiLanguage(stored) : paintTimeLanguage;
+  const config = useConfigStore((s) => s.config);
+  return config ? resolveUiLanguage(config.uiLanguage) : paintTimeLanguage;
 }
 
 /**

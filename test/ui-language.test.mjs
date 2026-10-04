@@ -250,6 +250,37 @@ export async function run() {
     appStateService.getState().transcripts.length === 0
   );
 
+  // Two slots on the control bar are a fixed width with no truncation, so a label that does not
+  // fit does not clip - it wraps, and the control gets taller. Both sit in single-row layouts
+  // where that moves everything beside them, and `RunningIndicator` is the only thing on screen
+  // at all in stealth mode. Russian found this once already (`ОСТАНОВКА` against a 96px badge),
+  // and the next locale will find it again, so the budget is written down rather than measured
+  // by eye each time.
+  //
+  // Character counts rather than pixels, which is what a test can actually see. 10 is `w-28`
+  // (112px) less the dot and the padding, at text-xs bold uppercase; 8 is `w-24` less the icon.
+  const SLOT_BUDGETS = [
+    { block: 'runningIndicator', keys: ['idle', 'starting', 'running', 'stopping'], max: 10 },
+    { block: 'controlPanel', keys: ['stop'], max: 8 },
+  ];
+
+  for (const locale of Object.values(UiLanguage)) {
+    const localeSource = codeOnly(
+      readSource(new URL(`../src/renderer/i18n/locales/${locale}.ts`, import.meta.url))
+    );
+    for (const { block, keys, max } of SLOT_BUDGETS) {
+      const start = localeSource.indexOf(`\n  ${block}: {`);
+      const body = localeSource.slice(start, localeSource.indexOf('\n  },', start));
+      for (const key of keys) {
+        const m = body.match(new RegExp(`\\b${key}: '([^']*)',`));
+        check(
+          `${locale}.${block}.${key} fits its fixed-width slot${m ? ` ("${m[1]}", ${m[1].length}/${max})` : ' (not found)'}`,
+          m !== null && m[1].length <= max
+        );
+      }
+    }
+  }
+
   // Restored for the tests after this one, which read the placeholder in English and assume the
   // state a freshly constructed service is in.
   configStore.updateConfig({ uiLanguage: 'en' });
