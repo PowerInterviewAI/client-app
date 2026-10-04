@@ -42,6 +42,20 @@ export interface UiStrings {
   stealthNotRunning: string;
   opacityStealthOnly: string;
 
+  /**
+   * The native save dialog's own title and file-type labels.
+   *
+   * Chrome rather than part of the document: the report inside the file follows the interview
+   * language, but the window asking where to put it is being read by the person at the keyboard.
+   * `.docx` and `.md` stay as they are - a file extension is not a word.
+   */
+  saveTranscriptTitle: string;
+  saveMockReportTitle: string;
+  saveImageTitle: string;
+  markdownFilter: string;
+  wordFilter: string;
+  pngFilter: string;
+
   /** Action suggestions, refused for a reason the renderer's own gating cannot always see. */
   actionDuringMock: string;
   cannotClearImages: string;
@@ -74,6 +88,13 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     stealthNotRunning: 'Stealth mode is only available during a live interview.',
     opacityStealthOnly: 'Opacity toggle is only available in stealth mode.',
 
+    saveTranscriptTitle: 'Save Transcript',
+    saveMockReportTitle: 'Save Mock Interview Report',
+    saveImageTitle: 'Save Image',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Word Document',
+    pngFilter: 'PNG Image',
+
     actionDuringMock: 'Action suggestions are unavailable during a mock interview.',
     cannotClearImages: 'Cannot clear images when assistant is not running',
     cannotCaptureScreenshot: 'Cannot capture screenshot when assistant is not running',
@@ -104,6 +125,13 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       'В пробном собеседовании скрытый режим выключен. Это тренировка, а не настоящий звонок.',
     stealthNotRunning: 'Скрытый режим доступен только во время живого собеседования.',
     opacityStealthOnly: 'Прозрачность переключается только в скрытом режиме.',
+
+    saveTranscriptTitle: 'Сохранить расшифровку',
+    saveMockReportTitle: 'Сохранить отчёт о пробном собеседовании',
+    saveImageTitle: 'Сохранить изображение',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Документ Word',
+    pngFilter: 'Изображение PNG',
 
     actionDuringMock: 'Подсказки по запросу недоступны во время пробного собеседования.',
     cannotClearImages: 'Нельзя очистить снимки, пока ассистент не запущен',
