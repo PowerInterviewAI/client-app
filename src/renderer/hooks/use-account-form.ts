@@ -33,7 +33,7 @@ export function useAccountForm() {
    */
   const edited = useRef(false);
 
-  const markEdited = <T>(set: (value: T) => void) => {
+  const markEdited = <T,>(set: (value: T) => void) => {
     return (value: T) => {
       edited.current = true;
       set(value);
