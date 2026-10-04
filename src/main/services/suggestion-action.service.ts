@@ -313,7 +313,7 @@ export class ActionSuggestionService {
             // This path already promoted to Loading before the loop, so an empty stream lands
             // here as a blank Success card rather than a stuck one. Still wrong: report it.
             suggestion.state = SuggestionState.Error;
-            suggestion.error = 'The model returned an empty response.';
+            suggestion.error = uiStrings().suggestionErrors.emptyResponse;
           } else {
             suggestion.state = SuggestionState.Success;
           }
@@ -342,7 +342,7 @@ export class ActionSuggestionService {
         }
         suggestion.state = SuggestionState.Error;
         suggestion.error = stalled
-          ? 'The response timed out. Please try again.'
+          ? uiStrings().suggestionErrors.responseTimedOut
           : getSuggestionErrorMessage(error);
       }
       this.setSuggestion(timestamp, suggestion);

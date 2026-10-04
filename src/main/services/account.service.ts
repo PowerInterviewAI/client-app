@@ -87,7 +87,7 @@ export class AccountService {
         const migration = await this.migrateLegacyConfig(account._id, generation);
         if (migration === 'migrated') return { success: true };
         if (migration === 'failed') {
-          return { success: false, error: 'Failed to migrate local configuration' };
+          return { success: false, error: uiStrings().accountErrors.migrateFailed };
         }
       }
 
@@ -191,7 +191,10 @@ export class AccountService {
         context,
       });
       if (response.error) {
-        return { success: false, error: response.error.message || 'Failed to update account' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().accountErrors.updateFailed,
+        };
       }
 
       // Mirror what the backend stored, not what was sent: it truncates oversized fields,
@@ -235,7 +238,7 @@ export class AccountService {
     return {
       success: fresh,
       data: state.interviewConfig,
-      error: fresh ? undefined : pull.error || 'Failed to load configuration',
+      error: fresh ? undefined : pull.error || uiStrings().accountErrors.loadConfigFailed,
     };
   }
 
@@ -274,7 +277,10 @@ export class AccountService {
     try {
       const response = await this.client.updateOnboarding({ completed });
       if (response.error && response.status !== 404) {
-        return { success: false, error: response.error.message || 'Failed to save your setup' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().accountErrors.onboardingFailed,
+        };
       }
 
       // Bumped for the same reason `updateConfig` bumps it: a pull that started before this

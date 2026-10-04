@@ -315,7 +315,8 @@ class MockInterviewService {
         // naming the price and their balance, so it is passed through rather than prefixed with
         // "could not generate the question", which describes a fault they do not have.
         if (response.status === HTTP_PAYMENT_REQUIRED) {
-          this.lastQuestionError = response.error?.message || 'Not enough credits';
+          this.lastQuestionError =
+            response.error?.message || uiStrings().mockErrors.notEnoughCredits;
           this.lastQuestionUnaffordable = true;
           console.warn(
             `[MockInterviewService] question refused for credits: ${this.lastQuestionError}`
@@ -1097,7 +1098,7 @@ class MockInterviewService {
         }
         if (hint.answer.length === 0) {
           hint.state = SuggestionState.Error;
-          hint.error = 'The model returned an empty response.';
+          hint.error = uiStrings().suggestionErrors.emptyResponse;
         } else {
           hint.state = SuggestionState.Success;
         }

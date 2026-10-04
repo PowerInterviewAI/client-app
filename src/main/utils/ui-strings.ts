@@ -57,14 +57,46 @@ export interface UiStrings {
     string
   >;
 
-  accountErrors: Record<'fetchFailed' | 'updateFailed' | 'onboardingFailed', string>;
+  accountErrors: Record<
+    'fetchFailed' | 'updateFailed' | 'onboardingFailed' | 'migrateFailed' | 'loadConfigFailed',
+    string
+  >;
+
+  /**
+   * The two transport failures `api/client.ts` names itself.
+   *
+   * These matter more than their size suggests. Every caller's fallback is
+   * `response.error.message || uiStrings()...`, and on a timeout `message` *is* one of these -
+   * so the English string wins over every translated fallback behind it. A dead or slow backend
+   * is the most common failure the app has.
+   *
+   * A message thrown by the runtime (`fetch failed`) is still passed through: we did not write
+   * it, which is the same line drawn for backend text.
+   */
+  transportErrors: Record<'timedOut' | 'networkFailed', string>;
+
+  /** Same shape again for the payment service, whose every path sets its own message. */
+  paymentErrors: Record<
+    | 'getPlans'
+    | 'getCurrencies'
+    | 'createPayment'
+    | 'getStatus'
+    | 'getHistory'
+    | 'getCredits'
+    | 'pollingTimeout',
+    string
+  >;
 
   /**
    * Written onto a suggestion's `error` field, which the panel renders verbatim on the card the
    * candidate is reading mid-interview.
    */
   suggestionErrors: Record<
-    'tooManyRequests' | 'generateFailed' | 'cannotReachServer' | 'responseTimedOut',
+    | 'tooManyRequests'
+    | 'generateFailed'
+    | 'cannotReachServer'
+    | 'responseTimedOut'
+    | 'emptyResponse',
     string
   >;
 
@@ -78,7 +110,8 @@ export interface UiStrings {
     | 'firstQuestionFailed'
     | 'startFailed'
     | 'nothingRecorded'
-    | 'endedBeforeScoring',
+    | 'endedBeforeScoring'
+    | 'notEnoughCredits',
     string
   > & { firstQuestionFailedWith: (reason: string) => string };
 
@@ -142,6 +175,23 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       fetchFailed: 'Failed to fetch account',
       updateFailed: 'Failed to update account',
       onboardingFailed: 'Failed to save your setup',
+      migrateFailed: 'Failed to migrate local configuration',
+      loadConfigFailed: 'Failed to load configuration',
+    },
+
+    transportErrors: {
+      timedOut: 'The request timed out',
+      networkFailed: 'Network request failed',
+    },
+
+    paymentErrors: {
+      getPlans: 'Failed to get plans',
+      getCurrencies: 'Failed to get available currencies',
+      createPayment: 'Failed to create payment',
+      getStatus: 'Failed to get payment status',
+      getHistory: 'Failed to get payment history',
+      getCredits: 'Failed to get credits',
+      pollingTimeout: 'Payment polling timeout',
     },
 
     suggestionErrors: {
@@ -149,6 +199,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       generateFailed: 'Failed to generate response.',
       cannotReachServer: 'Could not reach the server. Check your connection and try again.',
       responseTimedOut: 'The response timed out. Please try again.',
+      emptyResponse: 'The model returned an empty response.',
     },
 
     mockErrors: {
@@ -160,6 +211,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       nothingRecorded:
         'The interview ended with nothing recorded. Check that the right microphone is selected and that it is not muted, then try again.',
       endedBeforeScoring: 'The interview was ended before scoring finished.',
+      notEnoughCredits: 'Not enough credits',
     },
 
     actionNames: {
@@ -217,6 +269,23 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       fetchFailed: 'Не удалось получить данные учётной записи',
       updateFailed: 'Не удалось обновить учётную запись',
       onboardingFailed: 'Не удалось сохранить настройки',
+      migrateFailed: 'Не удалось перенести локальные настройки',
+      loadConfigFailed: 'Не удалось загрузить настройки',
+    },
+
+    transportErrors: {
+      timedOut: 'Время ожидания запроса истекло',
+      networkFailed: 'Сетевой запрос не удался',
+    },
+
+    paymentErrors: {
+      getPlans: 'Не удалось получить тарифы',
+      getCurrencies: 'Не удалось получить список доступных валют',
+      createPayment: 'Не удалось создать платёж',
+      getStatus: 'Не удалось получить статус платежа',
+      getHistory: 'Не удалось получить историю платежей',
+      getCredits: 'Не удалось получить баланс кредитов',
+      pollingTimeout: 'Платёж не подтвердился вовремя',
     },
 
     suggestionErrors: {
@@ -225,6 +294,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       cannotReachServer:
         'Не удалось связаться с сервером. Проверьте подключение и попробуйте снова.',
       responseTimedOut: 'Ответ не пришёл вовремя. Попробуйте снова.',
+      emptyResponse: 'Модель вернула пустой ответ.',
     },
 
     mockErrors: {
@@ -235,6 +305,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       nothingRecorded:
         'Собеседование закончилось, и ничего не записано. Проверьте, что выбран нужный микрофон и он не выключен, затем попробуйте снова.',
       endedBeforeScoring: 'Собеседование завершили до того, как закончилась оценка.',
+      notEnoughCredits: 'Недостаточно кредитов',
     },
 
     actionNames: {
