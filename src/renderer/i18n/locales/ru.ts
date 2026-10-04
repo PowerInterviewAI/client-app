@@ -1116,6 +1116,8 @@ export const ru: Translation = {
     stoppedUncleanly: 'Ассистент остановлен, но не всё завершилось корректно',
     stoppedUncleanlyHint:
       'Если расшифровка или подсказки продолжают приходить, перезапустите приложение.',
+    startFailed: 'Не удалось запустить ассистента',
+    stopFailed: 'Не удалось остановить ассистента',
   },
 
   mockStartChecks: {

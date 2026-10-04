@@ -127,7 +127,7 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
       });
     } catch (error) {
       console.error('Failed to start mock interview:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to start the mock interview');
+      toast.error(error instanceof Error ? error.message : t.mock.session.startFailed);
     } finally {
       setStarting(false);
     }

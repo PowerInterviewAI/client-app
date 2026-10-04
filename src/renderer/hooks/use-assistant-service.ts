@@ -73,7 +73,8 @@ export const useAssistantService = create<AssistantService>((set) => ({
 
       // Reset state to Idle so the button doesn't stay stuck on "Starting..."
       electron.appState.update({ runningState: RunningState.Idle });
-      const errorMessage = error instanceof Error ? error.message : 'Failed to start assistant';
+      const errorMessage =
+        error instanceof Error ? error.message : currentTranslation().assistant.startFailed;
       set({ error: errorMessage });
       console.error('Start assistant error:', error);
       throw error;

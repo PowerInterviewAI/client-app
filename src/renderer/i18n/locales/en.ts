@@ -1122,6 +1122,8 @@ export const en = {
     mockRunning: 'Stop the mock interview before starting a live session.',
     stoppedUncleanly: 'The assistant stopped, but not everything shut down cleanly',
     stoppedUncleanlyHint: 'Restart the app if transcription or suggestions keep arriving.',
+    startFailed: 'Failed to start assistant',
+    stopFailed: 'Failed to stop the assistant',
   },
 
   mockStartChecks: {
