@@ -13,7 +13,7 @@
  * - and a Russian string that is still its English original. That one type-checks perfectly,
  *   ships, and is only ever found by a Russian speaker looking at the screen.
  */
-import { codeOnly, createChecker, loadMain, readSource } from './helpers.mjs';
+import { codeOnly, createChecker, loadMain, loadMainAs, readSource } from './helpers.mjs';
 
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 
@@ -188,6 +188,35 @@ export async function run() {
   );
 
   configStore.updateConfig({ uiLanguage: 'en', language: 'en' });
+
+  // The store's migration backfills `uiLanguage` for an install that predates it, and the way
+  // that goes wrong is the way it went wrong for `autoScroll` once already: written
+  // unconditionally rather than only when the key is absent, so every launch resets the user's
+  // choice. A Russian install reverting to English on every start, with nothing to see but the
+  // language moving.
+  //
+  // Driven by loading a second copy of the module, which re-runs its import-time migration
+  // against whatever is on disk. The platform argument is irrelevant here - `loadMainAs` is
+  // being used for the fresh instance, not for the platform.
+  configStore.updateConfig({ uiLanguage: 'ru' });
+  const { configStore: reloaded } = await loadMainAs('linux', 'store/config.store.js');
+  check(
+    'the migration leaves a stored chrome language alone on the next launch',
+    reloaded.getConfig().uiLanguage === 'ru'
+  );
+
+  // And the other direction: absent on disk, it is written rather than only defaulted on read,
+  // so the two processes agree about what the setting is before anything asks.
+  const beforeBackfill = configStore.getStoredRuntime() ?? {};
+  delete beforeBackfill.uiLanguage;
+  configStore.setStoredRuntime(beforeBackfill);
+  const { configStore: backfilled } = await loadMainAs('darwin', 'store/config.store.js');
+  check(
+    'and backfills English onto an install that predates the setting',
+    backfilled.getStoredRuntime()?.uiLanguage === 'en'
+  );
+
+  configStore.updateConfig({ uiLanguage: 'en' });
 
   // Main has its own share of the chrome - the placeholder panel copy it seeds, and the push
   // notifications it raises as toasts from paths the renderer cannot see. `UiStrings` makes a
