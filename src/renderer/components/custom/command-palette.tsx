@@ -37,6 +37,7 @@ import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
 import { useThemeStore } from '@/hooks/use-theme-store';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
+import { useT } from '@/i18n';
 import { isMac } from '@/lib/consts';
 
 /**
@@ -68,6 +69,7 @@ function useCommandPaletteHotkey(inert: boolean) {
 }
 
 export function CommandPalette() {
+  const t = useT();
   const isStealth = useIsStealthMode();
   // Inert during an interview for the same reason it is inert in stealth mode, and stated the
   // same way: every entry it carries is a navigation, a session start, or a sign-out, and all
@@ -129,7 +131,7 @@ export function CommandPalette() {
       // Off the caught error, not the hook's `error` state - `logout` sets it and throws in the
       // same tick, so this closure's copy is still last render's value.
       console.error('Sign out failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to sign out');
+      toast.error(err instanceof Error ? err.message : t.home.signOutFailed);
     }
   };
 
@@ -138,40 +140,40 @@ export function CommandPalette() {
       <CommandDialog
         open={open}
         onOpenChange={setOpen}
-        title="Command Palette"
-        description="Search for an action, page, or setting."
+        title={t.commandPalette.title}
+        description={t.commandPalette.description}
       >
-        <CommandInput placeholder="Search actions..." />
+        <CommandInput placeholder={t.commandPalette.searchPlaceholder} />
         <CommandList>
-          <CommandEmpty>No matching action.</CommandEmpty>
+          <CommandEmpty>{t.commandPalette.empty}</CommandEmpty>
 
           {/* No entry for `/main`. The live console is not a destination you visit - it is where
               a running session is, and the only two ways onto it are starting one (below) and
               coming back to one already running (the home screen's own card). Sending an idle
               user there landed them on a bar whose every control is disabled, with the sole
               working one being the way back. */}
-          <CommandGroup heading="Go to">
+          <CommandGroup heading={t.commandPalette.groups.goTo}>
             <CommandItem onSelect={() => run(() => navigate('/'))}>
               <Home />
-              Home
+              {t.commandPalette.home}
             </CommandItem>
             <CommandItem onSelect={() => run(() => navigate('/account'))}>
               <UserRound />
-              Account
+              {t.commandPalette.account}
             </CommandItem>
             <CommandItem onSelect={() => run(() => navigate('/configuration'))}>
               <SettingsIcon />
-              Configuration
+              {t.commandPalette.configuration}
             </CommandItem>
             <CommandItem onSelect={() => run(() => navigate('/payment'))}>
               <CreditCard />
-              Buy Credits
+              {t.commandPalette.buyCredits}
             </CommandItem>
           </CommandGroup>
 
           <CommandSeparator />
 
-          <CommandGroup heading="Session">
+          <CommandGroup heading={t.commandPalette.groups.session}>
             {/* Both starts hand off to `/main` through router state rather than starting anything
                 here: the control panel there owns the whole start sequence, and the palette is
                 reachable from every route, including ones where none of it is mounted. Named the
@@ -186,39 +188,41 @@ export function CommandPalette() {
                 onSelect={() => run(() => navigate('/', { state: { openMockSetup: true } }))}
               >
                 <Mic />
-                Start mock interview
+                {t.commandPalette.startMock}
               </CommandItem>
             )}
             <CommandItem
               onSelect={() => run(() => navigate('/main', { state: { autoStartLive: true } }))}
             >
               <Play />
-              Start live assistant
+              {t.commandPalette.startLive}
             </CommandItem>
             <CommandItem onSelect={() => run(toggleSuggestionMode)}>
               {hintOnly ? <ListChecks /> : <Route className="-scale-y-100" />}
-              {hintOnly ? 'Switch to full-sentence mode' : 'Switch to hint-only mode'}
+              {hintOnly ? t.commandPalette.switchToFullSentence : t.commandPalette.switchToHintOnly}
             </CommandItem>
             <CommandItem onSelect={() => run(toggleTranscript)}>
               <TranscriptIcon />
-              {transcriptVisible ? 'Hide Transcript' : 'Show Transcript'}
+              {transcriptVisible
+                ? t.commandPalette.hideTranscript
+                : t.commandPalette.showTranscript}
             </CommandItem>
           </CommandGroup>
 
           <CommandSeparator />
 
-          <CommandGroup heading="App">
+          <CommandGroup heading={t.commandPalette.groups.app}>
             <CommandItem onSelect={() => run(() => navigate('/documentation'))}>
               <BookOpen />
-              Documentation
+              {t.commandPalette.documentation}
             </CommandItem>
             <CommandItem onSelect={() => run(() => setIsHotkeysOpen(true))}>
               <Keyboard />
-              Keyboard Shortcuts
+              {t.commandPalette.hotkeys}
             </CommandItem>
             <CommandItem onSelect={() => run(toggleTheme)}>
               {isDark ? <Sun /> : <Moon />}
-              {isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              {isDark ? t.commandPalette.switchToLight : t.commandPalette.switchToDark}
             </CommandItem>
             {/* Stealth mode is not offered here. It is a live-interview control - it hides the
                 app from a screen share that is only happening during a real call - and this
@@ -227,7 +231,7 @@ export function CommandPalette() {
             {isLoggedIn && (
               <CommandItem onSelect={() => run(() => void handleSignOut())}>
                 <LogOut />
-                Sign Out
+                {t.commandPalette.signOut}
               </CommandItem>
             )}
           </CommandGroup>

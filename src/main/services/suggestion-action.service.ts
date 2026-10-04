@@ -24,6 +24,7 @@ import { GenerateActionSuggestionRequest, SuggestionMode } from '../types/llm.js
 import { isMockInterviewSessionActive } from '../types/mock-interview.js';
 import { DateTimeUtil } from '../utils/datetime.js';
 import { getSuggestionErrorMessage } from '../utils/suggestion-error.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
@@ -91,15 +92,13 @@ export class ActionSuggestionService {
   }
 
   async clearImages(): Promise<void> {
-    if (
-      this.refuseDuringMockInterview('Action suggestions are unavailable during a mock interview.')
-    ) {
+    if (this.refuseDuringMockInterview(uiStrings().actionDuringMock)) {
       return;
     }
     if (appStateService.getState().runningState !== RunningState.Running) {
       pushNotificationService.pushNotification({
         type: 'warning',
-        message: 'Cannot clear images when assistant is not running',
+        message: uiStrings().cannotClearImages,
       });
       return;
     }
@@ -109,15 +108,13 @@ export class ActionSuggestionService {
   }
 
   async captureScreenshot(): Promise<void> {
-    if (
-      this.refuseDuringMockInterview('Action suggestions are unavailable during a mock interview.')
-    ) {
+    if (this.refuseDuringMockInterview(uiStrings().actionDuringMock)) {
       return;
     }
     if (appStateService.getState().runningState !== RunningState.Running) {
       pushNotificationService.pushNotification({
         type: 'warning',
-        message: 'Cannot capture screenshot when assistant is not running',
+        message: uiStrings().cannotCaptureScreenshot,
       });
       return;
     }
@@ -125,7 +122,7 @@ export class ActionSuggestionService {
     if (this.uploadedImageNames.length >= ACTION_SUGGESTION_MAX_CAPTURES) {
       pushNotificationService.pushNotification({
         type: 'warning',
-        message: `Maximum of ${ACTION_SUGGESTION_MAX_CAPTURES} screenshots reached. Please clear images and try again.`,
+        message: uiStrings().maxCaptures(ACTION_SUGGESTION_MAX_CAPTURES),
       });
       return;
     }
@@ -157,7 +154,7 @@ export class ActionSuggestionService {
       appStateService.updateState({ actionSuggestions: this.getSuggestions() });
       pushNotificationService.pushNotification({
         type: 'error',
-        message: 'Screenshot capture failed. Please try again.',
+        message: uiStrings().captureFailed,
       });
     } finally {
       actionLockService.release(ActionType.ScreenshotCapture);
@@ -165,9 +162,7 @@ export class ActionSuggestionService {
   }
 
   async startGenerateSuggestion(): Promise<void> {
-    if (
-      this.refuseDuringMockInterview('Action suggestions are unavailable during a mock interview.')
-    ) {
+    if (this.refuseDuringMockInterview(uiStrings().actionDuringMock)) {
       return;
     }
 
@@ -176,7 +171,7 @@ export class ActionSuggestionService {
     if (appState.runningState !== RunningState.Running) {
       pushNotificationService.pushNotification({
         type: 'warning',
-        message: 'Cannot generate suggestion when assistant is not running',
+        message: uiStrings().cannotGenerateSuggestion,
       });
       return;
     }
@@ -318,7 +313,7 @@ export class ActionSuggestionService {
             // This path already promoted to Loading before the loop, so an empty stream lands
             // here as a blank Success card rather than a stuck one. Still wrong: report it.
             suggestion.state = SuggestionState.Error;
-            suggestion.error = 'The model returned an empty response.';
+            suggestion.error = uiStrings().suggestionErrors.emptyResponse;
           } else {
             suggestion.state = SuggestionState.Success;
           }
@@ -347,7 +342,7 @@ export class ActionSuggestionService {
         }
         suggestion.state = SuggestionState.Error;
         suggestion.error = stalled
-          ? 'The response timed out. Please try again.'
+          ? uiStrings().suggestionErrors.responseTimedOut
           : getSuggestionErrorMessage(error);
       }
       this.setSuggestion(timestamp, suggestion);

@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
+import { currentTranslation } from '@/i18n';
+
 import { useConfigStore } from './use-config-store';
 
 /**
@@ -23,7 +25,7 @@ export function useMockLiveSuggestions() {
     const { updateConfig } = useConfigStore.getState();
     updateConfig({ mockLiveHintsEnabled: enabled }).catch((e) => {
       console.error('Failed to save mock live suggestions setting', e);
-      toast.error('Failed to save live suggestions setting');
+      toast.error(currentTranslation().settingsToasts.saveMockHintsFailed);
     });
   }, []);
 

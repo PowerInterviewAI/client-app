@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import { useMicLevel } from '@/hooks/use-mic-level';
+import { useT } from '@/i18n';
 
 /**
  * A live input-level bar for a microphone test.
@@ -14,6 +15,7 @@ import { useMicLevel } from '@/hooks/use-mic-level';
  * `speaking` hint below, which is what tells the user the test is actually working.
  */
 export function MicLevelMeter({ stream }: { stream: MediaStream | null }) {
+  const t = useT();
   const levelRef = useMicLevel(stream);
   const barRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
@@ -32,26 +34,31 @@ export function MicLevelMeter({ stream }: { stream: MediaStream | null }) {
       peak = Math.max(level, peak * 0.94);
 
       if (barRef.current) barRef.current.style.width = `${Math.round(level * 100)}%`;
-      if (hintRef.current) hintRef.current.textContent = peak > 0.08 ? 'Hearing you' : 'Silent';
+      if (hintRef.current) {
+        hintRef.current.textContent =
+          peak > 0.08 ? t.micLevelMeter.hearing : t.micLevelMeter.silent;
+      }
 
       raf = requestAnimationFrame(tick);
     };
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [levelRef]);
+    // `t` is in the deps because the loop writes the hint straight to the DOM: a language changed
+    // with the meter on screen would otherwise keep the old wording until the stream changed.
+  }, [levelRef, t]);
 
   return (
     <div className="space-y-1.5">
       <div
         className="h-2 w-full overflow-hidden rounded-full bg-muted"
         role="img"
-        aria-label="Microphone input level"
+        aria-label={t.micLevelMeter.label}
       >
         <div ref={barRef} className="h-full w-0 rounded-full bg-primary transition-[width]" />
       </div>
       <p ref={hintRef} className="text-xs text-muted-foreground tabular-nums" role="status">
-        Silent
+        {t.micLevelMeter.silent}
       </p>
     </div>
   );

@@ -17,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { usePayment } from '@/hooks/use-payment';
+import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import type { PaymentHistory } from '@/types/payment';
 
@@ -33,6 +34,7 @@ export default function PaymentHistoryTab({
   onViewPayment,
   onSwitchToBuy,
 }: PaymentHistoryTabProps) {
+  const t = useT();
   const { getPaymentHistory } = usePayment();
   const [history, setHistory] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,13 +58,13 @@ export default function PaymentHistoryTab({
           setHistory(result);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load payment history');
+        setError(err instanceof Error ? err.message : t.payment.history.loadFailed);
       } finally {
         if (!silent) setLoading(false);
         if (silent) setRefreshing(false);
       }
     },
-    [getPaymentHistory]
+    [getPaymentHistory, t]
   );
 
   useEffect(() => {
@@ -90,19 +92,17 @@ export default function PaymentHistoryTab({
 
       {loading ? (
         <div className="py-8">
-          <Loading disclaimer="Loading payment history…" />
+          <Loading disclaimer={t.payment.history.loading} />
         </div>
       ) : history.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No Payment History</CardTitle>
-            <CardDescription>
-              You haven't made any payments yet. Purchase credits to get started.
-            </CardDescription>
+            <CardTitle>{t.payment.history.emptyTitle}</CardTitle>
+            <CardDescription>{t.payment.history.emptyBody}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={onSwitchToBuy} className="w-full">
-              Buy Credits
+              {t.payment.history.buyCredits}
             </Button>
           </CardContent>
         </Card>
@@ -116,18 +116,18 @@ export default function PaymentHistoryTab({
               )}
             >
               <RefreshCw className="h-3 w-3 animate-spin" />
-              Refreshing…
+              {t.payment.history.refreshing}
             </span>
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Created</TableHead>
-                <TableHead>Payment ID</TableHead>
-                <TableHead>Credits</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Action</TableHead>
+                <TableHead>{t.payment.history.columns.created}</TableHead>
+                <TableHead>{t.payment.history.columns.paymentId}</TableHead>
+                <TableHead>{t.payment.history.columns.credits}</TableHead>
+                <TableHead>{t.payment.history.columns.amount}</TableHead>
+                <TableHead>{t.payment.history.columns.status}</TableHead>
+                <TableHead>{t.payment.history.columns.action}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -144,7 +144,7 @@ export default function PaymentHistoryTab({
                   <TableCell className="text-sm">
                     {payment.pay_amount && payment.pay_currency
                       ? `${payment.pay_amount} ${payment.pay_currency.toUpperCase()}`
-                      : 'N/A'}
+                      : t.payment.history.notAvailable}
                     <div className="text-xs text-muted-foreground">${payment.price_amount} USD</div>
                   </TableCell>
                   <TableCell>
@@ -154,7 +154,7 @@ export default function PaymentHistoryTab({
                         getStatusBadgeColor(payment.status)
                       )}
                     >
-                      {getStatusLabel(payment.status)}
+                      {getStatusLabel(t, payment.status)}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -163,7 +163,7 @@ export default function PaymentHistoryTab({
                       variant="outline"
                       onClick={() => onViewPayment(payment.payment_id ?? '')}
                     >
-                      View
+                      {t.payment.history.view}
                     </Button>
                   </TableCell>
                 </TableRow>

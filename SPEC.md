@@ -79,9 +79,19 @@ A length the balance cannot cover is disabled in the question-count picker with 
 
 The default. Restructures both live and triggered suggestions into a bold one-line core answer plus one bullet per point, however many the answer needs - the same answer full-sentence mode would give, reorganised so the eye finds each point in one pass and stripped of its padding. Bullets stay full speakable sentences rather than keywords, so the candidate can read one out loud as it stands. Switched from the control panel, the configuration page, or with `Ctrl+Shift+F7`, which keeps it reachable in stealth mode. Persisted locally as `hintOnlyMode`; sent to the backend as `mode` on the suggestion request, whose wire values are still `normal` / `professional`.
 
+### Interface Language
+
+The app's own chrome - buttons, headings, dialogs, toasts - follows `uiLanguage`, which is English or Russian. A **separate setting** from the interview language, asked outright on the first step of the first-run wizard and settable on the configuration page, and never inferred from the other: a Russian speaker interviewing in English wants an English transcript and a Russian app.
+
+A typed dictionary rather than i18next, so a missing or misspelled translation is a build error rather than a key rendered on screen ([src/renderer/i18n](src/renderer/i18n)). Strings that take a value are functions, which is what makes Russian's three plural forms expressible. Main keeps its own table for the copy it writes itself - the panel placeholders and the push notifications it raises as toasts ([src/main/utils/ui-strings.ts](src/main/utils/ui-strings.ts)).
+
+Two things deliberately do not follow it. The exported report follows the **interview** language, because it is handed to someone who was not there. And backend error text is passed through untranslated, because the client cannot translate a string it did not write.
+
 ### First-Run Setup
 
-A user who has not been through setup is sent to `/onboarding` before they can reach anything else, and asked once for the seven things a first interview needs: profile, job context, language, microphone (with a live level test), suggestion style, interface size, and whether the transcript panel is docked. Each step renders the same component the account and configuration pages use.
+A user who has not been through setup is sent to `/onboarding` before they can reach anything else, and asked once for the eight things a first interview needs: **app language**, profile, job context, interview language, microphone (with a live level test), suggestion style, interface size, and whether the transcript panel is docked. Each step renders the same component the account and configuration pages use.
+
+App language is first, ahead of even the profile. Every other step asks about an interview; that one asks whether the user can read the questions, and picking there re-renders the step itself in the language chosen.
 
 Gated on the account's `onboarding_completed`, written through `PATCH /api/users/me/onboarding` - on the account rather than on the machine, so it follows the user to a new device and a second account on a shared one gets its own run of it. The gate waits for `interviewConfigLoaded` as well as the flag, since before the account has been read the flag is a default rather than an answer.
 
@@ -89,7 +99,7 @@ Nothing in it is a trap: Skip is on every step, every setting has a working defa
 
 ### Navigation
 
-`/` is a launch hub naming the five things a user comes to the app to do: start a mock interview, start the live assistant, open Account (`/account` - sign-in identity, profile, context, password), open Configuration (`/configuration` - microphone, language, suggestion style, interface size, transcript panel), or buy credits.
+`/` is a launch hub naming the five things a user comes to the app to do: start a mock interview, start the live assistant, open Account (`/account` - sign-in identity, profile, context, password), open Configuration (`/configuration` - app language, microphone, interview language, suggestion style, interface size, transcript panel), or buy credits.
 
 **It is the only place a session begins.** Both launch buttons start one; neither implements starting one. Live hands off to `/main` through router state, because `/main`'s control panel owns the whole start sequence; mock hands off to `/mock-interview` with the setup its dialog collected. `/main` itself carries only Stop - it is the live assistant, not a place to choose one - and shows a way back to `/` on the rare idle visit (a start cancelled at the headphone notice, or the route opened directly). Stopping asks whether to save the interview, clears it, and returns to `/`. See [docs/ux-conventions.md](docs/ux-conventions.md) for where a new capability belongs.
 

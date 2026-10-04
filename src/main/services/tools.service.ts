@@ -8,6 +8,7 @@ import { ExportFormat } from '../types/export.js';
 import { GenerateSummarizeRequest } from '../types/llm.js';
 import { buildExportMarkdown, generateExportFilename } from '../utils/export-markdown.js';
 import { buildMockExportMarkdown } from '../utils/export-mock-markdown.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { appStateService } from './app-state.service.js';
 import { mockInterviewService } from './mock-interview.service.js';
 import { actionSuggestionService } from './suggestion-action.service.js';
@@ -77,12 +78,15 @@ class ToolsService {
 
     const isMarkdown = format === 'md';
 
+    // The document inside follows the interview language; this window is being read by the
+    // person at the keyboard, so it follows the chrome language.
+    const strings = uiStrings();
     const { canceled, filePath } = await dialog.showSaveDialog({
-      title: 'Save Transcript',
+      title: strings.saveTranscriptTitle,
       defaultPath: generateExportFilename(format),
       filters: isMarkdown
-        ? [{ name: 'Markdown', extensions: ['md'] }]
-        : [{ name: 'Word Document', extensions: ['docx'] }],
+        ? [{ name: strings.markdownFilter, extensions: ['md'] }]
+        : [{ name: strings.wordFilter, extensions: ['docx'] }],
     });
 
     if (canceled || !filePath) return null;
@@ -120,12 +124,13 @@ class ToolsService {
 
     const isMarkdown = format === 'md';
 
+    const strings = uiStrings();
     const { canceled, filePath } = await dialog.showSaveDialog({
-      title: 'Save Mock Interview Report',
+      title: strings.saveMockReportTitle,
       defaultPath: generateExportFilename(format, 'mock-interview'),
       filters: isMarkdown
-        ? [{ name: 'Markdown', extensions: ['md'] }]
-        : [{ name: 'Word Document', extensions: ['docx'] }],
+        ? [{ name: strings.markdownFilter, extensions: ['md'] }]
+        : [{ name: strings.wordFilter, extensions: ['docx'] }],
     });
 
     if (canceled || !filePath) return null;

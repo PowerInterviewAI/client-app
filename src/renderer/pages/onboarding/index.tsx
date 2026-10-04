@@ -14,94 +14,43 @@ import {
 } from '@/components/custom/settings/profile-fields';
 import { SuggestionModeField } from '@/components/custom/settings/suggestion-mode-field';
 import { TranscriptPanelField } from '@/components/custom/settings/transcript-panel-field';
+import { UiLanguageField } from '@/components/custom/settings/ui-language-field';
 import { ZoomField } from '@/components/custom/settings/zoom-field';
 import { Button } from '@/components/ui/button';
 import { useAccountForm } from '@/hooks/use-account-form';
 import { useAppState } from '@/hooks/use-app-state';
 import { useOnboardingDismissed } from '@/hooks/use-onboarding-dismissed';
+import { useT } from '@/i18n';
 import { APP_NAME } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 
-type StepId =
-  | 'profile'
-  | 'context'
-  | 'language'
-  | 'microphone'
-  | 'mode'
-  | 'mock-hints'
-  | 'zoom'
-  | 'transcript';
-
-interface Step {
-  id: StepId;
-  /** Two or three words for the progress line. The heading below says the rest. */
-  label: string;
-  title: string;
-  description: string;
-}
-
 /**
- * One thing per step, in the order a first interview needs them: who you are, what you are
- * interviewing for, then the six things that decide how a session looks and behaves.
+ * The steps, in the order a first interview needs them.
  *
- * Profile first because it is the only step that can block a start - the start sequence refuses
- * to run without a name and a CV - and the only one that is worth typing rather than picking.
+ * App language first, ahead of even the profile. Every other step is a question about an
+ * interview; this one is a question about whether the user can read the questions. A wizard that
+ * asks for a CV in a language someone does not speak has already failed, and picking here
+ * re-renders this screen - its own heading included - in the language chosen.
+ *
+ * Profile second because it is the only step that can block progress - the start sequence
+ * refuses to run without a name and a CV - and the only one worth typing rather than picking.
+ *
+ * The ids double as keys into `t.onboarding.steps`, so a step cannot be added without its copy:
+ * a missing entry is a build error in both locales rather than a blank heading at runtime.
  */
-const STEPS: Step[] = [
-  {
-    id: 'profile',
-    label: 'Profile',
-    title: 'Tell us who you are',
-    description:
-      'Every suggestion is written from this, in your own experience and your own words. It is the one thing the app cannot run without.',
-  },
-  {
-    id: 'context',
-    label: 'Job context',
-    title: 'What are you interviewing for?',
-    description:
-      'Optional, and worth the paste: with the job description in hand the assistant answers for that role rather than in general.',
-  },
-  {
-    id: 'language',
-    label: 'Language',
-    title: 'Pick your interview language',
-    description: 'This sets both what gets transcribed and what your suggestions come back in.',
-  },
-  {
-    id: 'microphone',
-    label: 'Microphone',
-    title: 'Choose your microphone',
-    description:
-      'Pick the microphone you will actually be speaking into, then test it. Wear headphones during interviews - on speakers the app hears the interviewer through your microphone and goes quiet.',
-  },
-  {
-    id: 'mode',
-    label: 'Suggestions',
-    title: 'How should suggestions read?',
-    description: 'Change your mind at any time, including mid-interview.',
-  },
-  {
-    id: 'mock-hints',
-    label: 'Mock interview',
-    title: 'Hints in a mock interview?',
-    description:
-      'A mock interview is where you practise against the AI interviewer. This decides whether it hands you the answer as well.',
-  },
-  {
-    id: 'zoom',
-    label: 'Size',
-    title: 'Is this comfortable to read?',
-    description:
-      'The interview window is small on purpose, so it does not cover the call. Size it now, while you can take your time over it, rather than mid-question.',
-  },
-  {
-    id: 'transcript',
-    label: 'Transcript',
-    title: 'One last thing',
-    description: 'Whether to keep a live transcript on screen under your suggestions.',
-  },
-];
+const STEP_IDS = [
+  'uiLanguage',
+  'profile',
+  'context',
+  'language',
+  'microphone',
+  'mode',
+  'mockHints',
+  'zoom',
+  'transcript',
+] as const;
+
+type StepId = (typeof STEP_IDS)[number];
 
 /**
  * First-run setup.
@@ -121,6 +70,7 @@ const STEPS: Step[] = [
  * it does without any of it being a decision the user has to get right now.
  */
 export default function OnboardingPage() {
+  const t = useT();
   const navigate = useNavigate();
   const { appState } = useAppState();
   const dismiss = useOnboardingDismissed((s) => s.dismiss);
@@ -129,9 +79,10 @@ export default function OnboardingPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [finishing, setFinishing] = useState(false);
 
-  const step = STEPS[stepIndex];
+  const step: StepId = STEP_IDS[stepIndex];
+  const copy = t.onboarding.steps[step];
   const isFirst = stepIndex === 0;
-  const isLast = stepIndex === STEPS.length - 1;
+  const isLast = stepIndex === STEP_IDS.length - 1;
 
   // The same screen serves two arrivals. A first run is compulsory and its way out is Skip; a
   // run started from Configuration's *Run setup* is neither, and calling that one "first-time
@@ -150,7 +101,7 @@ export default function OnboardingPage() {
   // Only the profile step gates progress: the name and CV are what the start sequence checks
   // before it will run anything, so letting the wizard past them would only move the failure
   // later.
-  const profileBlocked = step.id === 'profile' && !(form.isComplete && form.loaded);
+  const profileBlocked = step === 'profile' && !(form.isComplete && form.loaded);
 
   /**
    * Why Continue is disabled, named after the thing that is missing.
@@ -163,10 +114,10 @@ export default function OnboardingPage() {
   const blockedReason = !profileBlocked
     ? null
     : !form.loaded
-      ? 'Your account could not be reached, so nothing typed here can be saved yet.'
+      ? t.onboarding.blocked.accountUnreachable
       : form.fullName.trim() === ''
-        ? 'Add your full name to continue.'
-        : 'Add your profile to continue.';
+        ? t.onboarding.blocked.needName
+        : t.onboarding.blocked.needProfile;
 
   /**
    * Record on the account that setup is done. Reports whether the write landed, so Finish can
@@ -194,7 +145,7 @@ export default function OnboardingPage() {
     dismiss();
     // Said out loud, because the screen they land on says nothing about setup, and a wizard that
     // simply vanishes leaves the user unsure whether it took.
-    if (finished) toast.success('You are all set');
+    if (finished) toast.success(t.onboarding.allSet);
     navigate('/', { replace: true });
   };
 
@@ -210,7 +161,7 @@ export default function OnboardingPage() {
           await form.save();
         } catch (e) {
           console.error('Failed to save your profile before skipping setup:', e);
-          toast.warning('Setup skipped, but your profile was not saved. Try again from Account.');
+          toast.warning(t.onboarding.profileNotSavedOnSkip);
         }
       }
 
@@ -218,7 +169,7 @@ export default function OnboardingPage() {
       // wizard is a worse outcome than asking them again next launch, and Skip is the control
       // whose entire meaning is "let me out".
       if (!(await complete())) {
-        toast.warning('Setup skipped, but we could not record that. It may be offered again.');
+        toast.warning(t.onboarding.completionNotRecorded);
       }
       leave(false);
     } finally {
@@ -235,13 +186,13 @@ export default function OnboardingPage() {
     // hold the only content in the wizard the user typed, and a window closed on step 4 should
     // not mean pasting a CV in a second time. Re-saving on the second step, and again if they go
     // back and forward, costs one idempotent write; the alternative costs the user their CV.
-    if (step.id === 'profile' || step.id === 'context') {
+    if (step === 'profile' || step === 'context') {
       setFinishing(true);
       try {
         await form.save();
       } catch (error) {
         console.error('Failed to save your profile:', error);
-        toast.error(error instanceof Error ? error.message : 'Failed to save your profile');
+        toast.error(error instanceof Error ? error.message : t.onboarding.saveProfileFailed);
         return;
       } finally {
         setFinishing(false);
@@ -255,7 +206,7 @@ export default function OnboardingPage() {
         // every step, and leaving on a write that did not land means being asked again from the
         // top.
         if (!(await complete())) {
-          toast.error('Could not save your setup. Check your connection and try again.');
+          toast.error(t.onboarding.finishFailed);
           return;
         }
         leave(true);
@@ -271,7 +222,7 @@ export default function OnboardingPage() {
   // Signed out, this screen has no account to read or write and every step would fail. Sent
   // where `/` sends them, rather than rendering a wizard whose every step fails to save.
   if (appState?.isLoggedIn === false) return <Navigate to="/auth/login" replace />;
-  if (appState?.isLoggedIn !== true) return <LoadingPage disclaimer="Loading…" />;
+  if (appState?.isLoggedIn !== true) return <LoadingPage disclaimer={t.common.loading} />;
 
   return (
     <div className="flex-1 overflow-auto">
@@ -286,14 +237,14 @@ export default function OnboardingPage() {
         }}
       >
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {isFirstRun ? `Set up ${APP_NAME}` : 'Setup guide'}
+          {isFirstRun ? t.onboarding.firstRunEyebrow(APP_NAME) : t.onboarding.guideEyebrow}
         </p>
 
         <div className="mt-3 mb-6">
           <div className="mb-2 flex items-center gap-1.5" aria-hidden="true">
-            {STEPS.map((s, i) => (
+            {STEP_IDS.map((id, i) => (
               <div
-                key={s.id}
+                key={id}
                 className={`h-1 flex-1 rounded-full ${
                   i < stepIndex ? 'bg-primary' : i === stepIndex ? 'bg-primary/50' : 'bg-muted'
                 }`}
@@ -301,32 +252,32 @@ export default function OnboardingPage() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground" role="status">
-            Step {stepIndex + 1} of {STEPS.length} &middot; {step.label}
+            {t.onboarding.progress(stepIndex + 1, STEP_IDS.length, copy.label)}
           </p>
         </div>
 
         <h1 ref={headingRef} tabIndex={-1} className="text-xl font-semibold outline-none">
-          {step.title}
+          {copy.title}
         </h1>
-        <p className="mt-1 mb-6 text-sm text-muted-foreground">{step.description}</p>
+        <p className="mt-1 mb-6 text-sm text-muted-foreground">{copy.description}</p>
 
         {/* Floored rather than left to the content, so the footer does not jump up the screen
             between a step with two textareas and a step with one checkbox. */}
         <div className="min-h-64 space-y-5">
-          {step.id === 'profile' && (
+          {step === 'uiLanguage' && <UiLanguageField />}
+          {step === 'profile' && (
             <>
               <FullNameField form={form} />
               <ProfileField form={form} />
               {form.loading && (
                 <p className="text-xs text-muted-foreground" role="status">
-                  Loading your account&hellip;
+                  {t.onboarding.loadingAccount}
                 </p>
               )}
               {!form.loading && !form.loaded && (
                 <div className="flex items-start justify-between gap-3 rounded-md border border-destructive/40 p-3">
                   <p role="alert" className="text-xs text-destructive">
-                    Could not reach your account. Nothing typed here can be saved until it comes
-                    back.
+                    {t.onboarding.accountUnreachable}
                   </p>
                   <Button
                     type="button"
@@ -336,19 +287,19 @@ export default function OnboardingPage() {
                     onClick={form.reload}
                   >
                     <RotateCw className="h-3.5 w-3.5" aria-hidden="true" />
-                    Retry
+                    {t.common.retry}
                   </Button>
                 </div>
               )}
             </>
           )}
-          {step.id === 'context' && <ContextField form={form} />}
-          {step.id === 'language' && <LanguageField />}
-          {step.id === 'microphone' && <MicrophoneField />}
-          {step.id === 'mode' && <SuggestionModeField />}
-          {step.id === 'mock-hints' && <MockHintsField />}
-          {step.id === 'zoom' && <ZoomField />}
-          {step.id === 'transcript' && <TranscriptPanelField />}
+          {step === 'context' && <ContextField form={form} />}
+          {step === 'language' && <LanguageField />}
+          {step === 'microphone' && <MicrophoneField />}
+          {step === 'mode' && <SuggestionModeField />}
+          {step === 'mockHints' && <MockHintsField />}
+          {step === 'zoom' && <ZoomField />}
+          {step === 'transcript' && <TranscriptPanelField />}
         </div>
 
         <div className="mt-8 border-t pt-4">
@@ -365,9 +316,9 @@ export default function OnboardingPage() {
               className="text-muted-foreground"
               onClick={() => void handleSkip()}
               disabled={finishing}
-              title={isFirstRun ? 'You can run setup again later from Configuration' : undefined}
+              title={isFirstRun ? t.onboarding.skipTooltip : undefined}
             >
-              {isFirstRun ? 'Skip for now' : 'Close'}
+              {isFirstRun ? t.onboarding.skip : t.common.close}
             </Button>
             <div className="ml-auto flex items-center gap-2">
               {!isFirst && (
@@ -379,11 +330,11 @@ export default function OnboardingPage() {
                   disabled={finishing}
                 >
                   <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  Back
+                  {t.common.back}
                 </Button>
               )}
               <Button type="submit" size="sm" disabled={profileBlocked || finishing}>
-                {isLast ? 'Finish' : 'Continue'}
+                {isLast ? t.common.finish : t.common.continue}
                 {isLast ? (
                   <Check className="h-4 w-4" aria-hidden="true" />
                 ) : (

@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { useT } from '@/i18n';
 import { Speaker, type Transcript } from '@/types/transcript';
 
 import { Button } from '../../ui/button';
@@ -55,6 +56,7 @@ interface TranscriptPanelProps {
 }
 
 function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProps) {
+  const t = useT();
   const { config, updateConfig } = useConfigStore();
   const { appState } = useAppState();
   const username = appState?.interviewConfig?.fullName ?? '';
@@ -87,7 +89,7 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
               aria-hidden="true"
             />
           )}
-          <h3 className="font-semibold text-foreground text-xs">Transcription</h3>
+          <h3 className="font-semibold text-foreground text-xs">{t.panels.transcription}</h3>
         </div>
 
         {!isStealth && (
@@ -102,9 +104,9 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
                 );
               }}
               className="h-4 w-4 rounded border-border bg-background"
-              aria-label="Enable auto-scroll"
+              aria-label={t.panels.enableAutoScroll}
             />
-            <span className="select-none">Auto-scroll</span>
+            <span className="select-none">{t.panels.autoScroll}</span>
           </label>
         )}
       </div>
@@ -112,13 +114,13 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
       <div ref={containerRef} className="flex-1 overflow-y-auto">
         {transcripts.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center p-4">
-            <p className="text-sm text-muted-foreground">No transcripts yet</p>
+            <p className="text-sm text-muted-foreground">{t.panels.noTranscripts}</p>
           </div>
         ) : (
           <>
             <div className="divide-y divide-border/50 px-2 py-1">
               {runs.map((run) => {
-                const speaker = run.speaker === Speaker.Self ? username : 'Interviewer';
+                const speaker = run.speaker === Speaker.Self ? username : t.panels.interviewer;
                 return (
                   <div key={run.key} className="flex gap-2 py-1 max-w-3xl mx-auto">
                     {/* Fixed-width column so wrapped/adjacent rows keep a stable left edge
@@ -184,7 +186,7 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
           size="icon-sm"
           className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
           onClick={() => endRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          aria-label="Scroll to bottom"
+          aria-label={t.panels.scrollToBottom}
         >
           <ArrowDown className="size-4" />
         </Button>

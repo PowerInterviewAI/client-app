@@ -12,6 +12,7 @@ import {
   PaymentHistory,
   PaymentStatusResponse,
 } from '../types/payment.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { appStateService } from './app-state.service.js';
 
 export class PaymentService {
@@ -33,7 +34,10 @@ export class PaymentService {
 
       if (response.error) {
         console.error('[PaymentService] Failed to get plans:', response.error);
-        return { success: false, error: response.error.message || 'Failed to get plans' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().paymentErrors.getPlans,
+        };
       }
 
       // Map backend plans to frontend format
@@ -48,7 +52,7 @@ export class PaymentService {
       return { success: true, data: plans };
     } catch (error) {
       console.error('[PaymentService] Failed to get plans:', error);
-      return { success: false, error: 'Failed to get plans' };
+      return { success: false, error: uiStrings().paymentErrors.getPlans };
     }
   }
 
@@ -65,14 +69,14 @@ export class PaymentService {
       if (response.error) {
         return {
           success: false,
-          error: response.error.message || 'Failed to get available currencies',
+          error: response.error.message || uiStrings().paymentErrors.getCurrencies,
         };
       }
 
       return { success: true, data: response.data || [] };
     } catch (error) {
       console.error('[PaymentService] Failed to get available currencies:', error);
-      return { success: false, error: 'Failed to get available currencies' };
+      return { success: false, error: uiStrings().paymentErrors.getCurrencies };
     }
   }
 
@@ -86,13 +90,16 @@ export class PaymentService {
       const response = await this.api.createPayment(data);
 
       if (response.error) {
-        return { success: false, error: response.error.message || 'Failed to create payment' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().paymentErrors.createPayment,
+        };
       }
 
       return { success: true, data: response.data };
     } catch (error) {
       console.error('[PaymentService] Failed to create payment:', error);
-      return { success: false, error: 'Failed to create payment' };
+      return { success: false, error: uiStrings().paymentErrors.createPayment };
     }
   }
 
@@ -106,13 +113,16 @@ export class PaymentService {
       const response = await this.api.getPaymentStatus(paymentId);
 
       if (response.error) {
-        return { success: false, error: response.error.message || 'Failed to get payment status' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().paymentErrors.getStatus,
+        };
       }
 
       return { success: true, data: response.data };
     } catch (error) {
       console.error('[PaymentService] Failed to get payment status:', error);
-      return { success: false, error: 'Failed to get payment status' };
+      return { success: false, error: uiStrings().paymentErrors.getStatus };
     }
   }
 
@@ -128,13 +138,16 @@ export class PaymentService {
       const response = await this.api.getPaymentHistory();
 
       if (response.error) {
-        return { success: false, error: response.error.message || 'Failed to get payment history' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().paymentErrors.getHistory,
+        };
       }
 
       return { success: true, data: response.data || [] };
     } catch (error) {
       console.error('[PaymentService] Failed to get payment history:', error);
-      return { success: false, error: 'Failed to get payment history' };
+      return { success: false, error: uiStrings().paymentErrors.getHistory };
     }
   }
 
@@ -146,7 +159,10 @@ export class PaymentService {
       const response = await this.api.getCredits();
 
       if (response.error) {
-        return { success: false, error: response.error.message || 'Failed to get credits' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().paymentErrors.getCredits,
+        };
       }
 
       // Update app state with latest credits
@@ -157,7 +173,7 @@ export class PaymentService {
       return { success: true, credits: response.data?.credits || 0 };
     } catch (error) {
       console.error('[PaymentService] Failed to get credits:', error);
-      return { success: false, error: 'Failed to get credits' };
+      return { success: false, error: uiStrings().paymentErrors.getCredits };
     }
   }
 
@@ -178,7 +194,7 @@ export class PaymentService {
       error?: string;
     }> => {
       if (attempts >= maxAttempts) {
-        return { success: false, error: 'Payment polling timeout' };
+        return { success: false, error: uiStrings().paymentErrors.pollingTimeout };
       }
 
       attempts++;

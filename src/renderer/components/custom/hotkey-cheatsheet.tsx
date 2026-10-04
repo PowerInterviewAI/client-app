@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useT } from '@/i18n';
 import { Hotkey, HOTKEY_GROUPS, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 
@@ -34,15 +35,18 @@ const comboClass = (hk: Hotkey) =>
  * which is what would put each group back on its own measurement.
  */
 export function HotkeyCheatsheet() {
+  const t = useT();
+
   return (
     <div className="grid grid-cols-[max-content_minmax(0,1fr)] items-start gap-x-3 gap-y-2">
       {HOTKEY_GROUPS.map((group) => (
-        <Fragment key={group.label}>
+        <Fragment key={group.id}>
           <h4 className="col-span-2 text-xs font-semibold uppercase text-muted-foreground pt-2 first:pt-0">
-            {group.label}
+            {t.hotkeys.groups[group.id]}
           </h4>
           {group.keys.map((hk) => {
             const info = HOTKEYS[hk];
+            const copy = t.hotkeys.keys[hk];
             return (
               <Fragment key={hk}>
                 {/* justify-center inside a cell the grid has already sized: the badges share a
@@ -50,9 +54,9 @@ export function HotkeyCheatsheet() {
                     a gap the eye reads as a missing character. */}
                 <div className={comboClass(hk)}>{info.combo}</div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium leading-tight">{info.title}</p>
+                  <p className="text-sm font-medium leading-tight">{copy.title}</p>
                   <p className="text-xs text-muted-foreground leading-tight mt-0.5">
-                    {info.description}
+                    {copy.description}
                   </p>
                 </div>
               </Fragment>
@@ -70,18 +74,18 @@ interface HotkeyCheatsheetDialogProps {
 }
 
 export function HotkeyCheatsheetDialog({ open, onOpenChange }: HotkeyCheatsheetDialogProps) {
+  const t = useT();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg w-full max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          <DialogTitle>{t.hotkeys.dialogTitle}</DialogTitle>
           {/* Deliberately does not promise a `?` shortcut. That one is registered by
               `StatusPanel`, which only renders in stealth mode - so "press ? anytime" was untrue
               everywhere else this dialog is opened from: the configuration page and the command
               palette. The status panel's own button carries the hint where it does work. */}
-          <DialogDescription>
-            Everything you can reach without touching the app during an interview.
-          </DialogDescription>
+          <DialogDescription>{t.hotkeys.dialogDescription}</DialogDescription>
         </DialogHeader>
         <div className="overflow-auto flex-1">
           <HotkeyCheatsheet />

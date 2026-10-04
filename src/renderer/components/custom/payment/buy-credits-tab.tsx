@@ -13,21 +13,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { usePayment } from '@/hooks/use-payment';
+import { useT } from '@/i18n';
 import { CREDITS_PER_MINUTE } from '@/lib/consts';
 import { cn } from '@/lib/utils';
 import type { AvailableCurrency, CreditPlanInfo } from '@/types/payment';
 import { CreditPlan } from '@/types/payment';
 
-const planNames: Record<CreditPlan, string> = {
-  [CreditPlan.Starter]: 'Starter',
-  [CreditPlan.Pro]: 'Pro',
-  [CreditPlan.Enterprise]: 'Enterprise',
-};
-
-const planDescriptions: Record<CreditPlan, string> = {
-  [CreditPlan.Starter]: 'Perfect for trying out the platform',
-  [CreditPlan.Pro]: 'Best value for serious job seekers',
-  [CreditPlan.Enterprise]: 'For heavy users and teams',
+/**
+ * Which locale entry names each plan. `Pro` is a real purchasable SKU, so the names stay as the
+ * brand's own words in both languages; only the descriptions are prose.
+ */
+const planKeys: Record<CreditPlan, 'starter' | 'pro' | 'enterprise'> = {
+  [CreditPlan.Starter]: 'starter',
+  [CreditPlan.Pro]: 'pro',
+  [CreditPlan.Enterprise]: 'enterprise',
 };
 
 interface BuyCreditsTabProps {
@@ -37,7 +36,12 @@ interface BuyCreditsTabProps {
   onPaymentCreated: (paymentId: string) => void;
 }
 
-export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCreated }: BuyCreditsTabProps) {
+export default function BuyCreditsTab({
+  credits,
+  creditsPerMinute,
+  onPaymentCreated,
+}: BuyCreditsTabProps) {
+  const t = useT();
   const effectiveCreditsPerMinute = creditsPerMinute ?? CREDITS_PER_MINUTE;
   const { plans, currencies, loading, error, createPayment } = usePayment();
   const [selectedPlan, setSelectedPlan] = useState<CreditPlanInfo | null>(null);
@@ -108,22 +112,15 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
   return (
     <div className="space-y-3">
       <div className="bg-muted/50 p-3 rounded-lg">
-        <div className="text-xs font-medium">Current Balance</div>
-        <div className="text-lg font-bold">{credits.toLocaleString()} credits</div>
+        <div className="text-xs font-medium">{t.payment.buy.currentBalance}</div>
+        <div className="text-lg font-bold">{t.payment.buy.credits(credits)}</div>
+        {/* Assembled in the locale rather than out of JSX fragments: the hours and minutes each
+            take their own plural form, and which one is a property of the number. */}
         <div className="text-xs text-muted-foreground">
-          Available for ~
-          {availableHours > 0 && (
-            <>
-              {availableHours} hour{availableHours !== 1 ? 's' : ''}
-              {availableRemMinutes > 0 ? ' ' : ''}
-            </>
+          {t.payment.buy.availableFor(
+            t.payment.buy.duration(availableHours, availableRemMinutes),
+            effectiveCreditsPerMinute
           )}
-          {availableRemMinutes > 0 && (
-            <>
-              {availableRemMinutes} minute{availableRemMinutes !== 1 ? 's' : ''}
-            </>
-          )}{' '}
-          ({effectiveCreditsPerMinute} credits per minute)
         </div>
       </div>
 
@@ -135,7 +132,7 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
 
       {loading && plans.length === 0 ? (
         <div className="py-6">
-          <Loading disclaimer="Loading payment plans…" />
+          <Loading disclaimer={t.payment.buy.loadingPlans} />
         </div>
       ) : (
         <>
@@ -144,8 +141,11 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
               const isPro = plan.plan === CreditPlan.Pro;
               const isSelected = selectedPlan?.plan === plan.plan;
               const minutes = Math.floor(plan.credits / effectiveCreditsPerMinute);
-              const planName = planNames[plan.plan] || plan.plan;
-              const planDescription = planDescriptions[plan.plan] || plan.description || '';
+              const planKey = planKeys[plan.plan];
+              const planName = planKey ? t.payment.buy.planNames[planKey] : plan.plan;
+              const planDescription = planKey
+                ? t.payment.buy.planDescriptions[planKey]
+                : plan.description || '';
 
               return (
                 <Card
@@ -169,7 +169,7 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
                   {isPro && (
                     <div className="absolute -top-3 left-0 right-0 flex justify-center">
                       <span className="rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
-                        Most Popular
+                        {t.payment.buy.mostPopular}
                       </span>
                     </div>
                   )}
@@ -180,12 +180,11 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
                     <div className="mt-2">
                       <span className="text-2xl font-bold">${plan.priceUsd}</span>
                       <span className="text-xs text-muted-foreground">
-                        {' '}
-                        / {plan.credits.toLocaleString()} credits
+                        {t.payment.buy.perCredits(plan.credits)}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      ~{minutes.toLocaleString()} minutes of AI assistance
+                      {t.payment.buy.minutesOfAssistance(minutes)}
                     </p>
                   </CardHeader>
 
@@ -209,10 +208,10 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
                       {isSelected ? (
                         <>
                           <Check className="h-3.5 w-3.5" />
-                          Selected
+                          {t.payment.buy.selected}
                         </>
                       ) : (
-                        'Buy'
+                        t.payment.buy.buy
                       )}
                     </Button>
                   </CardContent>
@@ -224,17 +223,18 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
           {selectedPlan && (
             <Card ref={paymentDetailsRef} className="gap-3 py-4">
               <CardHeader className="gap-1 px-4">
-                <CardTitle className="text-base">Payment Details</CardTitle>
+                <CardTitle className="text-base">{t.payment.buy.detailsTitle}</CardTitle>
                 <CardDescription className="text-xs">
-                  Complete your purchase of{' '}
-                  <span className="font-bold">{selectedPlan.credits.toLocaleString()} credits</span>{' '}
-                  for <span className="font-bold">${selectedPlan.priceUsd} USD</span>
+                  {t.payment.buy.detailsLead}
+                  <span className="font-bold">{t.payment.buy.credits(selectedPlan.credits)}</span>
+                  {t.payment.buy.detailsFor}
+                  <span className="font-bold">${selectedPlan.priceUsd} USD</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-4 space-y-3">
                 <div>
                   <label className="text-xs font-medium mb-1.5 block">
-                    Payment Currency <span className="text-destructive">*</span>
+                    {t.payment.buy.currencyLabel} <span className="text-destructive">*</span>
                   </label>
                   <Select
                     value={selectedCurrency}
@@ -243,7 +243,7 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
                     onOpenChange={handleCurrencySelectOpenChange}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a currency" />
+                      <SelectValue placeholder={t.payment.buy.currencyPlaceholder} />
                     </SelectTrigger>
                     <SelectContent className="max-h-80">
                       <div className="sticky top-0 z-10 -mx-1 -mt-1 mb-1 border-b bg-popover p-1.5">
@@ -256,14 +256,14 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
                             onKeyDown={(e) => {
                               if (e.key !== 'Escape') e.stopPropagation();
                             }}
-                            placeholder="Search currency..."
+                            placeholder={t.payment.buy.currencySearchPlaceholder}
                             className="h-8 pl-7 text-xs"
                           />
                         </div>
                       </div>
                       {!hasVisibleCurrency ? (
                         <div className="py-4 text-center text-xs text-muted-foreground">
-                          No currency found
+                          {t.payment.buy.noCurrency}
                         </div>
                       ) : (
                         currencies.map((currency: AvailableCurrency) => (
@@ -295,7 +295,7 @@ export default function BuyCreditsTab({ credits, creditsPerMinute, onPaymentCrea
                   onClick={handleCreatePayment}
                   disabled={creating || !selectedCurrency}
                 >
-                  {creating ? 'Creating Payment...' : 'Create Payment'}
+                  {creating ? t.payment.buy.creatingPayment : t.payment.buy.createPayment}
                 </Button>
               </CardContent>
             </Card>

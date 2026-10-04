@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 
 import { toolsService } from '../services/tools.service.js';
 import { ExportFormat } from '../types/export.js';
+import { uiStrings } from '../utils/ui-strings.js';
 
 export function registerToolsHandlers(): void {
   ipcMain.handle('tools:export-transcript', async (_event, format: ExportFormat = 'docx') => {
@@ -20,10 +21,11 @@ export function registerToolsHandlers(): void {
   ipcMain.handle(
     'tools:save-image',
     async (_event, { filename, data }: { filename: string; data: number[] }) => {
+      const strings = uiStrings();
       const { canceled, filePath } = await dialog.showSaveDialog({
-        title: 'Save Image',
+        title: strings.saveImageTitle,
         defaultPath: filename,
-        filters: [{ name: 'PNG Image', extensions: ['png'] }],
+        filters: [{ name: strings.pngFilter, extensions: ['png'] }],
       });
       if (canceled || !filePath) return { filePath: null };
       await fs.writeFile(filePath, Buffer.from(data));

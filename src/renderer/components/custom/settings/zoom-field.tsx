@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 
 /**
@@ -28,6 +29,7 @@ const STEP_PERCENT = 10;
  * control and this one can never disagree about what the current level is.
  */
 export function ZoomField() {
+  const t = useT();
   const [percent, setPercent] = useState<number | null>(null);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export function ZoomField() {
 
   return (
     <div className="space-y-2">
-      <Label id="zoom-field-label">Interface size</Label>
+      <Label id="zoom-field-label">{t.zoomField.label}</Label>
       <div
         className="flex items-center gap-2"
         role="group"
@@ -72,7 +74,7 @@ export function ZoomField() {
           type="button"
           variant="outline"
           size="icon"
-          aria-label="Smaller"
+          aria-label={t.zoomField.smaller}
           disabled={!ready || current <= MIN_PERCENT}
           onClick={() => apply(Math.max(MIN_PERCENT, current - STEP_PERCENT))}
         >
@@ -89,7 +91,7 @@ export function ZoomField() {
           type="button"
           variant="outline"
           size="icon"
-          aria-label="Larger"
+          aria-label={t.zoomField.larger}
           disabled={!ready || current >= MAX_PERCENT}
           onClick={() => apply(Math.min(MAX_PERCENT, current + STEP_PERCENT))}
         >
@@ -104,13 +106,11 @@ export function ZoomField() {
           onClick={() => apply(100)}
         >
           <RefreshCcw className="h-3.5 w-3.5" aria-hidden="true" />
-          Reset
+          {t.zoomField.reset}
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Scales the whole app. The interview window is small on purpose - this is how you make the
-        suggestions readable at a glance. Also on{' '}
-        {HOTKEYS[Hotkey.ZoomInOutReset].combo}.
+        {t.zoomField.description(HOTKEYS[Hotkey.ZoomInOutReset].combo)}
       </p>
     </div>
   );

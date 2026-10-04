@@ -8,10 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import useAuth from '@/hooks/use-auth';
+import { useT } from '@/i18n';
+import { APP_NAME } from '@/lib/consts';
 
 type Step = 'email' | 'code' | 'details';
 
 export default function SignupPage() {
+  const t = useT();
   const { signup, sendVerificationCode, verifyEmailCode, loading, error, setError } = useAuth();
   const navigate = useNavigate();
 
@@ -28,7 +31,7 @@ export default function SignupPage() {
     if (await sendVerificationCode(email.trim())) {
       setStep('code');
     } else {
-      toast.error('Failed to send verification code. Please try again.');
+      toast.error(t.auth.signup.sendCodeFailed);
     }
   };
 
@@ -38,7 +41,7 @@ export default function SignupPage() {
     if (await verifyEmailCode(email.trim(), code.trim())) {
       setStep('details');
     } else {
-      toast.error('Invalid or expired verification code.');
+      toast.error(t.auth.signup.invalidCode);
     }
   };
 
@@ -46,33 +49,33 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     if (password !== passwordConfirm) {
-      setError('Passwords do not match');
+      setError(t.auth.passwordsDoNotMatch);
       return;
     }
 
     if (await signup(username.trim(), email.trim(), password, code.trim())) {
-      toast.success('Signup successful! Please login.');
+      toast.success(t.auth.signup.succeeded);
       // redirect to login page
       setTimeout(() => {
         navigate('/auth/login');
       }, 2000);
     } else {
-      toast.error('Signup failed. Please try again.');
+      toast.error(t.auth.signup.failed);
     }
   };
 
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Create account</CardTitle>
-        <CardDescription>Register a new account for Power Interview AI</CardDescription>
+        <CardTitle>{t.auth.signup.title}</CardTitle>
+        <CardDescription>{t.auth.signup.description(APP_NAME)}</CardDescription>
       </CardHeader>
       <CardContent>
         {step === 'email' && (
           <form onSubmit={submitEmail} className="space-y-4">
             <div>
               <label htmlFor="signup-email" className="text-sm block mb-1">
-                Email
+                {t.auth.fields.email}
               </label>
               <Input
                 id="signup-email"
@@ -93,12 +96,12 @@ export default function SignupPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Sending…' : 'Send code'}
+              {loading ? t.auth.signup.sending : t.auth.signup.sendCode}
             </Button>
 
             <div className="text-center">
               <Link to="/auth/login" className="text-sm underline">
-                Already have account? Just login
+                {t.auth.signup.haveAccount}
               </Link>
             </div>
           </form>
@@ -108,7 +111,7 @@ export default function SignupPage() {
           <form onSubmit={submitCode} className="space-y-4">
             <div>
               <label htmlFor="signup-code" className="text-sm block mb-1">
-                Verification code
+                {t.auth.fields.verificationCode}
               </label>
               {/*
                 Conditional, like the reset wizard's step two, because the backend now answers
@@ -118,8 +121,7 @@ export default function SignupPage() {
                 back over the UI the enumeration the endpoint was changed to remove.
               */}
               <p className="text-sm text-muted-foreground mb-2">
-                If {email} does not already have an account, we sent a verification code to it.
-                Paste the code below. If it does, we sent a note explaining how to sign in instead.
+                {t.auth.signup.codeNotice(email)}
               </p>
               <Textarea
                 id="signup-code"
@@ -139,7 +141,7 @@ export default function SignupPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Verifying…' : 'Verify'}
+              {loading ? t.auth.signup.verifying : t.auth.signup.verify}
             </Button>
 
             <div className="flex justify-between text-sm">
@@ -152,7 +154,7 @@ export default function SignupPage() {
                   setStep('email');
                 }}
               >
-                Change email
+                {t.auth.signup.changeEmail}
               </button>
               <button
                 type="button"
@@ -164,13 +166,13 @@ export default function SignupPage() {
                     // Not "Verification code resent": a taken address gets the "you already
                     // have an account" notice resent instead, and this toast can no longer
                     // tell which one happened - see sendVerificationCode's docstring.
-                    toast.success('Request sent again.');
+                    toast.success(t.auth.signup.requestResent);
                   } else {
-                    toast.error('Failed to resend.');
+                    toast.error(t.auth.signup.resendFailed);
                   }
                 }}
               >
-                Resend code
+                {t.auth.signup.resendCode}
               </button>
             </div>
 
@@ -183,7 +185,7 @@ export default function SignupPage() {
             */}
             <div className="text-center">
               <Link to="/auth/login" className="text-sm underline">
-                Already have account? Just login
+                {t.auth.signup.haveAccount}
               </Link>
             </div>
           </form>
@@ -193,7 +195,7 @@ export default function SignupPage() {
           <form onSubmit={submitDetails} className="space-y-4">
             <div>
               <label htmlFor="signup-username" className="text-sm block mb-1">
-                Username
+                {t.auth.fields.username}
               </label>
               <Input
                 id="signup-username"
@@ -209,7 +211,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="signup-password" className="text-sm block mb-1">
-                Password
+                {t.auth.fields.password}
               </label>
               <InputPassword
                 id="signup-password"
@@ -224,7 +226,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="signup-password-confirm" className="text-sm block mb-1">
-                Confirm Password
+                {t.auth.fields.confirmPassword}
               </label>
               <InputPassword
                 id="signup-password-confirm"
@@ -244,7 +246,7 @@ export default function SignupPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Creating…' : 'Create account'}
+              {loading ? t.auth.signup.creating : t.auth.signup.create}
             </Button>
           </form>
         )}

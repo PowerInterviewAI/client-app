@@ -1,6 +1,7 @@
 import {
   BookOpen,
   Home,
+  Languages,
   LogOut,
   Mail,
   Menu,
@@ -18,7 +19,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,6 +34,9 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import { useInterviewLock } from '@/hooks/use-interview-lock';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useThemeStore } from '@/hooks/use-theme-store';
+import { useUiLanguage } from '@/hooks/use-ui-language';
+import { useT } from '@/i18n';
+import { UI_LANGUAGES, type UiLanguage } from '@/types/ui-language';
 
 interface TitlebarMenuProps {
   style?: React.CSSProperties;
@@ -36,11 +45,13 @@ interface TitlebarMenuProps {
 }
 
 export default function TitlebarMenu({ style, disabled: closed = false }: TitlebarMenuProps) {
+  const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
   const { appState } = useAppState();
   const { config } = useConfigStore();
   const { isDark, toggleTheme } = useThemeStore();
+  const { uiLanguage, setUiLanguage } = useUiLanguage();
   const { logout } = useAuth();
   const { confirmDiscard } = useSaveHistoryGuard();
 
@@ -76,7 +87,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
       // sets it and throws in the same tick, so this closure's `error` is still last render's
       // (stale) value.
       console.error('Sign out failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to sign out');
+      toast.error(err instanceof Error ? err.message : t.home.signOutFailed);
     }
   };
 
@@ -89,7 +100,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
           <span className="inline-flex" style={style}>
             <DropdownMenuTrigger asChild>
               <button
-                aria-label="Menu"
+                aria-label={t.titlebar.menu}
                 disabled={closed}
                 className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
               >
@@ -99,7 +110,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{closed ? 'Unavailable during an interview' : 'Menu'}</p>
+          <p>{closed ? t.titlebar.unavailableDuringInterview : t.titlebar.menu}</p>
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" side="bottom">
@@ -114,7 +125,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
               <>
                 <DropdownMenuItem onClick={() => navigate('/')}>
                   <Home className="mr-2 h-4 w-4" />
-                  Home
+                  {t.titlebarMenu.home}
                 </DropdownMenuItem>
                 {/* The same two destinations the home page names, in the same words. Account is
                     disabled mid-session because saving a new profile rewrites state the running
@@ -125,24 +136,54 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
                   disabled={disabled}
                 >
                   <UserRound className="mr-2 h-4 w-4" />
-                  Account
+                  {t.titlebarMenu.account}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/configuration')}>
                   <SettingsIcon className="mr-2 h-4 w-4" />
-                  Configuration
+                  {t.titlebarMenu.configuration}
                 </DropdownMenuItem>
               </>
             )}
           </>
         )}
+        {/* Outside the `isLoggedIn` block on purpose, and outside the `inSetup` one too. This
+            menu is the only surface reachable from *every* screen - the login form, the signup
+            wizard, a half-finished first run - and those are exactly the screens where someone
+            who cannot read the app has nowhere else to go. Configuration has the same control,
+            but it is behind a sign-in and behind the navigation lock.
+
+            A submenu with a radio group rather than a toggle beside the theme one. Two languages
+            would toggle, but the list only grows, and a toggle labelled with the language you
+            are not in is the shape that stops working at three. The radio dot also answers
+            "which am I in" without the user having to recognise the answer. */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Languages className="mr-2 h-4 w-4" />
+            {t.titlebarMenu.language}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup
+              value={uiLanguage}
+              onValueChange={(v) => void setUiLanguage(v as UiLanguage)}
+            >
+              {UI_LANGUAGES.map((entry) => (
+                // Endonym only, for the same reason `UiLanguageField` lists only endonyms: this
+                // is read by someone whose app may be in a language they do not speak.
+                <DropdownMenuRadioItem key={entry.code} value={entry.code}>
+                  {entry.nativeName}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         <DropdownMenuItem onClick={() => toggleTheme()}>
           {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-          {isDark ? 'Light mode' : 'Dark mode'}
+          {isDark ? t.titlebarMenu.lightMode : t.titlebarMenu.darkMode}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate('/documentation')}>
           <BookOpen className="mr-2 h-4 w-4" />
-          Documentation
+          {t.titlebarMenu.documentation}
         </DropdownMenuItem>
 
         {isLoggedIn && (
@@ -150,7 +191,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => !disabled && void handleSignOut()} disabled={disabled}>
               <LogOut className="mr-2 h-4 w-4" />
-              Sign out
+              {t.titlebarMenu.signOut}
             </DropdownMenuItem>
           </>
         )}

@@ -7,11 +7,20 @@ import ElectronStore from 'electron-store';
 
 import { OPACITY_DEFAULT } from '../consts.js';
 import { DEFAULT_LANGUAGE, Language, resolveLanguage } from '../types/language.js';
+import { DEFAULT_UI_LANGUAGE, resolveUiLanguage, UiLanguage } from '../types/ui-language.js';
 
 // Runtime configuration (matches Config type in frontend)
 export interface RuntimeConfig {
   /** Interview language: what the ASR transcribes and what suggestions come back in. */
   language: Language;
+
+  /**
+   * The language the app's own chrome is written in.
+   *
+   * A separate key from `language` above, not a view of it. See `types/ui-language.ts` for why
+   * the two are never derived from each other.
+   */
+  uiLanguage: UiLanguage;
   sessionToken: string;
   rememberMe: boolean;
   email: string;
@@ -41,6 +50,14 @@ export interface RuntimeConfig {
 // Default runtime configuration
 const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   language: DEFAULT_LANGUAGE,
+
+  // English, rather than a guess at the chrome language from `app.getLocale()`. An install that
+  // is being upgraded has never been asked this question, and answering it from the OS would
+  // move a working English UI under a user who did not ask for that - while a new install is
+  // asked outright on the first step of the first-run wizard, where the options are listed by
+  // endonym and picking one translates the step itself on the spot.
+  uiLanguage: DEFAULT_UI_LANGUAGE,
+
   sessionToken: '',
   rememberMe: true,
   email: '',
@@ -123,6 +140,11 @@ class ConfigStore {
     // reads through here, so this is the one place that can stop an unknown code reaching the
     // ASR URL and the request bodies.
     config.language = resolveLanguage(config.language);
+
+    // Same treatment, one step further: an unresolved UI language reaches a lookup in the
+    // locale table rather than a request body, and comes back undefined - which renders an app
+    // with no text in it at all.
+    config.uiLanguage = resolveUiLanguage(config.uiLanguage);
 
     return config;
   }
@@ -270,6 +292,12 @@ export const configStore = new ConfigStore();
     // one that does not is either new or predates the setting, and takes the new default.
     const legacy = (raw as (StoredRuntime & Record<string, unknown>) | undefined)?.professionalMode;
     migration.hintOnlyMode = typeof legacy === 'boolean' ? legacy : true;
+  }
+  if (raw?.uiLanguage === undefined) {
+    // Written explicitly rather than left to the default backfill in `getConfig`, so that an
+    // install which has been running in English keeps English on disk even if a later release
+    // changes what a fresh install defaults to.
+    migration.uiLanguage = DEFAULT_UI_LANGUAGE;
   }
   if (raw?.mockLiveHintsEnabled === undefined) {
     // `mockLiveSuggestionsEnabled` is the pre-rename name, and it is read forward for the same

@@ -14,6 +14,7 @@ import {
 } from '../types/app-state.js';
 import { DEFAULT_LANGUAGE } from '../types/language.js';
 import { SuggestionMode } from '../types/llm.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { getWindowReference, refreshWindowSurfaces } from './window-control.service.js';
 
 const DEFAULT_STATE: AppState = {
@@ -81,6 +82,7 @@ export class AppStateService {
 
   setPlaceholderState() {
     this.placeholderActive = true;
+    const strings = uiStrings();
     const tstampNow = Date.now();
     this.state = {
       ...this.state,
@@ -88,7 +90,7 @@ export class AppStateService {
       transcripts: [
         {
           timestamp: tstampNow,
-          text: 'Transcripts will be here',
+          text: strings.placeholderTranscript,
           speaker: Speaker.Other,
           isFinal: false,
           endTimestamp: tstampNow + 5000,
@@ -98,8 +100,8 @@ export class AppStateService {
       liveSuggestions: [
         {
           timestamp: tstampNow,
-          last_question: 'Interviewer questions will be here',
-          answer: 'Suggested answers will be here in real-time',
+          last_question: strings.placeholderQuestion,
+          answer: strings.placeholderLiveAnswer,
           state: SuggestionState.Success,
           error: '',
           mode: SuggestionMode.FullSentence,
@@ -108,9 +110,8 @@ export class AppStateService {
       actionSuggestions: [
         {
           timestamp: tstampNow,
-          last_question: 'Interviewer questions will be here',
-          answer:
-            'Triggered suggestions will be here. For example, reply suggestion, coding test solution, diagram descriptions, etc.',
+          last_question: strings.placeholderQuestion,
+          answer: strings.placeholderActionAnswer,
           image_urls: [null, null, null, null],
           state: SuggestionState.Success,
           error: '',
@@ -124,6 +125,20 @@ export class AppStateService {
     // state through this broadcast - it does not poll while the push API exists. Without this
     // the panels keep rendering pre-Clear content until some unrelated change broadcasts.
     this.notifyRenderer();
+  }
+
+  /**
+   * Re-seed the placeholder copy in whatever language the chrome is now in.
+   *
+   * A no-op unless the placeholder is actually on screen: once a real interview has written to
+   * the history, re-seeding would throw it away. Called from the config IPC handler when
+   * `uiLanguage` moves, because nothing else would - the placeholder is written on launch and
+   * after a Clear, and a language changed between those two left English copy in the panels of
+   * an otherwise Russian app.
+   */
+  refreshPlaceholderLanguage(): void {
+    if (!this.placeholderActive) return;
+    this.setPlaceholderState();
   }
 
   getState(): AppState {

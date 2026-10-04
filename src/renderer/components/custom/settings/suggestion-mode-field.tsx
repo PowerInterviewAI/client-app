@@ -3,6 +3,7 @@ import { ListChecks, Route } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
+import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 
 /**
@@ -14,11 +15,12 @@ import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
  * an example of what the panel will actually look like.
  */
 export function SuggestionModeField() {
+  const t = useT();
   const { hintOnly, setHintOnly } = useSuggestionMode();
 
   return (
     <div className="space-y-2">
-      <Label id="suggestion-mode-field-label">Suggestion style</Label>
+      <Label id="suggestion-mode-field-label">{t.suggestionModeField.label}</Label>
       <RadioGroup
         aria-labelledby="suggestion-mode-field-label"
         value={hintOnly ? 'hint' : 'full'}
@@ -29,27 +31,25 @@ export function SuggestionModeField() {
           <span className="flex items-center gap-2 font-medium">
             <RadioGroupItem value="hint" />
             <ListChecks className="h-4 w-4" aria-hidden="true" />
-            Hint-only
+            {t.suggestionModeField.hintOnly}
           </span>
           <span className="text-xs text-muted-foreground">
-            A headline and keyword bullets you can read at a glance while you keep talking.
-            Recommended.
+            {t.suggestionModeField.hintOnlyDescription}
           </span>
         </label>
         <label className="flex cursor-pointer flex-col gap-1 rounded-md border p-3 text-sm has-data-[state=checked]:border-primary">
           <span className="flex items-center gap-2 font-medium">
             <RadioGroupItem value="full" />
             <Route className="h-4 w-4 -scale-y-100" aria-hidden="true" />
-            Full sentences
+            {t.suggestionModeField.fullSentences}
           </span>
           <span className="text-xs text-muted-foreground">
-            The answer written out the way it would be spoken. More to read, less to improvise.
+            {t.suggestionModeField.fullSentencesDescription}
           </span>
         </label>
       </RadioGroup>
       <p className="text-xs text-muted-foreground">
-        Switchable mid-interview from the control bar or{' '}
-        {HOTKEYS[Hotkey.ToggleSuggestionMode].combo}.
+        {t.suggestionModeField.switchHint(HOTKEYS[Hotkey.ToggleSuggestionMode].combo)}
       </p>
     </div>
   );

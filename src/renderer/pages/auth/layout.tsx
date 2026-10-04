@@ -3,8 +3,10 @@ import { Outlet, useNavigate } from 'react-router-dom';
 
 import { LoadingPage } from '@/components/custom/loading';
 import { useAppState } from '@/hooks/use-app-state';
+import { useT } from '@/i18n';
 
 export default function AuthLayout() {
+  const t = useT();
   const { appState } = useAppState();
   const navigate = useNavigate();
 
@@ -27,6 +29,6 @@ export default function AuthLayout() {
       </div>
     );
   } else {
-    return <LoadingPage disclaimer="Loading…" />;
+    return <LoadingPage disclaimer={t.common.loading} />;
   }
 }

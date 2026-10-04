@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { type Translation, useT } from '@/i18n';
 import type { MockInterviewSessionState } from '@/types/mock-interview';
 
 interface ReportScreenProps {
@@ -25,11 +26,11 @@ interface ReportScreenProps {
   onDone: () => Promise<void>;
 }
 
-function scoreVerdict(score: number): string {
-  if (score >= 85) return 'Excellent';
-  if (score >= 70) return 'Strong';
-  if (score >= 50) return 'Developing';
-  return 'Needs work';
+function scoreVerdict(t: Translation, score: number): string {
+  if (score >= 85) return t.mock.report.verdictExcellent;
+  if (score >= 70) return t.mock.report.verdictStrong;
+  if (score >= 50) return t.mock.report.verdictDeveloping;
+  return t.mock.report.verdictNeedsWork;
 }
 
 export function ReportScreen({
@@ -39,6 +40,7 @@ export function ReportScreen({
   onPracticeAgain,
   onDone,
 }: ReportScreenProps) {
+  const t = useT();
   const { report, reportError, rescoring, answers } = session;
   const [saving, setSaving] = useState<'docx' | 'md' | null>(null);
   const [busy, setBusy] = useState<'again' | 'done' | null>(null);
@@ -66,7 +68,7 @@ export function ReportScreen({
       // the one export of the three that left "where did that go" unanswered.
       if (filePath) showExportSuccessToast(filePath, format);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to export the report');
+      toast.error(error instanceof Error ? error.message : t.mock.report.exportFailed);
     } finally {
       setSaving(null);
     }
@@ -96,17 +98,14 @@ export function ReportScreen({
         {/* Visually hidden: the score is the visual headline, but this route still needs a
             landmark for screen-reader heading navigation to land on. */}
         <h1 ref={headingRef} tabIndex={-1} className="sr-only">
-          Mock interview report
+          {t.mock.report.heading}
         </h1>
         {reportError && (
           <Alert variant="destructive">
             {/* `gap-3` overrides AlertDescription's own `gap-1`: it is a grid, and the default
                 gap is sized for two lines of copy rather than copy followed by a control. */}
             <AlertDescription className="gap-3">
-              <span>
-                The overall score could not be produced ({reportError}). Your answers are still
-                shown below and can still be exported.
-              </span>
+              <span>{t.mock.report.scoreFailed(reportError)}</span>
               {/* The answers are kept, so scoring can be asked for again without re-running the
                   interview. Not automatic - see `retryScoring` in the service for why the spend
                   is the candidate's to make. */}
@@ -119,10 +118,10 @@ export function ReportScreen({
                 {rescoring ? (
                   <>
                     <Loader className="animate-spin" />
-                    Scoring…
+                    {t.mock.report.scoring}
                   </>
                 ) : (
-                  'Score again'
+                  t.mock.report.scoreAgain
                 )}
               </Button>
             </AlertDescription>
@@ -135,9 +134,11 @@ export function ReportScreen({
               {/* The number and verdict below read as two unrelated lines to a screen reader
                   without this - visually the "82" is self-evidently a score because of its
                   size and position, which carries no meaning once read aloud in sequence. */}
-              <h2 className="sr-only">Overall score</h2>
+              <h2 className="sr-only">{t.mock.report.overallScore}</h2>
               <p className="text-5xl font-semibold tabular-nums">{report.overall_score}</p>
-              <p className="text-sm text-muted-foreground">{scoreVerdict(report.overall_score)}</p>
+              <p className="text-sm text-muted-foreground">
+                {scoreVerdict(t, report.overall_score)}
+              </p>
               <div className="w-full pt-2">
                 <Progress value={report.overall_score} />
               </div>
@@ -149,7 +150,7 @@ export function ReportScreen({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Card>
               <CardHeader>
-                <h2 className="leading-none font-semibold text-sm">Strengths</h2>
+                <h2 className="leading-none font-semibold text-sm">{t.mock.report.strengths}</h2>
               </CardHeader>
               <CardContent>
                 {report.strengths.length > 0 ? (
@@ -161,13 +162,13 @@ export function ReportScreen({
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Nothing specific noted.</p>
+                  <p className="text-sm text-muted-foreground">{t.mock.report.nothingNoted}</p>
                 )}
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <h2 className="leading-none font-semibold text-sm">Gaps</h2>
+                <h2 className="leading-none font-semibold text-sm">{t.mock.report.gaps}</h2>
               </CardHeader>
               <CardContent>
                 {report.gaps.length > 0 ? (
@@ -179,7 +180,7 @@ export function ReportScreen({
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Nothing specific noted.</p>
+                  <p className="text-sm text-muted-foreground">{t.mock.report.nothingNoted}</p>
                 )}
               </CardContent>
             </Card>
@@ -188,7 +189,7 @@ export function ReportScreen({
 
         <Card>
           <CardHeader>
-            <h2 className="leading-none font-semibold text-sm">Per-question breakdown</h2>
+            <h2 className="leading-none font-semibold text-sm">{t.mock.report.perQuestion}</h2>
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible>
@@ -206,22 +207,26 @@ export function ReportScreen({
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3">
                       <div>
-                        <p className="text-xs font-medium text-muted-foreground">Your answer</p>
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t.mock.report.yourAnswer}
+                        </p>
                         <p dir="auto" className="text-sm">
-                          {entry.answer || '(no answer recorded)'}
+                          {entry.answer || t.mock.report.noAnswerRecorded}
                         </p>
                       </div>
                       {scored && (
                         <>
                           <div>
-                            <p className="text-xs font-medium text-muted-foreground">Score</p>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {t.mock.report.score}
+                            </p>
                             <p dir="auto" className="text-sm">
                               {scored.justification}
                             </p>
                           </div>
                           <div>
                             <p className="text-xs font-medium text-muted-foreground">
-                              Stronger answer
+                              {t.mock.report.strongerAnswer}
                             </p>
                             <SafeMarkdown content={scored.stronger_answer} />
                           </div>
@@ -249,7 +254,7 @@ export function ReportScreen({
               ) : (
                 <FileText className="mr-2 h-4 w-4" />
               )}
-              Save as Word
+              {t.mock.report.saveAsWord}
             </Button>
             <Button
               variant="outline"
@@ -263,7 +268,7 @@ export function ReportScreen({
               ) : (
                 <Hash className="mr-2 h-4 w-4" />
               )}
-              Save as Markdown
+              {t.mock.report.saveAsMarkdown}
             </Button>
           </div>
           <div className="flex gap-2">
@@ -273,10 +278,10 @@ export function ReportScreen({
               disabled={busy !== null}
               onClick={() => void practiceAgain()}
             >
-              Practise again
+              {t.mock.report.practiseAgain}
             </Button>
             <Button size="sm" disabled={busy !== null} onClick={() => void done()}>
-              Done
+              {t.mock.report.done}
             </Button>
           </div>
         </div>

@@ -19,7 +19,9 @@ export async function run() {
   const { check, failures } = createChecker('mock-transcript-turns');
 
   const source = codeOnly(
-    readSource(new URL('../src/renderer/components/custom/panels/mock-transcript-panel.tsx', import.meta.url))
+    readSource(
+      new URL('../src/renderer/components/custom/panels/mock-transcript-panel.tsx', import.meta.url)
+    )
   );
 
   check(
@@ -29,7 +31,10 @@ export async function run() {
 
   // The two states in which the candidate can still act on the question, and the only two in
   // which it is not already in `answers`.
-  check('and that state is Speaking', /questionIsLive[\s\S]{0,160}MockInterviewState\.Speaking/.test(source));
+  check(
+    'and that state is Speaking',
+    /questionIsLive[\s\S]{0,160}MockInterviewState\.Speaking/.test(source)
+  );
   check('or Listening', /questionIsLive[\s\S]{0,160}MockInterviewState\.Listening/.test(source));
 
   // Evaluating is the state the duplicate was most visible in - it is reached on every answer.
@@ -43,9 +48,12 @@ export async function run() {
     /if \(session\.currentAnswerText\) \{/.test(source)
   );
 
+  // The label itself lives in `i18n/locales`, so this anchors on the key rather than on the
+  // words: that the panel reaches for a label at all is the invariant, and the two locales
+  // having one is a build error rather than something to grep for.
   check(
     'an answered-but-empty turn is labelled rather than left blank',
-    /turn\.skipped \|\| !turn\.text/.test(source) && source.includes('No answer')
+    /turn\.skipped \|\| !turn\.text/.test(source) && source.includes('t.panels.noAnswer')
   );
 
   return failures;

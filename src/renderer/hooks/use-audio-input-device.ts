@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { currentTranslation } from '@/i18n';
 import { liveTranscriptionService } from '@/services/live-transcription.service';
 
 import { useConfigStore } from './use-config-store';
@@ -46,7 +47,7 @@ export function useAudioInputDevice() {
       await updateConfig({ audioInputDeviceName: name });
     } catch (e) {
       console.error('Failed to save the selected microphone', e);
-      toast.error('Failed to save the selected microphone');
+      toast.error(currentTranslation().settingsToasts.saveMicrophoneFailed);
       return;
     }
 
@@ -64,8 +65,9 @@ export function useAudioInputDevice() {
       // state the user is actually in - the setting took, the audio did not move.
       console.error('Failed to switch microphone', e);
       setFailedDeviceName(name);
-      toast.warning('Saved, but the interview is still using the previous microphone', {
-        description: 'Check the device is connected, then stop and start the assistant.',
+      const t = currentTranslation();
+      toast.warning(t.settingsToasts.microphoneSwapFailed, {
+        description: t.settingsToasts.microphoneSwapFailedHint,
       });
     } finally {
       // Left set by a superseded swap: the one that replaced it is still in flight, and the

@@ -15,6 +15,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useAudioInputDevice } from '@/hooks/use-audio-input-device';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useT } from '@/i18n';
 import { resolveMicDeviceId } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
 
@@ -33,6 +34,7 @@ import { RunningState } from '@/types/app-state';
  * nothing the control bar does not already show.
  */
 export function MicrophoneField() {
+  const t = useT();
   const { runningState } = useAppState();
   const { config, updateConfig } = useConfigStore();
   const { devices, ready } = useAudioInputDevices();
@@ -99,9 +101,7 @@ export function MicrophoneField() {
       console.error('Microphone test failed', e);
       // Inline rather than a toast: this sits directly under the control that caused it, and the
       // user is about to try again with a different device.
-      setTestError(
-        'Could not open this microphone. Check it is connected and that no other app is using it.'
-      );
+      setTestError(t.microphoneField.openFailed);
     } finally {
       setTestStarting(false);
     }
@@ -109,12 +109,12 @@ export function MicrophoneField() {
 
   return (
     <div className="space-y-2">
-      <Label id="microphone-field-label">Microphone</Label>
+      <Label id="microphone-field-label">{t.microphoneField.label}</Label>
 
       {noDevices ? (
         <p className="flex items-start gap-1.5 rounded-md border border-destructive/40 p-3 text-xs text-destructive">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          <span>No microphone was detected. Connect one and it will appear here.</span>
+          <span>{t.microphoneField.noDevices}</span>
         </p>
       ) : (
         <>
@@ -128,7 +128,11 @@ export function MicrophoneField() {
             >
               <SelectTrigger aria-labelledby="microphone-field-label" className="w-full">
                 <SelectValue
-                  placeholder={ready ? 'Select a microphone' : 'Looking for microphones...'}
+                  placeholder={
+                    ready
+                      ? t.microphoneField.selectPlaceholder
+                      : t.microphoneField.lookingPlaceholder
+                  }
                 />
               </SelectTrigger>
               <SelectContent>
@@ -154,16 +158,14 @@ export function MicrophoneField() {
               ) : (
                 <Mic className="h-4 w-4" aria-hidden="true" />
               )}
-              {testStream ? 'Stop test' : 'Test'}
+              {testStream ? t.microphoneField.stopTest : t.microphoneField.test}
             </Button>
           </div>
 
           {deviceNotFound && (
             <p role="alert" className="flex items-start gap-1.5 text-xs text-destructive">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-              <span>
-                &ldquo;{deviceName}&rdquo; is not connected any more. Pick another microphone.
-              </span>
+              <span>{t.microphoneField.notConnected(deviceName)}</span>
             </p>
           )}
 
@@ -175,16 +177,12 @@ export function MicrophoneField() {
 
           {testStream ? (
             <div className="rounded-md border p-3">
-              <p className="mb-2 text-xs text-muted-foreground">
-                Say something - the bar should move while you speak.
-              </p>
+              <p className="mb-2 text-xs text-muted-foreground">{t.microphoneField.saySomething}</p>
               <MicLevelMeter stream={testStream} />
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">
-              {running
-                ? 'The interview is using this microphone. Testing is available once it stops.'
-                : 'Test it before your interview - a silent microphone looks exactly like a quiet room.'}
+              {running ? t.microphoneField.runningHint : t.microphoneField.testHint}
             </p>
           )}
         </>

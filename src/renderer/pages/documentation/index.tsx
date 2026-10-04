@@ -9,11 +9,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useT } from '@/i18n';
 import { APP_NAME } from '@/lib/consts';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { LANGUAGES } from '@/types/language';
 
 export default function DocumentationPage() {
+  const t = useT();
   const [version, setVersion] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,51 +38,41 @@ export default function DocumentationPage() {
       <PageHeader title={`${APP_NAME} ${version ? `v${version}` : ''}`.trim()} />
 
       <div className="flex-1 overflow-auto px-4 py-4 w-full max-w-2xl mx-auto">
-        <p className="text-sm text-muted-foreground">
-          {APP_NAME} is an AI-powered assistant that enhances your interview experience with
-          real-time suggestions, on-screen code recommendations.
-        </p>
+        <p className="text-sm text-muted-foreground">{t.documentation.intro(APP_NAME)}</p>
         <p className="mt-2 mb-4 text-sm text-muted-foreground">
-          For full documentation, visit{' '}
+          {t.documentation.docsLead}
           <ExternalLink
             href="https://www.powerinterviewai.com/docs"
             className="text-primary underline"
           >
-            powerinterviewai.com/docs
+            {t.documentation.docsLinkText}
           </ExternalLink>
-          . Press Cmd/Ctrl+K anywhere in the app to search for an action.
+          {t.documentation.docsTrailing}
         </p>
 
         <Accordion type="multiple" defaultValue={['hotkeys']} className="w-full">
           <AccordionItem value="lost-window">
-            <AccordionTrigger className="text-sm font-semibold">Lost the window?</AccordionTrigger>
+            <AccordionTrigger className="text-sm font-semibold">
+              {t.documentation.lostWindow.title}
+            </AccordionTrigger>
             <AccordionContent>
               <p className="text-sm text-muted-foreground">
-                In stealth mode {APP_NAME} leaves the taskbar and the macOS Dock so it is not
-                visible when you share your screen, which also means a minimized window has no
-                button to click. Just launch {APP_NAME} again: it does not start a second copy, it
-                brings this window back. Outside stealth mode the usual taskbar button and Dock icon
-                are there.
+                {t.documentation.lostWindow.body(APP_NAME)}
               </p>
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="language">
             <AccordionTrigger className="text-sm font-semibold">
-              Interviewing in another language
+              {t.documentation.language.title}
             </AccordionTrigger>
             <AccordionContent>
-              <p className="text-sm text-muted-foreground">
-                One setting covers the whole session: which speech model transcribes the call, what
-                language suggestions are written in, and the language of the exported report. Set it
-                from the language button on the control bar, from the configuration page, or in the
-                mock interview&apos;s setup dialog - they all change the same thing.
-              </p>
+              <p className="text-sm text-muted-foreground">{t.documentation.language.oneSetting}</p>
               {/* A list rather than a sentence: at 28 entries the run-on paragraph this used to
                   be could not be scanned for one's own language, which is the only question a
                   reader opens this section with. Derived from LANGUAGES so it cannot drift. */}
               <p className="mt-2 text-sm text-muted-foreground">
-                {LANGUAGES.length} languages are supported:{' '}
+                {t.documentation.language.supported(LANGUAGES.length)}
                 {/* Each name is its own isolate rather than one `dir="auto"` span around the
                     lot. Joined into a single string, the two right-to-left names sit adjacent
                     with only a neutral between them, so the bidi algorithm resolves that
@@ -94,81 +86,79 @@ export default function DocumentationPage() {
                 ))}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                You can change it mid-interview. Suggestions follow immediately, from the next
-                answer onward. Speech recognition takes a moment longer: it reconnects, so the
-                sentence being spoken at that instant may be cut short in the transcript.
+                {t.documentation.language.midInterview}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                In a mock interview, a language marked &ldquo;text only&rdquo; in the setup dialog
-                has no voice available: the interviewer writes its questions instead of speaking
-                them. You still answer out loud and the scoring is unchanged.
+                {t.documentation.language.textOnly}
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* The chrome language is a second setting, and this is the only place that says so in
+              full. The two are routinely different for one user, and nothing in the app infers
+              either from the other - which is worth stating where someone goes looking. */}
+          <AccordionItem value="app-language">
+            <AccordionTrigger className="text-sm font-semibold">
+              {t.documentation.language.appLanguageTitle}
+            </AccordionTrigger>
+            <AccordionContent>
+              <p className="text-sm text-muted-foreground">
+                {t.documentation.language.appLanguageBody}
               </p>
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="microphone">
             <AccordionTrigger className="text-sm font-semibold">
-              Changing microphone mid-interview
+              {t.documentation.microphone.title}
             </AccordionTrigger>
             <AccordionContent>
-              <p className="text-sm text-muted-foreground">
-                The microphone button on the control bar stays available while an interview is
-                running. If your headset dies, is unplugged, or was the wrong device to begin with,
-                pick another one there rather than stopping the assistant - stopping it clears the
-                transcript and the suggestions with it.
-              </p>
+              <p className="text-sm text-muted-foreground">{t.documentation.microphone.body}</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                The change takes effect immediately and transcription keeps running, so nothing is
-                cut short. If the device you pick cannot be opened - unplugged, or in use by another
-                app - the interview carries on using the previous one and the app says so.
+                {t.documentation.microphone.immediate}
               </p>
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="suggestion-style">
             <AccordionTrigger className="text-sm font-semibold">
-              Hint-only vs. full-sentence suggestions
+              {t.documentation.suggestionStyle.title}
             </AccordionTrigger>
             <AccordionContent>
               <p className="text-sm text-muted-foreground">
-                Hint-only is the default: each suggestion arrives as a one-line headline plus
-                keyword bullets, so you can take it in at a glance and keep talking. Full-sentence
-                writes the answer out the way it would be spoken - more to read, less to improvise.
+                {t.documentation.suggestionStyle.body}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Switch between them on the control bar, on the configuration page, or with{' '}
-                {HOTKEYS[Hotkey.ToggleSuggestionMode].combo}, which works in stealth mode too.
-                Suggestions already on screen keep the style they were generated in; only the next
-                one changes.
+                {t.documentation.suggestionStyle.switching(
+                  HOTKEYS[Hotkey.ToggleSuggestionMode].combo
+                )}
               </p>
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="where-things-are">
             <AccordionTrigger className="text-sm font-semibold">
-              Where your settings live
+              {t.documentation.settings.title}
             </AccordionTrigger>
             <AccordionContent>
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Account</strong> holds who you are - the name
-                you go by, the profile or CV your suggestions are written from, the job context you
-                are interviewing against, and your password.
+                <strong className="text-foreground">{t.documentation.settings.accountLabel}</strong>
+                {t.documentation.settings.accountBody}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                <strong className="text-foreground">Configuration</strong> holds how the interview
-                runs - your microphone (with a test), the interview language, the suggestion style,
-                and whether the transcript panel is docked. Nothing there needs saving; each change
-                takes effect as you make it.
+                <strong className="text-foreground">
+                  {t.documentation.settings.configurationLabel}
+                </strong>
+                {t.documentation.settings.configurationBody}
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Both are on the home screen, in the titlebar menu, and in the Cmd/Ctrl+K palette. A
-                new install is walked through all of it once on first launch.
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{t.documentation.settings.both}</p>
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="hotkeys">
-            <AccordionTrigger className="text-sm font-semibold">Hotkeys</AccordionTrigger>
+            <AccordionTrigger className="text-sm font-semibold">
+              {t.documentation.hotkeys}
+            </AccordionTrigger>
             <AccordionContent>
               <HotkeyCheatsheet />
             </AccordionContent>

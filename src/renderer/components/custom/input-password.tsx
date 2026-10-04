@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useT } from '@/i18n';
 
 interface InputPasswordProps extends React.InputHTMLAttributes<HTMLInputElement> {
   showPassword?: boolean;
@@ -15,6 +16,7 @@ export function InputPassword({
   className = '',
   ...props
 }: InputPasswordProps) {
+  const t = useT();
   const [internalShowPassword, setInternalShowPassword] = useState(false);
 
   const showPassword = externalShowPassword ?? internalShowPassword;
@@ -38,7 +40,7 @@ export function InputPassword({
         variant="ghost"
         size="sm"
         tabIndex={-1}
-        aria-label={showPassword ? 'Hide password' : 'Show password'}
+        aria-label={showPassword ? t.inputPassword.hide : t.inputPassword.show}
         aria-pressed={showPassword}
         className="absolute right-0 top-0 h-full px-3 py-2"
         onClick={toggleShowPassword}

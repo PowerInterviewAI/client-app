@@ -3,9 +3,11 @@ import { toast } from 'sonner';
 
 import { UpdateStatus, useAutoUpdater } from '@/hooks/use-auto-updater';
 import { useSaveHistoryPrompt } from '@/hooks/use-save-history-guard';
+import { useT } from '@/i18n';
 import { getElectron } from '@/lib/utils';
 
 export function UpdateNotification() {
+  const t = useT();
   const { updateStatus, quitAndInstall } = useAutoUpdater();
   const lastStatusRef = useRef<UpdateStatus | null>(null);
   const downloadToastIdRef = useRef<string | number | null>(null);
@@ -44,9 +46,12 @@ export function UpdateNotification() {
 
     if (lastStatusRef.current === status) {
       if (status === UpdateStatus.Downloading && downloadToastIdRef.current && progress) {
-        toast.loading(`Downloading update... ${progress.percent.toFixed(0)}%`, {
+        toast.loading(t.updateNotification.downloading(progress.percent.toFixed(0)), {
           id: downloadToastIdRef.current,
-          description: `${(progress.transferred / 1024 / 1024).toFixed(1)} MB / ${(progress.total / 1024 / 1024).toFixed(1)} MB`,
+          description: t.updateNotification.downloadProgress(
+            (progress.transferred / 1024 / 1024).toFixed(1),
+            (progress.total / 1024 / 1024).toFixed(1)
+          ),
         });
       }
       return;
@@ -61,8 +66,8 @@ export function UpdateNotification() {
 
       case UpdateStatus.Available:
         if (info) {
-          toast.info(`Update Available: v${info.version}`, {
-            description: 'Download will start automatically in the background.',
+          toast.info(t.updateNotification.available(info.version), {
+            description: t.updateNotification.availableDescription,
             duration: 5000,
           });
         }
@@ -71,9 +76,12 @@ export function UpdateNotification() {
       case UpdateStatus.Downloading:
         if (progress) {
           downloadToastIdRef.current = toast.loading(
-            `Downloading update... ${progress.percent.toFixed(0)}%`,
+            t.updateNotification.downloading(progress.percent.toFixed(0)),
             {
-              description: `${(progress.transferred / 1024 / 1024).toFixed(1)} MB / ${(progress.total / 1024 / 1024).toFixed(1)} MB`,
+              description: t.updateNotification.downloadProgress(
+                (progress.transferred / 1024 / 1024).toFixed(1),
+                (progress.total / 1024 / 1024).toFixed(1)
+              ),
             }
           );
         }
@@ -87,13 +95,13 @@ export function UpdateNotification() {
 
         if (info) {
           const isMac = window.electronAPI?.platform === 'darwin';
-          toast.success(`Update Downloaded: v${info.version}`, {
+          toast.success(t.updateNotification.downloaded(info.version), {
             description: isMac
-              ? 'Click to open the installer, then drag it into Applications.'
-              : 'Click to restart and install the update.',
+              ? t.updateNotification.downloadedDescriptionMac
+              : t.updateNotification.downloadedDescription,
             duration: Infinity,
             action: {
-              label: isMac ? 'Open Installer' : 'Restart Now',
+              label: isMac ? t.updateNotification.openInstaller : t.updateNotification.restartNow,
               onClick: () => void confirmThenInstall(),
             },
           });
@@ -108,7 +116,9 @@ export function UpdateNotification() {
         console.error('[UpdateNotification] Update error:', error);
         break;
     }
-  }, [updateStatus, confirmThenInstall]);
+    // `t` is a dependency because the effect raises toasts rather than rendering them: a
+    // language changed while a download is in flight has to reach the next progress update.
+  }, [updateStatus, confirmThenInstall, t]);
 
   return null;
 }

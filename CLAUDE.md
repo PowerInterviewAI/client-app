@@ -276,9 +276,71 @@ Menu items carry an explicit `textValue` of the **English** name. Radix runs its
 
 **Arabic and Hebrew need a text direction, and the panels are laid out left-to-right.** Every block `SafeMarkdown` emits carries `dir="auto"`, as do the transcript lines and both panels' question lines. The defect without it is not that RTL text renders left-to-right - it does not - it is that the neutrals go the wrong way: sentence-final punctuation takes the *paragraph's* direction, so the question mark lands at the wrong end, and a technical answer reorders at every switch of script, which is every answer since the prompts keep product names and code in Latin. Per block rather than once on a wrapper, because `auto` resolves from the first strong character it contains. Block code is pinned to `dir="ltr"` instead: code is left-to-right in every language and one RTL comment in a fence flips the whole block. `test/rtl-rendering.test.mjs` pins it, and it is a no-op in every language that shipped before the picker.
 
-The app's own chrome is **not** localised, deliberately: an English button on a Spanish interview is an inconvenience, an English transcript of Spanish speech is a wrong answer read out loud.
+**The app's own chrome follows a second setting, and is never derived from this one.** The old rule here was that the chrome is not localised at all, on the grounds that an English button on a Spanish interview is an inconvenience while an English transcript of Spanish speech is a wrong answer read out loud. The second half of that is still why nothing infers one language from the other: a Russian speaker interviewing in English wants an English transcript and a Russian app, and guessing either way gets that user wrong. The first half only ever argued for not guessing. So `uiLanguage` is its own config key, asked outright - the first step of the first-run wizard and the first row on the configuration page - and the interview language is left alone by it. See **Interface language** below.
 
 **The exported report is the one exception**, because it is the one artifact that leaves the machine and is handed to someone who was not there. The summarize prompt translates the headings *it* writes; the five words the client wraps around them - Transcripts, Suggestions, Suggestion, Interviewer, Date/Time - live in [export-labels.ts](src/main/utils/export-labels.ts) and follow the same setting, or the export is the half-translated document that prompt exists to avoid. The candidate is named rather than labelled, and timestamps stay on the machine's locale. `test/tools-export.test.mjs` pins that every enum member has a full set and that an unknown code falls back to English rather than throwing.
+
+### Interface language
+
+`uiLanguage` ([src/main/types/ui-language.ts](src/main/types/ui-language.ts), mirrored in
+[src/renderer/types/ui-language.ts](src/renderer/types/ui-language.ts) the way `Language` is) is
+the language the app's buttons, headings, dialogs and toasts are written in. English and Russian
+today. It is **not** `language`: see the note at the end of **Interview language** for why neither
+is ever derived from the other.
+
+**A typed dictionary, not i18next.** `src/renderer/i18n/locales/en.ts` is the source of truth and
+exports `Translation = typeof en`; every other locale is an object literal assigned to that type,
+so a key Russian is missing - or spells differently - fails the build. i18next's answer for a
+missing key is to render the key, which for two locales with no lazy loading and no namespacing is
+the only thing its runtime would have bought. A language belongs in the enum once it has a file in
+`locales`, not before: offering one without that file is offering a UI that falls back to English
+everywhere it matters.
+
+**Strings that take a value are functions, not templates with placeholders.** That is what makes
+Russian's three plural forms expressible at all - `1 кредит`, `2 кредита`, `5 кредитов`, and `11
+кредитов` again despite ending in 1 - and it is why `CreditsDisplay` hands the locale two integers
+rather than a formatted `2 hours 15 mins`. A `{{count}}` scheme would need a plural-rule engine to
+say what a one-line function says. The compiler covers the other half: `noUnusedParameters` is on,
+so a locale that declares `(email: string)` and writes a sentence without it does not compile.
+
+`useT()` reads the config store directly, so there is no provider. The chosen code is also cached
+in `localStorage` and read synchronously at module load, because the store is loaded from an effect
+in `MainFrame` - without that cache a Russian install opens in English for the first frames of every
+launch, which is the one moment a user is deciding whether the app is translated at all. The cache
+is never authoritative: it is read only while the store has not answered.
+
+**`currentTranslation()` is for callbacks that must stay referentially stable.** Several setting
+hooks say in their own comments that the global hotkey listeners subscribe to them once rather than
+resubscribing on every config change; `useT()` inside such a callback would freeze the dictionary at
+creation, and adding `t` to the dependency array would defeat that stability. It is also what the
+callers that cannot call a hook at all use - `showExportSuccessToast`, and the zustand store in
+`use-assistant-service`.
+
+**Main has its own table**, [ui-strings.ts](src/main/utils/ui-strings.ts), for the strings it writes
+itself: the placeholder panel copy it seeds, and the push notifications it raises as toasts from
+paths the renderer cannot see - a global hotkey pressed while the window is hidden, a session that
+expires, stealth refused at the IPC boundary. Same shape as `export-labels.ts` and deliberately not
+that table: the report follows the *interview* language because it is handed to someone who was not
+there, this follows the *chrome* language because it is read by the person using the app.
+`appStateService.refreshPlaceholderLanguage()` is what keeps the two in step - the placeholder is
+written on launch and after a Clear, so a language changed between those two would otherwise leave
+English sample copy in the panels of a Russian app. It is a no-op once a real interview has written
+to the history, which is the half that matters.
+
+**Backend error text is passed through untranslated.** The client cannot translate a string it did
+not write, and replacing a specific server message with a generic local one loses the only useful
+half of it. The locale's `errors` blocks are fallbacks, for a failure that arrived without a
+message.
+
+`test/ui-language.test.mjs` covers what the types cannot: an unknown stored code (which would reach
+the lookup and come back `undefined` - an app with no text in it), the two enums drifting, and a
+Russian string that is still its English original. That last one type-checks perfectly, ships, and
+is otherwise only ever caught by a Russian speaker reading the screen; the check is Latin letters
+with no Cyrillic in the same string, with an allowlist whose every entry is a written-out claim
+that one string is correct in Latin script (`Markdown`, `Pro`, `Junior`, a domain).
+
+Russian copy uses hyphens where Russian typography would use `—`, because this repository's writing
+rules forbid generating em-dashes and the English source uses hyphens in the same positions.
 
 ### Headphones
 

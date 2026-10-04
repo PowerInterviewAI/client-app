@@ -16,6 +16,7 @@ import {
   type SuggestionStallStage,
 } from '../utils/suggestion-error.js';
 import { isNoSuggestionSentinel } from '../utils/suggestion-sentinel.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { UuidUtil } from '../utils/uuid.js';
 import { appStateService } from './app-state.service.js';
 
@@ -180,7 +181,7 @@ class LiveSuggestionService {
             // Indistinguishable from a provider failure, and a stated error beats a card
             // that never resolves.
             suggestion.state = SuggestionState.Error;
-            suggestion.error = 'The model returned an empty response.';
+            suggestion.error = uiStrings().suggestionErrors.emptyResponse;
           } else {
             suggestion.state = SuggestionState.Success;
           }

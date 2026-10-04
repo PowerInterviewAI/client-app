@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { AccountForm } from '@/hooks/use-account-form';
+import { useT } from '@/i18n';
 
 // Kept in sync with the backend's MAX_PROFILE_DATA_LENGTH / MAX_CONTEXT_LENGTH (app/cfg/llm.py)
 const MAX_FIELD_LENGTH = 128_000;
@@ -19,6 +20,7 @@ const MAX_NAME_LENGTH = 1_000;
 const LIMIT_NOTICE_RATIO = 0.9;
 
 function FieldLimitNotice({ value, max }: { value: string; max: number }) {
+  const t = useT();
   if (value.length < max * LIMIT_NOTICE_RATIO) return null;
 
   const atLimit = value.length >= max;
@@ -30,8 +32,8 @@ function FieldLimitNotice({ value, max }: { value: string; max: number }) {
       role="status"
     >
       {atLimit
-        ? `Character limit reached (${max.toLocaleString()}). Extra text was not added.`
-        : `${(max - value.length).toLocaleString()} characters left`}
+        ? t.profileFields.limitReached(max)
+        : t.profileFields.charactersLeft(max - value.length)}
     </p>
   );
 }
@@ -58,10 +60,12 @@ function RequiredMark() {
  * lands is exactly the case where the response would overwrite what was typed.
  */
 export function FullNameField({ form }: { form: AccountForm }) {
+  const t = useT();
+
   return (
     <div className="space-y-2">
       <Label htmlFor="account-full-name">
-        Full name
+        {t.profileFields.fullName}
         <RequiredMark />
       </Label>
       <Input
@@ -69,7 +73,7 @@ export function FullNameField({ form }: { form: AccountForm }) {
         required
         value={form.fullName}
         onChange={(e) => form.setFullName(e.target.value)}
-        placeholder="The name you go by in the interview"
+        placeholder={t.profileFields.fullNamePlaceholder}
         maxLength={MAX_NAME_LENGTH}
         disabled={form.loading}
       />
@@ -78,11 +82,13 @@ export function FullNameField({ form }: { form: AccountForm }) {
 }
 
 export function ProfileField({ form }: { form: AccountForm }) {
+  const t = useT();
+
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-2">
         <Label htmlFor="account-profile">
-          Profile
+          {t.profileFields.profile}
           <RequiredMark />
         </Label>
         <FieldLimitNotice value={form.profileData} max={MAX_FIELD_LENGTH} />
@@ -93,7 +99,7 @@ export function ProfileField({ form }: { form: AccountForm }) {
         value={form.profileData}
         onChange={(e) => form.setProfileData(e.target.value)}
         disabled={form.loading}
-        placeholder="Paste your CV/resume, LinkedIn profile, or a short bio. Suggestions are written from this, so more detail means answers that sound like you."
+        placeholder={t.profileFields.profilePlaceholder}
         className="min-h-40 max-h-80 overflow-auto text-sm"
         maxLength={MAX_FIELD_LENGTH}
       />
@@ -102,10 +108,12 @@ export function ProfileField({ form }: { form: AccountForm }) {
 }
 
 export function ContextField({ form }: { form: AccountForm }) {
+  const t = useT();
+
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-2">
-        <Label htmlFor="account-context">Context</Label>
+        <Label htmlFor="account-context">{t.profileFields.context}</Label>
         <FieldLimitNotice value={form.context} max={MAX_FIELD_LENGTH} />
       </div>
       <Textarea
@@ -113,7 +121,7 @@ export function ContextField({ form }: { form: AccountForm }) {
         value={form.context}
         onChange={(e) => form.setContext(e.target.value)}
         disabled={form.loading}
-        placeholder="Paste the job description, the role requirements, or anything else about the interview you are preparing for."
+        placeholder={t.profileFields.contextPlaceholder}
         className="min-h-40 max-h-80 overflow-auto text-sm"
         maxLength={MAX_FIELD_LENGTH}
       />

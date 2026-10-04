@@ -10,6 +10,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
+import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { mockSessionPrice, RunningState } from '@/types/app-state';
 import type { MockInterviewSetup } from '@/types/mock-interview';
@@ -100,6 +101,7 @@ function LaunchCard({ icon, title, description, onClick, disabled = false }: Lau
  * preference deciding which one a button meant.
  */
 export default function HomePage() {
+  const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
   const { appState, runningState } = useAppState();
@@ -137,7 +139,8 @@ export default function HomePage() {
   const shortestMockPrice = appState?.mockPricing
     ? mockSessionPrice(appState.mockPricing, SHORTEST_MOCK_QUESTION_COUNT)
     : null;
-  const mockUnaffordable = shortestMockPrice !== null && (appState?.credits ?? 0) < shortestMockPrice;
+  const mockUnaffordable =
+    shortestMockPrice !== null && (appState?.credits ?? 0) < shortestMockPrice;
 
   const [mockSetupOpen, setMockSetupOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -207,7 +210,7 @@ export default function HomePage() {
       // Read off the caught error rather than the hook's `error` state - `logout` sets it and
       // throws in the same tick, so this closure's copy is still last render's value.
       console.error('Sign out failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to sign out');
+      toast.error(err instanceof Error ? err.message : t.home.signOutFailed);
       setSigningOut(false);
       return;
     }
@@ -242,38 +245,36 @@ export default function HomePage() {
         <div className="w-full max-w-3xl px-6 py-6">
           <div className="mb-5">
             <h1 className="text-xl font-semibold">
-              {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
+              {firstName ? t.home.welcome(firstName) : t.home.welcomeAnonymous}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Practise against an AI interviewer, or get live help during a real call.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{t.home.subtitle}</p>
           </div>
 
           <div className="mb-4 grid grid-cols-2 gap-3">
             <LaunchCard
               icon={<Mic className="h-4 w-4" aria-hidden="true" />}
-              title="Start mock interview"
+              title={t.home.mock.title}
               description={
                 mockUnsupported
-                  ? 'Not available on this server yet. Update the app, or try again later.'
+                  ? t.home.mock.unsupported
                   : liveSessionActive
-                    ? 'Stop the live assistant first - the two cannot share your microphone.'
+                    ? t.home.mock.liveRunning
                     : mockUnaffordable
-                      ? `Not enough credits - the shortest mock costs ${shortestMockPrice}. Buy more to practise.`
-                      : 'The AI asks, you answer out loud, and you get a scored report at the end.'
+                      ? t.home.mock.unaffordable(shortestMockPrice)
+                      : t.home.mock.ready
               }
               onClick={() => (mockUnaffordable ? navigate('/payment') : setMockSetupOpen(true))}
               disabled={liveSessionActive || mockUnsupported}
             />
             <LaunchCard
               icon={<Play className="h-4 w-4" aria-hidden="true" />}
-              title={liveSessionActive ? 'Back to your interview' : 'Start live assistant'}
+              title={liveSessionActive ? t.home.live.resumeTitle : t.home.live.title}
               description={
                 liveSessionActive
-                  ? 'Your live assistant is already running.'
+                  ? t.home.live.running
                   : mockSessionActive
-                    ? 'Finish the mock interview first - the two cannot share your microphone.'
-                    : 'Transcribes your real interview and suggests answers as it happens.'
+                    ? t.home.live.mockRunning
+                    : t.home.live.ready
               }
               onClick={handleStartLive}
               disabled={!liveSessionActive && mockSessionActive}
@@ -284,15 +285,15 @@ export default function HomePage() {
               the 48px of vertical padding a Card carries for content that is one line tall. */}
           <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border bg-card px-4 py-3">
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Account</p>
+              <p className="text-xs text-muted-foreground">{t.home.accountLabel}</p>
               <p className="truncate text-sm font-medium">
-                {accountReady ? (email ?? 'Not signed in') : 'Loading...'}
+                {accountReady ? (email ?? t.home.notSignedIn) : t.common.loading}
               </p>
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Credits</p>
+              <p className="text-xs text-muted-foreground">{t.home.creditsLabel}</p>
               <p className="text-sm font-medium">
-                {accountReady ? (credits ?? 'Unavailable') : 'Loading...'}
+                {accountReady ? (credits ?? t.home.creditsUnavailable) : t.common.loading}
               </p>
             </div>
             <Button
@@ -302,7 +303,7 @@ export default function HomePage() {
               onClick={() => navigate('/payment')}
             >
               <CreditCard className="h-4 w-4" aria-hidden="true" />
-              Buy Credits
+              {t.home.buyCredits}
             </Button>
           </div>
 
@@ -316,7 +317,7 @@ export default function HomePage() {
               onClick={() => navigate('/account')}
             >
               <UserRound className="h-4 w-4" aria-hidden="true" />
-              Account
+              {t.home.nav.account}
             </Button>
             <Button
               variant="outline"
@@ -324,7 +325,7 @@ export default function HomePage() {
               onClick={() => navigate('/configuration')}
             >
               <SettingsIcon className="h-4 w-4" aria-hidden="true" />
-              Configuration
+              {t.home.nav.configuration}
             </Button>
             <Button
               variant="outline"
@@ -332,7 +333,7 @@ export default function HomePage() {
               onClick={() => navigate('/documentation')}
             >
               <BookOpen className="h-4 w-4" aria-hidden="true" />
-              Documentation
+              {t.home.nav.documentation}
             </Button>
           </div>
 
@@ -346,11 +347,11 @@ export default function HomePage() {
               size="sm"
               className="text-muted-foreground"
               disabled={anySessionActive || signingOut}
-              title={anySessionActive ? 'Stop the interview before signing out' : undefined}
+              title={anySessionActive ? t.home.signOutBlocked : undefined}
               onClick={() => void handleSignOut()}
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
-              {signingOut ? 'Signing out...' : 'Sign out'}
+              {signingOut ? t.home.signingOut : t.home.signOut}
             </Button>
           </div>
         </div>

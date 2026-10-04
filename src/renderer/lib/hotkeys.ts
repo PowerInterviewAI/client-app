@@ -22,15 +22,21 @@ export const HOTKEY_LIST: Hotkey[] = Object.values(Hotkey);
 /**
  * Groups of hotkeys organized by functional area.  Useful for display
  * in menus or tooltips where related shortcuts should be clustered.
+ *
+ * `id` indexes `t.hotkeys.groups` rather than carrying the label itself. Everything in this file
+ * that a user reads as a sentence moved to the locale; what is left is the combos, which are
+ * keyboard notation and the one thing here that depends on the platform rather than the reader.
  */
+export type HotkeyGroupId = 'general' | 'window' | 'panels' | 'triggered';
+
 export type HotkeyGroup = {
-  label: string;
+  id: HotkeyGroupId;
   keys: Hotkey[];
 };
 
 export const HOTKEY_GROUPS: HotkeyGroup[] = [
   {
-    label: 'General',
+    id: 'general',
     keys: [
       Hotkey.StopAll,
       Hotkey.ToggleStealth,
@@ -40,15 +46,15 @@ export const HOTKEY_GROUPS: HotkeyGroup[] = [
     ],
   },
   {
-    label: 'Window Management',
+    id: 'window',
     keys: [Hotkey.PlaceWin, Hotkey.MoveWin, Hotkey.ResizeWin, Hotkey.ZoomInOutReset],
   },
   {
-    label: 'Scroll Panels',
+    id: 'panels',
     keys: [Hotkey.ScrollLiveSuggestionPanel, Hotkey.ScrollActionSuggestionPanel],
   },
   {
-    label: 'Triggered Suggestions',
+    id: 'triggered',
     keys: [
       Hotkey.Capture,
       Hotkey.ClearCaptures,
@@ -60,8 +66,6 @@ export const HOTKEY_GROUPS: HotkeyGroup[] = [
 
 export interface HotkeyInfo {
   combo: string;
-  title: string;
-  description: string;
 }
 
 // Base modifier: macOS = ⌃⌥ (Ctrl+Option), others = Ctrl+Shift text
@@ -75,85 +79,19 @@ export function formatCombo(key: string): string {
 }
 
 export const HOTKEYS: Record<Hotkey, HotkeyInfo> = {
-  [Hotkey.StopAll]: {
-    combo: `${BASE}Q`,
-    title: 'Stop All',
-    description: 'Stop assistant and exit stealth mode',
-  },
-  [Hotkey.ToggleStealth]: {
-    combo: `${BASE}M`,
-    title: 'Toggle Stealth',
-    // Entering is refused unless a live interview is running (see `stealthUnavailableReason` in
-    // window-control.service.ts), and this sheet is where the combo is documented for the one
-    // mode with no visible control to explain itself - so it says so rather than leaving the
-    // refusal to a toast.
-    description: 'Hide from screen capture during a live interview. The same keys bring it back.',
-  },
-  [Hotkey.Opacity]: {
-    combo: `${BASE}N`,
-    title: 'Toggle Opacity',
-    description: 'Toggle window opacity in stealth mode',
-  },
-  [Hotkey.ToggleTranscript]: {
-    combo: `${BASE}F8`,
-    title: 'Toggle Transcription',
-    description: 'Show or hide the transcription dock - works in stealth mode too',
-  },
-  [Hotkey.ToggleSuggestionMode]: {
-    combo: `${BASE}F7`,
-    title: 'Hint-only / Full-sentence',
-    description:
-      'Switch suggestions between hint-only - a headline plus keyword bullets you can read at a glance - and full sentences. Works in stealth mode too.',
-  },
-  [Hotkey.PlaceWin]: {
-    combo: `${BASE}1-9`,
-    title: 'Place Window',
-    description: 'Place window in a specific corner, side, or center',
-  },
-  [Hotkey.MoveWin]: {
-    combo: `${MOVE}[↑↓←→]`,
-    title: 'Move Window',
-    description: 'Move window in the specified direction',
-  },
-  [Hotkey.ResizeWin]: {
-    combo: `${RESIZE}[↑↓←→]`,
-    title: 'Resize Window',
-    description: 'Resize window in the specified direction',
-  },
-  [Hotkey.ZoomInOutReset]: {
-    combo: `${BASE}[=  -  0]`,
-    title: 'Zoom In/Out/Reset',
-    description: 'Adjust or reset UI zoom level',
-  },
-  [Hotkey.ScrollLiveSuggestionPanel]: {
-    combo: `${BASE}[J  K  L]`,
-    title: 'Scroll Live Panel',
-    description: 'Scroll Down/Up/End in the live suggestions panel',
-  },
-  [Hotkey.ScrollActionSuggestionPanel]: {
-    combo: `${BASE}[U  I  O]`,
-    title: 'Scroll Triggered Panel',
-    description: 'Scroll Down/Up/End in the triggered suggestions panel',
-  },
-  [Hotkey.Capture]: {
-    combo: `${BASE}F9`,
-    title: 'Capture Screen',
-    description: 'Take a screenshot for triggered suggestions',
-  },
-  [Hotkey.ClearCaptures]: {
-    combo: `${BASE}F10`,
-    title: 'Clear Captures',
-    description: 'Clear captured screenshots',
-  },
-  [Hotkey.TriggerWithoutCaptures]: {
-    combo: `${BASE}F11`,
-    title: 'Trigger without Captures',
-    description: 'Generate suggestion without captures',
-  },
-  [Hotkey.TriggerWithCaptures]: {
-    combo: `${BASE}F12`,
-    title: 'Trigger with Captures',
-    description:
-      'Generate suggestion referencing screen captures. If no captures exist, attempts to take one before generating.',
-  },
+  [Hotkey.StopAll]: { combo: `${BASE}Q` },
+  [Hotkey.ToggleStealth]: { combo: `${BASE}M` },
+  [Hotkey.Opacity]: { combo: `${BASE}N` },
+  [Hotkey.ToggleTranscript]: { combo: `${BASE}F8` },
+  [Hotkey.ToggleSuggestionMode]: { combo: `${BASE}F7` },
+  [Hotkey.PlaceWin]: { combo: `${BASE}1-9` },
+  [Hotkey.MoveWin]: { combo: `${MOVE}[↑↓←→]` },
+  [Hotkey.ResizeWin]: { combo: `${RESIZE}[↑↓←→]` },
+  [Hotkey.ZoomInOutReset]: { combo: `${BASE}[=  -  0]` },
+  [Hotkey.ScrollLiveSuggestionPanel]: { combo: `${BASE}[J  K  L]` },
+  [Hotkey.ScrollActionSuggestionPanel]: { combo: `${BASE}[U  I  O]` },
+  [Hotkey.Capture]: { combo: `${BASE}F9` },
+  [Hotkey.ClearCaptures]: { combo: `${BASE}F10` },
+  [Hotkey.TriggerWithoutCaptures]: { combo: `${BASE}F11` },
+  [Hotkey.TriggerWithCaptures]: { combo: `${BASE}F12` },
 };

@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useMockInterviewSetupForm } from '@/hooks/use-mock-interview-setup-form';
+import { useT } from '@/i18n';
 import type { MockInterviewSetup } from '@/types/mock-interview';
 
 interface MockInterviewSetupDialogProps {
@@ -34,9 +35,15 @@ export function MockInterviewSetupDialog({
   onOpenChange,
   onStart,
 }: MockInterviewSetupDialogProps) {
+  const t = useT();
   const form = useMockInterviewSetupForm(onStart);
-  const { starting, headphoneNoticeOpen, setHeadphoneNoticeOpen, handleStartClick, startAfterNotice } =
-    form;
+  const {
+    starting,
+    headphoneNoticeOpen,
+    setHeadphoneNoticeOpen,
+    handleStartClick,
+    startAfterNotice,
+  } = form;
 
   return (
     <>
@@ -50,20 +57,18 @@ export function MockInterviewSetupDialog({
       <Dialog open={open && !headphoneNoticeOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Mock interview</DialogTitle>
-            <DialogDescription>
-              The AI asks, you answer out loud. Nothing is saved unless you export it.
-            </DialogDescription>
+            <DialogTitle>{t.mock.setup.title}</DialogTitle>
+            <DialogDescription>{t.mock.setup.description}</DialogDescription>
           </DialogHeader>
 
           <MockInterviewSetupFields form={form} />
 
           <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button onClick={handleStartClick} disabled={starting}>
-              {starting ? 'Starting…' : 'Start mock interview'}
+              {starting ? t.mock.setup.starting : t.mock.setup.start}
             </Button>
           </DialogFooter>
         </DialogContent>

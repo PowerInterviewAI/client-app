@@ -3,6 +3,7 @@ import os from 'os';
 
 import { BACKEND_BASE_URL } from '../consts.js';
 import { configStore } from '../store/config.store.js';
+import { uiStrings } from '../utils/ui-strings.js';
 
 function buildUserAgent(): string {
   return `PowerInterviewAI/${app.getVersion()} (${process.platform}; ${process.arch}; ${os.release()})`;
@@ -101,7 +102,8 @@ export class ApiClient {
         status: 0,
         error: {
           code: 'NETWORK_ERROR',
-          message: error instanceof Error ? error.message : 'Network request failed',
+          message:
+            error instanceof Error ? error.message : uiStrings().transportErrors.networkFailed,
         },
       };
     }
@@ -166,10 +168,10 @@ export class ApiClient {
       const timedOut = error instanceof Error && error.name === 'TimeoutError';
       throw new ApiRequestError(
         timedOut
-          ? 'The request timed out'
+          ? uiStrings().transportErrors.timedOut
           : error instanceof Error
             ? error.message
-            : 'Network request failed',
+            : uiStrings().transportErrors.networkFailed,
         0,
         null
       );
@@ -234,10 +236,10 @@ export class ApiClient {
         error: {
           code: timedOut ? 'TIMEOUT' : 'NETWORK_ERROR',
           message: timedOut
-            ? 'The request timed out'
+            ? uiStrings().transportErrors.timedOut
             : error instanceof Error
               ? error.message
-              : 'Network request failed',
+              : uiStrings().transportErrors.networkFailed,
         },
       };
     }
@@ -304,7 +306,7 @@ export class ApiClient {
 
       console.error('[ApiClient] Streaming request error:', { method, url, error });
       throw new ApiRequestError(
-        error instanceof Error ? error.message : 'Network request failed',
+        error instanceof Error ? error.message : uiStrings().transportErrors.networkFailed,
         0,
         null
       );

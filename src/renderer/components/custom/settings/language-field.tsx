@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useInterviewLanguage } from '@/hooks/use-interview-language';
+import { useT } from '@/i18n';
 import { type Language, LANGUAGES } from '@/types/language';
 
 interface LanguageFieldProps {
@@ -42,11 +43,12 @@ interface LanguageFieldProps {
  * old language while this picker shows the new one.
  */
 export function LanguageField({ description, showVoice = false }: LanguageFieldProps) {
+  const t = useT();
   const { language, option, switching, reconnectFailed, setLanguage } = useInterviewLanguage();
 
   return (
     <div className="space-y-2">
-      <Label id="language-field-label">Interview language</Label>
+      <Label id="language-field-label">{t.languageField.label}</Label>
       <div className="flex items-center gap-2">
         <Select
           value={language}
@@ -65,7 +67,10 @@ export function LanguageField({ description, showVoice = false }: LanguageFieldP
                     constraint applies to the language that is selected, not only to the ones
                     being browsed past. */}
                 {showVoice && !entry.hasVoice && (
-                  <span className="text-muted-foreground"> &middot; text only</span>
+                  <span className="text-muted-foreground">
+                    {' '}
+                    &middot; {t.languageField.textOnly}
+                  </span>
                 )}
               </SelectItem>
             ))}
@@ -82,23 +87,17 @@ export function LanguageField({ description, showVoice = false }: LanguageFieldP
       {reconnectFailed ? (
         <p role="alert" className="flex items-start gap-1.5 text-xs text-destructive">
           <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-          <span>
-            Suggestions switched language, but transcription is still reconnecting. Stop and start
-            the assistant if it does not come back.
-          </span>
+          <span>{t.languageField.reconnectFailed}</span>
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          {description ?? 'What is transcribed, and what your suggestions come back in.'}
+          {description ?? t.languageField.description}
         </p>
       )}
 
       {showVoice && !option.hasVoice && (
         <Alert>
-          <AlertDescription>
-            The interviewer will write its questions instead of speaking them. You still answer out
-            loud, and the scoring is the same.
-          </AlertDescription>
+          <AlertDescription>{t.languageField.noVoiceNotice}</AlertDescription>
         </Alert>
       )}
     </div>

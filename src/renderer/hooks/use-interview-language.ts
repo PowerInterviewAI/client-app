@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { currentTranslation } from '@/i18n';
 import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { getLanguageOption, type Language } from '@/types/language';
 
@@ -49,7 +50,7 @@ export function useInterviewLanguage() {
       await updateConfig({ language });
     } catch (e) {
       console.error('Failed to save interview language', e);
-      toast.error('Failed to save interview language');
+      toast.error(currentTranslation().settingsToasts.saveLanguageFailed);
       return;
     }
 
@@ -66,8 +67,9 @@ export function useInterviewLanguage() {
       if (seq !== switchSeq.current) return;
       console.error('Failed to switch transcription language', e);
       setReconnectFailed(true);
-      toast.warning('Suggestions switched language; transcription is still reconnecting', {
-        description: 'It keeps retrying. Stop and start the assistant if it does not come back.',
+      const t = currentTranslation();
+      toast.warning(t.settingsToasts.languageHalfApplied, {
+        description: t.settingsToasts.languageHalfAppliedHint,
       });
     } finally {
       // Left set by a superseded switch: the one that replaced it is still in flight, and the

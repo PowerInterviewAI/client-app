@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useT } from '@/i18n';
 
 interface HeadphoneNoticeDialogProps {
   open: boolean;
@@ -60,6 +61,8 @@ export default function HeadphoneNoticeDialog({
   onCancel,
   variant = 'live',
 }: HeadphoneNoticeDialogProps) {
+  const t = useT();
+
   // Proceeding closes through `onOpenChange` directly, so it never passes through here - Radix
   // does not call back for a close the caller made itself.
   const handleDismiss = () => {
@@ -72,36 +75,19 @@ export default function HeadphoneNoticeDialog({
     onProceed();
   };
 
-  const description = "This session needs the interviewer's voice going to your ears only.";
-  const copy =
-    variant === 'mock'
-      ? {
-          description,
-          rows: [
-            {
-              icon: <Volume2 className="h-4 w-4" />,
-              text: 'On speakers, the question you just heard can echo into the start of your answer.',
-            },
-            {
-              icon: <MicOff className="h-4 w-4" />,
-              text: 'Your mic is muted while the interviewer speaks, but room reverb after it stops can still slip in as stray words.',
-            },
+  const copy = {
+    description: t.headphoneNotice.description,
+    rows:
+      variant === 'mock'
+        ? [
+            { icon: <Volume2 className="h-4 w-4" />, text: t.headphoneNotice.mockSpeakers },
+            { icon: <MicOff className="h-4 w-4" />, text: t.headphoneNotice.mockConsequence },
+          ]
+        : [
+            { icon: <Volume2 className="h-4 w-4" />, text: t.headphoneNotice.liveSpeakers },
+            { icon: <MicOff className="h-4 w-4" />, text: t.headphoneNotice.liveConsequence },
           ],
-        }
-      : {
-          description,
-          rows: [
-            {
-              icon: <Volume2 className="h-4 w-4" />,
-              text: 'On speakers, your microphone hears the interviewer as well as you do.',
-            },
-            {
-              icon: <MicOff className="h-4 w-4" />,
-              // The failure is the quiet one, so it is named rather than left as "quality issues".
-              text: 'The app then reads their question as something you said, and stops answering it - with no error to tell you why.',
-            },
-          ],
-        };
+  };
 
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? onOpenChange(true) : handleDismiss())}>
@@ -109,7 +95,7 @@ export default function HeadphoneNoticeDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Headphones className="h-4 w-4" />
-            Put your headphones on
+            {t.headphoneNotice.title}
           </DialogTitle>
           <DialogDescription>{copy.description}</DialogDescription>
         </DialogHeader>
@@ -122,10 +108,10 @@ export default function HeadphoneNoticeDialog({
 
         <DialogFooter>
           <Button variant="ghost" size="sm" onClick={handleDismiss}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button size="sm" onClick={handleProceed}>
-            My headphones are on
+            {t.headphoneNotice.proceed}
           </Button>
         </DialogFooter>
       </DialogContent>

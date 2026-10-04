@@ -10,12 +10,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { type PermStatus, usePermissions } from '@/hooks/use-permissions';
+import { useT } from '@/i18n';
 import { getElectron } from '@/lib/utils';
 
 interface PermissionGateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onProceed: () => void;
+  /** Defaults to the locale's own "Start"; the mock flow passes its own word. */
   proceedLabel?: string;
 }
 
@@ -23,8 +25,9 @@ export default function PermissionGateDialog({
   open,
   onOpenChange,
   onProceed,
-  proceedLabel = 'Start',
+  proceedLabel,
 }: PermissionGateDialogProps) {
+  const t = useT();
   const { status, loading, allGranted, recheck } = usePermissions(open);
   const { screenNeedsRelaunch } = status;
   const [requesting, setRequesting] = useState(false);
@@ -56,31 +59,31 @@ export default function PermissionGateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Permissions Required</DialogTitle>
+          <DialogTitle>{t.permissionGate.title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-1">
           <PermissionRow
             icon={<Mic className="h-4 w-4" />}
-            label="Microphone"
+            label={t.permissionGate.microphone}
             status={status.mic}
             note={
               status.mic === 'unknown'
-                ? 'Checking...'
+                ? t.permissionGate.micChecking
                 : status.mic === 'granted'
-                  ? 'Access granted'
+                  ? t.permissionGate.micGranted
                   : status.mic === 'denied' || status.mic === 'restricted'
-                    ? 'Enable in System Settings, then click Check Again'
-                    : 'Required to capture your voice'
+                    ? t.permissionGate.micBlocked
+                    : t.permissionGate.micRequired
             }
             action={
               status.mic === 'not-determined' ? (
                 <Button size="sm" onClick={requestMic} disabled={requesting}>
-                  Grant Access
+                  {t.permissionGate.grantAccess}
                 </Button>
               ) : status.mic === 'denied' || status.mic === 'restricted' ? (
                 <Button size="sm" variant="outline" onClick={() => openSettings('microphone')}>
-                  Open Settings
+                  {t.permissionGate.openSettings}
                 </Button>
               ) : null
             }
@@ -88,31 +91,31 @@ export default function PermissionGateDialog({
 
           <PermissionRow
             icon={<Monitor className="h-4 w-4" />}
-            label="Screen Recording"
+            label={t.permissionGate.screenRecording}
             status={screenNeedsRelaunch ? 'not-determined' : status.screen}
             note={
               status.screen === 'unknown'
-                ? 'Checking...'
+                ? t.permissionGate.screenChecking
                 : screenNeedsRelaunch
-                  ? 'Granted - restart the app to apply before starting'
+                  ? t.permissionGate.screenNeedsRelaunch
                   : status.screen === 'granted'
-                    ? 'Access granted'
+                    ? t.permissionGate.screenGranted
                     : status.screen === 'not-determined'
-                      ? 'Will be requested when recording starts'
-                      : 'Enable in System Settings, then restart the app to apply'
+                      ? t.permissionGate.screenNotDetermined
+                      : t.permissionGate.screenBlocked
             }
             action={
               screenNeedsRelaunch ? (
                 <Button size="sm" onClick={relaunch}>
-                  Restart App
+                  {t.permissionGate.restartApp}
                 </Button>
               ) : status.screen === 'denied' || status.screen === 'restricted' ? (
                 <div className="flex flex-col gap-1.5">
                   <Button size="sm" variant="outline" onClick={() => openSettings('screen')}>
-                    Open Settings
+                    {t.permissionGate.openSettings}
                   </Button>
                   <Button size="sm" variant="ghost" onClick={relaunch}>
-                    Restart App
+                    {t.permissionGate.restartApp}
                   </Button>
                 </div>
               ) : null
@@ -122,13 +125,13 @@ export default function PermissionGateDialog({
 
         <DialogFooter>
           <Button variant="ghost" size="sm" onClick={recheck} disabled={loading}>
-            {loading ? 'Checking...' : 'Check Again'}
+            {loading ? t.permissionGate.checking : t.permissionGate.checkAgain}
           </Button>
           <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button size="sm" onClick={handleProceed} disabled={!allGranted || loading}>
-            {proceedLabel}
+            {proceedLabel ?? t.permissionGate.start}
           </Button>
         </DialogFooter>
       </DialogContent>

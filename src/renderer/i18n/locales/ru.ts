@@ -1,0 +1,1152 @@
+/**
+ * Russian.
+ *
+ * Typed as `Translation`, so this file cannot drift from `en.ts`: a key that is missing is a
+ * build error, and so is one that is spelled differently.
+ *
+ * Two things about the copy itself. Dashes are hyphens rather than the «—» Russian typography
+ * would normally use, because this repository's writing rules forbid generating em-dashes and
+ * the English source uses hyphens in the same positions. And the register matches the English:
+ * direct, second-person formal, and no more words than the English string uses - Russian runs
+ * roughly 15% longer than English for the same sentence, and these strings sit in a window whose
+ * minimum width is 840px.
+ */
+import type { Translation } from './en';
+
+/**
+ * Russian has three plural forms and which one a number takes is not a property of the number
+ * alone, so it cannot be expressed as a `{{count}}` placeholder: 1 балл, 2 балла, 5 баллов, and
+ * 11 балл**ов** again despite ending in 1.
+ *
+ * Exported for the locale's own use only. Callers pass a number and get a finished string.
+ */
+export function plural(n: number, one: string, few: string, many: string): string {
+  const mod100 = Math.abs(n) % 100;
+  const mod10 = mod100 % 10;
+  if (mod100 >= 11 && mod100 <= 14) return many;
+  if (mod10 === 1) return one;
+  if (mod10 >= 2 && mod10 <= 4) return few;
+  return many;
+}
+
+export const ru: Translation = {
+  common: {
+    cancel: 'Отмена',
+    close: 'Закрыть',
+    back: 'Назад',
+    continue: 'Далее',
+    finish: 'Готово',
+    retry: 'Повторить',
+    view: 'Открыть',
+    loading: 'Загрузка…',
+    withCombo: (label: string, combo: string) => `${label} (${combo})`,
+  },
+
+  uiLanguageField: {
+    label: 'Язык приложения',
+    description:
+      'Сам интерфейс: кнопки, заголовки и сообщения. Язык собеседования настраивается отдельно.',
+  },
+
+  onboarding: {
+    firstRunEyebrow: (appName: string) => `Настройка ${appName}`,
+    guideEyebrow: 'Руководство по настройке',
+    progress: (current: number, total: number, label: string) =>
+      `Шаг ${current} из ${total} · ${label}`,
+
+    steps: {
+      uiLanguage: {
+        label: 'Язык приложения',
+        title: 'На каком языке показывать приложение?',
+        description:
+          'Выберите язык, на котором вам удобнее читать. Всё дальше, включая этот шаг, будет на нём.',
+      },
+      profile: {
+        label: 'Профиль',
+        title: 'Расскажите о себе',
+        description:
+          'Все подсказки опираются на это - на ваш опыт и ваши слова. Без этого приложение работать не сможет.',
+      },
+      context: {
+        label: 'О вакансии',
+        title: 'На какую позицию вы проходите собеседование?',
+        description:
+          'Необязательно, но стоит вставить: с описанием вакансии ассистент отвечает с учётом этой роли, а не в общем.',
+      },
+      language: {
+        label: 'Язык',
+        title: 'Выберите язык собеседования',
+        description: 'Он задаёт и то, что распознаётся, и то, на каком языке приходят подсказки.',
+      },
+      microphone: {
+        label: 'Микрофон',
+        title: 'Выберите микрофон',
+        description:
+          'Выберите микрофон, в который вы действительно будете говорить, и проверьте его. На собеседовании используйте наушники - через динамики приложение слышит интервьюера через ваш микрофон и замолкает.',
+      },
+      mode: {
+        label: 'Подсказки',
+        title: 'Какими должны быть подсказки?',
+        description: 'Это можно изменить в любой момент, в том числе во время собеседования.',
+      },
+      mockHints: {
+        label: 'Пробное собеседование',
+        title: 'Показывать подсказки в пробном собеседовании?',
+        description:
+          'Пробное собеседование - это тренировка с ИИ-интервьюером. Здесь вы решаете, будет ли он подсказывать ответы.',
+      },
+      zoom: {
+        label: 'Размер',
+        title: 'Так читать удобно?',
+        description:
+          'Окно собеседования небольшое специально, чтобы не закрывать звонок. Настройте размер сейчас, пока есть время, а не посреди вопроса.',
+      },
+      transcript: {
+        label: 'Расшифровка',
+        title: 'И последнее',
+        description: 'Показывать ли расшифровку разговора под подсказками.',
+      },
+    },
+
+    blocked: {
+      accountUnreachable:
+        'Не удалось связаться с вашей учётной записью, поэтому введённое здесь пока нельзя сохранить.',
+      needName: 'Укажите полное имя, чтобы продолжить.',
+      needProfile: 'Добавьте профиль, чтобы продолжить.',
+    },
+
+    loadingAccount: 'Загружаем вашу учётную запись…',
+    accountUnreachable:
+      'Не удалось связаться с учётной записью. Введённое здесь нельзя сохранить, пока связь не восстановится.',
+
+    skip: 'Пропустить',
+    skipTooltip: 'Настройку можно пройти позже в разделе «Настройки»',
+
+    allSet: 'Всё готово',
+    profileNotSavedOnSkip:
+      'Настройка пропущена, но профиль не сохранён. Попробуйте ещё раз в разделе «Учётная запись».',
+    completionNotRecorded:
+      'Настройка пропущена, но сохранить это не удалось. Возможно, она предложится снова.',
+    saveProfileFailed: 'Не удалось сохранить профиль',
+    finishFailed: 'Не удалось сохранить настройки. Проверьте подключение и попробуйте снова.',
+  },
+
+  configuration: {
+    title: 'Настройки',
+    setupGuide: {
+      title: 'Руководство по настройке',
+      description: 'Пройдите всё на этой странице, а также профиль, шаг за шагом.',
+      action: 'Пройти настройку',
+    },
+    hotkeys: {
+      title: 'Горячие клавиши',
+      description: 'Всё, до чего можно дотянуться, не трогая приложение во время собеседования.',
+    },
+  },
+
+  auth: {
+    fields: {
+      email: 'Эл. почта',
+      password: 'Пароль',
+      username: 'Имя пользователя',
+      confirmPassword: 'Подтвердите пароль',
+      newPassword: 'Новый пароль',
+      confirmNewPassword: 'Подтвердите новый пароль',
+      verificationCode: 'Код подтверждения',
+      resetCode: 'Код сброса',
+    },
+
+    signIn: {
+      title: 'Вход',
+      description: (appName: string) => `Войдите, чтобы пользоваться ${appName}`,
+      submit: 'Войти',
+      submitting: 'Входим…',
+      rememberMe: 'Запомнить меня',
+      noAccount: 'Нет учётной записи? Создайте новую.',
+      forgotPassword: 'Забыли пароль?',
+    },
+
+    signup: {
+      title: 'Создание учётной записи',
+      description: (appName: string) => `Зарегистрируйте новую учётную запись в ${appName}`,
+      sendCode: 'Отправить код',
+      sending: 'Отправляем…',
+      haveAccount: 'Уже есть учётная запись? Войдите',
+      codeNotice: (email: string) =>
+        `Если у адреса ${email} ещё нет учётной записи, мы отправили на него код подтверждения - вставьте код ниже. Если учётная запись уже есть, мы отправили письмо о том, как войти.`,
+      verify: 'Подтвердить',
+      verifying: 'Проверяем…',
+      changeEmail: 'Изменить адрес',
+      resendCode: 'Отправить код снова',
+      requestResent: 'Запрос отправлен снова.',
+      resendFailed: 'Не удалось отправить снова.',
+      create: 'Создать учётную запись',
+      creating: 'Создаём…',
+      sendCodeFailed: 'Не удалось отправить код подтверждения. Попробуйте ещё раз.',
+      invalidCode: 'Код подтверждения неверен или истёк.',
+      succeeded: 'Учётная запись создана. Теперь войдите.',
+      failed: 'Не удалось создать учётную запись. Попробуйте ещё раз.',
+    },
+
+    reset: {
+      title: 'Сброс пароля',
+      description: (appName: string) => `Задайте новый пароль для учётной записи в ${appName}`,
+      sendResetCode: 'Отправить код сброса',
+      sending: 'Отправляем…',
+      backToSignIn: 'Вернуться к входу',
+      codeNotice: (email: string) =>
+        `Если для адреса ${email} есть учётная запись, мы отправили на него код сброса - вставьте код ниже. Код действует один раз, а срок его действия указан в письме.`,
+      verify: 'Подтвердить',
+      verifying: 'Проверяем…',
+      changeEmail: 'Изменить адрес',
+      resendCode: 'Отправить код снова',
+      codeResent: 'Код сброса отправлен снова.',
+      resendFailed: 'Не удалось отправить код сброса снова.',
+      signsYouOut: 'После смены пароля вы выйдете из приложения на всех устройствах.',
+      setNewPassword: 'Задать новый пароль',
+      saving: 'Сохраняем…',
+      done: 'Пароль изменён',
+      startOver: 'Начать заново',
+      sendFailed: 'Не удалось отправить код сброса. Попробуйте ещё раз.',
+      verifyFailed: 'Не удалось проверить код сброса.',
+      succeeded: 'Пароль изменён. Войдите с новым паролем.',
+      failed: 'Не удалось изменить пароль. Возможно, код истёк - запросите новый.',
+    },
+
+    passwordsDoNotMatch: 'Пароли не совпадают',
+
+    errors: {
+      sendCodeFailed: 'Не удалось отправить код подтверждения',
+      invalidCode: 'Код подтверждения неверен или истёк',
+      loginFailed: 'Не удалось войти',
+      signupFailed: 'Не удалось создать учётную запись',
+      logoutFailed: 'Не удалось выйти',
+      changePasswordFailed: 'Не удалось изменить пароль',
+      sendResetCodeFailed: 'Не удалось отправить код сброса пароля',
+      invalidResetCode: 'Код сброса неверен или истёк',
+      resetFailed: 'Не удалось изменить пароль',
+    },
+  },
+
+  home: {
+    welcome: (firstName: string) => `С возвращением, ${firstName}`,
+    welcomeAnonymous: 'С возвращением',
+    subtitle:
+      'Потренируйтесь с ИИ-интервьюером или получите подсказки прямо во время настоящего звонка.',
+
+    mock: {
+      title: 'Пробное собеседование',
+      ready: 'ИИ задаёт вопросы, вы отвечаете вслух, а в конце получаете отчёт с оценкой.',
+      unsupported: 'Пока недоступно на этом сервере. Обновите приложение или попробуйте позже.',
+      liveRunning:
+        'Сначала остановите живого ассистента - они не могут использовать микрофон одновременно.',
+      unaffordable: (price: number) =>
+        `Недостаточно кредитов - самое короткое пробное собеседование стоит ${price} ${plural(price, 'кредит', 'кредита', 'кредитов')}. Пополните баланс, чтобы тренироваться.`,
+    },
+
+    live: {
+      title: 'Запустить ассистента',
+      resumeTitle: 'Вернуться к собеседованию',
+      ready: 'Распознаёт настоящее собеседование и предлагает ответы по ходу разговора.',
+      running: 'Ассистент уже работает.',
+      mockRunning:
+        'Сначала завершите пробное собеседование - они не могут использовать микрофон одновременно.',
+    },
+
+    accountLabel: 'Учётная запись',
+    notSignedIn: 'Вход не выполнен',
+    creditsLabel: 'Кредиты',
+    creditsUnavailable: 'Нет данных',
+    buyCredits: 'Купить кредиты',
+
+    nav: {
+      account: 'Учётная запись',
+      configuration: 'Настройки',
+      documentation: 'Документация',
+    },
+
+    signOut: 'Выйти',
+    signingOut: 'Выходим…',
+    signOutBlocked: 'Остановите собеседование, прежде чем выйти',
+    signOutFailed: 'Не удалось выйти',
+  },
+
+  account: {
+    title: 'Учётная запись',
+    signedInAs: 'Вы вошли как',
+    password: {
+      title: 'Пароль',
+      description: 'Смена пароля учётной записи',
+      action: 'Изменить пароль',
+    },
+    loadFailed:
+      'Не удалось загрузить сохранённые данные. Восстановите соединение, прежде чем вносить изменения.',
+    save: 'Сохранить',
+    saving: 'Сохраняем…',
+    saved: 'Данные учётной записи сохранены',
+    saveFailed: 'Не удалось сохранить данные учётной записи',
+  },
+
+  profileFields: {
+    fullName: 'Полное имя',
+    fullNamePlaceholder: 'Имя, которым вы называетесь на собеседовании',
+    profile: 'Профиль',
+    profilePlaceholder:
+      'Вставьте резюме, профиль LinkedIn или короткую биографию. Подсказки пишутся на основе этого, поэтому чем больше деталей, тем больше ответы будут похожи на ваши.',
+    context: 'Контекст',
+    contextPlaceholder:
+      'Вставьте описание вакансии, требования к роли или что-то ещё о собеседовании, к которому вы готовитесь.',
+    limitReached: (max: number) =>
+      `Достигнут предел символов (${max.toLocaleString('ru-RU')}). Лишний текст не добавлен.`,
+    // Three plural forms, which is the whole reason these strings are functions and not
+    // templates with a `{{count}}` in them: 1 символ, 2 символа, 5 символов, 11 символов.
+    //
+    // Phrased without a verb on purpose. "Осталось N символов" is right for every N except 1,
+    // where Russian wants "Остался 1 символ" - the verb agrees with the numeral too, and a
+    // plural helper that only picks the noun cannot fix that.
+    charactersLeft: (remaining: number) =>
+      `Ещё ${remaining.toLocaleString('ru-RU')} ${plural(remaining, 'символ', 'символа', 'символов')}`,
+  },
+
+  microphoneField: {
+    label: 'Микрофон',
+    noDevices: 'Микрофон не найден. Подключите его, и он появится здесь.',
+    selectPlaceholder: 'Выберите микрофон',
+    lookingPlaceholder: 'Ищем микрофоны…',
+    test: 'Проверить',
+    stopTest: 'Остановить',
+    openFailed:
+      'Не удалось открыть этот микрофон. Проверьте, что он подключён и не занят другим приложением.',
+    notConnected: (deviceName: string) =>
+      `«${deviceName}» больше не подключён. Выберите другой микрофон.`,
+    saySomething: 'Скажите что-нибудь - полоска должна двигаться, пока вы говорите.',
+    runningHint: 'Этот микрофон занят собеседованием. Проверить его можно после остановки.',
+    testHint:
+      'Проверьте микрофон до собеседования - молчащий микрофон выглядит точно так же, как тихая комната.',
+  },
+
+  micLevelMeter: {
+    label: 'Уровень сигнала микрофона',
+    hearing: 'Вас слышно',
+    silent: 'Тишина',
+  },
+
+  suggestionModeField: {
+    label: 'Вид подсказок',
+    hintOnly: 'Краткие подсказки',
+    hintOnlyDescription:
+      'Заголовок и ключевые слова, которые читаются одним взглядом, пока вы продолжаете говорить. Рекомендуется.',
+    fullSentences: 'Полные фразы',
+    fullSentencesDescription:
+      'Ответ, записанный так, как его можно произнести. Читать больше, придумывать меньше.',
+    switchHint: (combo: string) =>
+      `Переключается во время собеседования с панели управления или по ${combo}.`,
+  },
+
+  zoomField: {
+    label: 'Размер интерфейса',
+    smaller: 'Меньше',
+    larger: 'Больше',
+    reset: 'Сбросить',
+    description: (combo: string) =>
+      `Масштабирует всё приложение. Окно собеседования небольшое специально - так подсказки можно прочитать одним взглядом. Также доступно по ${combo}.`,
+  },
+
+  transcriptPanelField: {
+    label: 'Показывать панель расшифровки',
+    description: (combo: string) =>
+      `Показывает расшифровку разговора под подсказками. Выключите, чтобы освободить место для чтения подсказок. Переключается в любой момент по ${combo}.`,
+  },
+
+  mockHintsField: {
+    label: 'Показывать подсказки в пробных собеседованиях',
+    description:
+      'Показывает рядом с каждым вопросом пробного собеседования то, что ответил бы живой ассистент, чтобы вы могли сравнить со своим ответом. Выключите, чтобы отвечать самостоятельно - в любом случае это переключается во время сессии с панели пробного собеседования. На настоящее собеседование это никак не влияет.',
+  },
+
+  languageField: {
+    label: 'Язык собеседования',
+    textOnly: 'только текст',
+    reconnectFailed:
+      'Подсказки переключились на новый язык, но распознавание всё ещё переподключается. Если оно не вернётся, остановите и запустите ассистента заново.',
+    description: 'Что распознаётся и на каком языке приходят подсказки.',
+    noVoiceNotice:
+      'Интервьюер будет писать вопросы, а не произносить их. Отвечать всё равно нужно вслух, и оценка не меняется.',
+  },
+
+  changePassword: {
+    title: 'Изменить пароль',
+    description: 'Введите текущий пароль и выберите новый.',
+    current: 'Текущий пароль',
+    currentPlaceholder: 'Введите текущий пароль',
+    next: 'Новый пароль',
+    nextPlaceholder: 'Введите новый пароль',
+    confirm: 'Подтвердите новый пароль',
+    confirmPlaceholder: 'Повторите новый пароль',
+    submit: 'Изменить пароль',
+    submitting: 'Меняем…',
+    mismatch: 'Новые пароли не совпадают.',
+    succeeded: 'Пароль изменён',
+    failed: 'Не удалось изменить пароль',
+  },
+
+  hotkeys: {
+    dialogTitle: 'Горячие клавиши',
+    dialogDescription:
+      'Всё, до чего можно дотянуться, не трогая приложение во время собеседования.',
+
+    groups: {
+      general: 'Основное',
+      window: 'Управление окном',
+      panels: 'Прокрутка панелей',
+      triggered: 'Подсказки по запросу',
+    },
+
+    keys: {
+      StopAll: {
+        title: 'Остановить всё',
+        description: 'Остановить ассистента и выйти из скрытого режима',
+      },
+      ToggleStealth: {
+        title: 'Скрытый режим',
+        description:
+          'Скрыть окно от записи экрана во время живого собеседования. Те же клавиши возвращают его.',
+      },
+      Opacity: {
+        title: 'Переключить прозрачность',
+        description: 'Переключить прозрачность окна в скрытом режиме',
+      },
+      ToggleTranscript: {
+        title: 'Показать или скрыть расшифровку',
+        description: 'Показать или скрыть панель расшифровки - работает и в скрытом режиме',
+      },
+      ToggleSuggestionMode: {
+        title: 'Краткие подсказки / полные фразы',
+        description:
+          'Переключить подсказки между краткими - заголовок и ключевые слова, которые читаются одним взглядом - и полными фразами. Работает и в скрытом режиме.',
+      },
+      PlaceWin: {
+        title: 'Разместить окно',
+        description: 'Поставить окно в угол, к краю или по центру',
+      },
+      MoveWin: {
+        title: 'Переместить окно',
+        description: 'Переместить окно в выбранную сторону',
+      },
+      ResizeWin: {
+        title: 'Изменить размер окна',
+        description: 'Изменить размер окна в выбранную сторону',
+      },
+      ZoomInOutReset: {
+        title: 'Масштаб: больше, меньше, сброс',
+        description: 'Изменить или сбросить масштаб интерфейса',
+      },
+      ScrollLiveSuggestionPanel: {
+        title: 'Прокрутка живой панели',
+        description: 'Прокрутка вниз, вверх и в конец в панели живых подсказок',
+      },
+      ScrollActionSuggestionPanel: {
+        title: 'Прокрутка панели по запросу',
+        description: 'Прокрутка вниз, вверх и в конец в панели подсказок по запросу',
+      },
+      Capture: {
+        title: 'Снимок экрана',
+        description: 'Сделать снимок экрана для подсказок по запросу',
+      },
+      ClearCaptures: { title: 'Очистить снимки', description: 'Удалить сделанные снимки экрана' },
+      TriggerWithoutCaptures: {
+        title: 'Подсказка без снимков',
+        description: 'Создать подсказку без снимков экрана',
+      },
+      TriggerWithCaptures: {
+        title: 'Подсказка со снимками',
+        description:
+          'Создать подсказку с учётом снимков экрана. Если снимков нет, сначала будет сделан один.',
+      },
+    },
+  },
+
+  inputPassword: {
+    show: 'Показать пароль',
+    hide: 'Скрыть пароль',
+  },
+
+  titlebar: {
+    openCommandPalette: 'Открыть палитру команд',
+    searchActions: 'Поиск действий',
+    unavailableDuringInterview: 'Недоступно во время собеседования',
+    menu: 'Меню',
+    minimize: 'Свернуть',
+    maximize: 'Развернуть',
+    close: 'Закрыть',
+  },
+
+  titlebarMenu: {
+    home: 'Главная',
+    account: 'Учётная запись',
+    configuration: 'Настройки',
+    documentation: 'Документация',
+    language: 'Язык приложения',
+    lightMode: 'Светлая тема',
+    darkMode: 'Тёмная тема',
+    signOut: 'Выйти',
+  },
+
+  commandPalette: {
+    title: 'Палитра команд',
+    description: 'Найдите действие, страницу или настройку.',
+    searchPlaceholder: 'Поиск действий…',
+    empty: 'Ничего не найдено.',
+    groups: {
+      goTo: 'Перейти',
+      session: 'Сессия',
+      app: 'Приложение',
+    },
+    home: 'Главная',
+    account: 'Учётная запись',
+    configuration: 'Настройки',
+    buyCredits: 'Купить кредиты',
+    startMock: 'Начать пробное собеседование',
+    startLive: 'Запустить ассистента',
+    switchToFullSentence: 'Переключиться на полные фразы',
+    switchToHintOnly: 'Переключиться на краткие подсказки',
+    hideTranscript: 'Скрыть расшифровку',
+    showTranscript: 'Показать расшифровку',
+    documentation: 'Документация',
+    hotkeys: 'Горячие клавиши',
+    switchToLight: 'Светлая тема',
+    switchToDark: 'Тёмная тема',
+    signOut: 'Выйти',
+  },
+
+  controlPanel: {
+    stop: 'Стоп',
+    stopTooltip: 'Остановить ассистента',
+    stopRunningHint: 'Завершает сессию, предлагает её сохранить и возвращает на главную',
+    stopIdleHint: 'Ничего не запущено - начните собеседование с главного экрана',
+    stopTransientHint: 'Будет доступно, когда сессия запустится',
+
+    checks: {
+      configUnavailable:
+        'Не удалось загрузить сохранённые настройки. Переподключаемся - попробуйте через мгновение.',
+      nameMissing: 'Полное имя не указано',
+      profileMissing: 'Профиль не заполнен',
+      noMicrophone: 'Микрофон не найден. Подключите его и попробуйте снова.',
+      deviceNotFound: (deviceName: string) => `Микрофон «${deviceName}» не найден`,
+    },
+    startFailed: 'Не удалось запустить ассистента',
+  },
+
+  audioGroup: {
+    options: 'Настройки звука',
+    optionsSwapFailed: 'Настройки звука - не удалось сменить микрофон, используется предыдущий',
+    optionsDeviceNotFound: 'Настройки звука - выбранный микрофон не найден',
+    dialogTitle: 'Настройки звука',
+    dialogDescription: 'Выберите микрофон, которым вы пользуетесь.',
+    microphone: 'Микрофон',
+    selectPlaceholder: 'Выберите микрофон',
+    switching: 'Меняем микрофон…',
+    swapFailed: (deviceName: string) =>
+      `Не удалось переключиться на ${deviceName}. Это собеседование продолжается на предыдущем микрофоне. Чтобы использовать новый, остановите и запустите ассистента.`,
+    takesEffectImmediately: 'Применяется сразу. Распознавание продолжает работать.',
+  },
+
+  languageGroup: {
+    current: (languageName: string) => `Язык собеседования: ${languageName}`,
+    currentHalfApplied: (languageName: string) =>
+      `Язык собеседования: ${languageName} - распознавание не переключилось`,
+    tooltip: (nativeName: string) => `Язык собеседования: ${nativeName}`,
+    reconnecting: 'Переподключаем распознавание…',
+    suggestionsOnly: 'Переключились только подсказки - распознавание ещё переподключается',
+    speechAndSuggestions: 'Распознавание речи и подсказки',
+    menuLabel: 'Язык собеседования',
+    halfApplied:
+      'Подсказки переключились, распознавание нет. Попытки продолжаются - если оно не вернётся, остановите и запустите ассистента.',
+    willReconnect: 'Распознавание переподключится; текущая фраза может оборваться.',
+  },
+
+  suggestionMode: {
+    // The one place the short form is kept rather than the mode's full name: this is a pill on
+    // the stealth-mode status row, beside the credits readout and the transcript badge.
+    hintOnlyBadge: 'Кратко',
+    fullSentencesBadge: 'Полные фразы',
+    hintOnlyMode: 'Краткие подсказки',
+    fullSentenceMode: 'Полные фразы',
+    hintOnlySummary: 'Заголовок и ключевые слова',
+    fullSentenceSummary: 'Ответы, записанные целиком',
+    ariaHintOnly: 'Вид подсказок: кратко. Переключить на полные фразы',
+    ariaFullSentence: 'Вид подсказок: полные фразы. Переключить на краткие',
+  },
+
+  toolsGroup: {
+    hideTranscription: 'Скрыть расшифровку',
+    showTranscription: 'Показать расшифровку',
+    enterStealth: 'Включить скрытый режим',
+    stealthMode: 'Скрытый режим',
+    stealthUnavailable: 'Будет доступно во время живого собеседования - пока скрывать нечего.',
+    stealthAvailable: 'Скрывает приложение от записи экрана. Те же клавиши возвращают его обратно.',
+    captureScreenshot: 'Сделать снимок экрана',
+    captureScreenshotTooltip: 'Снимок экрана',
+    captureFailed: 'Не удалось сделать снимок экрана',
+    clearCaptures: 'Удалить сделанные снимки экрана',
+    clearCapturesTooltip: 'Очистить снимки',
+    clearCapturesFailed: 'Не удалось очистить снимки',
+    generateSuggestion: 'Создать подсказку по запросу',
+    generateSuggestionTooltip: 'Создать подсказку',
+    generateSuggestionFailed: 'Не удалось создать подсказку',
+    clear: 'Очистить',
+    clearInterview: 'Очистить собеседование',
+    clearFailed: 'Не удалось очистить',
+    exportInterview: 'Экспорт собеседования',
+    exportTheInterview: 'Экспортировать собеседование',
+    nothingToExport: 'Экспортировать пока нечего',
+    nothingToExportDescription:
+      'Сначала проведите собеседование, затем экспортируйте расшифровку и подсказки.',
+    exportFailed: 'Не удалось экспортировать собеседование',
+    exportDocx: 'Документ Word (.docx)',
+    exportMarkdown: 'Markdown (.md)',
+  },
+
+  statusPanel: {
+    transcript: 'Расшифровка',
+    transcriptionShown: (combo: string) => `Расшифровка: показана (${combo})`,
+    transcriptionHidden: (combo: string) => `Расшифровка: скрыта (${combo})`,
+    showHotkeys: 'Горячие клавиши',
+    showHotkeysLabel: 'Показать горячие клавиши',
+    showHotkeysTitle: 'Показать горячие клавиши (?)',
+  },
+
+  runningIndicator: {
+    idle: 'Простой',
+    starting: 'Запуск',
+    running: 'Работает',
+    stopping: 'Остановка',
+  },
+
+  zoomControl: {
+    reset: 'Сбросить масштаб',
+    zoomIn: 'Увеличить',
+    zoomOut: 'Уменьшить',
+  },
+
+  creditsDisplay: {
+    trialPlan: 'Пробный тариф',
+    paidPlan: 'Платный тариф',
+    summary: (credits: number, availableTime: string) =>
+      `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')} - ${availableTime}`,
+    duration: (hours: number, minutes: number) => {
+      const parts: string[] = [];
+      if (hours) parts.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
+      if (minutes) parts.push(`${minutes} ${plural(minutes, 'минута', 'минуты', 'минут')}`);
+      return parts.join(' ') || '0 минут';
+    },
+    lessThanAMinute: 'Меньше минуты',
+    noCreditsLeft: 'Кредиты закончились',
+  },
+
+  panels: {
+    autoScroll: 'Автопрокрутка',
+    enableAutoScroll: 'Включить автопрокрутку',
+    scrollToBottom: 'Прокрутить вниз',
+    scrollToTop: 'Прокрутить вверх',
+
+    transcription: 'Расшифровка',
+    noTranscripts: 'Расшифровки пока нет',
+    interviewer: 'Интервьюер',
+
+    liveSuggestions: 'Живые подсказки',
+    noSuggestions: 'Подсказок пока нет',
+    idleNoGeneration: 'Ожидание - ничего не создано',
+
+    triggeredSuggestions: 'Подсказки по запросу',
+    noTriggeredSuggestions: 'Подсказок по запросу пока нет',
+    suggestionCanceled: 'Подсказка отменена',
+
+    mockInterview: 'Пробное собеседование',
+    questionProgress: (current: number, total: number) => `Вопрос ${current} из ${total}`,
+    preparingFirstQuestion: 'Готовим первый вопрос…',
+    you: 'Вы',
+    followUp: 'Уточнение',
+    skipped: 'Пропущено',
+    noAnswer: 'Без ответа',
+
+    resizeTranscript: 'Изменить высоту панели расшифровки',
+    resizeHint: 'Потяните, чтобы изменить размер; двойной щелчок сбрасывает',
+  },
+
+  saveHistory: {
+    saveAsWord: 'Сохранить в Word',
+    saveAsMarkdown: 'Сохранить в Markdown',
+    formatHintLive: 'Word - чтобы поделиться или распечатать, Markdown - чтобы хранить текстом.',
+    formatHintMock:
+      'Word - чтобы поделиться или распечатать, Markdown - чтобы хранить рядом с заметками.',
+    exportFailed: 'Не удалось экспортировать собеседование',
+
+    live: {
+      clear: {
+        title: 'Сохранить это собеседование перед очисткой?',
+        body: 'Очистка удалит расшифровку и подсказки этой сессии, а на диск ничего не записывается до экспорта.',
+        discard: 'Очистить без сохранения',
+      },
+      start: {
+        title: 'Сохранить это собеседование перед началом нового?',
+        body: 'Запуск сессии удалит расшифровку и подсказки предыдущей, а на диск ничего не записывается до экспорта.',
+        discard: 'Начать без сохранения',
+      },
+      close: {
+        title: 'Сохранить это собеседование перед закрытием?',
+        body: 'Закрытие удалит расшифровку и подсказки этой сессии, а на диск ничего не записывается до экспорта.',
+        discard: 'Закрыть без сохранения',
+      },
+      update: {
+        title: 'Сохранить это собеседование перед установкой обновления?',
+        body: 'Установка перезапустит приложение и удалит расшифровку и подсказки этой сессии, а на диск ничего не записывается до экспорта.',
+        discard: 'Установить без сохранения',
+      },
+      signout: {
+        title: 'Сохранить это собеседование перед выходом?',
+        body: 'Выход удалит расшифровку и подсказки этой сессии, а на диск ничего не записывается до экспорта.',
+        discard: 'Выйти без сохранения',
+      },
+      stop: {
+        title: 'Сохранить это собеседование?',
+        body: 'Собеседование завершено. Расшифровка и подсказки будут удалены отсюда, и на диск ничего не записано.',
+        discard: 'Удалить и выйти на главную',
+      },
+      'mock-done': {
+        title: 'Сохранить отчёт перед завершением?',
+        body: 'Оценка, разбор и все ваши ответы существуют только в приложении, пока вы не сохраните их в файл.',
+        discard: 'Завершить без сохранения',
+      },
+      'mock-again': {
+        title: 'Сохранить этот отчёт перед следующей попыткой?',
+        body: 'Новая тренировка начнёт собеседование заново и заменит эту оценку, разбор и ответы.',
+        discard: 'Тренироваться без сохранения',
+      },
+    },
+
+    mock: {
+      clear: {
+        title: 'Сначала сохранить отчёт о пробном собеседовании?',
+        body: 'Очистка удалит этот отчёт и ваши ответы, а на диск ничего не записывается до сохранения.',
+        discard: 'Очистить без сохранения',
+      },
+      start: {
+        title: 'Сначала сохранить отчёт о пробном собеседовании?',
+        body: 'Запуск сессии заменит этот отчёт и ваши ответы, а на диск ничего не записывается до сохранения.',
+        discard: 'Начать без сохранения',
+      },
+      close: {
+        title: 'Сохранить отчёт о пробном собеседовании перед закрытием?',
+        body: 'Этот отчёт и ваши ответы существуют только в приложении, и закрытие их удалит.',
+        discard: 'Закрыть без сохранения',
+      },
+      update: {
+        title: 'Сохранить отчёт о пробном собеседовании перед установкой обновления?',
+        body: 'Установка перезапустит приложение, а это удалит отчёт и ваши ответы.',
+        discard: 'Установить без сохранения',
+      },
+      signout: {
+        title: 'Сохранить отчёт о пробном собеседовании перед выходом?',
+        body: 'Выход удалит этот отчёт и ваши ответы, и на диск ничего не записано.',
+        discard: 'Выйти без сохранения',
+      },
+      stop: {
+        title: 'Сохранить отчёт о пробном собеседовании?',
+        body: 'Собеседование завершено. Этот отчёт и ваши ответы будут удалены отсюда, и на диск ничего не записано.',
+        discard: 'Удалить и выйти на главную',
+      },
+    },
+  },
+
+  headphoneNotice: {
+    title: 'Наденьте наушники',
+    description: 'Голос интервьюера должен звучать только у вас в наушниках.',
+    liveSpeakers: 'Через динамики ваш микрофон слышит интервьюера так же хорошо, как и вы.',
+    liveConsequence:
+      'Тогда приложение принимает его вопрос за ваши слова и перестаёт на него отвечать - без каких-либо сообщений об ошибке.',
+    mockSpeakers:
+      'Через динамики только что услышанный вопрос может попасть в начало вашего ответа.',
+    mockConsequence:
+      'Микрофон выключен, пока интервьюер говорит, но эхо в комнате после этого всё равно может попасть в запись как лишние слова.',
+    proceed: 'Наушники надеты',
+  },
+
+  permissionGate: {
+    title: 'Нужны разрешения',
+    microphone: 'Микрофон',
+    micChecking: 'Проверяем…',
+    micGranted: 'Доступ разрешён',
+    micBlocked: 'Разрешите доступ в системных настройках и нажмите «Проверить снова»',
+    micRequired: 'Нужен, чтобы записывать ваш голос',
+    grantAccess: 'Разрешить доступ',
+    openSettings: 'Открыть настройки',
+    screenRecording: 'Запись экрана',
+    screenChecking: 'Проверяем…',
+    screenNeedsRelaunch:
+      'Разрешено - чтобы это применилось, перезапустите приложение перед началом',
+    screenGranted: 'Доступ разрешён',
+    screenNotDetermined: 'Будет запрошено при начале записи',
+    screenBlocked: 'Разрешите доступ в системных настройках и перезапустите приложение',
+    restartApp: 'Перезапустить',
+    checking: 'Проверяем…',
+    checkAgain: 'Проверить снова',
+    start: 'Начать',
+  },
+
+  exportToast: {
+    exported: (format: string) => `Собеседование экспортировано в ${format}`,
+    markdown: 'Markdown',
+    word: 'Word',
+    openFileLabel: 'Открыть экспортированный файл',
+    openFile: 'Открыть файл',
+    showInFolderLabel: 'Показать файл в папке',
+    showInFolder: 'Показать в папке',
+    dismiss: 'Закрыть',
+  },
+
+  notices: {
+    connecting: 'Подключаемся к серверу…',
+    starting: 'Запускаем…',
+    stopping: 'Останавливаем…',
+    dismiss: 'Закрыть',
+  },
+
+  updateNotification: {
+    available: (version: string) => `Доступно обновление: v${version}`,
+    availableDescription: 'Загрузка начнётся автоматически в фоне.',
+    downloading: (percent: string) => `Загружаем обновление… ${percent}%`,
+    downloadProgress: (transferredMb: string, totalMb: string) =>
+      `${transferredMb} МБ из ${totalMb} МБ`,
+    downloaded: (version: string) => `Обновление загружено: v${version}`,
+    downloadedDescriptionMac:
+      'Нажмите, чтобы открыть установщик, затем перетащите его в «Программы».',
+    downloadedDescription: 'Нажмите, чтобы перезапустить приложение и установить обновление.',
+    openInstaller: 'Открыть установщик',
+    restartNow: 'Перезапустить',
+  },
+
+  mock: {
+    setup: {
+      title: 'Пробное собеседование',
+      description:
+        'ИИ задаёт вопросы, вы отвечаете вслух. Ничего не сохраняется, пока вы не экспортируете.',
+      start: 'Начать пробное собеседование',
+      starting: 'Запускаем…',
+      seniority: 'Уровень',
+      seniorityOptions: {
+        junior: 'Junior',
+        mid: 'Middle',
+        senior: 'Senior',
+        staff: 'Staff+',
+      },
+      questions: 'Вопросы',
+      questionOption: (count: number, minutes: number) =>
+        `${count} ${plural(count, 'вопрос', 'вопроса', 'вопросов')}, около ${minutes} ${plural(minutes, 'минуты', 'минут', 'минут')}`,
+      cannotAfford: ' - недостаточно кредитов',
+      difficulty: 'Сложность',
+      difficultyOptions: {
+        easy: {
+          label: 'Разминка',
+          description: 'Простые вопросы, каждый об одном.',
+        },
+        standard: {
+          label: 'Обычная',
+          description: 'То, что действительно спросил бы обычный интервьюер.',
+        },
+        hard: {
+          label: 'Сложная',
+          description: 'Вопросы о компромиссах и крайних случаях.',
+        },
+      },
+      languageDescription:
+        'На каком языке спрашивает интервьюер, что распознаётся и на каком языке приходит разбор.',
+      price: (price: number) => `${price} ${plural(price, 'кредит', 'кредита', 'кредитов')}`,
+      priceLead: 'Стоит ',
+      priceCeiling: (ceiling: number) => `, и до ${ceiling}, если интервьюер уточнит каждый ответ`,
+      balance: (credits: number) =>
+        `У вас ${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}.`,
+    },
+
+    session: {
+      heading: 'Пробное собеседование',
+      starting: 'Запускаем…',
+      generating: 'Придумываем следующий вопрос…',
+      evaluating: 'Думаем…',
+      scoring: 'Оцениваем собеседование…',
+      stopping: 'Завершаем собеседование…',
+      speaking: 'Интервьюер говорит. Ваш микрофон выключен, пока звучит вопрос.',
+      readThenReady: 'Прочитайте вопрос. Ответ записывается с того момента, как вы будете готовы.',
+      listening: 'Слушаем…',
+      ready: 'Можно начинать',
+      doneAnswering: 'Ответ готов',
+      doneAnsweringTooltip: 'Отправить ответ и перейти дальше',
+      toggleHints: 'Переключить живые подсказки',
+      hintsOn: 'Живые подсказки: вкл.',
+      hintsOff: 'Живые подсказки: выкл.',
+      hintsOnHint: 'Показывает, что ответил бы живой ассистент',
+      hintsOffHint: 'Тренироваться без подсказок',
+      endInterview: 'Завершить собеседование',
+      startFailed: 'Не удалось начать пробное собеседование',
+      startingPage: 'Начинаем пробное собеседование…',
+    },
+
+    report: {
+      heading: 'Отчёт о пробном собеседовании',
+      verdictExcellent: 'Отлично',
+      verdictStrong: 'Хорошо',
+      verdictDeveloping: 'Есть над чем работать',
+      verdictNeedsWork: 'Нужна подготовка',
+      scoreFailed: (reason: string) =>
+        `Не удалось получить общую оценку (${reason}). Ваши ответы по-прежнему показаны ниже, и их можно экспортировать.`,
+      scoreAgain: 'Оценить снова',
+      scoring: 'Оцениваем…',
+      overallScore: 'Общая оценка',
+      strengths: 'Сильные стороны',
+      gaps: 'Пробелы',
+      nothingNoted: 'Ничего конкретного не отмечено.',
+      perQuestion: 'Разбор по вопросам',
+      yourAnswer: 'Ваш ответ',
+      noAnswerRecorded: '(ответ не записан)',
+      score: 'Оценка',
+      strongerAnswer: 'Более сильный ответ',
+      saveAsWord: 'Сохранить в Word',
+      saveAsMarkdown: 'Сохранить в Markdown',
+      exportFailed: 'Не удалось экспортировать отчёт',
+      practiseAgain: 'Тренироваться снова',
+      done: 'Готово',
+    },
+  },
+
+  mainRoute: {
+    redirectingToLogin: 'Переходим к входу…',
+    authenticating: 'Проверяем вход…',
+    transcriptionHidden: 'Расшифровка скрыта',
+  },
+
+  documentation: {
+    intro: (appName: string) =>
+      `${appName} - это ИИ-ассистент, который помогает на собеседовании: подсказывает ответы в реальном времени и предлагает решения прямо на экране.`,
+    docsLead: 'Полная документация: ',
+    docsLinkText: 'powerinterviewai.com/docs',
+    docsTrailing: '. Нажмите Cmd/Ctrl+K в любом месте приложения, чтобы найти нужное действие.',
+
+    lostWindow: {
+      title: 'Потеряли окно?',
+      body: (appName: string) =>
+        `В скрытом режиме ${appName} убирает себя с панели задач и из Dock на macOS, чтобы его не было видно при демонстрации экрана, - а значит, у свёрнутого окна нет кнопки, на которую можно нажать. Просто запустите ${appName} ещё раз: вторая копия не откроется, вернётся это же окно. Вне скрытого режима кнопка на панели задач и значок в Dock на месте.`,
+    },
+
+    language: {
+      title: 'Собеседование на другом языке',
+      oneSetting:
+        'Одна настройка охватывает всю сессию: какая модель распознаёт речь, на каком языке пишутся подсказки и на каком языке будет экспортированный отчёт. Её можно задать кнопкой языка на панели управления, на странице настроек или в диалоге пробного собеседования - всё это меняет одно и то же.',
+      supported: (count: number) => `Поддерживаемые языки (${count}): `,
+      midInterview:
+        'Язык можно сменить во время собеседования. Подсказки переключаются сразу, начиная со следующего ответа. Распознаванию нужно чуть больше времени: оно переподключается, поэтому фраза, которая звучит в этот момент, может оборваться в расшифровке.',
+      textOnly:
+        'В пробном собеседовании язык, помеченный в диалоге настройки как «только текст», не имеет голоса: интервьюер будет писать вопросы, а не произносить их. Отвечать всё равно нужно вслух, и оценка не меняется.',
+      appLanguageTitle: 'У приложения свой язык',
+      appLanguageBody:
+        'Язык выше - это язык собеседования. Язык самого приложения - его кнопок, заголовков и сообщений - настраивается отдельно на странице настроек, и это же первый вопрос первоначальной настройки. Ни один из них не выводится из другого: тому, кто говорит по-русски, но проходит собеседование по-английски, нужна английская расшифровка и русское приложение.',
+    },
+
+    microphone: {
+      title: 'Смена микрофона во время собеседования',
+      body: 'Кнопка микрофона на панели управления остаётся доступной во время собеседования. Если гарнитура разрядилась, её выдернули или она была выбрана по ошибке, выберите другую здесь, а не останавливайте ассистента - остановка удаляет расшифровку и подсказки вместе с ней.',
+      immediate:
+        'Изменение применяется сразу, распознавание продолжает работать, поэтому ничего не обрывается. Если выбранное устройство не удаётся открыть - оно отключено или занято другим приложением - собеседование продолжается на предыдущем, и приложение об этом сообщает.',
+    },
+
+    suggestionStyle: {
+      title: 'Краткие подсказки или полные фразы',
+      body: 'По умолчанию - краткие: каждая подсказка приходит как заголовок в одну строку и ключевые слова, чтобы её можно было схватить одним взглядом и продолжать говорить. Полные фразы пишут ответ так, как его можно произнести: читать больше, придумывать меньше.',
+      switching: (combo: string) =>
+        `Переключить можно на панели управления, на странице настроек или по ${combo} - это работает и в скрытом режиме. Подсказки, которые уже на экране, сохраняют тот вид, в котором были созданы; меняется только следующая.`,
+    },
+
+    settings: {
+      title: 'Где находятся настройки',
+      accountLabel: 'Учётная запись',
+      accountBody:
+        ' хранит то, кто вы: имя, которым вы называетесь, профиль или резюме, из которого пишутся подсказки, описание вакансии, к которой вы готовитесь, и пароль.',
+      configurationLabel: 'Настройки',
+      configurationBody:
+        ' хранят то, как проходит собеседование: язык приложения, микрофон (с проверкой), язык собеседования, вид подсказок и то, закреплена ли панель расшифровки. Ничего сохранять не нужно - каждое изменение применяется сразу.',
+      both: 'И то, и другое есть на главном экране, в меню заголовка окна и в палитре Cmd/Ctrl+K. При первом запуске приложение один раз проводит через всё это.',
+    },
+
+    hotkeys: 'Горячие клавиши',
+  },
+
+  payment: {
+    title: 'Покупка кредитов',
+    tabs: {
+      buy: 'Покупка',
+      history: 'История',
+      status: 'Статус',
+    },
+
+    buy: {
+      currentBalance: 'Текущий баланс',
+      credits: (credits: number) =>
+        `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
+      availableFor: (duration: string, perMinute: number) =>
+        `Хватит примерно на ${duration} (${perMinute} ${plural(perMinute, 'кредит', 'кредита', 'кредитов')} в минуту)`,
+      duration: (hours: number, minutes: number) => {
+        const parts: string[] = [];
+        if (hours) parts.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
+        if (minutes) parts.push(`${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}`);
+        return parts.join(' ') || '0 минут';
+      },
+      loadingPlans: 'Загружаем тарифы…',
+      mostPopular: 'Чаще всего берут',
+      planNames: {
+        starter: 'Starter',
+        pro: 'Pro',
+        enterprise: 'Enterprise',
+      },
+      planDescriptions: {
+        starter: 'Чтобы попробовать платформу',
+        pro: 'Лучший выбор, если вы серьёзно ищете работу',
+        enterprise: 'Для интенсивного использования и команд',
+      },
+      perCredits: (credits: number) =>
+        ` / ${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
+      minutesOfAssistance: (minutes: number) =>
+        `примерно ${minutes.toLocaleString('ru-RU')} ${plural(minutes, 'минута', 'минуты', 'минут')} работы ассистента`,
+      selected: 'Выбрано',
+      buy: 'Купить',
+      detailsTitle: 'Детали оплаты',
+      detailsLead: 'Завершите покупку: ',
+      detailsFor: ' за ',
+      currencyLabel: 'Валюта платежа',
+      currencyPlaceholder: 'Выберите валюту',
+      currencySearchPlaceholder: 'Поиск валюты…',
+      noCurrency: 'Валюта не найдена',
+      createPayment: 'Создать платёж',
+      creatingPayment: 'Создаём платёж…',
+    },
+
+    history: {
+      loading: 'Загружаем историю платежей…',
+      loadFailed: 'Не удалось загрузить историю платежей',
+      emptyTitle: 'История платежей пуста',
+      emptyBody: 'Вы ещё не совершали платежей. Купите кредиты, чтобы начать.',
+      buyCredits: 'Купить кредиты',
+      refreshing: 'Обновляем…',
+      columns: {
+        created: 'Создан',
+        paymentId: 'ID платежа',
+        credits: 'Кредиты',
+        amount: 'Сумма',
+        status: 'Статус',
+        action: 'Действие',
+      },
+      notAvailable: 'Нет данных',
+      view: 'Открыть',
+    },
+
+    status: {
+      title: 'Проверка статуса платежа',
+      description: 'Введите ID платежа, чтобы узнать его текущий статус',
+      idPlaceholder: 'Введите ID платежа',
+      check: 'Проверить статус',
+      checking: 'Проверяем…',
+      notFound: 'Платёж не найден',
+      fetchFailed: 'Не удалось получить статус платежа',
+      order: (orderId: string) => `Заказ №${orderId}`,
+      refreshing: 'Обновляем…',
+      amountToPay: 'Сумма к оплате',
+      priceUsd: 'Цена (USD)',
+      actuallyPaid: 'Фактически оплачено',
+      paymentMethods: 'Способы оплаты',
+      qrTab: 'QR-код',
+      addressTab: 'Адрес',
+      downloadQr: 'Скачать QR-код',
+      qrSaved: 'QR-код сохранён',
+      scanWithWallet: 'Отсканируйте в приложении кошелька',
+      qrIncludes: (amount: string) => `QR-код содержит адрес и сумму (${amount})`,
+      paymentAddress: 'Адрес для оплаты',
+      amountToSend: 'Сумма к отправке',
+      sendExactly: 'Отправьте ровно эту сумму на адрес выше.',
+      successTitle: 'Платёж прошёл',
+      successBody: 'Кредиты зачислены на вашу учётную запись.',
+      expiredTitle: 'Срок платежа истёк',
+      failedTitle: 'Платёж не прошёл',
+      expiredBody: 'Срок этого платежа истёк. Создайте новый платёж.',
+      failedBody: 'Платёж не удалось обработать. Попробуйте ещё раз.',
+      created: 'Создан:',
+      updated: 'Обновлён:',
+      addressCopied: 'Адрес для оплаты скопирован',
+      amountCopied: 'Сумма скопирована',
+      currencyCopied: 'Валюта скопирована',
+    },
+
+    statusLabels: {
+      waiting: 'Ожидает',
+      confirming: 'Подтверждается',
+      confirmed: 'Подтверждён',
+      sending: 'Отправляется',
+      partiallyPaid: 'Оплачен частично',
+      finished: 'Завершён',
+      failed: 'Не прошёл',
+      refunded: 'Возвращён',
+      expired: 'Истёк',
+    },
+
+    errors: {
+      getPlans: 'Не удалось получить тарифы',
+      getCurrencies: 'Не удалось получить список валют',
+      createPayment: 'Не удалось создать платёж',
+      getStatus: 'Не удалось получить статус платежа',
+      getHistory: 'Не удалось получить историю платежей',
+      getCredits: 'Не удалось получить баланс кредитов',
+    },
+  },
+
+  settingsToasts: {
+    saveMicrophoneFailed: 'Не удалось сохранить выбранный микрофон',
+    microphoneSwapFailed: 'Сохранено, но собеседование продолжается на предыдущем микрофоне',
+    microphoneSwapFailedHint:
+      'Проверьте, что устройство подключено, затем остановите и запустите ассистента.',
+    saveLanguageFailed: 'Не удалось сохранить язык собеседования',
+    languageHalfApplied:
+      'Подсказки переключились на новый язык; распознавание ещё переподключается',
+    languageHalfAppliedHint:
+      'Попытки продолжаются. Если оно не вернётся, остановите и запустите ассистента.',
+    saveSuggestionModeFailed: 'Не удалось сохранить вид подсказок',
+    saveTranscriptPanelFailed: 'Не удалось сохранить настройку панели расшифровки',
+    saveMockHintsFailed: 'Не удалось сохранить настройку живых подсказок',
+    saveUiLanguageFailed: 'Не удалось сохранить язык приложения',
+  },
+
+  assistant: {
+    mockRunning: 'Завершите пробное собеседование, прежде чем запускать живого ассистента.',
+    stoppedUncleanly: 'Ассистент остановлен, но не всё завершилось корректно',
+    stoppedUncleanlyHint:
+      'Если расшифровка или подсказки продолжают приходить, перезапустите приложение.',
+    startFailed: 'Не удалось запустить ассистента',
+    stopFailed: 'Не удалось остановить ассистента',
+    screenCaptureTimedOut: 'Не удалось захватить экран вовремя. Попробуйте снова.',
+  },
+
+  mockStartChecks: {
+    deviceNotFound: (deviceName: string) =>
+      `Микрофон «${deviceName}» не найден. Выберите другой в настройках звука на главном экране.`,
+    unaffordable: (questionCount: number) =>
+      `Недостаточно кредитов на пробное собеседование из ${questionCount} ${plural(questionCount, 'вопроса', 'вопросов', 'вопросов')}`,
+    unaffordableHint: (price: number, credits: number) =>
+      `Оно стоит ${price} ${plural(price, 'кредит', 'кредита', 'кредитов')}, а у вас ${credits}.`,
+    buyCredits: 'Купить кредиты',
+  },
+
+  trialNotice: {
+    freeTierLead: 'Пробный тариф: 1 час бесплатно на модели ',
+    freeTier: 'базового уровня',
+    freeTierTail: '.',
+    sotaLead: 'Купите кредиты, чтобы открыть ',
+    sota: 'передовую',
+    sotaTail: ' модель.',
+  },
+};

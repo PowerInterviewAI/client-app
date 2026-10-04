@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePayment } from '@/hooks/use-payment';
+import { type Translation, useT } from '@/i18n';
 import { cn, getElectron } from '@/lib/utils';
 import type { PaymentStatusResponse } from '@/types/payment';
 import { PaymentStatus } from '@/types/payment';
@@ -30,6 +31,8 @@ import { getStatusBadgeColor, getStatusLabel } from './payment-utils';
 
 // separate memoized QR canvas to avoid redraws when parent re-renders
 interface MemoQrProps {
+  /** The dictionary, so the memo comparison below can treat a language change as a change. */
+  t: Translation;
   paymentUri: string;
   setQrcode: (canvas: HTMLCanvasElement | SVGSVGElement) => void;
   isQrcodeReady: boolean;
@@ -38,6 +41,7 @@ interface MemoQrProps {
 }
 
 const QrComponent: React.FC<MemoQrProps> = ({
+  t,
   paymentUri,
   setQrcode,
   isQrcodeReady,
@@ -73,7 +77,7 @@ const QrComponent: React.FC<MemoQrProps> = ({
       disabled={!isQrcodeReady}
       className="cursor-pointer"
     >
-      Download QR Code
+      {t.payment.status.downloadQr}
     </Button>
   </>
 );
@@ -81,6 +85,7 @@ const QrComponent: React.FC<MemoQrProps> = ({
 const MemoQr = memo(
   QrComponent,
   (prev, next) =>
+    prev.t === next.t &&
     prev.paymentUri === next.paymentUri &&
     prev.isQrcodeReady === next.isQrcodeReady &&
     prev.orderId === next.orderId
@@ -91,6 +96,7 @@ interface PaymentStatusTabProps {
 }
 
 export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatusTabProps) {
+  const t = useT();
   const { getPaymentStatus } = usePayment();
   const [paymentId, setPaymentId] = useState(initialPaymentId);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatusResponse | null>(null);
@@ -131,7 +137,7 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
           }}
         >
           <CircleCheck className="h-4 w-4 shrink-0" />
-          <span className="flex-1 text-sm font-medium">QR code saved</span>
+          <span className="flex-1 text-sm font-medium">{t.payment.status.qrSaved}</span>
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -144,7 +150,7 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                   <FileIcon className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Open file</TooltipContent>
+              <TooltipContent>{t.exportToast.openFile}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -157,7 +163,7 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                   <FolderOpenIcon className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Show in folder</TooltipContent>
+              <TooltipContent>{t.exportToast.showInFolder}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -170,14 +176,14 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                   <XIcon className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Dismiss</TooltipContent>
+              <TooltipContent>{t.exportToast.dismiss}</TooltipContent>
             </Tooltip>
           </div>
         </div>
       ),
       { id: toastId, duration: 10_000, style: { width: 'var(--width, 356px)' } }
     );
-  }, [paymentStatus?.order_id]);
+  }, [paymentStatus?.order_id, t]);
 
   const paymentStatusRef = React.useRef<PaymentStatusResponse | null>(null);
 
@@ -199,16 +205,16 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
             paymentStatusRef.current = status;
           }
         } else {
-          setError('Payment not found');
+          setError(t.payment.status.notFound);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch payment status');
+        setError(err instanceof Error ? err.message : t.payment.status.fetchFailed);
       } finally {
         if (!silent) setLoading(false);
         if (silent) setRefreshing(false);
       }
     },
-    [paymentId, getPaymentStatus]
+    [paymentId, getPaymentStatus, t]
   );
 
   type CopyField = 'address' | 'amount' | 'currency';
@@ -232,25 +238,25 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
 
   const handleCopyAddress = useCallback(() => {
     if (paymentStatus?.pay_address) {
-      copyToClipboard(paymentStatus.pay_address, 'address', 'Payment address copied to clipboard');
+      copyToClipboard(paymentStatus.pay_address, 'address', t.payment.status.addressCopied);
     }
-  }, [paymentStatus, copyToClipboard]);
+  }, [paymentStatus, copyToClipboard, t]);
 
   const handleCopyAmount = useCallback(() => {
     if (paymentStatus?.pay_amount != null) {
-      copyToClipboard(String(paymentStatus.pay_amount), 'amount', 'Amount copied to clipboard');
+      copyToClipboard(String(paymentStatus.pay_amount), 'amount', t.payment.status.amountCopied);
     }
-  }, [paymentStatus, copyToClipboard]);
+  }, [paymentStatus, copyToClipboard, t]);
 
   const handleCopyCurrency = useCallback(() => {
     if (paymentStatus?.pay_currency) {
       copyToClipboard(
         paymentStatus.pay_currency.toUpperCase(),
         'currency',
-        'Currency copied to clipboard'
+        t.payment.status.currencyCopied
       );
     }
-  }, [paymentStatus, copyToClipboard]);
+  }, [paymentStatus, copyToClipboard, t]);
 
   // Generate payment URI for wallet apps (includes amount)
   // memoized so it only recalculates when status changes
@@ -300,20 +306,20 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Check Payment Status</CardTitle>
-          <CardDescription>Enter a payment ID to check its current status</CardDescription>
+          <CardTitle>{t.payment.status.title}</CardTitle>
+          <CardDescription>{t.payment.status.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
             <Input
-              placeholder="Enter payment ID"
+              placeholder={t.payment.status.idPlaceholder}
               value={paymentId}
               onChange={(e) => setPaymentId(e.target.value)}
               className="max-w-40"
               maxLength={100}
             />
             <Button onClick={() => handleCheckStatus()} disabled={!paymentId || loading}>
-              {loading ? 'Checking...' : 'Check Status'}
+              {loading ? t.payment.status.checking : t.payment.status.check}
             </Button>
           </div>
         </CardContent>
@@ -337,10 +343,12 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                       getStatusBadgeColor(paymentStatus.payment_status)
                     )}
                   >
-                    {getStatusLabel(paymentStatus.payment_status)}
+                    {getStatusLabel(t, paymentStatus.payment_status)}
                   </span>
                 </CardTitle>
-                <CardDescription className="mt-2">Order #{paymentStatus.order_id}</CardDescription>
+                <CardDescription className="mt-2">
+                  {t.payment.status.order(paymentStatus.order_id)}
+                </CardDescription>
               </div>
               <span
                 className={cn(
@@ -349,27 +357,27 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                 )}
               >
                 <RefreshCw className="h-3 w-3 animate-spin" />
-                Refreshing…
+                {t.payment.status.refreshing}
               </span>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Amount to Pay</p>
+                <p className="text-sm text-muted-foreground">{t.payment.status.amountToPay}</p>
                 <p className="text-lg font-semibold">
                   {paymentStatus.pay_amount} {paymentStatus.pay_currency.toUpperCase()}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Price (USD)</p>
+                <p className="text-sm text-muted-foreground">{t.payment.status.priceUsd}</p>
                 <p className="text-lg font-semibold">
                   ${paymentStatus.price_amount} {paymentStatus.price_currency}
                 </p>
               </div>
               {paymentStatus.actually_paid != null && paymentStatus.actually_paid > 0 && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Actually Paid</p>
+                  <p className="text-sm text-muted-foreground">{t.payment.status.actuallyPaid}</p>
                   <p className="text-lg font-semibold">
                     {paymentStatus.actually_paid} {paymentStatus.pay_currency.toUpperCase()}
                   </p>
@@ -382,16 +390,17 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               paymentStatus.payment_status !== PaymentStatus.Expired && (
                 <>
                   <div className="border-t pt-4">
-                    <p className="text-sm font-medium mb-3">Payment Methods</p>
+                    <p className="text-sm font-medium mb-3">{t.payment.status.paymentMethods}</p>
                     <Tabs defaultValue="qr" className="w-full">
                       <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="qr">QR Code</TabsTrigger>
-                        <TabsTrigger value="address">Address</TabsTrigger>
+                        <TabsTrigger value="qr">{t.payment.status.qrTab}</TabsTrigger>
+                        <TabsTrigger value="address">{t.payment.status.addressTab}</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="qr" className="mt-4">
                         <div className="flex flex-col items-center space-y-3">
                           <MemoQr
+                            t={t}
                             paymentUri={paymentUri}
                             setQrcode={handleQrcodeReady}
                             isQrcodeReady={isQrcodeReady}
@@ -399,11 +408,12 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                             onDownload={handleDownloadQr}
                           />
                           <p className="text-sm text-muted-foreground text-center">
-                            Scan with your wallet app
+                            {t.payment.status.scanWithWallet}
                           </p>
                           <p className="text-xs text-muted-foreground text-center">
-                            QR code includes address and amount ({paymentStatus.pay_amount}{' '}
-                            {paymentStatus.pay_currency.toUpperCase()})
+                            {t.payment.status.qrIncludes(
+                              `${paymentStatus.pay_amount} ${paymentStatus.pay_currency.toUpperCase()}`
+                            )}
                           </p>
                         </div>
                       </TabsContent>
@@ -411,7 +421,9 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                       <TabsContent value="address" className="mt-4">
                         <div className="space-y-3">
                           <div>
-                            <p className="text-sm font-medium mb-2">Payment Address</p>
+                            <p className="text-sm font-medium mb-2">
+                              {t.payment.status.paymentAddress}
+                            </p>
                             <div className="flex gap-2 items-center">
                               <Button size="sm" variant="secondary" onClick={handleCopyAddress}>
                                 {copiedField === 'address' ? (
@@ -426,7 +438,9 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                             </div>
                           </div>
                           <div>
-                            <p className="text-sm font-medium mb-2">Amount to Send</p>
+                            <p className="text-sm font-medium mb-2">
+                              {t.payment.status.amountToSend}
+                            </p>
                             <div className="flex gap-2">
                               <div className="flex flex-1 gap-2 items-center">
                                 <Button size="sm" variant="secondary" onClick={handleCopyAmount}>
@@ -455,7 +469,7 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            Send exactly this amount to the address above.
+                            {t.payment.status.sendExactly}
                           </p>
                         </div>
                       </TabsContent>
@@ -467,10 +481,10 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
             {paymentStatus.payment_status === PaymentStatus.Finished && (
               <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
                 <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                  Payment Successful!
+                  {t.payment.status.successTitle}
                 </p>
                 <p className="text-sm text-green-800 dark:text-green-200 mt-1">
-                  Your credits have been added to your account.
+                  {t.payment.status.successBody}
                 </p>
               </div>
             )}
@@ -479,13 +493,14 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               paymentStatus.payment_status === PaymentStatus.Expired) && (
               <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg">
                 <p className="text-sm font-medium text-red-900 dark:text-red-100">
-                  Payment{' '}
-                  {paymentStatus.payment_status === PaymentStatus.Expired ? 'Expired' : 'Failed'}
+                  {paymentStatus.payment_status === PaymentStatus.Expired
+                    ? t.payment.status.expiredTitle
+                    : t.payment.status.failedTitle}
                 </p>
                 <p className="text-sm text-red-800 dark:text-red-200 mt-1">
                   {paymentStatus.payment_status === PaymentStatus.Expired
-                    ? 'This payment has expired. Please create a new payment.'
-                    : 'The payment could not be processed. Please try again.'}
+                    ? t.payment.status.expiredBody
+                    : t.payment.status.failedBody}
                 </p>
               </div>
             )}
@@ -494,13 +509,13 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               <div className="border-t pt-4 space-y-2 text-sm">
                 {paymentStatus.created_at && (
                   <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Created:</span>
+                    <span className="text-muted-foreground">{t.payment.status.created}</span>
                     <span>{new Date(paymentStatus.created_at).toLocaleString()}</span>
                   </div>
                 )}
                 {paymentStatus.updated_at && (
                   <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Updated:</span>
+                    <span className="text-muted-foreground">{t.payment.status.updated}</span>
                     <span>{new Date(paymentStatus.updated_at).toLocaleString()}</span>
                   </div>
                 )}

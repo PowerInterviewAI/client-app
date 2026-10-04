@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { currentTranslation } from '@/i18n';
+
 import { useAppState } from './use-app-state';
 import { useAssistantService } from './use-assistant-service';
 import { beginInterviewExit } from './use-interview-lock';
@@ -52,7 +54,9 @@ export function useEndLiveSession() {
       // `finally` whatever happened, so the session is over either way and the user still needs
       // the chance to keep what it produced.
       console.error('Failed to stop the assistant cleanly:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to stop the assistant');
+      toast.error(
+        error instanceof Error ? error.message : currentTranslation().assistant.stopFailed
+      );
     }
 
     if (hasContent) {
