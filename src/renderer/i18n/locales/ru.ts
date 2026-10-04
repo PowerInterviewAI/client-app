@@ -1138,4 +1138,13 @@ export const ru: Translation = {
       `Оно стоит ${price} ${plural(price, 'кредит', 'кредита', 'кредитов')}, а у вас ${credits}.`,
     buyCredits: 'Купить кредиты',
   },
+
+  trialNotice: {
+    freeTierLead: 'Пробный тариф: 1 час бесплатно на модели ',
+    freeTier: 'базового уровня',
+    freeTierTail: '.',
+    sotaLead: 'Купите кредиты, чтобы открыть ',
+    sota: 'передовую',
+    sotaTail: ' модель.',
+  },
 };

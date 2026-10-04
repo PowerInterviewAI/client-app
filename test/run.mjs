@@ -21,6 +21,9 @@ for (const module of [
   // After language.test.mjs: both write to the same store, and this one asserts on what a
   // chrome language round-trip leaves on disk.
   './ui-language.test.mjs',
+  // Source-level and independent of the store, so it sits beside the locale checks rather than
+  // with the other renderer-source files further down.
+  './ui-text-routing.test.mjs',
   './app-state.test.mjs',
   './account.test.mjs',
   // After account.test.mjs: both swap the accountService singleton's client, and that one's

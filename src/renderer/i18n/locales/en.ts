@@ -1135,6 +1135,21 @@ export const en = {
       `It costs ${price} credits and you have ${credits}.`,
     buyCredits: 'Buy credits',
   },
+
+  trialNotice: {
+    /**
+     * Split into lead / emphasis / tail rather than one sentence with a `<strong>` in it,
+     * because where the emphasised words sit in the sentence is a property of the language:
+     * English puts "free tier" before the noun it qualifies and Russian puts its equivalent
+     * after it, so the tail is what absorbs the difference.
+     */
+    freeTierLead: 'Trial plan: 1 hour of free usage with the ',
+    freeTier: 'free tier',
+    freeTierTail: ' model.',
+    sotaLead: 'Buy credits to unlock ',
+    sota: 'SOTA',
+    sotaTail: ' model.',
+  },
 };
 
 export type Translation = typeof en;
