@@ -3,8 +3,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useConfigStore } from '@/hooks/use-config-store';
-import { translationFor } from '@/i18n';
+import { currentTranslation } from '@/i18n';
 import { getElectron } from '@/lib/utils';
 import type { ExportFormat } from '@/types/export';
 
@@ -19,9 +18,8 @@ export function showExportSuccessToast(filePath: string, format: ExportFormat): 
   const electron = getElectron();
   const toastId = `export-${Date.now()}`;
   // Not a component, so there is no `useT` to call: this is a plain function invoked from a
-  // click handler. The language is read off the config store directly, which is the same value
-  // the hook would have resolved.
-  const t = translationFor(useConfigStore.getState().config?.uiLanguage);
+  // click handler.
+  const t = currentTranslation();
 
   toast.custom(
     () => (
