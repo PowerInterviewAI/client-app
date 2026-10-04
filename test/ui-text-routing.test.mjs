@@ -33,6 +33,34 @@ const SKIP_DIRS = new Set(['ui']);
 const NOT_PROSE = new Set();
 
 /**
+ * Attributes that carry copy, and so must be an expression rather than a string literal.
+ *
+ * `proceedLabel="Continue"` is why this list exists: one word, inside an attribute, on the
+ * permission gate `/main` opens during startup - so the dialog showed a translated title, rows
+ * and Cancel beside an English primary button. The between-tags match below cannot see inside a
+ * tag at all, and a one-word literal is too short for the prose heuristic even if it could.
+ *
+ * The rule is the shape, not the content: anything here written as `foo="bar"` is untranslated
+ * by construction, whatever the words are. `alt=""` is allowed, because an empty alt is how a
+ * decorative image is excluded from the accessibility tree.
+ */
+const COPY_ATTRIBUTES = [
+  'aria-label',
+  'placeholder',
+  'title',
+  'label',
+  'description',
+  'disclaimer',
+  'proceedLabel',
+  'alt',
+  'heading',
+];
+
+// `\\b` rather than `\b`: inside a template literal the latter is a backspace character, which
+// matches nothing and makes the whole check pass vacuously.
+const COPY_ATTRIBUTE = new RegExp(`\\b(${COPY_ATTRIBUTES.join('|')})="([^"]+)"`, 'g');
+
+/**
  * Text between two tags, kept to letters, spaces and sentence punctuation.
  *
  * Brackets, braces and operators are excluded, which is what keeps a ternary caught mid-flight
@@ -79,6 +107,23 @@ export async function run() {
   check(
     `no English prose is left as a JSX child${found.length ? ` (${found.join('; ')})` : ''}`,
     found.length === 0
+  );
+
+  const literalAttributes = [];
+  for (const file of files) {
+    const source = readSource(file)
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/^\s*\/\/.*$/gm, ' ');
+    for (const match of source.matchAll(COPY_ATTRIBUTE)) {
+      literalAttributes.push(
+        `${path.relative(RENDERER, file).replace(/\\/g, '/')}: ${match[1]}="${match[2]}"`
+      );
+    }
+  }
+
+  check(
+    `every copy-bearing attribute is an expression${literalAttributes.length ? ` (${literalAttributes.join('; ')})` : ''}`,
+    literalAttributes.length === 0
   );
 
   return failures;

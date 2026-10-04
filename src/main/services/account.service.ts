@@ -7,6 +7,7 @@ import {
 } from '../store/config.store.js';
 import { UserAccount } from '../types/account.js';
 import { InterviewConfig } from '../types/app-state.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { appStateService } from './app-state.service.js';
 
 /**
@@ -104,7 +105,7 @@ export class AccountService {
       if (interviewConfig) this.discardLegacyConfigIfOwned(account._id);
       return { success: true };
     } catch {
-      return { success: false, error: 'Failed to fetch account' };
+      return { success: false, error: uiStrings().accountErrors.fetchFailed };
     }
   }
 
@@ -207,7 +208,7 @@ export class AccountService {
       });
       return { success: true };
     } catch {
-      return { success: false, error: 'Failed to update account' };
+      return { success: false, error: uiStrings().accountErrors.updateFailed };
     }
   }
 
@@ -269,9 +270,7 @@ export class AccountService {
    * user in the wizard on a failed write, so the one screen the deployment cannot support was
    * also the one screen they could not leave except by skipping it.
    */
-  async setOnboardingCompleted(
-    completed: boolean
-  ): Promise<{ success: boolean; error?: string }> {
+  async setOnboardingCompleted(completed: boolean): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await this.client.updateOnboarding({ completed });
       if (response.error && response.status !== 404) {
@@ -287,7 +286,7 @@ export class AccountService {
       });
       return { success: true };
     } catch {
-      return { success: false, error: 'Failed to save your setup' };
+      return { success: false, error: uiStrings().accountErrors.onboardingFailed };
     }
   }
 }

@@ -69,7 +69,7 @@ export default function Titlebar() {
         <div className="flex flex-1 items-center gap-2 px-1">
           {!isMac && (
             <>
-              <img src={faviconSvg} alt="logo" className="h-5 w-5" />
+              <img src={faviconSvg} alt="" className="h-5 w-5" />
               <div className="text-sm font-medium" style={DRAG}>
                 {APP_NAME}
               </div>

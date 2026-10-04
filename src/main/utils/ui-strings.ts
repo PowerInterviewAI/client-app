@@ -32,6 +32,56 @@ export interface UiStrings {
   /** The session token expired under the user, from the health-check poll. */
   sessionExpired: string;
 
+  /**
+   * Auth and account failures **this process authored**, which is the distinction that matters.
+   *
+   * The renderer has a parallel set in `t.auth.errors`, and they are not redundant: those are
+   * for a rejection that arrived with no message at all, while these are the message. Every
+   * `{ success: false, error }` below sets `error`, so the renderer's `result?.error || t...`
+   * never reaches its fallback on these paths - which left the most frequently read error in
+   * the app ("Invalid email or password") in English on a Russian install.
+   *
+   * Anything the backend sent is still preferred over both and passed through untouched.
+   */
+  authErrors: Record<
+    | 'sendCodeFailed'
+    | 'invalidCode'
+    | 'signupFailed'
+    | 'invalidCredentials'
+    | 'loginFailed'
+    | 'logoutFailed'
+    | 'changePasswordFailed'
+    | 'sendResetCodeFailed'
+    | 'invalidResetCode'
+    | 'resetFailed',
+    string
+  >;
+
+  accountErrors: Record<'fetchFailed' | 'updateFailed' | 'onboardingFailed', string>;
+
+  /**
+   * Written onto a suggestion's `error` field, which the panel renders verbatim on the card the
+   * candidate is reading mid-interview.
+   */
+  suggestionErrors: Record<
+    'tooManyRequests' | 'generateFailed' | 'cannotReachServer' | 'responseTimedOut',
+    string
+  >;
+
+  /**
+   * Written onto the mock session's `error`, which `/mock-interview` deliberately surfaces - the
+   * microphone one in particular is the explanation a candidate is owed for a session that
+   * skipped its way through questions they were already billed for.
+   */
+  mockErrors: Record<
+    | 'liveRunning'
+    | 'firstQuestionFailed'
+    | 'startFailed'
+    | 'nothingRecorded'
+    | 'endedBeforeScoring',
+    string
+  > & { firstQuestionFailedWith: (reason: string) => string };
+
   /** One action-suggestion step refused because another is still running. */
   actionNames: Record<'screenshotCapture' | 'captureSuggestion', string>;
   actionBlocked: (runningAction: string) => string;
@@ -75,6 +125,43 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
 
     sessionExpired: 'Your session expired, please log in again.',
 
+    authErrors: {
+      sendCodeFailed: 'Failed to send verification code',
+      invalidCode: 'Invalid or expired verification code',
+      signupFailed: 'Signup failed',
+      invalidCredentials: 'Invalid email or password',
+      loginFailed: 'Login failed',
+      logoutFailed: 'Logout failed',
+      changePasswordFailed: 'Change password failed',
+      sendResetCodeFailed: 'Failed to send password reset code',
+      invalidResetCode: 'Invalid or expired reset code',
+      resetFailed: 'Password reset failed',
+    },
+
+    accountErrors: {
+      fetchFailed: 'Failed to fetch account',
+      updateFailed: 'Failed to update account',
+      onboardingFailed: 'Failed to save your setup',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: 'Too many requests. Please try again later.',
+      generateFailed: 'Failed to generate response.',
+      cannotReachServer: 'Could not reach the server. Check your connection and try again.',
+      responseTimedOut: 'The response timed out. Please try again.',
+    },
+
+    mockErrors: {
+      liveRunning: 'Stop the live interview before starting a mock interview.',
+      firstQuestionFailed: 'Failed to generate the first question. Please try again.',
+      firstQuestionFailedWith: (reason: string) =>
+        `Could not generate the first question: ${reason}`,
+      startFailed: 'Failed to start the mock interview',
+      nothingRecorded:
+        'The interview ended with nothing recorded. Check that the right microphone is selected and that it is not muted, then try again.',
+      endedBeforeScoring: 'The interview was ended before scoring finished.',
+    },
+
     actionNames: {
       screenshotCapture: 'Screenshot capture',
       captureSuggestion: 'Action suggestion generation',
@@ -112,6 +199,43 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       'Здесь будут подсказки по запросу: например, вариант ответа, решение задачи по программированию, описание схемы и так далее.',
 
     sessionExpired: 'Сессия истекла, войдите заново.',
+
+    authErrors: {
+      sendCodeFailed: 'Не удалось отправить код подтверждения',
+      invalidCode: 'Код подтверждения неверен или истёк',
+      signupFailed: 'Не удалось создать учётную запись',
+      invalidCredentials: 'Неверная почта или пароль',
+      loginFailed: 'Не удалось войти',
+      logoutFailed: 'Не удалось выйти',
+      changePasswordFailed: 'Не удалось изменить пароль',
+      sendResetCodeFailed: 'Не удалось отправить код сброса пароля',
+      invalidResetCode: 'Код сброса неверен или истёк',
+      resetFailed: 'Не удалось изменить пароль',
+    },
+
+    accountErrors: {
+      fetchFailed: 'Не удалось получить данные учётной записи',
+      updateFailed: 'Не удалось обновить учётную запись',
+      onboardingFailed: 'Не удалось сохранить настройки',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: 'Слишком много запросов. Попробуйте позже.',
+      generateFailed: 'Не удалось создать ответ.',
+      cannotReachServer:
+        'Не удалось связаться с сервером. Проверьте подключение и попробуйте снова.',
+      responseTimedOut: 'Ответ не пришёл вовремя. Попробуйте снова.',
+    },
+
+    mockErrors: {
+      liveRunning: 'Остановите живое собеседование, прежде чем начинать пробное.',
+      firstQuestionFailed: 'Не удалось создать первый вопрос. Попробуйте снова.',
+      firstQuestionFailedWith: (reason: string) => `Не удалось создать первый вопрос: ${reason}`,
+      startFailed: 'Не удалось начать пробное собеседование',
+      nothingRecorded:
+        'Собеседование закончилось, и ничего не записано. Проверьте, что выбран нужный микрофон и он не выключен, затем попробуйте снова.',
+      endedBeforeScoring: 'Собеседование завершили до того, как закончилась оценка.',
+    },
 
     actionNames: {
       screenshotCapture: 'Создание снимка экрана',

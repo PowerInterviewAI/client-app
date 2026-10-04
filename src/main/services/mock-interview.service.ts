@@ -41,6 +41,7 @@ import {
   type SuggestionStallStage,
 } from '../utils/suggestion-error.js';
 import { transcriptSeparator } from '../utils/transcript-join.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { appStateService } from './app-state.service.js';
 
 /**
@@ -224,7 +225,7 @@ class MockInterviewService {
     // direction - there is no start hotkey into a mock session for it to intercept the way it
     // intercepts every route into the live assistant, so this side needed its own guard.
     if (appStateService.getState().runningState !== RunningState.Idle) {
-      throw new Error('Stop the live interview before starting a mock interview.');
+      throw new Error(uiStrings().mockErrors.liveRunning);
     }
 
     const seq = ++this.sessionSeq;
@@ -258,15 +259,15 @@ class MockInterviewService {
         if (this.lastQuestionUnaffordable) throw new Error(this.lastQuestionError);
         throw new Error(
           this.lastQuestionError
-            ? `Could not generate the first question: ${this.lastQuestionError}`
-            : 'Failed to generate the first question. Please try again.'
+            ? uiStrings().mockErrors.firstQuestionFailedWith(this.lastQuestionError)
+            : uiStrings().mockErrors.firstQuestionFailed
         );
       }
     } catch (error) {
       if (seq !== this.sessionSeq) return;
       this.session = {
         ...initialSession(),
-        error: error instanceof Error ? error.message : 'Failed to start the mock interview',
+        error: error instanceof Error ? error.message : uiStrings().mockErrors.startFailed,
       };
       this.broadcast();
       throw error;
@@ -754,9 +755,7 @@ class MockInterviewService {
       const answered = this.session.answers.length > 0;
       this.session = {
         ...initialSession(),
-        error: answered
-          ? 'The interview ended with nothing recorded. Check that the right microphone is selected and that it is not muted, then try again.'
-          : null,
+        error: answered ? uiStrings().mockErrors.nothingRecorded : null,
       };
       this.broadcast();
       return;
@@ -899,7 +898,7 @@ class MockInterviewService {
       this.session = {
         ...this.session,
         report: null,
-        reportError: 'The interview was ended before scoring finished.',
+        reportError: uiStrings().mockErrors.endedBeforeScoring,
         state: MockInterviewState.Finished,
       };
       this.broadcast();

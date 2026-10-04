@@ -1,5 +1,6 @@
 import { AuthApi } from '../api/auth.js';
 import { configStore } from '../store/config.store.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { accountService } from './account.service.js';
 import { appStateService } from './app-state.service.js';
 import { toolsService } from './tools.service.js';
@@ -32,12 +33,12 @@ export class AuthService {
       if (response.error) {
         return {
           success: false,
-          error: response.error.message || 'Failed to send verification code',
+          error: response.error.message || uiStrings().authErrors.sendCodeFailed,
         };
       }
       return { success: true };
     } catch {
-      return { success: false, error: 'Failed to send verification code' };
+      return { success: false, error: uiStrings().authErrors.sendCodeFailed };
     }
   }
 
@@ -53,12 +54,12 @@ export class AuthService {
       if (response.error) {
         return {
           success: false,
-          error: response.error.message || 'Invalid or expired verification code',
+          error: response.error.message || uiStrings().authErrors.invalidCode,
         };
       }
       return { success: true };
     } catch {
-      return { success: false, error: 'Invalid or expired verification code' };
+      return { success: false, error: uiStrings().authErrors.invalidCode };
     }
   }
 
@@ -80,14 +81,17 @@ export class AuthService {
           verification_code: verificationCode,
         });
         if (response.error) {
-          return { success: false, error: response.error.message || 'Signup failed' };
+          return {
+            success: false,
+            error: response.error.message || uiStrings().authErrors.signupFailed,
+          };
         }
         return { success: true };
       } catch {
-        return { success: false, error: 'Signup failed' };
+        return { success: false, error: uiStrings().authErrors.signupFailed };
       }
     } else {
-      return { success: false, error: 'Invalid email or password' };
+      return { success: false, error: uiStrings().authErrors.invalidCredentials };
     }
   }
 
@@ -101,7 +105,10 @@ export class AuthService {
       try {
         const response = await this.client.login({ email, password });
         if (response.error) {
-          return { success: false, error: response.error.message || 'Login failed' };
+          return {
+            success: false,
+            error: response.error.message || uiStrings().authErrors.loginFailed,
+          };
         }
 
         // persist credentials in the config store only if rememberMe is enabled
@@ -130,10 +137,10 @@ export class AuthService {
 
         return { success: true };
       } catch {
-        return { success: false, error: 'Login failed' };
+        return { success: false, error: uiStrings().authErrors.loginFailed };
       }
     } else {
-      return { success: false, error: 'Invalid email or password' };
+      return { success: false, error: uiStrings().authErrors.invalidCredentials };
     }
   }
 
@@ -144,11 +151,14 @@ export class AuthService {
     try {
       const response = await this.client.logout();
       if (response.error) {
-        return { success: false, error: response.error.message || 'Logout failed' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().authErrors.logoutFailed,
+        };
       }
       return { success: true };
     } catch {
-      return { success: false, error: 'Logout failed' };
+      return { success: false, error: uiStrings().authErrors.logoutFailed };
     } finally {
       disableStealth();
       // clear session token and update app state
@@ -191,7 +201,10 @@ export class AuthService {
         new_password: newPassword,
       });
       if (response.error) {
-        return { success: false, error: response.error.message || 'Change password failed' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().authErrors.changePasswordFailed,
+        };
       }
 
       // Only persist when the user opted in - login/logout leave the store empty otherwise,
@@ -212,7 +225,7 @@ export class AuthService {
 
       return { success: true };
     } catch {
-      return { success: false, error: 'Change password failed' };
+      return { success: false, error: uiStrings().authErrors.changePasswordFailed };
     }
   }
 
@@ -230,12 +243,12 @@ export class AuthService {
       if (response.error) {
         return {
           success: false,
-          error: response.error.message || 'Failed to send password reset code',
+          error: response.error.message || uiStrings().authErrors.sendResetCodeFailed,
         };
       }
       return { success: true };
     } catch {
-      return { success: false, error: 'Failed to send password reset code' };
+      return { success: false, error: uiStrings().authErrors.sendResetCodeFailed };
     }
   }
 
@@ -251,12 +264,12 @@ export class AuthService {
       if (response.error) {
         return {
           success: false,
-          error: response.error.message || 'Invalid or expired reset code',
+          error: response.error.message || uiStrings().authErrors.invalidResetCode,
         };
       }
       return { success: true };
     } catch {
-      return { success: false, error: 'Invalid or expired reset code' };
+      return { success: false, error: uiStrings().authErrors.invalidResetCode };
     }
   }
 
@@ -275,7 +288,10 @@ export class AuthService {
         new_password: newPassword,
       });
       if (response.error) {
-        return { success: false, error: response.error.message || 'Password reset failed' };
+        return {
+          success: false,
+          error: response.error.message || uiStrings().authErrors.resetFailed,
+        };
       }
 
       // The login form pre-fills from the store when rememberMe is on, and if what it holds
@@ -305,7 +321,7 @@ export class AuthService {
 
       return { success: true };
     } catch {
-      return { success: false, error: 'Password reset failed' };
+      return { success: false, error: uiStrings().authErrors.resetFailed };
     }
   }
 }

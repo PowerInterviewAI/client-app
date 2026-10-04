@@ -385,7 +385,7 @@ export default function MainPage() {
         open={startupPermGateOpen}
         onOpenChange={setStartupPermGateOpen}
         onProceed={() => {}}
-        proceedLabel="Continue"
+        proceedLabel={t.common.continue}
       />
       <TransitionOverlay />
     </div>

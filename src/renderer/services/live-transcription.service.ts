@@ -1,3 +1,4 @@
+import { currentTranslation } from '@/i18n';
 import { getElectron } from '@/lib/utils';
 import { DEFAULT_LANGUAGE, Language } from '@/types/language';
 
@@ -66,11 +67,7 @@ export const enum StreamMetering {
  * at which point `channels` is moot. Dropping `channels` once `metered` existed would halve every
  * mock interview's bill on every deployment that has not been updated yet.
  */
-function buildStreamingUrl(
-  language: Language,
-  channels: number,
-  metering: StreamMetering
-): string {
+function buildStreamingUrl(language: Language, channels: number, metering: StreamMetering): string {
   const params = new URLSearchParams();
   if (language !== DEFAULT_LANGUAGE) params.set('language', language);
   if (channels !== LIVE_STREAM_CHANNELS) params.set('channels', String(channels));
@@ -559,7 +556,7 @@ class LiveTranscriptionService {
         navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }),
         new Promise<never>((_, reject) =>
           window.setTimeout(
-            () => reject(new Error('Screen capture timed out. Please try again.')),
+            () => reject(new Error(currentTranslation().assistant.screenCaptureTimedOut)),
             GET_DISPLAY_MEDIA_TIMEOUT_MS
           )
         ),

@@ -12,7 +12,7 @@ export function LoadingPage({ disclaimer }: LoadingProps) {
     <div className="flex justify-center items-center h-screen w-full bg-background ">
       <div className="flex flex-col items-center">
         <div className="flex gap-2 items-center">
-          <img src={logoSvg} alt="Logo" width={32} height={32} className="mx-auto" />
+          <img src={logoSvg} alt="" width={32} height={32} className="mx-auto" />
           <p className="text-2xl font-bold">{APP_NAME}</p>
         </div>
         <p className="animate-pulse text-sm mt-4">{disclaimer}</p>

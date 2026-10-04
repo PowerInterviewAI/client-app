@@ -1124,6 +1124,7 @@ export const en = {
     stoppedUncleanlyHint: 'Restart the app if transcription or suggestions keep arriving.',
     startFailed: 'Failed to start assistant',
     stopFailed: 'Failed to stop the assistant',
+    screenCaptureTimedOut: 'Screen capture timed out. Please try again.',
   },
 
   mockStartChecks: {
