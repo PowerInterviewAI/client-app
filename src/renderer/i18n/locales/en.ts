@@ -1103,6 +1103,36 @@ export const en = {
       getCredits: 'Failed to get credits',
     },
   },
+
+  settingsToasts: {
+    saveMicrophoneFailed: 'Failed to save the selected microphone',
+    microphoneSwapFailed: 'Saved, but the interview is still using the previous microphone',
+    microphoneSwapFailedHint: 'Check the device is connected, then stop and start the assistant.',
+    saveLanguageFailed: 'Failed to save interview language',
+    languageHalfApplied: 'Suggestions switched language; transcription is still reconnecting',
+    languageHalfAppliedHint:
+      'It keeps retrying. Stop and start the assistant if it does not come back.',
+    saveSuggestionModeFailed: 'Failed to save the suggestion mode',
+    saveTranscriptPanelFailed: 'Failed to save transcription panel setting',
+    saveMockHintsFailed: 'Failed to save live suggestions setting',
+    saveUiLanguageFailed: 'Failed to save the app language',
+  },
+
+  assistant: {
+    mockRunning: 'Stop the mock interview before starting a live session.',
+    stoppedUncleanly: 'The assistant stopped, but not everything shut down cleanly',
+    stoppedUncleanlyHint: 'Restart the app if transcription or suggestions keep arriving.',
+  },
+
+  mockStartChecks: {
+    deviceNotFound: (deviceName: string) =>
+      `Audio input device "${deviceName}" is not found. Choose a different one from the main screen's audio settings.`,
+    unaffordable: (questionCount: number) =>
+      `Not enough credits for a ${questionCount}-question mock interview`,
+    unaffordableHint: (price: number, credits: number) =>
+      `It costs ${price} credits and you have ${credits}.`,
+    buyCredits: 'Buy credits',
+  },
 };
 
 export type Translation = typeof en;

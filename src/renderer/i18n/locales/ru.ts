@@ -1094,4 +1094,37 @@ export const ru: Translation = {
       getCredits: 'Не удалось получить баланс кредитов',
     },
   },
+
+  settingsToasts: {
+    saveMicrophoneFailed: 'Не удалось сохранить выбранный микрофон',
+    microphoneSwapFailed: 'Сохранено, но собеседование продолжается на предыдущем микрофоне',
+    microphoneSwapFailedHint:
+      'Проверьте, что устройство подключено, затем остановите и запустите ассистента.',
+    saveLanguageFailed: 'Не удалось сохранить язык собеседования',
+    languageHalfApplied:
+      'Подсказки переключились на новый язык; распознавание ещё переподключается',
+    languageHalfAppliedHint:
+      'Попытки продолжаются. Если оно не вернётся, остановите и запустите ассистента.',
+    saveSuggestionModeFailed: 'Не удалось сохранить вид подсказок',
+    saveTranscriptPanelFailed: 'Не удалось сохранить настройку панели расшифровки',
+    saveMockHintsFailed: 'Не удалось сохранить настройку живых подсказок',
+    saveUiLanguageFailed: 'Не удалось сохранить язык приложения',
+  },
+
+  assistant: {
+    mockRunning: 'Завершите пробное собеседование, прежде чем запускать живую сессию.',
+    stoppedUncleanly: 'Ассистент остановлен, но не всё завершилось корректно',
+    stoppedUncleanlyHint:
+      'Если расшифровка или подсказки продолжают приходить, перезапустите приложение.',
+  },
+
+  mockStartChecks: {
+    deviceNotFound: (deviceName: string) =>
+      `Микрофон «${deviceName}» не найден. Выберите другой в настройках звука на главном экране.`,
+    unaffordable: (questionCount: number) =>
+      `Недостаточно кредитов на пробное собеседование из ${questionCount} ${plural(questionCount, 'вопроса', 'вопросов', 'вопросов')}`,
+    unaffordableHint: (price: number, credits: number) =>
+      `Оно стоит ${price} ${plural(price, 'кредит', 'кредита', 'кредитов')}, а у вас ${credits}.`,
+    buyCredits: 'Купить кредиты',
+  },
 };

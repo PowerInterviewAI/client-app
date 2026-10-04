@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
+import { currentTranslation } from '@/i18n';
+
 import { useConfigStore } from './use-config-store';
 
 /**
@@ -17,7 +19,7 @@ export function useTranscriptPanel() {
     const { config: current, updateConfig } = useConfigStore.getState();
     updateConfig({ showTranscriptPanel: current?.showTranscriptPanel === false }).catch((e) => {
       console.error('Failed to save transcription panel setting', e);
-      toast.error('Failed to save transcription panel setting');
+      toast.error(currentTranslation().settingsToasts.saveTranscriptPanelFailed);
     });
   }, []);
 

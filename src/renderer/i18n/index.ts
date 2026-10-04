@@ -62,6 +62,23 @@ export function useT(): Translation {
 }
 
 /**
+ * The dictionary, read at the moment it is needed rather than through a hook.
+ *
+ * Several of the setting hooks deliberately keep their callbacks referentially stable, and say
+ * so: the global hotkey listeners subscribe to them once instead of resubscribing on every
+ * config change. `useT()` inside such a callback would leave it holding whichever dictionary was
+ * current when the callback was created, and adding `t` to the dependency array would defeat the
+ * stability those comments describe. This reads the language the same way those callbacks
+ * already read the config, so it is always current and costs no dependency.
+ *
+ * Also what the handful of non-component callers use - `showExportSuccessToast` and the zustand
+ * store in `use-assistant-service`, neither of which can call a hook at all.
+ */
+export function currentTranslation(): Translation {
+  return translationFor(useConfigStore.getState().config?.uiLanguage);
+}
+
+/**
  * Keep the paint-time cache and the document's `lang` in step with the setting.
  *
  * Mounted once, in `MainFrame`. `lang` is not decoration: it picks the font fallback and the

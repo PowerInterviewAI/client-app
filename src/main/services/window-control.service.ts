@@ -4,6 +4,7 @@ import { MIN_HEIGHT, MIN_WIDTH, OPACITY_LEVELS } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { RunningState } from '../types/app-state.js';
 import { isMockInterviewSessionActive } from '../types/mock-interview.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
 
@@ -583,7 +584,7 @@ export function disableStealth(): void {
 function stealthUnavailableReason(): string | null {
   const state = appStateService.getState();
 
-  if (!state.isLoggedIn) return 'You must be logged in to use stealth mode.';
+  if (!state.isLoggedIn) return uiStrings().stealthSignedOut;
 
   // Mock interview is deliberate practice, not a live call - it needs no always-on-top and no
   // screen-share hiding, and a click-through, non-focusable window would strand the session
@@ -591,14 +592,14 @@ function stealthUnavailableReason(): string | null {
   // session deliberately leaves `runningState` on Idle, so the answer "start a live interview
   // first" would be the wrong thing to say to someone who is mid-interview already.
   if (isMockInterviewSessionActive(state.mockInterview)) {
-    return 'Stealth mode is off during a mock interview. This is practice, not a live call.';
+    return uiStrings().stealthDuringMock;
   }
 
   // The same predicate `shouldHideSurfaces()` reads, so the two cannot disagree about when a
   // session is on air. `Starting` is deliberately not enough: nothing is being captured yet, and
   // a start that fails leaves stealth on over a console that never opened.
   if (!isAssistantRunning()) {
-    return 'Stealth mode is only available during a live interview.';
+    return uiStrings().stealthNotRunning;
   }
 
   return null;
@@ -641,7 +642,7 @@ export function toggleOpacity(): void {
 
   if (!_stealth) {
     pushNotificationService.pushNotification({
-      message: 'Opacity toggle is only available in stealth mode.',
+      message: uiStrings().opacityStealthOnly,
       type: 'warning',
     });
     console.log('⚠️ Opacity toggle is only available in stealth mode');

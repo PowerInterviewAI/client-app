@@ -4,6 +4,7 @@
  */
 
 import { ACTION_LOCK_MAX_HOLD_MS } from '../consts.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { pushNotificationService } from './push-notification.service.js';
 
 export enum ActionType {
@@ -76,9 +77,10 @@ class ActionLockService {
    * Notify user that action is blocked
    */
   private notifyBlocked(requestedAction: ActionType, runningAction: ActionType): void {
+    const strings = uiStrings();
     const actionNames: Record<ActionType, string> = {
-      [ActionType.ScreenshotCapture]: 'Screenshot capture',
-      [ActionType.CaptureSuggestion]: 'Action suggestion generation',
+      [ActionType.ScreenshotCapture]: strings.actionNames.screenshotCapture,
+      [ActionType.CaptureSuggestion]: strings.actionNames.captureSuggestion,
     };
 
     const requested = actionNames[requestedAction];
@@ -88,7 +90,7 @@ class ActionLockService {
 
     pushNotificationService.pushNotification({
       type: 'warning',
-      message: `${running} is in progress. Try again a bit later.`,
+      message: strings.actionBlocked(running),
     });
   }
 }

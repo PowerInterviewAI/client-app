@@ -10,7 +10,11 @@ export interface PermissionsStatus {
   screenNeedsRelaunch: boolean;
 }
 
-const DEFAULT: PermissionsStatus = { mic: 'unknown', screen: 'unknown', screenNeedsRelaunch: false };
+const DEFAULT: PermissionsStatus = {
+  mic: 'unknown',
+  screen: 'unknown',
+  screenNeedsRelaunch: false,
+};
 
 export function usePermissions(active: boolean) {
   const [status, setStatus] = useState<PermissionsStatus>(DEFAULT);

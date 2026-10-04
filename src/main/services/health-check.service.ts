@@ -6,6 +6,7 @@
 import { HealthCheckApi } from '../api/health-check.js';
 import { MockInterviewApi } from '../api/mock-interview.js';
 import { safeSleep } from '../utils/sleep.js';
+import { uiStrings } from '../utils/ui-strings.js';
 import { accountService } from './account.service.js';
 import { appStateService } from './app-state.service.js';
 import { authService } from './auth.service.js';
@@ -189,7 +190,7 @@ export class HealthCheckService {
             console.warn('[HealthCheckService] Session expired (401) - logging out');
             pushNotificationService.pushNotification({
               type: 'warning',
-              message: 'Your session expired, please log in again.',
+              message: uiStrings().sessionExpired,
             });
             await authService.logout();
           } else if (res.data?.credits !== undefined) {

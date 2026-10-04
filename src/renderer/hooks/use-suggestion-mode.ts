@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
+import { currentTranslation } from '@/i18n';
+
 import { useConfigStore } from './use-config-store';
 
 /**
@@ -22,7 +24,7 @@ export function useSuggestionMode() {
     const { updateConfig } = useConfigStore.getState();
     updateConfig({ hintOnlyMode: hintOnly }).catch((e) => {
       console.error('Failed to save the suggestion mode', e);
-      toast.error('Failed to save the suggestion mode');
+      toast.error(currentTranslation().settingsToasts.saveSuggestionModeFailed);
     });
   }, []);
 

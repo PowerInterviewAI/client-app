@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 import { create } from 'zustand';
 
+import { currentTranslation } from '@/i18n';
 import { getElectron } from '@/lib/utils';
 import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
@@ -32,7 +33,7 @@ export const useAssistantService = create<AssistantService>((set) => ({
     // running both would bill twice. There is no start hotkey for the live assistant, so this
     // one check covers every route into it.
     if (isMockInterviewSessionActive(getAppStateSnapshot()?.mockInterview ?? null)) {
-      const message = 'Stop the mock interview before starting a live session.';
+      const message = currentTranslation().assistant.mockRunning;
       set({ error: message });
       throw new Error(message);
     }
@@ -109,8 +110,9 @@ export const useAssistantService = create<AssistantService>((set) => ({
         // Said out loud rather than left in store state nothing renders. The session is over
         // either way, but a channel that refused to close is the difference between "stopped"
         // and "still listening", and that is not something to discover from a log file.
-        toast.warning('The assistant stopped, but not everything shut down cleanly', {
-          description: 'Restart the app if transcription or suggestions keep arriving.',
+        const t = currentTranslation();
+        toast.warning(t.assistant.stoppedUncleanly, {
+          description: t.assistant.stoppedUncleanlyHint,
         });
       }
 

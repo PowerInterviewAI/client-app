@@ -189,5 +189,71 @@ export async function run() {
 
   configStore.updateConfig({ uiLanguage: 'en', language: 'en' });
 
+  // Main has its own share of the chrome - the placeholder panel copy it seeds, and the push
+  // notifications it raises as toasts from paths the renderer cannot see. `UiStrings` makes a
+  // missing key a build error and `Record<UiLanguage, UiStrings>` makes a missing language one,
+  // so what is left is the same thing the renderer locale's check covers: a Russian entry that
+  // is still its English original.
+  const mainSource = codeOnly(
+    readSource(new URL('../src/main/utils/ui-strings.ts', import.meta.url))
+  );
+  const russianBlock = mainSource.slice(mainSource.indexOf('[UiLanguage.Russian]:'));
+  const mainLiterals = [
+    ...russianBlock.matchAll(/'(?:[^'\\\n]|\\.)*'(\s*:)?/g),
+    ...russianBlock.matchAll(/`(?:[^`\\]|\\.)*`(\s*:)?/g),
+  ]
+    .filter((m) => m[1] === undefined)
+    .map((m) => m[0].slice(1, -1))
+    .map((literal) => literal.replace(/\$\{[^}]*\}/g, ''));
+
+  check('the main-process table has strings to check', mainLiterals.length > 10);
+
+  const mainUntranslated = mainLiterals.filter(
+    (literal) =>
+      /\p{Script=Latin}/u.test(literal) &&
+      !/\p{Script=Cyrillic}/u.test(literal) &&
+      !LATIN_BY_DESIGN.has(literal)
+  );
+  check(
+    `every Russian main-process string is in Russian${mainUntranslated.length ? ` (left in English: ${mainUntranslated.map((s) => JSON.stringify(s)).join(', ')})` : ''}`,
+    mainUntranslated.length === 0
+  );
+
+  // `uiStrings()` reads the store per call rather than capturing once, because the paths it
+  // serves - a health-check poll, a global hotkey handler - outlive any one setting.
+  const { uiStrings } = await loadMain('utils/ui-strings.js');
+  check(
+    'uiStrings follows the stored language',
+    /^Transcripts/.test(uiStrings().placeholderTranscript)
+  );
+  configStore.updateConfig({ uiLanguage: 'ru' });
+  check(
+    'and follows it again once it moves',
+    /\p{Script=Cyrillic}/u.test(uiStrings().placeholderTranscript)
+  );
+
+  // The placeholder is written on launch and after a Clear, so a language changed between those
+  // two would leave English sample copy in the panels of an otherwise Russian app. Driven here
+  // rather than left to a code read, because the no-op half is the half that matters: once a
+  // real interview has written to the history, re-seeding would throw it away.
+  const { appStateService } = await loadMain('services/app-state.service.js');
+  appStateService.refreshPlaceholderLanguage();
+  check(
+    'a chrome language change re-seeds the placeholder copy',
+    /\p{Script=Cyrillic}/u.test(appStateService.getState().transcripts[0]?.text ?? '')
+  );
+
+  appStateService.updateState({ transcripts: [], liveSuggestions: [], actionSuggestions: [] });
+  appStateService.refreshPlaceholderLanguage();
+  check(
+    'and is a no-op once the placeholder has been retired',
+    appStateService.getState().transcripts.length === 0
+  );
+
+  // Restored for the tests after this one, which read the placeholder in English and assume the
+  // state a freshly constructed service is in.
+  configStore.updateConfig({ uiLanguage: 'en' });
+  appStateService.setPlaceholderState();
+
   return failures;
 }

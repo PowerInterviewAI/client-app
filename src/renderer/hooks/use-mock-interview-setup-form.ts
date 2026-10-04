@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useT } from '@/i18n';
 import { MOCK_MAX_FOLLOW_UPS_PER_QUESTION } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 import { mockSessionCeiling, mockSessionPrice } from '@/types/app-state';
@@ -25,6 +26,7 @@ import { MockDifficulty, MockSeniority } from '@/types/mock-interview';
  * gathered here, so there is nothing to duplicate and nothing that can drift out of sync with it.
  */
 export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) => Promise<void>) {
+  const t = useT();
   const navigate = useNavigate();
   const { appState } = useAppState();
   const { config } = useConfigStore();
@@ -48,9 +50,7 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
 
   /** The most it could cost, if every question drew the maximum number of follow-ups. */
   const ceilingOf = (count: number): number | null =>
-    pricing === null
-      ? null
-      : mockSessionCeiling(pricing, count, MOCK_MAX_FOLLOW_UPS_PER_QUESTION);
+    pricing === null ? null : mockSessionCeiling(pricing, count, MOCK_MAX_FOLLOW_UPS_PER_QUESTION);
 
   /**
    * Whether this balance can see a session of `count` questions through to its report.
@@ -74,28 +74,26 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
 
   const checkCanStart = (): boolean => {
     if (!appState?.interviewConfigLoaded) {
-      toast.error('Could not load your saved configuration. Reconnecting - try again in a moment.');
+      toast.error(t.controlPanel.checks.configUnavailable);
       void getElectron()?.account?.refresh();
       return false;
     }
     if (!appState?.interviewConfig?.fullName) {
-      toast.error('Full name is not set');
+      toast.error(t.controlPanel.checks.nameMissing);
       navigate('/account');
       return false;
     }
     if (!appState?.interviewConfig?.hasProfileData) {
-      toast.error('Profile data is not set');
+      toast.error(t.controlPanel.checks.profileMissing);
       navigate('/account');
       return false;
     }
     if (noAudioInputDevices) {
-      toast.error('No microphone was detected. Connect one and try again.');
+      toast.error(t.controlPanel.checks.noMicrophone);
       return false;
     }
     if (audioInputDeviceNotFound) {
-      toast.error(
-        `Audio input device "${selectedAudioInputDeviceName}" is not found. Choose a different one from the main screen's audio settings.`
-      );
+      toast.error(t.mockStartChecks.deviceNotFound(selectedAudioInputDeviceName));
       return false;
     }
     // Last of the checks, and the only one with somewhere to send the user. A mock that stops
@@ -105,9 +103,9 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
     // of reach.
     if (!canAfford(questionCount)) {
       const price = priceOf(questionCount);
-      toast.error(`Not enough credits for a ${questionCount}-question mock interview`, {
-        description: `It costs ${price} credits and you have ${credits}.`,
-        action: { label: 'Buy credits', onClick: () => navigate('/payment') },
+      toast.error(t.mockStartChecks.unaffordable(questionCount), {
+        description: t.mockStartChecks.unaffordableHint(price ?? 0, credits),
+        action: { label: t.mockStartChecks.buyCredits, onClick: () => navigate('/payment') },
       });
       return false;
     }

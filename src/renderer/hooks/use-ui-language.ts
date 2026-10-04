@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
+import { toast } from 'sonner';
 
-import { useUiLanguageCode } from '@/i18n';
+import { currentTranslation, useUiLanguageCode } from '@/i18n';
 import { getUiLanguageOption, type UiLanguage } from '@/types/ui-language';
 
 import { useConfigStore } from './use-config-store';
@@ -21,7 +22,15 @@ export function useUiLanguage() {
   const setUiLanguage = useCallback(
     async (next: UiLanguage) => {
       if (next === uiLanguage) return;
-      await updateConfig({ uiLanguage: next });
+      try {
+        await updateConfig({ uiLanguage: next });
+      } catch (e) {
+        // `updateConfig` rolls the optimistic value back, so the picker snaps to the language
+        // that is still in force - which on its own looks like the click did nothing. Reported
+        // in the language the app is still in, read after the rollback.
+        console.error('Failed to save the app language', e);
+        toast.error(currentTranslation().settingsToasts.saveUiLanguageFailed);
+      }
     },
     [uiLanguage, updateConfig]
   );
