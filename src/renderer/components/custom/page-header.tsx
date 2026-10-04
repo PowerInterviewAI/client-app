@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
+import { useT } from '@/i18n';
 
 interface PageHeaderProps {
   title: string;
@@ -23,6 +24,7 @@ interface PageHeaderProps {
  * covers.
  */
 export default function PageHeader({ title, fallback = '/', children }: PageHeaderProps) {
+  const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,7 +41,7 @@ export default function PageHeader({ title, fallback = '/', children }: PageHead
           size="icon-sm"
           onClick={handleBack}
           className="flex items-center shrink-0"
-          aria-label="Back"
+          aria-label={t.common.back}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </Button>

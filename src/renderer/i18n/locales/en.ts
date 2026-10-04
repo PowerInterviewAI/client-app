@@ -128,6 +128,169 @@ export const en = {
       description: 'Everything you can reach without touching the app during an interview.',
     },
   },
+
+  auth: {
+    fields: {
+      email: 'Email',
+      password: 'Password',
+      username: 'Username',
+      confirmPassword: 'Confirm Password',
+      newPassword: 'New password',
+      confirmNewPassword: 'Confirm new password',
+      verificationCode: 'Verification code',
+      resetCode: 'Reset code',
+    },
+
+    signIn: {
+      title: 'Sign in',
+      description: (appName: string) => `Use your account to access ${appName}`,
+      submit: 'Sign in',
+      submitting: 'Signing in…',
+      rememberMe: 'Remember me',
+      noAccount: 'Don’t have account? Create a new one.',
+      forgotPassword: 'Forgot your password?',
+    },
+
+    signup: {
+      title: 'Create account',
+      description: (appName: string) => `Register a new account for ${appName}`,
+      sendCode: 'Send code',
+      sending: 'Sending…',
+      haveAccount: 'Already have account? Just login',
+      /**
+       * Conditional on purpose. The backend answers the same whether or not the address already
+       * has an account, so a flat "we sent you a code" is wrong half the time - and saying which
+       * happened would put the account enumeration back over the top of the fix.
+       */
+      codeNotice: (email: string) =>
+        `If ${email} does not already have an account, we sent a verification code to it. Paste the code below. If it does, we sent a note explaining how to sign in instead.`,
+      verify: 'Verify',
+      verifying: 'Verifying…',
+      changeEmail: 'Change email',
+      resendCode: 'Resend code',
+      requestResent: 'Request sent again.',
+      resendFailed: 'Failed to resend.',
+      create: 'Create account',
+      creating: 'Creating…',
+      sendCodeFailed: 'Failed to send verification code. Please try again.',
+      invalidCode: 'Invalid or expired verification code.',
+      succeeded: 'Signup successful! Please login.',
+      failed: 'Signup failed. Please try again.',
+    },
+
+    reset: {
+      title: 'Reset password',
+      description: (appName: string) => `Set a new password for your ${appName} account`,
+      sendResetCode: 'Send reset code',
+      sending: 'Sending…',
+      backToSignIn: 'Back to sign in',
+      codeNotice: (email: string) =>
+        `If an account exists for ${email}, we sent a reset code to it. Paste the code below. It can only be used once, and the email says when it expires.`,
+      verify: 'Verify',
+      verifying: 'Verifying…',
+      changeEmail: 'Change email',
+      resendCode: 'Resend code',
+      codeResent: 'Reset code resent.',
+      resendFailed: 'Could not resend the reset code.',
+      signsYouOut: 'Setting a new password signs you out on every device.',
+      setNewPassword: 'Set new password',
+      saving: 'Saving…',
+      done: 'Password reset',
+      startOver: 'Start over',
+      sendFailed: 'Could not send a reset code. Please try again.',
+      verifyFailed: 'Could not verify the reset code.',
+      succeeded: 'Password reset. Please sign in with your new password.',
+      /** Retrying the same code cannot work, so this sends them for a new one. */
+      failed: 'Password reset failed. The code may have expired - request a new one.',
+    },
+
+    passwordsDoNotMatch: 'Passwords do not match',
+
+    /**
+     * Fallbacks for a failure the backend did not describe. Anything it does send is passed
+     * through untranslated - the client cannot translate a string it did not write.
+     */
+    errors: {
+      sendCodeFailed: 'Failed to send verification code',
+      invalidCode: 'Invalid or expired verification code',
+      loginFailed: 'Login failed',
+      signupFailed: 'Signup failed',
+      logoutFailed: 'Logout failed',
+      changePasswordFailed: 'Change password failed',
+      sendResetCodeFailed: 'Failed to send password reset code',
+      invalidResetCode: 'Invalid or expired reset code',
+      resetFailed: 'Password reset failed',
+    },
+  },
+
+  home: {
+    welcome: (firstName: string) => `Welcome back, ${firstName}`,
+    welcomeAnonymous: 'Welcome back',
+    subtitle: 'Practise against an AI interviewer, or get live help during a real call.',
+
+    mock: {
+      title: 'Start mock interview',
+      ready: 'The AI asks, you answer out loud, and you get a scored report at the end.',
+      unsupported: 'Not available on this server yet. Update the app, or try again later.',
+      liveRunning: 'Stop the live assistant first - the two cannot share your microphone.',
+      unaffordable: (price: number) =>
+        `Not enough credits - the shortest mock costs ${price}. Buy more to practise.`,
+    },
+
+    live: {
+      title: 'Start live assistant',
+      resumeTitle: 'Back to your interview',
+      ready: 'Transcribes your real interview and suggests answers as it happens.',
+      running: 'Your live assistant is already running.',
+      mockRunning: 'Finish the mock interview first - the two cannot share your microphone.',
+    },
+
+    accountLabel: 'Account',
+    notSignedIn: 'Not signed in',
+    creditsLabel: 'Credits',
+    creditsUnavailable: 'Unavailable',
+    buyCredits: 'Buy Credits',
+
+    nav: {
+      account: 'Account',
+      configuration: 'Configuration',
+      documentation: 'Documentation',
+    },
+
+    signOut: 'Sign out',
+    signingOut: 'Signing out…',
+    signOutBlocked: 'Stop the interview before signing out',
+    signOutFailed: 'Failed to sign out',
+  },
+
+  account: {
+    title: 'Account',
+    signedInAs: 'Signed in as',
+    password: {
+      title: 'Password',
+      description: 'Change your account password',
+      action: 'Change Password',
+    },
+    loadFailed: 'Could not load your saved details. Reconnect before editing.',
+    save: 'Save Changes',
+    saving: 'Saving…',
+    saved: 'Account details saved',
+    saveFailed: 'Failed to save your account details',
+  },
+
+  profileFields: {
+    fullName: 'Full name',
+    fullNamePlaceholder: 'The name you go by in the interview',
+    profile: 'Profile',
+    profilePlaceholder:
+      'Paste your CV/resume, LinkedIn profile, or a short bio. Suggestions are written from this, so more detail means answers that sound like you.',
+    context: 'Context',
+    contextPlaceholder:
+      'Paste the job description, the role requirements, or anything else about the interview you are preparing for.',
+    limitReached: (max: number) =>
+      `Character limit reached (${max.toLocaleString()}). Extra text was not added.`,
+    charactersLeft: (remaining: number) => `${remaining.toLocaleString()} characters left`,
+  },
 };
 
 export type Translation = typeof en;

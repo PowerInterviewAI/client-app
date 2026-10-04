@@ -24,7 +24,13 @@ const CYRILLIC = /\p{Script=Cyrillic}/u;
  * the same in both languages, which is occasionally true - an import path, a separator - and is
  * exactly the excuse an untranslated sentence would need, so each one is written out.
  */
-const LANGUAGE_NEUTRAL = new Set(['./en']);
+const LANGUAGE_NEUTRAL = new Set([
+  // The import specifier the locale's type comes from.
+  './en',
+  // The BCP-47 tag handed to `toLocaleString`, which is how a Russian locale groups thousands.
+  // It is the one string in the file that is correct *because* it is not Russian prose.
+  'ru-RU',
+]);
 
 export async function run() {
   const { check, failures } = createChecker('ui-language');
@@ -120,19 +126,11 @@ export async function run() {
     untranslated.length === 0
   );
 
-  // Interpolated values have to survive translation. A locale that drops one renders a sentence
-  // with a hole in it, and a locale that renames one does not compile - so this covers the half
-  // that does: the same number of `${}` slots per string as the English original.
-  const enSource = codeOnly(
-    readSource(new URL('../src/renderer/i18n/locales/en.ts', import.meta.url))
-  );
-  const slotCounts = (source) =>
-    [...source.matchAll(/`(?:[^`\\]|\\.)*`/g)].map((m) => [...m[0].matchAll(/\$\{/g)].length);
-  check(
-    'every interpolated string keeps all of its values',
-    JSON.stringify(slotCounts(enSource).slice().sort()) ===
-      JSON.stringify(slotCounts(ruSource).slice().sort())
-  );
+  // Interpolated values surviving translation is pinned by the compiler rather than here.
+  // `noUnusedParameters` is on in tsconfig.app.json, so a locale that takes `(email: string)`
+  // and then writes a sentence without it fails the build - which is a better check than
+  // counting `${}` slots per string, since a locale may legitimately add one: Russian's
+  // `charactersLeft` interpolates the plural form as well as the number.
 
   // The store is the single source for every consumer, so it is where an unknown code has to die
   // - `getConfig` resolves it on the way out, exactly as it does the interview language.

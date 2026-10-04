@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { useT } from '@/i18n';
+
 /**
  * useAuth
  * React hook that exposes authentication actions and simple
@@ -10,6 +12,10 @@ import { useState } from 'react';
  * can respond as needed.
  */
 export default function useAuth() {
+  // Only reached when the backend sent no message of its own. Anything it did send is passed
+  // through untranslated, because the client cannot translate a string it did not write.
+  const t = useT();
+
   // indicates an in-progress auth request (used to disable UI, show spinners)
   const [loading, setLoading] = useState(false);
   // last auth error message or null
@@ -23,14 +29,14 @@ export default function useAuth() {
     try {
       const result = await window.electronAPI?.auth.sendVerificationCode(email);
       if (!result?.success) {
-        const errMsg = result?.error || 'Failed to send verification code';
+        const errMsg = result?.error || t.auth.errors.sendCodeFailed;
         setError(errMsg);
         return false;
       }
       return true;
     } catch (err) {
       console.error('sendVerificationCode error:', err);
-      setError('Failed to send verification code');
+      setError(t.auth.errors.sendCodeFailed);
       return false;
     } finally {
       setLoading(false);
@@ -45,14 +51,14 @@ export default function useAuth() {
     try {
       const result = await window.electronAPI?.auth.verifyEmailCode(email, code);
       if (!result?.success) {
-        const errMsg = result?.error || 'Invalid or expired verification code';
+        const errMsg = result?.error || t.auth.errors.invalidCode;
         setError(errMsg);
         return false;
       }
       return true;
     } catch (err) {
       console.error('verifyEmailCode error:', err);
-      setError('Invalid or expired verification code');
+      setError(t.auth.errors.invalidCode);
       return false;
     } finally {
       setLoading(false);
@@ -68,7 +74,7 @@ export default function useAuth() {
       const result = await window.electronAPI?.auth.login(email, password);
 
       if (!result?.success) {
-        const errMsg = result?.error || 'Login failed';
+        const errMsg = result?.error || t.auth.errors.loginFailed;
         setError(errMsg);
         throw new Error(errMsg);
       }
@@ -95,14 +101,14 @@ export default function useAuth() {
         verificationCode
       );
       if (!result?.success) {
-        const errMsg = result?.error || 'Signup failed';
+        const errMsg = result?.error || t.auth.errors.signupFailed;
         setError(errMsg);
         return false;
       }
       return true;
     } catch (err) {
       console.error('signup error:', err);
-      setError('Signup failed');
+      setError(t.auth.errors.signupFailed);
       return false;
     } finally {
       setLoading(false);
@@ -117,7 +123,7 @@ export default function useAuth() {
 
       const result = await window.electronAPI?.auth.logout();
       if (!result?.success) {
-        const errMsg = result?.error || 'Logout failed';
+        const errMsg = result?.error || t.auth.errors.logoutFailed;
         setError(errMsg);
         throw new Error(errMsg);
       }
@@ -133,14 +139,14 @@ export default function useAuth() {
     try {
       const result = await window.electronAPI?.auth.changePassword(currentPassword, newPassword);
       if (!result?.success) {
-        const errMsg = result?.error || 'Change password failed';
+        const errMsg = result?.error || t.auth.errors.changePasswordFailed;
         setError(errMsg);
         return false;
       }
       return true;
     } catch (err) {
       console.error('changePassword error:', err);
-      setError('Change password failed');
+      setError(t.auth.errors.changePasswordFailed);
       return false;
     } finally {
       setLoading(false);
@@ -157,14 +163,14 @@ export default function useAuth() {
     try {
       const result = await window.electronAPI?.auth.forgotPassword(email);
       if (!result?.success) {
-        const errMsg = result?.error || 'Failed to send password reset code';
+        const errMsg = result?.error || t.auth.errors.sendResetCodeFailed;
         setError(errMsg);
         return false;
       }
       return true;
     } catch (err) {
       console.error('forgotPassword error:', err);
-      setError('Failed to send password reset code');
+      setError(t.auth.errors.sendResetCodeFailed);
       return false;
     } finally {
       setLoading(false);
@@ -179,14 +185,14 @@ export default function useAuth() {
     try {
       const result = await window.electronAPI?.auth.verifyPasswordResetCode(email, code);
       if (!result?.success) {
-        const errMsg = result?.error || 'Invalid or expired reset code';
+        const errMsg = result?.error || t.auth.errors.invalidResetCode;
         setError(errMsg);
         return false;
       }
       return true;
     } catch (err) {
       console.error('verifyPasswordResetCode error:', err);
-      setError('Invalid or expired reset code');
+      setError(t.auth.errors.invalidResetCode);
       return false;
     } finally {
       setLoading(false);
@@ -204,14 +210,14 @@ export default function useAuth() {
     try {
       const result = await window.electronAPI?.auth.resetPassword(email, code, newPassword);
       if (!result?.success) {
-        const errMsg = result?.error || 'Password reset failed';
+        const errMsg = result?.error || t.auth.errors.resetFailed;
         setError(errMsg);
         return false;
       }
       return true;
     } catch (err) {
       console.error('resetPassword error:', err);
-      setError('Password reset failed');
+      setError(t.auth.errors.resetFailed);
       return false;
     } finally {
       setLoading(false);

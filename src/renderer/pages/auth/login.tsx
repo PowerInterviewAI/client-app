@@ -8,8 +8,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useT } from '@/i18n';
+import { APP_NAME } from '@/lib/consts';
 
 export default function LoginPage() {
+  const t = useT();
   const { login, loading, error, setError } = useAuth();
   const { config, loadConfig, updateConfig } = useConfigStore();
   const [email, setEmail] = useState('');
@@ -80,14 +83,14 @@ export default function LoginPage() {
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>Use your account to access Power Interview AI</CardDescription>
+        <CardTitle>{t.auth.signIn.title}</CardTitle>
+        <CardDescription>{t.auth.signIn.description(APP_NAME)}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label htmlFor="login-email" className="text-sm block mb-1">
-              Email
+              {t.auth.fields.email}
             </label>
             <Input
               id="login-email"
@@ -103,7 +106,7 @@ export default function LoginPage() {
 
           <div>
             <label htmlFor="login-password" className="text-sm block mb-1">
-              Password
+              {t.auth.fields.password}
             </label>
             <InputPassword
               id="login-password"
@@ -126,7 +129,7 @@ export default function LoginPage() {
               htmlFor="remember-me"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
-              Remember me
+              {t.auth.signIn.rememberMe}
             </label>
           </div>
 
@@ -141,18 +144,18 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" disabled={loading} className="w-full mt-2">
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? t.auth.signIn.submitting : t.auth.signIn.submit}
           </Button>
 
           <div className="text-center space-y-1">
             <div>
               <Link to="/auth/signup" className="text-sm underline">
-                Don&apos;t have account? Create a new one.
+                {t.auth.signIn.noAccount}
               </Link>
             </div>
             <div>
               <Link to="/auth/forgot-password" className="text-sm underline">
-                Forgot your password?
+                {t.auth.signIn.forgotPassword}
               </Link>
             </div>
           </div>

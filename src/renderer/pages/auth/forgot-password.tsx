@@ -8,10 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import useAuth from '@/hooks/use-auth';
+import { useT } from '@/i18n';
+import { APP_NAME } from '@/lib/consts';
 
 type Step = 'email' | 'code' | 'password';
 
 export default function ForgotPasswordPage() {
+  const t = useT();
   const { forgotPassword, verifyPasswordResetCode, resetPassword, loading, error, setError } =
     useAuth();
   const navigate = useNavigate();
@@ -45,7 +48,7 @@ export default function ForgotPasswordPage() {
       // exactly the account-enumeration oracle that design removes.
       setStep('code');
     } else {
-      toast.error('Could not send a reset code. Please try again.');
+      toast.error(t.auth.reset.sendFailed);
     }
   };
 
@@ -60,7 +63,7 @@ export default function ForgotPasswordPage() {
       // the rate limit and a deactivated account arrive, and asserting "invalid code" over
       // either of those sends the user to re-read a code that was never the problem. The
       // inline error carries the reason the server actually gave.
-      toast.error('Could not verify the reset code.');
+      toast.error(t.auth.reset.verifyFailed);
     }
   };
 
@@ -69,13 +72,13 @@ export default function ForgotPasswordPage() {
     if (succeeded) return;
     setError(null);
     if (password !== passwordConfirm) {
-      setError('Passwords do not match');
+      setError(t.auth.passwordsDoNotMatch);
       return;
     }
 
     if (await resetPassword(email.trim(), code.trim(), password)) {
       setSucceeded(true);
-      toast.success('Password reset. Please sign in with your new password.');
+      toast.success(t.auth.reset.succeeded);
       redirectTimer.current = setTimeout(() => {
         navigate('/auth/login');
       }, 2000);
@@ -83,7 +86,7 @@ export default function ForgotPasswordPage() {
       // The code was verified to reach this step, so the overwhelmingly likely cause is that
       // it expired or was spent in between. Retrying the same code cannot work, so the copy
       // sends them for a new one rather than telling them to try again.
-      toast.error('Password reset failed. The code may have expired - request a new one.');
+      toast.error(t.auth.reset.failed);
     }
   };
 
@@ -102,15 +105,15 @@ export default function ForgotPasswordPage() {
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Reset password</CardTitle>
-        <CardDescription>Set a new password for your Power Interview AI account</CardDescription>
+        <CardTitle>{t.auth.reset.title}</CardTitle>
+        <CardDescription>{t.auth.reset.description(APP_NAME)}</CardDescription>
       </CardHeader>
       <CardContent>
         {step === 'email' && (
           <form onSubmit={submitEmail} className="space-y-4">
             <div>
               <label htmlFor="reset-email" className="text-sm block mb-1">
-                Email
+                {t.auth.fields.email}
               </label>
               <Input
                 id="reset-email"
@@ -131,12 +134,12 @@ export default function ForgotPasswordPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Sending…' : 'Send reset code'}
+              {loading ? t.auth.reset.sending : t.auth.reset.sendResetCode}
             </Button>
 
             <div className="text-center">
               <Link to="/auth/login" className="text-sm underline">
-                Back to sign in
+                {t.auth.reset.backToSignIn}
               </Link>
             </div>
           </form>
@@ -146,12 +149,9 @@ export default function ForgotPasswordPage() {
           <form onSubmit={submitCode} className="space-y-4">
             <div>
               <label htmlFor="reset-code" className="text-sm block mb-1">
-                Reset code
+                {t.auth.fields.resetCode}
               </label>
-              <p className="text-sm text-muted-foreground mb-2">
-                If an account exists for {email}, we sent a reset code to it. Paste the code below.
-                It can only be used once, and the email says when it expires.
-              </p>
+              <p className="text-sm text-muted-foreground mb-2">{t.auth.reset.codeNotice(email)}</p>
               <Textarea
                 id="reset-code"
                 name="code"
@@ -170,12 +170,12 @@ export default function ForgotPasswordPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Verifying…' : 'Verify'}
+              {loading ? t.auth.reset.verifying : t.auth.reset.verify}
             </Button>
 
             <div className="flex justify-between text-sm">
               <button type="button" className="underline" disabled={loading} onClick={startOver}>
-                Change email
+                {t.auth.reset.changeEmail}
               </button>
               <button
                 type="button"
@@ -184,13 +184,13 @@ export default function ForgotPasswordPage() {
                 onClick={async () => {
                   setError(null);
                   if (await forgotPassword(email.trim())) {
-                    toast.success('Reset code resent.');
+                    toast.success(t.auth.reset.codeResent);
                   } else {
-                    toast.error('Could not resend the reset code.');
+                    toast.error(t.auth.reset.resendFailed);
                   }
                 }}
               >
-                Resend code
+                {t.auth.reset.resendCode}
               </button>
             </div>
           </form>
@@ -198,13 +198,11 @@ export default function ForgotPasswordPage() {
 
         {step === 'password' && (
           <form onSubmit={submitPassword} className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Setting a new password signs you out on every device.
-            </p>
+            <p className="text-sm text-muted-foreground">{t.auth.reset.signsYouOut}</p>
 
             <div>
               <label htmlFor="reset-password" className="text-sm block mb-1">
-                New password
+                {t.auth.fields.newPassword}
               </label>
               <InputPassword
                 id="reset-password"
@@ -219,7 +217,7 @@ export default function ForgotPasswordPage() {
 
             <div>
               <label htmlFor="reset-password-confirm" className="text-sm block mb-1">
-                Confirm new password
+                {t.auth.fields.confirmNewPassword}
               </label>
               <InputPassword
                 id="reset-password-confirm"
@@ -239,16 +237,20 @@ export default function ForgotPasswordPage() {
             )}
 
             <Button type="submit" disabled={loading || succeeded} className="w-full">
-              {loading ? 'Saving…' : succeeded ? 'Password reset' : 'Set new password'}
+              {loading
+                ? t.auth.reset.saving
+                : succeeded
+                  ? t.auth.reset.done
+                  : t.auth.reset.setNewPassword}
             </Button>
 
             {!succeeded && (
               <div className="flex justify-between text-sm">
                 <button type="button" className="underline" disabled={loading} onClick={startOver}>
-                  Start over
+                  {t.auth.reset.startOver}
                 </button>
                 <Link to="/auth/login" className="underline">
-                  Back to sign in
+                  {t.auth.reset.backToSignIn}
                 </Link>
               </div>
             )}
