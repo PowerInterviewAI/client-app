@@ -24,6 +24,9 @@ for (const module of [
   // Source-level and independent of the store, so it sits beside the locale checks rather than
   // with the other renderer-source files further down.
   './ui-text-routing.test.mjs',
+  // Transpiles the two renderer locales and runs them, which is the only check that executes
+  // their parameterised strings rather than type-checking them.
+  './locale-runtime.test.mjs',
   './app-state.test.mjs',
   './account.test.mjs',
   // After account.test.mjs: both swap the accountService singleton's client, and that one's
