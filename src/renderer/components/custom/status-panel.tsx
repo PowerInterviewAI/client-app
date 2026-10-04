@@ -5,6 +5,7 @@ import CreditsDisplay from '@/components/custom/credits-display';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
+import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 import { RunningState, UserRole } from '@/types/app-state';
@@ -54,6 +55,7 @@ export default function StatusPanel({
   userRole,
   creditsPerMinute,
 }: StatusPanelProps) {
+  const t = useT();
   // calculate and formatting handled by CreditsDisplay component
   const { hintOnly } = useSuggestionMode();
   const { visible: transcriptVisible } = useTranscriptPanel();
@@ -78,16 +80,18 @@ export default function StatusPanel({
             ) : (
               <Route className="h-3.5 w-3.5 -scale-y-100" />
             )}
-            {hintOnly ? 'Hint-only' : 'Full sentences'}
+            {hintOnly ? t.suggestionMode.hintOnlyBadge : t.suggestionMode.fullSentencesBadge}
           </div>
         </TooltipTrigger>
         <TooltipContent sideOffset={4}>
           <p>
-            {hintOnly ? 'Hint-only mode' : 'Full-sentence mode'} (
-            {HOTKEYS[Hotkey.ToggleSuggestionMode].combo})
+            {t.common.withCombo(
+              hintOnly ? t.suggestionMode.hintOnlyMode : t.suggestionMode.fullSentenceMode,
+              HOTKEYS[Hotkey.ToggleSuggestionMode].combo
+            )}
           </p>
           <p className="text-xs text-muted-foreground">
-            {hintOnly ? 'Headline + keyword bullets' : 'Answers written out in full'}
+            {hintOnly ? t.suggestionMode.hintOnlySummary : t.suggestionMode.fullSentenceSummary}
           </p>
         </TooltipContent>
       </Tooltip>
@@ -99,24 +103,25 @@ export default function StatusPanel({
             ) : (
               <CaptionsOff className="h-3.5 w-3.5" />
             )}
-            Transcript
+            {t.statusPanel.transcript}
           </div>
         </TooltipTrigger>
         <TooltipContent sideOffset={4}>
           <p>
-            Transcription: {transcriptVisible ? 'Shown' : 'Hidden'} (
-            {HOTKEYS[Hotkey.ToggleTranscript].combo})
+            {transcriptVisible
+              ? t.statusPanel.transcriptionShown(HOTKEYS[Hotkey.ToggleTranscript].combo)
+              : t.statusPanel.transcriptionHidden(HOTKEYS[Hotkey.ToggleTranscript].combo)}
           </p>
         </TooltipContent>
       </Tooltip>
       <div className="flex-1" />
       <button
         className="h-6 flex items-center justify-center rounded hover:bg-muted text-xs font-medium gap-1 px-2"
-        aria-label="Show keyboard shortcuts"
-        title="Show keyboard shortcuts (?)"
+        aria-label={t.statusPanel.showHotkeysLabel}
+        title={t.statusPanel.showHotkeysTitle}
         onClick={() => setHotkeysOpen(true)}
       >
-        <Keyboard className="h-4 w-4" /> Show Hotkeys
+        <Keyboard className="h-4 w-4" /> {t.statusPanel.showHotkeys}
       </button>
       <HotkeyCheatsheetDialog open={hotkeysOpen} onOpenChange={setHotkeysOpen} />
     </div>

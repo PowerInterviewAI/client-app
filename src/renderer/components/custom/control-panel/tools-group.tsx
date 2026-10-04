@@ -27,6 +27,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
+import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { cn, getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
@@ -39,6 +40,7 @@ interface ToolsGroupProps {
 }
 
 export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
+  const t = useT();
   const { runningState, appState } = useAppState();
   const { exporting, exportTranscript, exportMockReport, clearAll, setPlaceholderData } =
     useTools();
@@ -89,7 +91,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
       await setPlaceholderData();
     } catch (error) {
       console.error(error);
-      toast.error('Failed to clear');
+      toast.error(t.toolsGroup.clearFailed);
     } finally {
       setClearing(false);
     }
@@ -114,8 +116,8 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
 
   const onExportTranscript = async (format: ExportFormat) => {
     if (nothingToExport) {
-      toast.error('There is nothing to export yet', {
-        description: 'Run an interview first, then export the transcript and suggestions.',
+      toast.error(t.toolsGroup.nothingToExport, {
+        description: t.toolsGroup.nothingToExportDescription,
       });
       return;
     }
@@ -130,7 +132,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
       console.error(error);
       // The message when there is nothing to export names the reason, and a generic "failed"
       // over it would send the user looking for a fault that is not there.
-      toast.error(error instanceof Error ? error.message : 'Failed to export interview');
+      toast.error(error instanceof Error ? error.message : t.toolsGroup.exportFailed);
     }
   };
 
@@ -145,7 +147,9 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             size="sm"
             className={cn(BAR_ICON_BUTTON, transcriptVisible ? BAR_ACTIVE : BAR_GHOST)}
             aria-pressed={transcriptVisible}
-            aria-label={transcriptVisible ? 'Hide transcription' : 'Show transcription'}
+            aria-label={
+              transcriptVisible ? t.toolsGroup.hideTranscription : t.toolsGroup.showTranscription
+            }
           >
             {transcriptVisible ? (
               <Captions className="h-4 w-4" />
@@ -156,8 +160,10 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            {transcriptVisible ? 'Hide Transcription' : 'Show Transcription'} (
-            {HOTKEYS[Hotkey.ToggleTranscript].combo})
+            {t.common.withCombo(
+              transcriptVisible ? t.toolsGroup.hideTranscription : t.toolsGroup.showTranscription,
+              HOTKEYS[Hotkey.ToggleTranscript].combo
+            )}
           </p>
         </TooltipContent>
       </Tooltip>
@@ -191,18 +197,16 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
               size="sm"
               className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
               disabled={stealthDisabled}
-              aria-label="Enter stealth mode"
+              aria-label={t.toolsGroup.enterStealth}
             >
               <EyeOff className="h-4 w-4" />
             </Button>
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Stealth Mode ({HOTKEYS[Hotkey.ToggleStealth].combo})</p>
+          <p>{t.common.withCombo(t.toolsGroup.stealthMode, HOTKEYS[Hotkey.ToggleStealth].combo)}</p>
           <p className="text-xs text-muted-foreground">
-            {stealthDisabled
-              ? 'Available once the live interview is running - there is nothing to hide from yet.'
-              : 'Hides the app from screen capture. The same shortcut brings it back.'}
+            {stealthDisabled ? t.toolsGroup.stealthUnavailable : t.toolsGroup.stealthAvailable}
           </p>
         </TooltipContent>
       </Tooltip>
@@ -218,19 +222,24 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             onClick={() =>
               void runActionSuggestion(
                 () => getElectron()?.actionSuggestion.capture(),
-                'Failed to capture screenshot'
+                t.toolsGroup.captureFailed
               )
             }
             size="sm"
             className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
             disabled={actionDisabled}
-            aria-label="Capture screenshot"
+            aria-label={t.toolsGroup.captureScreenshot}
           >
             <Camera className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Capture Screenshot ({HOTKEYS[Hotkey.Capture].combo})</p>
+          <p>
+            {t.common.withCombo(
+              t.toolsGroup.captureScreenshotTooltip,
+              HOTKEYS[Hotkey.Capture].combo
+            )}
+          </p>
         </TooltipContent>
       </Tooltip>
       <Tooltip>
@@ -240,19 +249,24 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             onClick={() =>
               void runActionSuggestion(
                 () => getElectron()?.actionSuggestion.clearImages(),
-                'Failed to clear captures'
+                t.toolsGroup.clearCapturesFailed
               )
             }
             size="sm"
             className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
             disabled={actionDisabled}
-            aria-label="Clear captured screenshots"
+            aria-label={t.toolsGroup.clearCaptures}
           >
             <ImageOff className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Clear Captures ({HOTKEYS[Hotkey.ClearCaptures].combo})</p>
+          <p>
+            {t.common.withCombo(
+              t.toolsGroup.clearCapturesTooltip,
+              HOTKEYS[Hotkey.ClearCaptures].combo
+            )}
+          </p>
         </TooltipContent>
       </Tooltip>
       <Tooltip>
@@ -262,13 +276,13 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             onClick={() =>
               void runActionSuggestion(
                 () => getElectron()?.actionSuggestion.trigger(),
-                'Failed to generate suggestion'
+                t.toolsGroup.generateSuggestionFailed
               )
             }
             size="sm"
             className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
             disabled={actionDisabled}
-            aria-label="Generate triggered suggestion"
+            aria-label={t.toolsGroup.generateSuggestion}
           >
             {actionBusy ? (
               <Loader className="h-4 w-4 animate-spin" />
@@ -278,7 +292,12 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Generate Suggestion ({HOTKEYS[Hotkey.TriggerWithoutCaptures].combo})</p>
+          <p>
+            {t.common.withCombo(
+              t.toolsGroup.generateSuggestionTooltip,
+              HOTKEYS[Hotkey.TriggerWithoutCaptures].combo
+            )}
+          </p>
         </TooltipContent>
       </Tooltip>
 
@@ -292,7 +311,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             size="sm"
             className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
             disabled={getDisabled(runningState) || exporting || clearing}
-            aria-label="Clear the interview"
+            aria-label={t.toolsGroup.clearInterview}
             aria-busy={clearing}
           >
             {clearing ? (
@@ -303,7 +322,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Clear</p>
+          <p>{t.toolsGroup.clear}</p>
         </TooltipContent>
       </Tooltip>
       {/* Non-modal for the same reason as the titlebar menu: a modal menu locks body pointer
@@ -317,7 +336,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
                 size="sm"
                 className={cn(BAR_ICON_BUTTON, BAR_GHOST)}
                 disabled={getDisabled(runningState) || exporting}
-                aria-label="Export the interview"
+                aria-label={t.toolsGroup.exportTheInterview}
                 aria-busy={exporting}
               >
                 {exporting ? (
@@ -329,7 +348,7 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
             </DropdownMenuTrigger>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Export Interview</p>
+            <p>{t.toolsGroup.exportInterview}</p>
           </TooltipContent>
         </Tooltip>
         {/* Opens upward, and not just for looks: the menu is portalled into the overflow-hidden
@@ -338,11 +357,11 @@ export function ToolsGroup({ getDisabled }: ToolsGroupProps) {
         <DropdownMenuContent align="end" side="top">
           <DropdownMenuItem onClick={() => void onExportTranscript('docx')}>
             <FileText className="mr-2 h-4 w-4" />
-            Word Document (.docx)
+            {t.toolsGroup.exportDocx}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => void onExportTranscript('md')}>
             <Hash className="mr-2 h-4 w-4" />
-            Markdown (.md)
+            {t.toolsGroup.exportMarkdown}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

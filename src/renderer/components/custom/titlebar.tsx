@@ -10,6 +10,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useCommandPaletteStore } from '@/hooks/use-command-palette';
 import { useInterviewLock } from '@/hooks/use-interview-lock';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { useT } from '@/i18n';
 import { APP_NAME, isMac } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 
@@ -24,6 +25,7 @@ const NO_DRAG: DragStyle = { WebkitAppRegion: 'no-drag' };
 const TRAFFIC_LIGHT_LOGICAL_CLEAR = 72;
 
 export default function Titlebar() {
+  const t = useT();
   const isStealth = useIsStealthMode();
 
   const [zoomFactor, setZoomFactor] = useState(1);
@@ -99,7 +101,7 @@ export default function Titlebar() {
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => openCommandPalette(true)}
-                  aria-label="Open command palette"
+                  aria-label={t.titlebar.openCommandPalette}
                   disabled={locked}
                 >
                   <Search className="h-4 w-4" />
@@ -108,9 +110,9 @@ export default function Titlebar() {
             </TooltipTrigger>
             <TooltipContent>
               {locked ? (
-                <p>Unavailable during an interview</p>
+                <p>{t.titlebar.unavailableDuringInterview}</p>
               ) : (
-                <p>Search actions ({isMac ? '⌘' : 'Ctrl+'}K)</p>
+                <p>{t.common.withCombo(t.titlebar.searchActions, `${isMac ? '⌘' : 'Ctrl+'}K`)}</p>
               )}
             </TooltipContent>
           </Tooltip>
@@ -123,7 +125,7 @@ export default function Titlebar() {
                 <TooltipTrigger asChild>
                   <button
                     onClick={handleMinimize}
-                    aria-label="Minimize"
+                    aria-label={t.titlebar.minimize}
                     className="h-7 w-8 flex items-center justify-center rounded hover:bg-muted"
                     style={NO_DRAG}
                   >
@@ -140,14 +142,14 @@ export default function Titlebar() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Minimize</p>
+                  <p>{t.titlebar.minimize}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     onClick={handleMaximize}
-                    aria-label="Maximize"
+                    aria-label={t.titlebar.maximize}
                     className="h-7 w-8 flex items-center justify-center rounded hover:bg-muted"
                     style={NO_DRAG}
                   >
@@ -164,14 +166,14 @@ export default function Titlebar() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Maximize</p>
+                  <p>{t.titlebar.maximize}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     onClick={handleClose}
-                    aria-label="Close"
+                    aria-label={t.titlebar.close}
                     className="h-7 w-8 flex items-center justify-center rounded hover:bg-destructive/50"
                     style={NO_DRAG}
                   >
@@ -188,7 +190,7 @@ export default function Titlebar() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Close</p>
+                  <p>{t.titlebar.close}</p>
                 </TooltipContent>
               </Tooltip>
             </>

@@ -3,6 +3,7 @@ import { Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
+import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 
@@ -37,6 +38,7 @@ interface MainGroupProps {
  * read as one.
  */
 export function MainGroup({ onStop }: MainGroupProps) {
+  const t = useT();
   const { runningState } = useAppState();
 
   const isRunning = runningState === RunningState.Running;
@@ -71,21 +73,19 @@ export function MainGroup({ onStop }: MainGroupProps) {
             disabled={!isRunning}
           >
             <Square className="h-3.5 w-3.5" />
-            Stop
+            {t.controlPanel.stop}
           </Button>
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Stop the assistant</p>
+        <p>{t.controlPanel.stopTooltip}</p>
         {isRunning ? (
-          <p className="text-xs text-muted-foreground">
-            Ends the session, offers to save it, and returns home
-          </p>
+          <p className="text-xs text-muted-foreground">{t.controlPanel.stopRunningHint}</p>
         ) : (
           <p className="text-xs text-muted-foreground">
             {runningState === RunningState.Idle
-              ? 'Nothing is running - start an interview from the home screen'
-              : 'Available once the session is running'}
+              ? t.controlPanel.stopIdleHint
+              : t.controlPanel.stopTransientHint}
           </p>
         )}
       </TooltipContent>

@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useT } from '@/i18n';
 import { CREDITS_PER_MINUTE } from '@/lib/consts';
 import { cn } from '@/lib/utils';
 import { UserRole } from '@/types/app-state';
@@ -22,25 +23,25 @@ export default function CreditsDisplay({
   className,
   style,
 }: CreditsDisplayProps) {
+  const t = useT();
+
   // Not a real plan name - "Pro" is an actual purchasable SKU (see CreditPlan), so labeling
   // every non-trial user that way shows a starter or enterprise buyer a plan they never bought.
-  const planLabel = userRole === UserRole.TrialUser ? 'Trial Plan' : 'Paid Plan';
+  const planLabel =
+    userRole === UserRole.TrialUser ? t.creditsDisplay.trialPlan : t.creditsDisplay.paidPlan;
   const availableMinutes = Math.floor(credits / (creditsPerMinute ?? CREDITS_PER_MINUTE));
 
-  const formatDuration = (mins: number) => {
-    const hours = Math.floor(mins / 60);
-    const remainder = mins % 60;
-    const parts: string[] = [];
-    if (hours) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
-    if (remainder) parts.push(`${remainder} min${remainder > 1 ? 's' : ''}`);
-    return parts.join(' ') || '0 mins';
-  };
+  // Split into hours and minutes here and assembled in the locale, because which plural form
+  // each number takes is a property of the language: `2 hours 15 mins` against
+  // `2 часа 15 минут`, where 2 and 22 agree and 5 and 25 do not.
+  const formatDuration = (mins: number) =>
+    t.creditsDisplay.duration(Math.floor(mins / 60), mins % 60);
 
   const availableTime =
     availableMinutes <= 0
       ? credits > 0
-        ? 'Less than 1 min'
-        : 'No credits left'
+        ? t.creditsDisplay.lessThanAMinute
+        : t.creditsDisplay.noCreditsLeft
       : formatDuration(availableMinutes);
 
   return (
@@ -60,7 +61,7 @@ export default function CreditsDisplay({
               : 'text-destructive animate-pulse'
         )}
       >
-        {credits.toLocaleString()} credits - {availableTime}
+        {t.creditsDisplay.summary(credits, availableTime)}
       </span>
       {llmModel && (
         <>

@@ -25,6 +25,11 @@ export const en = {
     retry: 'Retry',
     view: 'View',
     loading: 'Loading…',
+    /**
+     * A label with its keyboard shortcut after it, which is the shape most of the control bar's
+     * tooltips take. A locale that wanted a different separator changes it here once.
+     */
+    withCombo: (label: string, combo: string) => `${label} (${combo})`,
   },
 
   uiLanguageField: {
@@ -448,6 +453,178 @@ export const en = {
   inputPassword: {
     show: 'Show password',
     hide: 'Hide password',
+  },
+
+  titlebar: {
+    openCommandPalette: 'Open command palette',
+    searchActions: 'Search actions',
+    unavailableDuringInterview: 'Unavailable during an interview',
+    menu: 'Menu',
+    minimize: 'Minimize',
+    maximize: 'Maximize',
+    close: 'Close',
+  },
+
+  titlebarMenu: {
+    home: 'Home',
+    account: 'Account',
+    configuration: 'Configuration',
+    documentation: 'Documentation',
+    lightMode: 'Light mode',
+    darkMode: 'Dark mode',
+    signOut: 'Sign out',
+  },
+
+  commandPalette: {
+    title: 'Command Palette',
+    description: 'Search for an action, page, or setting.',
+    searchPlaceholder: 'Search actions…',
+    empty: 'No matching action.',
+    groups: {
+      goTo: 'Go to',
+      session: 'Session',
+      app: 'App',
+    },
+    home: 'Home',
+    account: 'Account',
+    configuration: 'Configuration',
+    buyCredits: 'Buy Credits',
+    startMock: 'Start mock interview',
+    startLive: 'Start live assistant',
+    switchToFullSentence: 'Switch to full-sentence mode',
+    switchToHintOnly: 'Switch to hint-only mode',
+    hideTranscript: 'Hide Transcript',
+    showTranscript: 'Show Transcript',
+    documentation: 'Documentation',
+    hotkeys: 'Keyboard Shortcuts',
+    switchToLight: 'Switch to Light Mode',
+    switchToDark: 'Switch to Dark Mode',
+    signOut: 'Sign Out',
+  },
+
+  controlPanel: {
+    stop: 'Stop',
+    stopTooltip: 'Stop the assistant',
+    stopRunningHint: 'Ends the session, offers to save it, and returns home',
+    stopIdleHint: 'Nothing is running - start an interview from the home screen',
+    stopTransientHint: 'Available once the session is running',
+
+    /** Why a start was refused, named after the thing that is missing. */
+    checks: {
+      configUnavailable:
+        'Could not load your saved configuration. Reconnecting - try again in a moment.',
+      nameMissing: 'Full name is not set',
+      profileMissing: 'Profile data is not set',
+      noMicrophone: 'No microphone was detected. Connect one and try again.',
+      deviceNotFound: (deviceName: string) => `Audio input device "${deviceName}" is not found`,
+    },
+    startFailed: 'Failed to start assistant',
+  },
+
+  audioGroup: {
+    options: 'Audio options',
+    optionsSwapFailed: 'Audio options - could not switch microphone, still using the previous one',
+    optionsDeviceNotFound: 'Audio options - the selected microphone was not found',
+    dialogTitle: 'Audio Options',
+    dialogDescription: 'Select physical microphone that you use.',
+    microphone: 'Microphone',
+    selectPlaceholder: 'Select microphone',
+    switching: 'Switching microphone…',
+    swapFailed: (deviceName: string) =>
+      `Could not switch to ${deviceName}. This interview is still using the previous microphone. Stop and start the assistant to use it.`,
+    takesEffectImmediately: 'Takes effect immediately. Transcription keeps running.',
+  },
+
+  languageGroup: {
+    current: (languageName: string) => `Interview language: ${languageName}`,
+    currentHalfApplied: (languageName: string) =>
+      `Interview language: ${languageName} - transcription did not switch`,
+    tooltip: (nativeName: string) => `Interview Language: ${nativeName}`,
+    reconnecting: 'Reconnecting transcription…',
+    suggestionsOnly: 'Suggestions only - transcription is still reconnecting',
+    speechAndSuggestions: 'Speech recognition and suggestions',
+    menuLabel: 'Interview language',
+    halfApplied:
+      'Suggestions moved, transcription did not. It is still retrying - stop and start the assistant if it does not come back.',
+    willReconnect: 'Transcription reconnects; the current sentence may be cut short.',
+  },
+
+  suggestionMode: {
+    hintOnlyBadge: 'Hint-only',
+    fullSentencesBadge: 'Full sentences',
+    hintOnlyMode: 'Hint-only mode',
+    fullSentenceMode: 'Full-sentence mode',
+    hintOnlySummary: 'Headline + keyword bullets',
+    fullSentenceSummary: 'Answers written out in full',
+    ariaHintOnly: 'Suggestion mode: hint-only. Switch to full sentences',
+    ariaFullSentence: 'Suggestion mode: full sentences. Switch to hint-only',
+  },
+
+  toolsGroup: {
+    hideTranscription: 'Hide Transcription',
+    showTranscription: 'Show Transcription',
+    enterStealth: 'Enter stealth mode',
+    stealthMode: 'Stealth Mode',
+    stealthUnavailable:
+      'Available once the live interview is running - there is nothing to hide from yet.',
+    stealthAvailable: 'Hides the app from screen capture. The same shortcut brings it back.',
+    captureScreenshot: 'Capture screenshot',
+    captureScreenshotTooltip: 'Capture Screenshot',
+    captureFailed: 'Failed to capture screenshot',
+    clearCaptures: 'Clear captured screenshots',
+    clearCapturesTooltip: 'Clear Captures',
+    clearCapturesFailed: 'Failed to clear captures',
+    generateSuggestion: 'Generate triggered suggestion',
+    generateSuggestionTooltip: 'Generate Suggestion',
+    generateSuggestionFailed: 'Failed to generate suggestion',
+    clear: 'Clear',
+    clearInterview: 'Clear the interview',
+    clearFailed: 'Failed to clear',
+    exportInterview: 'Export Interview',
+    exportTheInterview: 'Export the interview',
+    nothingToExport: 'There is nothing to export yet',
+    nothingToExportDescription:
+      'Run an interview first, then export the transcript and suggestions.',
+    exportFailed: 'Failed to export interview',
+    exportDocx: 'Word Document (.docx)',
+    exportMarkdown: 'Markdown (.md)',
+  },
+
+  statusPanel: {
+    transcript: 'Transcript',
+    transcriptionShown: (combo: string) => `Transcription: Shown (${combo})`,
+    transcriptionHidden: (combo: string) => `Transcription: Hidden (${combo})`,
+    showHotkeys: 'Show Hotkeys',
+    showHotkeysLabel: 'Show keyboard shortcuts',
+    showHotkeysTitle: 'Show keyboard shortcuts (?)',
+  },
+
+  runningIndicator: {
+    idle: 'Idle',
+    starting: 'Starting',
+    running: 'Running',
+    stopping: 'Stopping',
+  },
+
+  zoomControl: {
+    reset: 'Reset zoom',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+  },
+
+  creditsDisplay: {
+    trialPlan: 'Trial Plan',
+    paidPlan: 'Paid Plan',
+    summary: (credits: number, availableTime: string) =>
+      `${credits.toLocaleString()} credits - ${availableTime}`,
+    duration: (hours: number, minutes: number) => {
+      const parts: string[] = [];
+      if (hours) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+      if (minutes) parts.push(`${minutes} min${minutes > 1 ? 's' : ''}`);
+      return parts.join(' ') || '0 mins';
+    },
+    lessThanAMinute: 'Less than 1 min',
+    noCreditsLeft: 'No credits left',
   },
 };
 

@@ -9,6 +9,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import { useEndLiveSession } from '@/hooks/use-end-live-session';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
+import { useT } from '@/i18n';
 import { isMac } from '@/lib/consts';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
@@ -23,6 +24,7 @@ import { SuggestionModeGroup } from './suggestion-mode-group';
 import { ToolsGroup } from './tools-group';
 
 export default function ControlPanel() {
+  const t = useT();
   const isStealth = useIsStealthMode();
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,28 +78,28 @@ export default function ControlPanel() {
       // setting a name they did set sends them into a dialog that cannot save either.
       {
         ok: appState?.interviewConfigLoaded ?? false,
-        message: 'Could not load your saved configuration. Reconnecting - try again in a moment.',
+        message: t.controlPanel.checks.configUnavailable,
         // Nothing else re-pulls after a failed startup fetch, so "try again" has to actually
         // retry: without this the same toast repeats forever however often Start is pressed.
         onFail: () => void getElectron()?.account?.refresh(),
       },
       {
         ok: !!appState?.interviewConfig?.fullName,
-        message: 'Full name is not set',
+        message: t.controlPanel.checks.nameMissing,
         onFail: () => navigate('/account'),
       },
       {
         ok: appState?.interviewConfig?.hasProfileData ?? false,
-        message: 'Profile data is not set',
+        message: t.controlPanel.checks.profileMissing,
         onFail: () => navigate('/account'),
       },
       {
         ok: !noAudioInputDevices,
-        message: 'No microphone was detected. Connect one and try again.',
+        message: t.controlPanel.checks.noMicrophone,
       },
       {
         ok: !audioInputDeviceNotFound,
-        message: `Audio input device "${selectedAudioInputDeviceName}" is not found`,
+        message: t.controlPanel.checks.deviceNotFound(selectedAudioInputDeviceName),
       },
     ];
 
@@ -120,7 +122,7 @@ export default function ControlPanel() {
       // three-second "Stopping" for a session that never started, and its own failure would
       // land here as an unhandled rejection.
       console.error('Failed to start assistant:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to start assistant');
+      toast.error(error instanceof Error ? error.message : t.controlPanel.startFailed);
     }
   };
 

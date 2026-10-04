@@ -3,6 +3,7 @@ import { ListChecks, Route } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
+import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +23,7 @@ import { BAR_ACTIVE, BAR_GHOST, BAR_ICON_BUTTON } from './bar';
  * survives a colour-blind reader.
  */
 export function SuggestionModeGroup() {
+  const t = useT();
   const { hintOnly, toggle } = useSuggestionMode();
 
   return (
@@ -34,9 +36,7 @@ export function SuggestionModeGroup() {
             className={cn(BAR_ICON_BUTTON, hintOnly ? BAR_ACTIVE : BAR_GHOST)}
             aria-pressed={hintOnly}
             aria-label={
-              hintOnly
-                ? 'Suggestion mode: hint-only. Switch to full sentences'
-                : 'Suggestion mode: full sentences. Switch to hint-only'
+              hintOnly ? t.suggestionMode.ariaHintOnly : t.suggestionMode.ariaFullSentence
             }
             onClick={toggle}
           >
@@ -49,11 +49,13 @@ export function SuggestionModeGroup() {
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            {hintOnly ? 'Hint-only mode' : 'Full-sentence mode'} (
-            {HOTKEYS[Hotkey.ToggleSuggestionMode].combo})
+            {t.common.withCombo(
+              hintOnly ? t.suggestionMode.hintOnlyMode : t.suggestionMode.fullSentenceMode,
+              HOTKEYS[Hotkey.ToggleSuggestionMode].combo
+            )}
           </p>
           <p className="text-xs text-muted-foreground">
-            {hintOnly ? 'Headline + keyword bullets' : 'Answers written out in full'}
+            {hintOnly ? t.suggestionMode.hintOnlySummary : t.suggestionMode.fullSentenceSummary}
           </p>
         </TooltipContent>
       </Tooltip>

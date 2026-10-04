@@ -1,3 +1,4 @@
+import { useT } from '@/i18n';
 import { RunningState } from '@/types/app-state';
 
 interface RunningIndicatorProps {
@@ -11,28 +12,30 @@ export function RunningIndicator({
   compact = false,
   className = '',
 }: RunningIndicatorProps) {
+  const t = useT();
+
   const indicatorConfig: Record<
     RunningState,
     { dotClass: string; label: string; labelClass: string }
   > = {
     [RunningState.Idle]: {
       dotClass: 'bg-muted-foreground',
-      label: 'Idle',
+      label: t.runningIndicator.idle,
       labelClass: 'text-muted-foreground',
     },
     [RunningState.Starting]: {
       dotClass: 'bg-primary animate-pulse',
-      label: 'Starting',
+      label: t.runningIndicator.starting,
       labelClass: 'text-primary animate-pulse',
     },
     [RunningState.Running]: {
       dotClass: 'bg-destructive animate-pulse',
-      label: 'Running',
+      label: t.runningIndicator.running,
       labelClass: 'text-destructive animate-pulse',
     },
     [RunningState.Stopping]: {
       dotClass: 'bg-destructive animate-pulse',
-      label: 'Stopping',
+      label: t.runningIndicator.stopping,
       labelClass: 'text-destructive animate-pulse',
     },
   };

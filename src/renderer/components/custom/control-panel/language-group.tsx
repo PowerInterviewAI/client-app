@@ -13,6 +13,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import { useInterviewLanguage } from '@/hooks/use-interview-language';
+import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 import { LANGUAGES } from '@/types/language';
@@ -40,6 +41,7 @@ interface LanguageGroupProps {
  * exactly that - a candidate whose interview has just switched language has seconds.
  */
 export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
+  const t = useT();
   const { runningState } = useAppState();
   const { language, option, switching, reconnectFailed, setLanguage, clearReconnectFailed } =
     useInterviewLanguage();
@@ -73,8 +75,8 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
                 disabled={disabled}
                 aria-label={
                   halfApplied
-                    ? `Interview language: ${option.name} - transcription did not switch`
-                    : `Interview language: ${option.name}`
+                    ? t.languageGroup.currentHalfApplied(option.name)
+                    : t.languageGroup.current(option.name)
                 }
                 aria-busy={switching}
               >
@@ -96,13 +98,13 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
             </DropdownMenuTrigger>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Interview Language: {option.nativeName}</p>
+            <p>{t.languageGroup.tooltip(option.nativeName)}</p>
             <p className="text-xs text-muted-foreground">
               {switching
-                ? 'Reconnecting transcription...'
+                ? t.languageGroup.reconnecting
                 : halfApplied
-                  ? 'Suggestions only - transcription is still reconnecting'
-                  : 'Speech recognition and suggestions'}
+                  ? t.languageGroup.suggestionsOnly
+                  : t.languageGroup.speechAndSuggestions}
             </p>
           </TooltipContent>
         </Tooltip>
@@ -118,7 +120,7 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
           className="flex max-h-[min(60vh,20rem)] w-56 flex-col"
         >
           <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-            Interview language
+            {t.languageGroup.menuLabel}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <div className="min-h-0 flex-1 overflow-y-auto">
@@ -166,16 +168,13 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
                   className="flex items-start gap-1.5 px-2 py-1.5 text-xs text-destructive"
                 >
                   <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-                  <span>
-                    Suggestions moved, transcription did not. It is still retrying - stop and start
-                    the assistant if it does not come back.
-                  </span>
+                  <span>{t.languageGroup.halfApplied}</span>
                 </div>
               ) : (
                 /* Says what will happen before it happens: a two-second hole in the transcript
                    is alarming if it arrives unannounced mid-question. */
                 <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                  Transcription reconnects; the current sentence may be cut short.
+                  {t.languageGroup.willReconnect}
                 </div>
               )}
             </>

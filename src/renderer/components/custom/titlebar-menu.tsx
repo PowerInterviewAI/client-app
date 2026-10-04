@@ -28,6 +28,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import { useInterviewLock } from '@/hooks/use-interview-lock';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useThemeStore } from '@/hooks/use-theme-store';
+import { useT } from '@/i18n';
 
 interface TitlebarMenuProps {
   style?: React.CSSProperties;
@@ -36,6 +37,7 @@ interface TitlebarMenuProps {
 }
 
 export default function TitlebarMenu({ style, disabled: closed = false }: TitlebarMenuProps) {
+  const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
   const { appState } = useAppState();
@@ -76,7 +78,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
       // sets it and throws in the same tick, so this closure's `error` is still last render's
       // (stale) value.
       console.error('Sign out failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to sign out');
+      toast.error(err instanceof Error ? err.message : t.home.signOutFailed);
     }
   };
 
@@ -89,7 +91,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
           <span className="inline-flex" style={style}>
             <DropdownMenuTrigger asChild>
               <button
-                aria-label="Menu"
+                aria-label={t.titlebar.menu}
                 disabled={closed}
                 className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
               >
@@ -99,7 +101,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{closed ? 'Unavailable during an interview' : 'Menu'}</p>
+          <p>{closed ? t.titlebar.unavailableDuringInterview : t.titlebar.menu}</p>
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" side="bottom">
@@ -114,7 +116,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
               <>
                 <DropdownMenuItem onClick={() => navigate('/')}>
                   <Home className="mr-2 h-4 w-4" />
-                  Home
+                  {t.titlebarMenu.home}
                 </DropdownMenuItem>
                 {/* The same two destinations the home page names, in the same words. Account is
                     disabled mid-session because saving a new profile rewrites state the running
@@ -125,11 +127,11 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
                   disabled={disabled}
                 >
                   <UserRound className="mr-2 h-4 w-4" />
-                  Account
+                  {t.titlebarMenu.account}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/configuration')}>
                   <SettingsIcon className="mr-2 h-4 w-4" />
-                  Configuration
+                  {t.titlebarMenu.configuration}
                 </DropdownMenuItem>
               </>
             )}
@@ -137,12 +139,12 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
         )}
         <DropdownMenuItem onClick={() => toggleTheme()}>
           {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-          {isDark ? 'Light mode' : 'Dark mode'}
+          {isDark ? t.titlebarMenu.lightMode : t.titlebarMenu.darkMode}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate('/documentation')}>
           <BookOpen className="mr-2 h-4 w-4" />
-          Documentation
+          {t.titlebarMenu.documentation}
         </DropdownMenuItem>
 
         {isLoggedIn && (
@@ -150,7 +152,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => !disabled && void handleSignOut()} disabled={disabled}>
               <LogOut className="mr-2 h-4 w-4" />
-              Sign out
+              {t.titlebarMenu.signOut}
             </DropdownMenuItem>
           </>
         )}

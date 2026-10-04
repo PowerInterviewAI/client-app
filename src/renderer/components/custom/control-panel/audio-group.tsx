@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppState } from '@/hooks/use-app-state';
 import { useAudioInputDevice } from '@/hooks/use-audio-input-device';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 import { type AudioDevice } from '@/types/audio-device';
@@ -45,6 +46,7 @@ export function AudioGroup({
   audioInputDeviceNotFound,
   getDisabled,
 }: AudioGroupProps) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const { runningState } = useAppState();
   const { config, updateConfig } = useConfigStore();
@@ -110,10 +112,10 @@ export function AudioGroup({
               // makes the conditions this control reports reachable without seeing it.
               aria-label={
                 swapFailed
-                  ? 'Audio options - could not switch microphone, still using the previous one'
+                  ? t.audioGroup.optionsSwapFailed
                   : audioInputDeviceNotFound
-                    ? 'Audio options - the selected microphone was not found'
-                    : 'Audio options'
+                    ? t.audioGroup.optionsDeviceNotFound
+                    : t.audioGroup.options
               }
               aria-busy={switching}
             >
@@ -125,7 +127,7 @@ export function AudioGroup({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Audio options</p>
+            <p>{t.audioGroup.options}</p>
           </TooltipContent>
         </Tooltip>
         {/* A failed swap raises the same badge as a missing device. Nobody opens a dialog
@@ -144,15 +146,15 @@ export function AudioGroup({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="flex flex-col w-72 p-4">
-          <DialogTitle>Audio Options</DialogTitle>
+          <DialogTitle>{t.audioGroup.dialogTitle}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Select physical microphone that you use.
+            {t.audioGroup.dialogDescription}
           </DialogDescription>
 
           {/* Microphone Select */}
           <div className="mb-3">
             <label id="audio-input-label" className="text-xs text-muted-foreground mb-1 block">
-              Microphone
+              {t.audioGroup.microphone}
             </label>
             {/* `|| undefined` keeps the pre-existing binding exactly as it was. Radix reserves
                 the empty string for clearing a selection, and the hook reports an unset device as
@@ -164,7 +166,7 @@ export function AudioGroup({
               onValueChange={(v) => void setDevice(v)}
             >
               <SelectTrigger aria-labelledby="audio-input-label" className="h-8 w-full text-xs">
-                <SelectValue placeholder="Select microphone" />
+                <SelectValue placeholder={t.audioGroup.selectPlaceholder} />
               </SelectTrigger>
               <SelectContent>
                 {usableAudioInputDevices.map((device) => (
@@ -185,23 +187,20 @@ export function AudioGroup({
                 the toast, which does not. */}
             {running &&
               (switching ? (
-                <p className="mt-1.5 text-xs text-muted-foreground">Switching microphone...</p>
+                <p className="mt-1.5 text-xs text-muted-foreground">{t.audioGroup.switching}</p>
               ) : failedDeviceName ? (
                 <p
                   role="alert"
                   className="mt-1.5 flex items-start gap-1.5 text-xs text-destructive"
                 >
                   <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-                  <span>
-                    Could not switch to {failedDeviceName}. This interview is still using the
-                    previous microphone. Stop and start the assistant to use it.
-                  </span>
+                  <span>{t.audioGroup.swapFailed(failedDeviceName)}</span>
                 </p>
               ) : (
                 // Says what will not happen, which is the question a candidate mid-interview
                 // actually has before touching a control on a live session.
                 <p className="mt-1.5 text-xs text-muted-foreground">
-                  Takes effect immediately. Transcription keeps running.
+                  {t.audioGroup.takesEffectImmediately}
                 </p>
               ))}
           </div>

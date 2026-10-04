@@ -39,6 +39,7 @@ export const ru: Translation = {
     retry: 'Повторить',
     view: 'Открыть',
     loading: 'Загрузка…',
+    withCombo: (label: string, combo: string) => `${label} (${combo})`,
   },
 
   uiLanguageField: {
@@ -462,5 +463,175 @@ export const ru: Translation = {
   inputPassword: {
     show: 'Показать пароль',
     hide: 'Скрыть пароль',
+  },
+
+  titlebar: {
+    openCommandPalette: 'Открыть палитру команд',
+    searchActions: 'Поиск действий',
+    unavailableDuringInterview: 'Недоступно во время собеседования',
+    menu: 'Меню',
+    minimize: 'Свернуть',
+    maximize: 'Развернуть',
+    close: 'Закрыть',
+  },
+
+  titlebarMenu: {
+    home: 'Главная',
+    account: 'Учётная запись',
+    configuration: 'Настройки',
+    documentation: 'Документация',
+    lightMode: 'Светлая тема',
+    darkMode: 'Тёмная тема',
+    signOut: 'Выйти',
+  },
+
+  commandPalette: {
+    title: 'Палитра команд',
+    description: 'Найдите действие, страницу или настройку.',
+    searchPlaceholder: 'Поиск действий…',
+    empty: 'Ничего не найдено.',
+    groups: {
+      goTo: 'Перейти',
+      session: 'Сессия',
+      app: 'Приложение',
+    },
+    home: 'Главная',
+    account: 'Учётная запись',
+    configuration: 'Настройки',
+    buyCredits: 'Купить кредиты',
+    startMock: 'Начать пробное собеседование',
+    startLive: 'Запустить ассистента',
+    switchToFullSentence: 'Переключиться на полные фразы',
+    switchToHintOnly: 'Переключиться на краткие подсказки',
+    hideTranscript: 'Скрыть расшифровку',
+    showTranscript: 'Показать расшифровку',
+    documentation: 'Документация',
+    hotkeys: 'Горячие клавиши',
+    switchToLight: 'Светлая тема',
+    switchToDark: 'Тёмная тема',
+    signOut: 'Выйти',
+  },
+
+  controlPanel: {
+    stop: 'Стоп',
+    stopTooltip: 'Остановить ассистента',
+    stopRunningHint: 'Завершает сессию, предлагает её сохранить и возвращает на главную',
+    stopIdleHint: 'Ничего не запущено - начните собеседование с главного экрана',
+    stopTransientHint: 'Будет доступно, когда сессия запустится',
+
+    checks: {
+      configUnavailable:
+        'Не удалось загрузить сохранённые настройки. Переподключаемся - попробуйте через мгновение.',
+      nameMissing: 'Полное имя не указано',
+      profileMissing: 'Профиль не заполнен',
+      noMicrophone: 'Микрофон не найден. Подключите его и попробуйте снова.',
+      deviceNotFound: (deviceName: string) => `Микрофон «${deviceName}» не найден`,
+    },
+    startFailed: 'Не удалось запустить ассистента',
+  },
+
+  audioGroup: {
+    options: 'Настройки звука',
+    optionsSwapFailed: 'Настройки звука - не удалось сменить микрофон, используется предыдущий',
+    optionsDeviceNotFound: 'Настройки звука - выбранный микрофон не найден',
+    dialogTitle: 'Настройки звука',
+    dialogDescription: 'Выберите микрофон, которым вы пользуетесь.',
+    microphone: 'Микрофон',
+    selectPlaceholder: 'Выберите микрофон',
+    switching: 'Меняем микрофон…',
+    swapFailed: (deviceName: string) =>
+      `Не удалось переключиться на ${deviceName}. Это собеседование продолжается на предыдущем микрофоне. Чтобы использовать новый, остановите и запустите ассистента.`,
+    takesEffectImmediately: 'Применяется сразу. Распознавание продолжает работать.',
+  },
+
+  languageGroup: {
+    current: (languageName: string) => `Язык собеседования: ${languageName}`,
+    currentHalfApplied: (languageName: string) =>
+      `Язык собеседования: ${languageName} - распознавание не переключилось`,
+    tooltip: (nativeName: string) => `Язык собеседования: ${nativeName}`,
+    reconnecting: 'Переподключаем распознавание…',
+    suggestionsOnly: 'Только подсказки - распознавание ещё переподключается',
+    speechAndSuggestions: 'Распознавание речи и подсказки',
+    menuLabel: 'Язык собеседования',
+    halfApplied:
+      'Подсказки переключились, распознавание нет. Попытки продолжаются - если оно не вернётся, остановите и запустите ассистента.',
+    willReconnect: 'Распознавание переподключится; текущая фраза может оборваться.',
+  },
+
+  suggestionMode: {
+    hintOnlyBadge: 'Кратко',
+    fullSentencesBadge: 'Полные фразы',
+    hintOnlyMode: 'Краткие подсказки',
+    fullSentenceMode: 'Полные фразы',
+    hintOnlySummary: 'Заголовок и ключевые слова',
+    fullSentenceSummary: 'Ответы, записанные целиком',
+    ariaHintOnly: 'Вид подсказок: кратко. Переключить на полные фразы',
+    ariaFullSentence: 'Вид подсказок: полные фразы. Переключить на краткие',
+  },
+
+  toolsGroup: {
+    hideTranscription: 'Скрыть расшифровку',
+    showTranscription: 'Показать расшифровку',
+    enterStealth: 'Включить скрытый режим',
+    stealthMode: 'Скрытый режим',
+    stealthUnavailable: 'Будет доступно во время живого собеседования - пока скрывать нечего.',
+    stealthAvailable: 'Скрывает приложение от записи экрана. Те же клавиши возвращают его обратно.',
+    captureScreenshot: 'Сделать снимок экрана',
+    captureScreenshotTooltip: 'Снимок экрана',
+    captureFailed: 'Не удалось сделать снимок экрана',
+    clearCaptures: 'Удалить сделанные снимки экрана',
+    clearCapturesTooltip: 'Очистить снимки',
+    clearCapturesFailed: 'Не удалось очистить снимки',
+    generateSuggestion: 'Создать подсказку по запросу',
+    generateSuggestionTooltip: 'Создать подсказку',
+    generateSuggestionFailed: 'Не удалось создать подсказку',
+    clear: 'Очистить',
+    clearInterview: 'Очистить собеседование',
+    clearFailed: 'Не удалось очистить',
+    exportInterview: 'Экспорт собеседования',
+    exportTheInterview: 'Экспортировать собеседование',
+    nothingToExport: 'Экспортировать пока нечего',
+    nothingToExportDescription:
+      'Сначала проведите собеседование, затем экспортируйте расшифровку и подсказки.',
+    exportFailed: 'Не удалось экспортировать собеседование',
+    exportDocx: 'Документ Word (.docx)',
+    exportMarkdown: 'Markdown (.md)',
+  },
+
+  statusPanel: {
+    transcript: 'Расшифровка',
+    transcriptionShown: (combo: string) => `Расшифровка: показана (${combo})`,
+    transcriptionHidden: (combo: string) => `Расшифровка: скрыта (${combo})`,
+    showHotkeys: 'Горячие клавиши',
+    showHotkeysLabel: 'Показать горячие клавиши',
+    showHotkeysTitle: 'Показать горячие клавиши (?)',
+  },
+
+  runningIndicator: {
+    idle: 'Простой',
+    starting: 'Запуск',
+    running: 'Работает',
+    stopping: 'Остановка',
+  },
+
+  zoomControl: {
+    reset: 'Сбросить масштаб',
+    zoomIn: 'Увеличить',
+    zoomOut: 'Уменьшить',
+  },
+
+  creditsDisplay: {
+    trialPlan: 'Пробный тариф',
+    paidPlan: 'Платный тариф',
+    summary: (credits: number, availableTime: string) =>
+      `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')} - ${availableTime}`,
+    duration: (hours: number, minutes: number) => {
+      const parts: string[] = [];
+      if (hours) parts.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
+      if (minutes) parts.push(`${minutes} ${plural(minutes, 'минута', 'минуты', 'минут')}`);
+      return parts.join(' ') || '0 минут';
+    },
+    lessThanAMinute: 'Меньше минуты',
+    noCreditsLeft: 'Кредиты закончились',
   },
 };
