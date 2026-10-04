@@ -486,6 +486,7 @@ export const ru: Translation = {
     account: 'Учётная запись',
     configuration: 'Настройки',
     documentation: 'Документация',
+    language: 'Язык приложения',
     lightMode: 'Светлая тема',
     darkMode: 'Тёмная тема',
     signOut: 'Выйти',

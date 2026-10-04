@@ -1,6 +1,7 @@
 import {
   BookOpen,
   Home,
+  Languages,
   LogOut,
   Mail,
   Menu,
@@ -18,7 +19,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,7 +34,9 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import { useInterviewLock } from '@/hooks/use-interview-lock';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useThemeStore } from '@/hooks/use-theme-store';
+import { useUiLanguage } from '@/hooks/use-ui-language';
 import { useT } from '@/i18n';
+import { UI_LANGUAGES, type UiLanguage } from '@/types/ui-language';
 
 interface TitlebarMenuProps {
   style?: React.CSSProperties;
@@ -43,6 +51,7 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
   const { appState } = useAppState();
   const { config } = useConfigStore();
   const { isDark, toggleTheme } = useThemeStore();
+  const { uiLanguage, setUiLanguage } = useUiLanguage();
   const { logout } = useAuth();
   const { confirmDiscard } = useSaveHistoryGuard();
 
@@ -137,6 +146,36 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
             )}
           </>
         )}
+        {/* Outside the `isLoggedIn` block on purpose, and outside the `inSetup` one too. This
+            menu is the only surface reachable from *every* screen - the login form, the signup
+            wizard, a half-finished first run - and those are exactly the screens where someone
+            who cannot read the app has nowhere else to go. Configuration has the same control,
+            but it is behind a sign-in and behind the navigation lock.
+
+            A submenu with a radio group rather than a toggle beside the theme one. Two languages
+            would toggle, but the list only grows, and a toggle labelled with the language you
+            are not in is the shape that stops working at three. The radio dot also answers
+            "which am I in" without the user having to recognise the answer. */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Languages className="mr-2 h-4 w-4" />
+            {t.titlebarMenu.language}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup
+              value={uiLanguage}
+              onValueChange={(v) => void setUiLanguage(v as UiLanguage)}
+            >
+              {UI_LANGUAGES.map((entry) => (
+                // Endonym only, for the same reason `UiLanguageField` lists only endonyms: this
+                // is read by someone whose app may be in a language they do not speak.
+                <DropdownMenuRadioItem key={entry.code} value={entry.code}>
+                  {entry.nativeName}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         <DropdownMenuItem onClick={() => toggleTheme()}>
           {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
           {isDark ? t.titlebarMenu.lightMode : t.titlebarMenu.darkMode}

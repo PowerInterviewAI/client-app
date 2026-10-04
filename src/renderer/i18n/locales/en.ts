@@ -470,6 +470,7 @@ export const en = {
     account: 'Account',
     configuration: 'Configuration',
     documentation: 'Documentation',
+    language: 'App language',
     lightMode: 'Light mode',
     darkMode: 'Dark mode',
     signOut: 'Sign out',
