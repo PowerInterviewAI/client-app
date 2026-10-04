@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 
+import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 interface DockResizeHandleProps {
@@ -30,6 +31,7 @@ export default function DockResizeHandle({
   onResize,
   onCommit,
 }: DockResizeHandleProps) {
+  const t = useT();
   const dragRef = useRef<{ startY: number; startHeight: number } | null>(null);
 
   const clamp = (h: number) => Math.min(Math.max(Math.round(h), min), max);
@@ -70,7 +72,7 @@ export default function DockResizeHandle({
     <div
       role="separator"
       aria-orientation="horizontal"
-      aria-label="Resize transcription panel"
+      aria-label={t.panels.resizeTranscript}
       aria-valuenow={Math.round(height)}
       aria-valuemin={min}
       aria-valuemax={max}
@@ -81,7 +83,7 @@ export default function DockResizeHandle({
       onPointerCancel={endDrag}
       onKeyDown={handleKeyDown}
       onDoubleClick={() => onCommit(null)}
-      title="Drag to resize, double-click to reset"
+      title={t.panels.resizeHint}
       // touch-none keeps a pen or touch drag from scrolling the page instead of resizing
       className="group relative h-1.5 shrink-0 cursor-row-resize touch-none outline-none -my-0.5"
     >

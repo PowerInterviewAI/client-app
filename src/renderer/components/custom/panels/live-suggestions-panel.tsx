@@ -7,6 +7,7 @@ const MAX_QUESTION_LENGTH = 256;
 
 import { Card } from '@/components/ui/card';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { useT } from '@/i18n';
 import {
   newestTimestamp,
   stripDanglingEmphasis,
@@ -82,6 +83,7 @@ function LiveSuggestionsPanel({
   style,
   isRunning = false,
 }: LiveSuggestionsPanelProps) {
+  const t = useT();
   const hasItems = suggestions.length > 0;
 
   // newest first: the incoming array is chronological, the panel renders it reversed
@@ -215,7 +217,7 @@ function LiveSuggestionsPanel({
               aria-hidden="true"
             />
           )}
-          <h3 className="font-semibold text-foreground text-xs">Live Suggestions</h3>
+          <h3 className="font-semibold text-foreground text-xs">{t.panels.liveSuggestions}</h3>
         </div>
 
         {!isStealth && (
@@ -230,9 +232,9 @@ function LiveSuggestionsPanel({
                 );
               }}
               className="h-4 w-4 rounded border-border bg-background text-primary"
-              aria-label="Enable auto-scroll"
+              aria-label={t.panels.enableAutoScroll}
             />
-            <span className="text-xs text-muted-foreground">Auto-scroll</span>
+            <span className="text-xs text-muted-foreground">{t.panels.autoScroll}</span>
           </label>
         )}
       </div>
@@ -242,7 +244,7 @@ function LiveSuggestionsPanel({
         {!hasItems && (
           <div className="flex items-center justify-center h-full text-center p-4">
             <div>
-              <p className="text-sm text-muted-foreground">No suggestions yet</p>
+              <p className="text-sm text-muted-foreground">{t.panels.noSuggestions}</p>
             </div>
           </div>
         )}
@@ -307,7 +309,7 @@ function LiveSuggestionsPanel({
 
                     {s.state === SuggestionState.Idle && (
                       <div className="text-xs text-muted-foreground mt-1">
-                        Idle - no generation yet
+                        {t.panels.idleNoGeneration}
                       </div>
                     )}
                   </div>
@@ -323,7 +325,7 @@ function LiveSuggestionsPanel({
           size="icon-sm"
           className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
           onClick={() => scrollToLatest('smooth')}
-          aria-label="Scroll to top"
+          aria-label={t.panels.scrollToTop}
         >
           <ArrowUp className="size-4" />
         </Button>

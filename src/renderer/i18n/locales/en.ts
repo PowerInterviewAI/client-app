@@ -626,6 +626,192 @@ export const en = {
     lessThanAMinute: 'Less than 1 min',
     noCreditsLeft: 'No credits left',
   },
+
+  panels: {
+    autoScroll: 'Auto-scroll',
+    enableAutoScroll: 'Enable auto-scroll',
+    scrollToBottom: 'Scroll to bottom',
+    scrollToTop: 'Scroll to top',
+
+    transcription: 'Transcription',
+    noTranscripts: 'No transcripts yet',
+    interviewer: 'Interviewer',
+
+    liveSuggestions: 'Live Suggestions',
+    noSuggestions: 'No suggestions yet',
+    idleNoGeneration: 'Idle - no generation yet',
+
+    triggeredSuggestions: 'Triggered Suggestions',
+    noTriggeredSuggestions: 'No action suggestions yet',
+    suggestionCanceled: 'Suggestion canceled',
+
+    mockInterview: 'Mock Interview',
+    questionProgress: (current: number, total: number) => `Question ${current} of ${total}`,
+    preparingFirstQuestion: 'Preparing your first question…',
+    /** Fallback for the candidate's own name in the speaker column before the account loads. */
+    you: 'You',
+    followUp: 'Follow-up',
+    skipped: 'Skipped',
+    noAnswer: 'No answer',
+
+    resizeTranscript: 'Resize transcription panel',
+    resizeHint: 'Drag to resize, double-click to reset',
+  },
+
+  saveHistory: {
+    saveAsWord: 'Save as Word',
+    saveAsMarkdown: 'Save as Markdown',
+    formatHintLive: 'Word to share or print, Markdown to keep as plain text.',
+    formatHintMock: 'Word to share or print, Markdown to keep alongside your notes.',
+    exportFailed: 'Failed to export interview',
+
+    /**
+     * One entry per reason, and the action is named on the button that goes through with it:
+     * "Discard" alone is the same word for four different losses.
+     */
+    live: {
+      clear: {
+        title: 'Save this interview before clearing?',
+        body: 'Clearing drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
+        discard: 'Clear without saving',
+      },
+      start: {
+        title: 'Save this interview before starting a new one?',
+        body: 'Starting a session drops the transcript and the suggestions from the last one, and nothing is written to disk until you export.',
+        discard: 'Start without saving',
+      },
+      close: {
+        title: 'Save this interview before closing?',
+        body: 'Closing drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
+        discard: 'Close without saving',
+      },
+      update: {
+        title: 'Save this interview before installing the update?',
+        body: 'Installing restarts the app and drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
+        discard: 'Install without saving',
+      },
+      signout: {
+        title: 'Save this interview before signing out?',
+        body: 'Signing out drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
+        discard: 'Sign out without saving',
+      },
+      stop: {
+        title: 'Save this interview?',
+        body: 'Your interview has ended. The transcript and the suggestions are dropped from here, and nothing has been written to disk.',
+        discard: 'Discard and go home',
+      },
+      'mock-done': {
+        title: 'Save your report before you finish?',
+        body: 'Your score, the feedback and every answer you gave exist only in this app until you save them to a file.',
+        discard: 'Finish without saving',
+      },
+      'mock-again': {
+        title: 'Save this report before the next round?',
+        body: 'Practising again starts a fresh interview and replaces this score, its feedback and the answers behind it.',
+        discard: 'Practise again without saving',
+      },
+    },
+
+    /** What the same reasons say when the thing at risk is a mock report. */
+    mock: {
+      clear: {
+        title: 'Save your mock interview report first?',
+        body: 'Clearing drops this report and the answers behind it, and nothing is written to disk until you save.',
+        discard: 'Clear without saving',
+      },
+      start: {
+        title: 'Save your mock interview report first?',
+        body: 'Starting a session replaces this report and the answers behind it, and nothing is written to disk until you save.',
+        discard: 'Start without saving',
+      },
+      close: {
+        title: 'Save your mock interview report before closing?',
+        body: 'This report and the answers behind it exist only in this app, and closing drops them.',
+        discard: 'Close without saving',
+      },
+      update: {
+        title: 'Save your mock interview report before installing the update?',
+        body: 'Installing restarts the app, which drops this report and the answers behind it.',
+        discard: 'Install without saving',
+      },
+      signout: {
+        title: 'Save your mock interview report before signing out?',
+        body: 'Signing out drops this report and the answers behind it, and nothing has been written to disk.',
+        discard: 'Sign out without saving',
+      },
+      stop: {
+        title: 'Save your mock interview report?',
+        body: 'The interview has ended. This report and the answers behind it are dropped from here, and nothing has been written to disk.',
+        discard: 'Discard and go home',
+      },
+    },
+  },
+
+  headphoneNotice: {
+    title: 'Put your headphones on',
+    description: "This session needs the interviewer's voice going to your ears only.",
+    liveSpeakers: 'On speakers, your microphone hears the interviewer as well as you do.',
+    /** The failure is the quiet one, so it is named rather than left as "quality issues". */
+    liveConsequence:
+      'The app then reads their question as something you said, and stops answering it - with no error to tell you why.',
+    mockSpeakers:
+      'On speakers, the question you just heard can echo into the start of your answer.',
+    mockConsequence:
+      'Your mic is muted while the interviewer speaks, but room reverb after it stops can still slip in as stray words.',
+    proceed: 'My headphones are on',
+  },
+
+  permissionGate: {
+    title: 'Permissions Required',
+    microphone: 'Microphone',
+    micChecking: 'Checking…',
+    micGranted: 'Access granted',
+    micBlocked: 'Enable in System Settings, then click Check Again',
+    micRequired: 'Required to capture your voice',
+    grantAccess: 'Grant Access',
+    openSettings: 'Open Settings',
+    screenRecording: 'Screen Recording',
+    screenChecking: 'Checking…',
+    screenNeedsRelaunch: 'Granted - restart the app to apply before starting',
+    screenGranted: 'Access granted',
+    screenNotDetermined: 'Will be requested when recording starts',
+    screenBlocked: 'Enable in System Settings, then restart the app to apply',
+    restartApp: 'Restart App',
+    checking: 'Checking…',
+    checkAgain: 'Check Again',
+    start: 'Start',
+  },
+
+  exportToast: {
+    exported: (format: string) => `Interview exported as ${format}`,
+    markdown: 'Markdown',
+    word: 'Word',
+    openFileLabel: 'Open the exported file',
+    openFile: 'Open file',
+    showInFolderLabel: 'Show the exported file in its folder',
+    showInFolder: 'Show in folder',
+    dismiss: 'Dismiss',
+  },
+
+  notices: {
+    connecting: 'Connecting to server…',
+    starting: 'Starting…',
+    stopping: 'Stopping…',
+    dismiss: 'Dismiss',
+  },
+
+  updateNotification: {
+    available: (version: string) => `Update Available: v${version}`,
+    availableDescription: 'Download will start automatically in the background.',
+    downloading: (percent: string) => `Downloading update… ${percent}%`,
+    downloadProgress: (transferredMb: string, totalMb: string) =>
+      `${transferredMb} MB / ${totalMb} MB`,
+    downloaded: (version: string) => `Update Downloaded: v${version}`,
+    downloadedDescriptionMac: 'Click to open the installer, then drag it into Applications.',
+    downloadedDescription: 'Click to restart and install the update.',
+    openInstaller: 'Open Installer',
+    restartNow: 'Restart Now',
+  },
 };
 
 export type Translation = typeof en;

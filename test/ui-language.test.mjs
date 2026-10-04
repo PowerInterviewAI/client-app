@@ -18,18 +18,22 @@ import { codeOnly, createChecker, loadMain, readSource } from './helpers.mjs';
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 
 /**
- * Strings in `ru.ts` that are correct without containing a Russian letter.
+ * Strings in `ru.ts` that hold Latin letters on purpose.
  *
- * Deliberately a list rather than a rule. Every entry is a claim that one specific string means
- * the same in both languages, which is occasionally true - an import path, a separator - and is
- * exactly the excuse an untranslated sentence would need, so each one is written out.
+ * Deliberately a list rather than a rule. Every entry is a claim that one specific string is
+ * correct in Latin script, which is occasionally true - a brand name, a file format, an import
+ * path - and is exactly the excuse an untranslated sentence would need, so each one is written
+ * out and has to be added by hand.
  */
-const LANGUAGE_NEUTRAL = new Set([
+const LATIN_BY_DESIGN = new Set([
   // The import specifier the locale's type comes from.
   './en',
   // The BCP-47 tag handed to `toLocaleString`, which is how a Russian locale groups thousands.
-  // It is the one string in the file that is correct *because* it is not Russian prose.
   'ru-RU',
+  // Format names. Russian technical writing keeps both, and the file extension is not a word.
+  'Markdown',
+  'Word',
+  'Markdown (.md)',
 ]);
 
 export async function run() {
@@ -105,21 +109,37 @@ export async function run() {
     check(`a locale file exists for ${code}`, present);
   }
 
-  // The check a type cannot make. Every string the Russian locale ships has to have been
+  // The check a type cannot make. Every sentence the Russian locale ships has to have been
   // translated, and an untranslated one is indistinguishable from a translated one to the
   // compiler: both are `string`.
+  //
+  // The test is Latin letters with no Cyrillic anywhere in the same string, rather than "no
+  // Cyrillic": a literal with no letters at all - a separator, a template that is nothing but
+  // its own interpolations - has nothing in it to translate, and flagging those would train
+  // whoever hits it to widen the allowlist rather than read it.
   const ruSource = codeOnly(
     readSource(new URL('../src/renderer/i18n/locales/ru.ts', import.meta.url))
   );
   const literals = [
-    ...ruSource.matchAll(/'(?:[^'\\\n]|\\.)*'/g),
-    ...ruSource.matchAll(/`(?:[^`\\]|\\.)*`/g),
-  ].map((m) => m[0].slice(1, -1));
+    ...ruSource.matchAll(/'(?:[^'\\\n]|\\.)*'(\s*:)?/g),
+    ...ruSource.matchAll(/`(?:[^`\\]|\\.)*`(\s*:)?/g),
+  ]
+    // A quoted property name is a key, not copy. `'mock-done'` is quoted only because of the
+    // hyphen, and it has to match `en.ts` exactly rather than being translated.
+    .filter((m) => m[1] === undefined)
+    .map((m) => m[0].slice(1, -1))
+    // `${...}` holds an identifier, not copy. `withCombo` is `` `${label} (${combo})` `` in both
+    // locales and correctly has no words of its own; left in, those two parameter names would
+    // read as untranslated English.
+    .map((literal) => literal.replace(/\$\{[^}]*\}/g, ''));
 
-  check('the Russian locale has strings to check', literals.length > 20);
+  check('the Russian locale has strings to check', literals.length > 100);
 
   const untranslated = literals.filter(
-    (literal) => !CYRILLIC.test(literal) && !LANGUAGE_NEUTRAL.has(literal)
+    (literal) =>
+      /\p{Script=Latin}/u.test(literal) &&
+      !/\p{Script=Cyrillic}/u.test(literal) &&
+      !LATIN_BY_DESIGN.has(literal)
   );
   check(
     `every Russian string is in Russian${untranslated.length ? ` (left in English: ${untranslated.map((s) => JSON.stringify(s)).join(', ')})` : ''}`,

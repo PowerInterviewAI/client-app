@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import {
   isMockInterviewSessionActive,
@@ -96,9 +97,10 @@ interface MockTranscriptPanelProps {
  * transcript reads, rather than as a single card that replaces its own content on every question.
  */
 function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
+  const t = useT();
   const { appState } = useAppState();
   const { config, updateConfig } = useConfigStore();
-  const username = appState?.interviewConfig?.fullName || 'You';
+  const username = appState?.interviewConfig?.fullName || t.panels.you;
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState<boolean>(() => config?.autoScrollTranscript ?? true);
   // A callback ref rather than a `useRef`, because the observer below has to be re-attached when
@@ -205,12 +207,12 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
               aria-hidden="true"
             />
           )}
-          <h3 className="font-semibold text-foreground text-xs">Mock Interview</h3>
+          <h3 className="font-semibold text-foreground text-xs">{t.panels.mockInterview}</h3>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {totalQuestions > 0 && (
             <span className="text-xs text-muted-foreground">
-              Question {questionNumber} of {totalQuestions}
+              {t.panels.questionProgress(questionNumber, totalQuestions)}
             </span>
           )}
           {/* Same control and the same stored preference as the live transcript dock. Without it
@@ -227,14 +229,16 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
                 );
               }}
               className="h-4 w-4 rounded border-border bg-background"
-              aria-label="Enable auto-scroll"
+              aria-label={t.panels.enableAutoScroll}
             />
-            <span className="select-none">Auto-scroll</span>
+            <span className="select-none">{t.panels.autoScroll}</span>
           </label>
         </div>
       </div>
 
-      {totalQuestions > 0 && <Progress value={progressValue} className="h-1 rounded-none shrink-0" />}
+      {totalQuestions > 0 && (
+        <Progress value={progressValue} className="h-1 rounded-none shrink-0" />
+      )}
 
       {/* `overflow-x-hidden` is not decoration: `overflow-y-auto` on its own leaves the other
           axis computing to `auto` rather than staying visible, so the vertical scrollbar
@@ -244,7 +248,7 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
       <div ref={scrollerRef} className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-1">
         {turns.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center p-4">
-            <p className="text-sm text-muted-foreground">Preparing your first question…</p>
+            <p className="text-sm text-muted-foreground">{t.panels.preparingFirstQuestion}</p>
           </div>
         ) : (
           <div ref={setContentEl} className="divide-y divide-border/50">
@@ -255,15 +259,15 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
                     'w-20 shrink-0 truncate text-xs font-semibold',
                     turn.speaker === 'candidate' ? 'text-primary' : 'text-foreground'
                   )}
-                  title={turn.speaker === 'candidate' ? username : 'Interviewer'}
+                  title={turn.speaker === 'candidate' ? username : t.panels.interviewer}
                 >
-                  {turn.speaker === 'candidate' ? username : 'Interviewer'}
+                  {turn.speaker === 'candidate' ? username : t.panels.interviewer}
                 </span>
 
                 <div className="min-w-0 flex-1 space-y-1">
                   {turn.isFollowUp && (
                     <Badge variant="secondary" className="text-[10px]">
-                      Follow-up
+                      {t.panels.followUp}
                     </Badge>
                   )}
                   {/* An answered turn can still be empty - "Done answering" pressed with nothing
@@ -273,7 +277,7 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
                       what happened. The export says the same thing with its own placeholder. */}
                   {turn.skipped || !turn.text ? (
                     <p className="text-sm text-muted-foreground italic">
-                      {turn.skipped ? 'Skipped' : 'No answer'}
+                      {turn.skipped ? t.panels.skipped : t.panels.noAnswer}
                     </p>
                   ) : turn.streaming ? (
                     <StreamingQuestion text={turn.text} spoken={turn.spoken ?? false} />
@@ -297,7 +301,7 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
           size="icon-sm"
           className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
           onClick={() => scrollToEnd()}
-          aria-label="Scroll to bottom"
+          aria-label={t.panels.scrollToBottom}
         >
           <ArrowDown className="size-4" />
         </Button>

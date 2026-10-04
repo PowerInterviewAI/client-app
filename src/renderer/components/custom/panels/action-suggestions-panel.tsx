@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useConfigStore } from '@/hooks/use-config-store';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { useT } from '@/i18n';
 import { newestTimestamp, truncateMiddle } from '@/lib/suggestions';
 import { type ActionSuggestion, SuggestionState } from '@/types/suggestion';
 
@@ -34,6 +35,7 @@ function ActionSuggestionsPanel({
   style,
   isRunning = false,
 }: ActionSuggestionsPanelProps) {
+  const t = useT();
   const hasItems = actionSuggestions.length > 0;
 
   // newest first: the incoming array is chronological, the panel renders it reversed
@@ -169,7 +171,7 @@ function ActionSuggestionsPanel({
               aria-hidden="true"
             />
           )}
-          <h3 className="font-semibold text-foreground text-xs">Triggered Suggestions</h3>
+          <h3 className="font-semibold text-foreground text-xs">{t.panels.triggeredSuggestions}</h3>
         </div>
 
         {!isStealth && (
@@ -184,9 +186,9 @@ function ActionSuggestionsPanel({
                 );
               }}
               className="h-4 w-4 rounded border-border bg-background text-primary"
-              aria-label="Enable auto-scroll"
+              aria-label={t.panels.enableAutoScroll}
             />
-            <span className="text-xs text-muted-foreground">Auto-scroll</span>
+            <span className="text-xs text-muted-foreground">{t.panels.autoScroll}</span>
           </label>
         )}
       </div>
@@ -196,7 +198,7 @@ function ActionSuggestionsPanel({
         {!hasItems && (
           <div className="flex items-center justify-center h-full text-center p-4">
             <div>
-              <p className="text-sm text-muted-foreground">No action suggestions yet</p>
+              <p className="text-sm text-muted-foreground">{t.panels.noTriggeredSuggestions}</p>
             </div>
           </div>
         )}
@@ -274,7 +276,7 @@ function ActionSuggestionsPanel({
                     {s.state === SuggestionState.Stopped && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                         <PauseCircle className="h-4 w-4" />
-                        <span>Suggestion canceled</span>
+                        <span>{t.panels.suggestionCanceled}</span>
                       </div>
                     )}
 
@@ -296,7 +298,7 @@ function ActionSuggestionsPanel({
           size="icon-sm"
           className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
           onClick={() => scrollToLatest('smooth')}
-          aria-label="Scroll to top"
+          aria-label={t.panels.scrollToTop}
         >
           <ArrowUp className="size-4" />
         </Button>

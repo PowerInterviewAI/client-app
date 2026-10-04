@@ -12,119 +12,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAppState } from '@/hooks/use-app-state';
-import { type SaveHistoryReason, useSaveHistoryPrompt } from '@/hooks/use-save-history-guard';
+import { useSaveHistoryPrompt } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
+import { useT } from '@/i18n';
 import { getElectron } from '@/lib/utils';
 import type { ExportFormat } from '@/types/export';
 
 import { showExportSuccessToast } from './export-success-toast';
-
-interface Copy {
-  title: string;
-  body: string;
-  discard: string;
-}
-
-/**
- * The action is named in the title and again on the button that goes through with it. "Discard"
- * on its own is the same word for four different losses, and this dialog can appear on a close
- * the user asked for seconds ago and on a Clear they pressed by accident.
- *
- * `stop` is the one entry that is not a guard. The other four are asked *before* the thing that
- * would destroy the interview and can be answered with "not now", which leaves it alone; the
- * session is already over by the time `stop` appears, and the buffers are dropped the moment it
- * closes. That is why it has no Cancel and cannot be dismissed - see `dismissible` below.
- */
-const COPY: Record<SaveHistoryReason, Copy> = {
-  clear: {
-    title: 'Save this interview before clearing?',
-    body: 'Clearing drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
-    discard: 'Clear without saving',
-  },
-  start: {
-    title: 'Save this interview before starting a new one?',
-    body: 'Starting a session drops the transcript and the suggestions from the last one, and nothing is written to disk until you export.',
-    discard: 'Start without saving',
-  },
-  close: {
-    title: 'Save this interview before closing?',
-    body: 'Closing drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
-    discard: 'Close without saving',
-  },
-  update: {
-    title: 'Save this interview before installing the update?',
-    body: 'Installing restarts the app and drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
-    discard: 'Install without saving',
-  },
-  signout: {
-    title: 'Save this interview before signing out?',
-    body: 'Signing out drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
-    discard: 'Sign out without saving',
-  },
-  stop: {
-    title: 'Save this interview?',
-    body: 'Your interview has ended. The transcript and the suggestions are dropped from here, and nothing has been written to disk.',
-    discard: 'Discard and go home',
-  },
-  // Only ever reached with a mock report as the subject, so they carry no live wording to
-  // override below.
-  'mock-done': {
-    title: 'Save your report before you finish?',
-    body: 'Your score, the feedback and every answer you gave exist only in this app until you save them to a file.',
-    discard: 'Finish without saving',
-  },
-  'mock-again': {
-    title: 'Save this report before the next round?',
-    body: 'Practising again starts a fresh interview and replaces this score, its feedback and the answers behind it.',
-    discard: 'Practise again without saving',
-  },
-};
-
-/**
- * What the same six reasons say when the thing at risk is a mock report rather than a live
- * interview.
- *
- * The live wording is specific in a way that becomes wrong here: it names a transcript and
- * suggestions, which is a live session's output and not a mock one's. A mock session produces a
- * score, written feedback and the answers the candidate gave, and the file it writes is a report
- * rather than a record of a call. Reading "save this interview before clearing" over a scored
- * report was the version of that mismatch the report screen actually shipped.
- *
- * Partial on purpose: `mock-done` and `mock-again` are raised only from that screen and are
- * already written for it, so an entry here would be a second copy of the same words.
- */
-const MOCK_COPY: Partial<Record<SaveHistoryReason, Copy>> = {
-  clear: {
-    title: 'Save your mock interview report first?',
-    body: 'Clearing drops this report and the answers behind it, and nothing is written to disk until you save.',
-    discard: 'Clear without saving',
-  },
-  start: {
-    title: 'Save your mock interview report first?',
-    body: 'Starting a session replaces this report and the answers behind it, and nothing is written to disk until you save.',
-    discard: 'Start without saving',
-  },
-  close: {
-    title: 'Save your mock interview report before closing?',
-    body: 'This report and the answers behind it exist only in this app, and closing drops them.',
-    discard: 'Close without saving',
-  },
-  update: {
-    title: 'Save your mock interview report before installing the update?',
-    body: 'Installing restarts the app, which drops this report and the answers behind it.',
-    discard: 'Install without saving',
-  },
-  signout: {
-    title: 'Save your mock interview report before signing out?',
-    body: 'Signing out drops this report and the answers behind it, and nothing has been written to disk.',
-    discard: 'Sign out without saving',
-  },
-  stop: {
-    title: 'Save your mock interview report?',
-    body: 'The interview has ended. This report and the answers behind it are dropped from here, and nothing has been written to disk.',
-    discard: 'Discard and go home',
-  },
-};
 
 /**
  * Asks whether to export before something destroys the interview.
@@ -135,6 +29,7 @@ const MOCK_COPY: Partial<Record<SaveHistoryReason, Copy>> = {
  * that raised it, since answering it is what sends the user home.
  */
 export default function SaveHistoryDialog() {
+  const t = useT();
   const { reason, settle, prompt } = useSaveHistoryPrompt();
   const { exportTranscript, exportMockReport } = useTools();
   const { appState } = useAppState();
@@ -177,20 +72,26 @@ export default function SaveHistoryDialog() {
       console.error(error);
       // The prompt stays open on a failure. Going ahead with the action here would destroy the
       // interview the user has just asked to keep, on the one path where saving did not work.
-      toast.error(error instanceof Error ? error.message : 'Failed to export interview');
+      toast.error(error instanceof Error ? error.message : t.saveHistory.exportFailed);
     } finally {
       setSaving(null);
     }
   };
 
-  const copy = reason ? (isMockSubject ? (MOCK_COPY[reason] ?? COPY[reason]) : COPY[reason]) : null;
+  // `t.saveHistory.mock` is partial on purpose: `mock-done` and `mock-again` are raised only
+  // from the report screen and are already written for it, so an entry there would be a second
+  // copy of the same words.
+  const copy = reason
+    ? isMockSubject
+      ? (t.saveHistory.mock[reason as keyof typeof t.saveHistory.mock] ??
+        t.saveHistory.live[reason])
+      : t.saveHistory.live[reason]
+    : null;
   const busy = saving !== null;
   // Both formats write the same content, so the choice is one of what to do with the file
   // afterwards rather than of what is being kept - said once, under the two buttons, instead of
   // left for the user to infer from two equally-weighted primaries.
-  const formatHint = isMockSubject
-    ? 'Word to share or print, Markdown to keep alongside your notes.'
-    : 'Word to share or print, Markdown to keep as plain text.';
+  const formatHint = isMockSubject ? t.saveHistory.formatHintMock : t.saveHistory.formatHintLive;
 
   // Every other reason can be answered with "not now" by pressing Esc, and that answer leaves
   // the interview exactly where it was. After a stop there is no "not now" left to mean - the
@@ -233,7 +134,7 @@ export default function SaveHistoryDialog() {
               ) : (
                 <FileText className="mr-2 h-4 w-4" />
               )}
-              Save as Word
+              {t.saveHistory.saveAsWord}
             </Button>
             <Button
               className="flex-1"
@@ -248,7 +149,7 @@ export default function SaveHistoryDialog() {
               ) : (
                 <Hash className="mr-2 h-4 w-4" />
               )}
-              Save as Markdown
+              {t.saveHistory.saveAsMarkdown}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">{formatHint}</p>
@@ -261,7 +162,7 @@ export default function SaveHistoryDialog() {
                 onClick={() => settle(false)}
                 disabled={busy}
               >
-                Cancel
+                {t.common.cancel}
               </Button>
             )}
             <Button

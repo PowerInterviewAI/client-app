@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useConfigStore } from '@/hooks/use-config-store';
+import { translationFor } from '@/i18n';
 import { getElectron } from '@/lib/utils';
 import type { ExportFormat } from '@/types/export';
 
@@ -16,6 +18,10 @@ import type { ExportFormat } from '@/types/export';
 export function showExportSuccessToast(filePath: string, format: ExportFormat): void {
   const electron = getElectron();
   const toastId = `export-${Date.now()}`;
+  // Not a component, so there is no `useT` to call: this is a plain function invoked from a
+  // click handler. The language is read off the config store directly, which is the same value
+  // the hook would have resolved.
+  const t = translationFor(useConfigStore.getState().config?.uiLanguage);
 
   toast.custom(
     () => (
@@ -29,7 +35,7 @@ export function showExportSuccessToast(filePath: string, format: ExportFormat): 
       >
         <CircleCheck className="h-4 w-4 shrink-0" />
         <span className="flex-1 text-sm font-medium">
-          Interview exported as {format === 'md' ? 'Markdown' : 'Word'}
+          {t.exportToast.exported(format === 'md' ? t.exportToast.markdown : t.exportToast.word)}
         </span>
         <div className="flex items-center gap-1">
           <Tooltip>
@@ -38,13 +44,13 @@ export function showExportSuccessToast(filePath: string, format: ExportFormat): 
                 size="sm"
                 variant="outline"
                 className="h-6 w-6 p-0"
-                aria-label="Open the exported file"
+                aria-label={t.exportToast.openFileLabel}
                 onClick={() => electron?.openFile(filePath)}
               >
                 <FileIcon className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Open file</TooltipContent>
+            <TooltipContent>{t.exportToast.openFile}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -52,13 +58,13 @@ export function showExportSuccessToast(filePath: string, format: ExportFormat): 
                 size="sm"
                 variant="outline"
                 className="h-6 w-6 p-0"
-                aria-label="Show the exported file in its folder"
+                aria-label={t.exportToast.showInFolderLabel}
                 onClick={() => electron?.showInFolder(filePath)}
               >
                 <FolderOpenIcon className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Show in folder</TooltipContent>
+            <TooltipContent>{t.exportToast.showInFolder}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -66,13 +72,13 @@ export function showExportSuccessToast(filePath: string, format: ExportFormat): 
                 size="sm"
                 variant="ghost"
                 className="h-6 w-6 p-0"
-                aria-label="Dismiss"
+                aria-label={t.exportToast.dismiss}
                 onClick={() => toast.dismiss(toastId)}
               >
                 <XIcon className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Dismiss</TooltipContent>
+            <TooltipContent>{t.exportToast.dismiss}</TooltipContent>
           </Tooltip>
         </div>
       </div>

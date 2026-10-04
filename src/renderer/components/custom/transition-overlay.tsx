@@ -1,7 +1,9 @@
 import { useAppState } from '@/hooks/use-app-state';
+import { useT } from '@/i18n';
 import { RunningState } from '@/types/app-state';
 
 export function TransitionOverlay() {
+  const t = useT();
   const { appState } = useAppState();
 
   if (!appState) return null;
@@ -9,7 +11,7 @@ export function TransitionOverlay() {
   const { runningState } = appState;
   if (runningState !== RunningState.Starting && runningState !== RunningState.Stopping) return null;
 
-  const message = runningState === RunningState.Starting ? 'Starting...' : 'Stopping...';
+  const message = runningState === RunningState.Starting ? t.notices.starting : t.notices.stopping;
 
   return (
     <div className="fixed inset-0 top-9 z-9998 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
