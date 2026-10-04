@@ -13,10 +13,12 @@ import PaymentStatusTab from '@/components/custom/payment/payment-status-tab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppState } from '@/hooks/use-app-state';
 import { usePayment } from '@/hooks/use-payment';
+import { useT } from '@/i18n';
 
 type PaymentTab = 'buy' | 'history' | 'status';
 
 export default function PaymentPage() {
+  const t = useT();
   const [activeTab, setActiveTab] = useState<PaymentTab>('buy');
   const [statusPaymentId, setStatusPaymentId] = useState('');
   const { appState } = useAppState();
@@ -50,19 +52,19 @@ export default function PaymentPage() {
     >
       {/* Header. Falls back to `/main` rather than home: this page is most often opened from the
           interview screen, on a credits warning the user wants to get back from. */}
-      <PageHeader title="Buy Credits" fallback="/main">
+      <PageHeader title={t.payment.title} fallback="/main">
         <TabsList className="ml-auto">
           <TabsTrigger value="buy" className="flex items-center gap-1.5">
             <CreditCard className="h-4 w-4" />
-            <span>Buy Credits</span>
+            <span>{t.payment.tabs.buy}</span>
           </TabsTrigger>
           <TabsTrigger value="history" className="flex items-center gap-1.5">
             <History className="h-4 w-4" />
-            <span>History</span>
+            <span>{t.payment.tabs.history}</span>
           </TabsTrigger>
           <TabsTrigger value="status" className="flex items-center gap-1.5">
             <Receipt className="h-4 w-4" />
-            <span>Status</span>
+            <span>{t.payment.tabs.status}</span>
           </TabsTrigger>
         </TabsList>
       </PageHeader>

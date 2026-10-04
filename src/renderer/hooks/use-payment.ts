@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { useT } from '@/i18n';
 import type {
   AvailableCurrency,
   CreatePaymentRequest,
@@ -15,6 +16,10 @@ import type {
 } from '@/types/payment';
 
 export function usePayment() {
+  // Only reached for a failure the backend did not describe. Every callback below takes `t` as a
+  // dependency: they are memoised and close over it, so without that a language change would
+  // leave the old wording in place for the rest of the session.
+  const t = useT();
   const [plans, setPlans] = useState<CreditPlanInfo[]>([]);
   const [currencies, setCurrencies] = useState<AvailableCurrency[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,14 +34,14 @@ export function usePayment() {
       if (result?.success && result.data) {
         setPlans(result.data);
       } else {
-        throw new Error(result?.error || 'Failed to get plans');
+        throw new Error(result?.error || t.payment.errors.getPlans);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get plans');
+      setError(err instanceof Error ? err.message : t.payment.errors.getPlans);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Get available currencies
   const getCurrencies = useCallback(async () => {
@@ -47,14 +52,14 @@ export function usePayment() {
       if (result?.success && result.data) {
         setCurrencies(result.data);
       } else {
-        throw new Error(result?.error || 'Failed to get currencies');
+        throw new Error(result?.error || t.payment.errors.getCurrencies);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get currencies');
+      setError(err instanceof Error ? err.message : t.payment.errors.getCurrencies);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Create a new payment
   const createPayment = useCallback(
@@ -66,16 +71,16 @@ export function usePayment() {
         if (result?.success && result.data) {
           return result.data;
         } else {
-          throw new Error(result?.error || 'Failed to create payment');
+          throw new Error(result?.error || t.payment.errors.createPayment);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create payment');
+        setError(err instanceof Error ? err.message : t.payment.errors.createPayment);
         return null;
       } finally {
         setLoading(false);
       }
     },
-    []
+    [t]
   );
 
   // Get payment status
@@ -88,16 +93,16 @@ export function usePayment() {
         if (result?.success && result.data) {
           return result.data;
         } else {
-          throw new Error(result?.error || 'Failed to get payment status');
+          throw new Error(result?.error || t.payment.errors.getStatus);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to get payment status');
+        setError(err instanceof Error ? err.message : t.payment.errors.getStatus);
         return null;
       } finally {
         setLoading(false);
       }
     },
-    []
+    [t]
   );
 
   // Get payment history
@@ -109,15 +114,15 @@ export function usePayment() {
       if (result?.success && result.data) {
         return result.data;
       } else {
-        throw new Error(result?.error || 'Failed to get payment history');
+        throw new Error(result?.error || t.payment.errors.getHistory);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get payment history');
+      setError(err instanceof Error ? err.message : t.payment.errors.getHistory);
       return [];
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Get current credits
   const getCredits = useCallback(async (): Promise<number | null> => {
@@ -128,15 +133,15 @@ export function usePayment() {
       if (result?.success && result.credits !== undefined) {
         return result.credits;
       } else {
-        throw new Error(result?.error || 'Failed to get credits');
+        throw new Error(result?.error || t.payment.errors.getCredits);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get credits');
+      setError(err instanceof Error ? err.message : t.payment.errors.getCredits);
       return null;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Load plans on mount
   useEffect(() => {

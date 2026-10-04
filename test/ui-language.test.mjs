@@ -43,6 +43,11 @@ const LATIN_BY_DESIGN = new Set([
   'Staff+',
   // A domain.
   'powerinterviewai.com/docs',
+  // Purchasable SKUs. `Pro` in particular is a plan a user has bought by that name, so the
+  // three stay as the brand's own words - only their descriptions are prose.
+  'Starter',
+  'Pro',
+  'Enterprise',
 ]);
 
 export async function run() {

@@ -968,4 +968,130 @@ export const ru: Translation = {
 
     hotkeys: 'Горячие клавиши',
   },
+
+  payment: {
+    title: 'Покупка кредитов',
+    tabs: {
+      buy: 'Покупка',
+      history: 'История',
+      status: 'Статус',
+    },
+
+    buy: {
+      currentBalance: 'Текущий баланс',
+      credits: (credits: number) =>
+        `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
+      availableFor: (duration: string, perMinute: number) =>
+        `Хватит примерно на ${duration} (${perMinute} ${plural(perMinute, 'кредит', 'кредита', 'кредитов')} в минуту)`,
+      duration: (hours: number, minutes: number) => {
+        const parts: string[] = [];
+        if (hours) parts.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
+        if (minutes) parts.push(`${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}`);
+        return parts.join(' ') || '0 минут';
+      },
+      loadingPlans: 'Загружаем тарифы…',
+      mostPopular: 'Чаще всего берут',
+      planNames: {
+        starter: 'Starter',
+        pro: 'Pro',
+        enterprise: 'Enterprise',
+      },
+      planDescriptions: {
+        starter: 'Чтобы попробовать платформу',
+        pro: 'Лучший выбор, если вы серьёзно ищете работу',
+        enterprise: 'Для интенсивного использования и команд',
+      },
+      perCredits: (credits: number) =>
+        ` / ${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
+      minutesOfAssistance: (minutes: number) =>
+        `примерно ${minutes.toLocaleString('ru-RU')} ${plural(minutes, 'минута', 'минуты', 'минут')} работы ассистента`,
+      selected: 'Выбрано',
+      buy: 'Купить',
+      detailsTitle: 'Детали оплаты',
+      detailsLead: 'Завершите покупку: ',
+      detailsFor: ' за ',
+      currencyLabel: 'Валюта платежа',
+      currencyPlaceholder: 'Выберите валюту',
+      currencySearchPlaceholder: 'Поиск валюты…',
+      noCurrency: 'Валюта не найдена',
+      createPayment: 'Создать платёж',
+      creatingPayment: 'Создаём платёж…',
+    },
+
+    history: {
+      loading: 'Загружаем историю платежей…',
+      loadFailed: 'Не удалось загрузить историю платежей',
+      emptyTitle: 'История платежей пуста',
+      emptyBody: 'Вы ещё не совершали платежей. Купите кредиты, чтобы начать.',
+      buyCredits: 'Купить кредиты',
+      refreshing: 'Обновляем…',
+      columns: {
+        created: 'Создан',
+        paymentId: 'ID платежа',
+        credits: 'Кредиты',
+        amount: 'Сумма',
+        status: 'Статус',
+        action: 'Действие',
+      },
+      notAvailable: 'нет данных',
+      view: 'Открыть',
+    },
+
+    status: {
+      title: 'Проверка статуса платежа',
+      description: 'Введите ID платежа, чтобы узнать его текущий статус',
+      idPlaceholder: 'Введите ID платежа',
+      check: 'Проверить статус',
+      checking: 'Проверяем…',
+      notFound: 'Платёж не найден',
+      fetchFailed: 'Не удалось получить статус платежа',
+      order: (orderId: string) => `Заказ №${orderId}`,
+      refreshing: 'Обновляем…',
+      amountToPay: 'Сумма к оплате',
+      priceUsd: 'Цена (USD)',
+      actuallyPaid: 'Фактически оплачено',
+      paymentMethods: 'Способы оплаты',
+      qrTab: 'QR-код',
+      addressTab: 'Адрес',
+      downloadQr: 'Скачать QR-код',
+      qrSaved: 'QR-код сохранён',
+      scanWithWallet: 'Отсканируйте в приложении кошелька',
+      qrIncludes: (amount: string) => `QR-код содержит адрес и сумму (${amount})`,
+      paymentAddress: 'Адрес для оплаты',
+      amountToSend: 'Сумма к отправке',
+      sendExactly: 'Отправьте ровно эту сумму на адрес выше.',
+      successTitle: 'Платёж прошёл',
+      successBody: 'Кредиты зачислены на вашу учётную запись.',
+      expiredTitle: 'Срок платежа истёк',
+      failedTitle: 'Платёж не прошёл',
+      expiredBody: 'Срок этого платежа истёк. Создайте новый платёж.',
+      failedBody: 'Платёж не удалось обработать. Попробуйте ещё раз.',
+      created: 'Создан:',
+      updated: 'Обновлён:',
+      addressCopied: 'Адрес для оплаты скопирован',
+      amountCopied: 'Сумма скопирована',
+      currencyCopied: 'Валюта скопирована',
+    },
+
+    statusLabels: {
+      waiting: 'Ожидает',
+      confirming: 'Подтверждается',
+      confirmed: 'Подтверждён',
+      sending: 'Отправляется',
+      partiallyPaid: 'Оплачен частично',
+      finished: 'Завершён',
+      failed: 'Не прошёл',
+      refunded: 'Возвращён',
+      expired: 'Истёк',
+    },
+
+    errors: {
+      getPlans: 'Не удалось получить тарифы',
+      getCurrencies: 'Не удалось получить список валют',
+      createPayment: 'Не удалось создать платёж',
+      getStatus: 'Не удалось получить статус платежа',
+      getHistory: 'Не удалось получить историю платежей',
+      getCredits: 'Не удалось получить баланс кредитов',
+    },
+  },
 };

@@ -977,6 +977,132 @@ export const en = {
 
     hotkeys: 'Hotkeys',
   },
+
+  payment: {
+    title: 'Buy Credits',
+    tabs: {
+      buy: 'Buy Credits',
+      history: 'History',
+      status: 'Status',
+    },
+
+    buy: {
+      currentBalance: 'Current Balance',
+      credits: (credits: number) => `${credits.toLocaleString()} credits`,
+      /** "Available for ~2 hours 15 minutes (10 credits per minute)". */
+      availableFor: (duration: string, perMinute: number) =>
+        `Available for ~${duration} (${perMinute} credits per minute)`,
+      duration: (hours: number, minutes: number) => {
+        const parts: string[] = [];
+        if (hours) parts.push(`${hours} hour${hours === 1 ? '' : 's'}`);
+        if (minutes) parts.push(`${minutes} minute${minutes === 1 ? '' : 's'}`);
+        return parts.join(' ') || '0 minutes';
+      },
+      loadingPlans: 'Loading payment plans…',
+      mostPopular: 'Most Popular',
+      planNames: {
+        starter: 'Starter',
+        pro: 'Pro',
+        enterprise: 'Enterprise',
+      },
+      planDescriptions: {
+        starter: 'Perfect for trying out the platform',
+        pro: 'Best value for serious job seekers',
+        enterprise: 'For heavy users and teams',
+      },
+      perCredits: (credits: number) => ` / ${credits.toLocaleString()} credits`,
+      minutesOfAssistance: (minutes: number) =>
+        `~${minutes.toLocaleString()} minutes of AI assistance`,
+      selected: 'Selected',
+      buy: 'Buy',
+      detailsTitle: 'Payment Details',
+      detailsLead: 'Complete your purchase of ',
+      detailsFor: ' for ',
+      currencyLabel: 'Payment Currency',
+      currencyPlaceholder: 'Select a currency',
+      currencySearchPlaceholder: 'Search currency…',
+      noCurrency: 'No currency found',
+      createPayment: 'Create Payment',
+      creatingPayment: 'Creating Payment…',
+    },
+
+    history: {
+      loading: 'Loading payment history…',
+      loadFailed: 'Failed to load payment history',
+      emptyTitle: 'No Payment History',
+      emptyBody: 'You have not made any payments yet. Purchase credits to get started.',
+      buyCredits: 'Buy Credits',
+      refreshing: 'Refreshing…',
+      columns: {
+        created: 'Created',
+        paymentId: 'Payment ID',
+        credits: 'Credits',
+        amount: 'Amount',
+        status: 'Status',
+        action: 'Action',
+      },
+      notAvailable: 'N/A',
+      view: 'View',
+    },
+
+    status: {
+      title: 'Check Payment Status',
+      description: 'Enter a payment ID to check its current status',
+      idPlaceholder: 'Enter payment ID',
+      check: 'Check Status',
+      checking: 'Checking…',
+      notFound: 'Payment not found',
+      fetchFailed: 'Failed to fetch payment status',
+      order: (orderId: string) => `Order #${orderId}`,
+      refreshing: 'Refreshing…',
+      amountToPay: 'Amount to Pay',
+      priceUsd: 'Price (USD)',
+      actuallyPaid: 'Actually Paid',
+      paymentMethods: 'Payment Methods',
+      qrTab: 'QR Code',
+      addressTab: 'Address',
+      downloadQr: 'Download QR Code',
+      qrSaved: 'QR code saved',
+      scanWithWallet: 'Scan with your wallet app',
+      qrIncludes: (amount: string) => `QR code includes address and amount (${amount})`,
+      paymentAddress: 'Payment Address',
+      amountToSend: 'Amount to Send',
+      sendExactly: 'Send exactly this amount to the address above.',
+      successTitle: 'Payment Successful!',
+      successBody: 'Your credits have been added to your account.',
+      expiredTitle: 'Payment Expired',
+      failedTitle: 'Payment Failed',
+      expiredBody: 'This payment has expired. Please create a new payment.',
+      failedBody: 'The payment could not be processed. Please try again.',
+      created: 'Created:',
+      updated: 'Updated:',
+      addressCopied: 'Payment address copied to clipboard',
+      amountCopied: 'Amount copied to clipboard',
+      currencyCopied: 'Currency copied to clipboard',
+    },
+
+    /** Mirrors the backend's `PaymentStatus`; `default` covers a status this build does not know. */
+    statusLabels: {
+      waiting: 'Waiting',
+      confirming: 'Confirming',
+      confirmed: 'Confirmed',
+      sending: 'Sending',
+      partiallyPaid: 'Partially Paid',
+      finished: 'Finished',
+      failed: 'Failed',
+      refunded: 'Refunded',
+      expired: 'Expired',
+    },
+
+    errors: {
+      getPlans: 'Failed to get plans',
+      getCurrencies: 'Failed to get currencies',
+      createPayment: 'Failed to create payment',
+      getStatus: 'Failed to get payment status',
+      getHistory: 'Failed to get payment history',
+      getCredits: 'Failed to get credits',
+    },
+  },
 };
 
 export type Translation = typeof en;
