@@ -9,12 +9,15 @@ import { MicrophoneField } from '@/components/custom/settings/microphone-field';
 import { MockHintsField } from '@/components/custom/settings/mock-hints-field';
 import { SuggestionModeField } from '@/components/custom/settings/suggestion-mode-field';
 import { TranscriptPanelField } from '@/components/custom/settings/transcript-panel-field';
+import { UiLanguageField } from '@/components/custom/settings/ui-language-field';
 import { ZoomField } from '@/components/custom/settings/zoom-field';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/i18n';
 
 /**
  * How the interview runs: the microphone, the language, how suggestions read, whether mock
- * interviews show them at all, and whether the transcript is docked.
+ * interviews show them at all, and whether the transcript is docked - and above all of it, the
+ * language the app itself is in, which is the one setting here that is not about an interview.
  *
  * Every control here writes straight through to the config store as it is changed - there is no
  * Save button, because there is nothing to batch and nothing that could be half-applied. That is
@@ -25,14 +28,22 @@ import { Button } from '@/components/ui/button';
  * same components, so what the wizard set is what this page shows.
  */
 export default function ConfigurationPage() {
+  const t = useT();
   const navigate = useNavigate();
   const [hotkeysOpen, setHotkeysOpen] = useState(false);
 
   return (
     <div className="w-full flex flex-col bg-background">
-      <PageHeader title="Configuration" />
+      <PageHeader title={t.configuration.title} />
 
       <div className="flex-1 overflow-auto px-4 py-4 w-full max-w-2xl mx-auto space-y-6">
+        {/* First, and separated from the rest: it is the only control on this page that is not
+            about how an interview runs, and it is the one someone arrives here looking for when
+            the app is in a language they do not read. */}
+        <UiLanguageField />
+
+        <div className="border-t" />
+
         <MicrophoneField />
         <LanguageField />
         <SuggestionModeField />
@@ -46,27 +57,25 @@ export default function ConfigurationPage() {
             finishing it simply records the same flag again. */}
         <div className="flex items-center justify-between gap-3 border-t pt-4">
           <div>
-            <p className="text-sm font-medium">Setup guide</p>
+            <p className="text-sm font-medium">{t.configuration.setupGuide.title}</p>
             <p className="text-xs text-muted-foreground">
-              Walk through everything on this page, and your profile, one step at a time.
+              {t.configuration.setupGuide.description}
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={() => navigate('/onboarding')}>
             <Wand2 className="h-4 w-4" aria-hidden="true" />
-            Run setup
+            {t.configuration.setupGuide.action}
           </Button>
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t pt-4">
           <div>
-            <p className="text-sm font-medium">Keyboard shortcuts</p>
-            <p className="text-xs text-muted-foreground">
-              Everything you can reach without touching the app during an interview.
-            </p>
+            <p className="text-sm font-medium">{t.configuration.hotkeys.title}</p>
+            <p className="text-xs text-muted-foreground">{t.configuration.hotkeys.description}</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => setHotkeysOpen(true)}>
             <Keyboard className="h-4 w-4" aria-hidden="true" />
-            View
+            {t.common.view}
           </Button>
         </div>
       </div>

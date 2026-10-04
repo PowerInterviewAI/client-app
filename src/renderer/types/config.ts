@@ -1,10 +1,15 @@
 import type { Language } from './language';
+import type { UiLanguage } from './ui-language';
 
 export type { Language };
 
 export interface Config {
   // Interview language: what the ASR transcribes and what suggestions come back in.
   language: Language;
+
+  // The language the app's own chrome is written in. A separate setting from `language` above -
+  // see `types/ui-language.ts`.
+  uiLanguage: UiLanguage;
 
   // Authentication
   sessionToken: string;

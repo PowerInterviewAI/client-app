@@ -7,6 +7,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import { MainContainerContext } from '@/hooks/use-main-container';
 import { useOnboardingDismissed } from '@/hooks/use-onboarding-dismissed';
 import usePointerLockGuard from '@/hooks/use-pointer-lock-guard';
+import { useUiLanguageSync } from '@/i18n';
 import type { PushNotification } from '@/types/push-notification';
 
 import { CommandPalette } from './command-palette';
@@ -16,6 +17,12 @@ import { UpdateNotification } from './update-notification';
 
 export default function MainFrame({ children }: { children: React.ReactNode }) {
   usePointerLockGuard();
+
+  // Mirrors the chosen UI language onto `document.lang` and into the paint-time cache the next
+  // launch reads before the config store has answered. Here rather than in a provider because
+  // the strings themselves need no context - `useT` reads the config store directly - and this
+  // is the one component mounted for every route.
+  useUiLanguageSync();
 
   // Loaded here rather than per page. Routes reached directly - a reload on `/configuration`, the
   // onboarding gate on `/` - all read the config, and every one of them holding its own fetch is

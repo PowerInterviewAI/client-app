@@ -18,6 +18,9 @@ for (const module of [
   // After config-store: that one seeds the store file and asserts on the leftover pre-sync
   // config, and this one writes to the same store.
   './language.test.mjs',
+  // After language.test.mjs: both write to the same store, and this one asserts on what a
+  // chrome language round-trip leaves on disk.
+  './ui-language.test.mjs',
   './app-state.test.mjs',
   './account.test.mjs',
   // After account.test.mjs: both swap the accountService singleton's client, and that one's
