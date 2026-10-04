@@ -291,6 +291,164 @@ export const en = {
       `Character limit reached (${max.toLocaleString()}). Extra text was not added.`,
     charactersLeft: (remaining: number) => `${remaining.toLocaleString()} characters left`,
   },
+
+  microphoneField: {
+    label: 'Microphone',
+    noDevices: 'No microphone was detected. Connect one and it will appear here.',
+    selectPlaceholder: 'Select a microphone',
+    lookingPlaceholder: 'Looking for microphones…',
+    test: 'Test',
+    stopTest: 'Stop test',
+    openFailed:
+      'Could not open this microphone. Check it is connected and that no other app is using it.',
+    notConnected: (deviceName: string) =>
+      `“${deviceName}” is not connected any more. Pick another microphone.`,
+    saySomething: 'Say something - the bar should move while you speak.',
+    runningHint: 'The interview is using this microphone. Testing is available once it stops.',
+    testHint:
+      'Test it before your interview - a silent microphone looks exactly like a quiet room.',
+  },
+
+  micLevelMeter: {
+    label: 'Microphone input level',
+    hearing: 'Hearing you',
+    silent: 'Silent',
+  },
+
+  suggestionModeField: {
+    label: 'Suggestion style',
+    hintOnly: 'Hint-only',
+    hintOnlyDescription:
+      'A headline and keyword bullets you can read at a glance while you keep talking. Recommended.',
+    fullSentences: 'Full sentences',
+    fullSentencesDescription:
+      'The answer written out the way it would be spoken. More to read, less to improvise.',
+    switchHint: (combo: string) => `Switchable mid-interview from the control bar or ${combo}.`,
+  },
+
+  zoomField: {
+    label: 'Interface size',
+    smaller: 'Smaller',
+    larger: 'Larger',
+    reset: 'Reset',
+    description: (combo: string) =>
+      `Scales the whole app. The interview window is small on purpose - this is how you make the suggestions readable at a glance. Also on ${combo}.`,
+  },
+
+  transcriptPanelField: {
+    label: 'Show the transcript panel',
+    description: (combo: string) =>
+      `Keeps a live transcript docked under your suggestions. Turn it off for more room to read them. Toggle any time with ${combo}.`,
+  },
+
+  mockHintsField: {
+    label: 'Show hints in mock interviews',
+    description:
+      'Puts what the live assistant would have answered beside each mock interview question, so you can compare it against your own. Turn it off to answer unaided - either way, you can switch it mid-session from the mock interview bar. This changes nothing about a real interview.',
+  },
+
+  languageField: {
+    label: 'Interview language',
+    /** Shown inside each item for a language Deepgram's Aura TTS cannot speak. */
+    textOnly: 'text only',
+    reconnectFailed:
+      'Suggestions switched language, but transcription is still reconnecting. Stop and start the assistant if it does not come back.',
+    description: 'What is transcribed, and what your suggestions come back in.',
+    noVoiceNotice:
+      'The interviewer will write its questions instead of speaking them. You still answer out loud, and the scoring is the same.',
+  },
+
+  changePassword: {
+    title: 'Change Password',
+    description: 'Enter your current password and choose a new one.',
+    current: 'Current Password',
+    currentPlaceholder: 'Enter current password',
+    next: 'New Password',
+    nextPlaceholder: 'Enter new password',
+    confirm: 'Confirm New Password',
+    confirmPlaceholder: 'Confirm new password',
+    submit: 'Change Password',
+    submitting: 'Changing…',
+    mismatch: 'The new passwords do not match.',
+    succeeded: 'Password changed successfully',
+    failed: 'Failed to change password',
+  },
+
+  hotkeys: {
+    dialogTitle: 'Keyboard Shortcuts',
+    dialogDescription: 'Everything you can reach without touching the app during an interview.',
+
+    groups: {
+      general: 'General',
+      window: 'Window Management',
+      panels: 'Scroll Panels',
+      triggered: 'Triggered Suggestions',
+    },
+
+    /**
+     * Keyed by the `Hotkey` enum. The combos stay in `lib/hotkeys.ts`, which is where the
+     * platform decides between `Ctrl+Shift+` and `⌃⌥` - a key name is notation rather
+     * than prose and does not translate.
+     */
+    keys: {
+      StopAll: { title: 'Stop All', description: 'Stop assistant and exit stealth mode' },
+      ToggleStealth: {
+        title: 'Toggle Stealth',
+        description:
+          'Hide from screen capture during a live interview. The same keys bring it back.',
+      },
+      Opacity: { title: 'Toggle Opacity', description: 'Toggle window opacity in stealth mode' },
+      ToggleTranscript: {
+        title: 'Toggle Transcription',
+        description: 'Show or hide the transcription dock - works in stealth mode too',
+      },
+      ToggleSuggestionMode: {
+        title: 'Hint-only / Full-sentence',
+        description:
+          'Switch suggestions between hint-only - a headline plus keyword bullets you can read at a glance - and full sentences. Works in stealth mode too.',
+      },
+      PlaceWin: {
+        title: 'Place Window',
+        description: 'Place window in a specific corner, side, or center',
+      },
+      MoveWin: { title: 'Move Window', description: 'Move window in the specified direction' },
+      ResizeWin: {
+        title: 'Resize Window',
+        description: 'Resize window in the specified direction',
+      },
+      ZoomInOutReset: {
+        title: 'Zoom In/Out/Reset',
+        description: 'Adjust or reset UI zoom level',
+      },
+      ScrollLiveSuggestionPanel: {
+        title: 'Scroll Live Panel',
+        description: 'Scroll Down/Up/End in the live suggestions panel',
+      },
+      ScrollActionSuggestionPanel: {
+        title: 'Scroll Triggered Panel',
+        description: 'Scroll Down/Up/End in the triggered suggestions panel',
+      },
+      Capture: {
+        title: 'Capture Screen',
+        description: 'Take a screenshot for triggered suggestions',
+      },
+      ClearCaptures: { title: 'Clear Captures', description: 'Clear captured screenshots' },
+      TriggerWithoutCaptures: {
+        title: 'Trigger without Captures',
+        description: 'Generate suggestion without captures',
+      },
+      TriggerWithCaptures: {
+        title: 'Trigger with Captures',
+        description:
+          'Generate suggestion referencing screen captures. If no captures exist, attempts to take one before generating.',
+      },
+    },
+  },
+
+  inputPassword: {
+    show: 'Show password',
+    hide: 'Hide password',
+  },
 };
 
 export type Translation = typeof en;

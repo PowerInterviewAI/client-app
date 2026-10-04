@@ -1,5 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useMockLiveSuggestions } from '@/hooks/use-mock-live-suggestions';
+import { useT } from '@/i18n';
 
 /**
  * Whether a mock interview also shows what the live assistant would have answered, on the
@@ -10,23 +11,19 @@ import { useMockLiveSuggestions } from '@/hooks/use-mock-live-suggestions';
  * know the comparison existed to find it - mid-question, which is the worst moment to go looking.
  */
 export function MockHintsField() {
+  const t = useT();
   const { enabled, setEnabled } = useMockLiveSuggestions();
 
   return (
     <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-3">
       <div>
-        <p className="text-sm font-medium">Show hints in mock interviews</p>
-        <p className="text-xs text-muted-foreground">
-          Puts what the live assistant would have answered beside each mock interview question, so
-          you can compare it against your own. Turn it off to answer unaided - either way, you can
-          switch it mid-session from the mock interview bar. This changes nothing about a real
-          interview.
-        </p>
+        <p className="text-sm font-medium">{t.mockHintsField.label}</p>
+        <p className="text-xs text-muted-foreground">{t.mockHintsField.description}</p>
       </div>
       <Checkbox
         checked={enabled}
         onCheckedChange={(v) => setEnabled(v === true)}
-        aria-label="Show hints in mock interviews"
+        aria-label={t.mockHintsField.label}
       />
     </label>
   );

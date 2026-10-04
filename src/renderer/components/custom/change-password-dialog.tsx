@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useT } from '@/i18n';
 
 interface ChangePasswordDialogProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function ChangePasswordDialog({
   loading,
   error,
 }: ChangePasswordDialogProps) {
+  const t = useT();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,9 +36,9 @@ export function ChangePasswordDialog({
   const handleSubmit = async () => {
     try {
       if (await onChangePassword(currentPassword, newPassword)) {
-        toast.success('Password changed successfully');
+        toast.success(t.changePassword.succeeded);
       } else {
-        toast.error('Failed to change password');
+        toast.error(t.changePassword.failed);
       }
     } catch (err) {
       // Error is handled by parent component
@@ -60,13 +62,13 @@ export function ChangePasswordDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
-          <DialogDescription>Enter your current password and choose a new one.</DialogDescription>
+          <DialogTitle>{t.changePassword.title}</DialogTitle>
+          <DialogDescription>{t.changePassword.description}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <label htmlFor="current-password" className="text-sm font-medium">
-              Current Password
+              {t.changePassword.current}
             </label>
             <div className="relative">
               <InputPassword
@@ -75,14 +77,14 @@ export function ChangePasswordDialog({
                 autoComplete="current-password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password"
+                placeholder={t.changePassword.currentPlaceholder}
                 maxLength={128}
               />
             </div>
           </div>
           <div className="grid gap-2">
             <label htmlFor="new-password" className="text-sm font-medium">
-              New Password
+              {t.changePassword.next}
             </label>
             <div className="relative">
               <InputPassword
@@ -91,14 +93,14 @@ export function ChangePasswordDialog({
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
+                placeholder={t.changePassword.nextPlaceholder}
                 maxLength={128}
               />
             </div>
           </div>
           <div className="grid gap-2">
             <label htmlFor="confirm-password" className="text-sm font-medium">
-              Confirm New Password
+              {t.changePassword.confirm}
             </label>
             <div className="relative">
               <InputPassword
@@ -107,7 +109,7 @@ export function ChangePasswordDialog({
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
+                placeholder={t.changePassword.confirmPlaceholder}
                 maxLength={128}
               />
             </div>
@@ -120,7 +122,7 @@ export function ChangePasswordDialog({
             onClick={() => handleOpenChange(false)}
             disabled={loading}
           >
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button
             type="button"
@@ -133,7 +135,7 @@ export function ChangePasswordDialog({
               loading
             }
           >
-            {loading ? 'Changing...' : 'Change Password'}
+            {loading ? t.changePassword.submitting : t.changePassword.submit}
           </Button>
         </DialogFooter>
         {/* Says why the button is dead. A mismatch is the one condition above that the user
@@ -142,7 +144,7 @@ export function ChangePasswordDialog({
             field has something in it, so it is not an error for a half-typed entry. */}
         {passwordsMismatch && (
           <div role="alert" className="text-sm text-destructive mt-2">
-            The new passwords do not match.
+            {t.changePassword.mismatch}
           </div>
         )}
         {error && (

@@ -1,5 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
+import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 
 /**
@@ -9,21 +10,21 @@ import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
  * shape the mock interview's difficulty cards use.
  */
 export function TranscriptPanelField() {
+  const t = useT();
   const { visible, toggle } = useTranscriptPanel();
 
   return (
     <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-3">
       <div>
-        <p className="text-sm font-medium">Show the transcript panel</p>
+        <p className="text-sm font-medium">{t.transcriptPanelField.label}</p>
         <p className="text-xs text-muted-foreground">
-          Keeps a live transcript docked under your suggestions. Turn it off for more room to read
-          them. Toggle any time with {HOTKEYS[Hotkey.ToggleTranscript].combo}.
+          {t.transcriptPanelField.description(HOTKEYS[Hotkey.ToggleTranscript].combo)}
         </p>
       </div>
       <Checkbox
         checked={visible}
         onCheckedChange={() => toggle()}
-        aria-label="Show the transcript panel"
+        aria-label={t.transcriptPanelField.label}
       />
     </label>
   );
