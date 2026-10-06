@@ -91,26 +91,29 @@ export default function HeadphoneNoticeDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? onOpenChange(true) : handleDismiss())}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Headphones className="h-4 w-4" />
-            {t.headphoneNotice.title}
-          </DialogTitle>
-          <DialogDescription>{copy.description}</DialogDescription>
+      <DialogContent className="max-w-sm border-destructive/50">
+        <DialogHeader className="items-center text-center sm:text-center">
+          <div className="mb-1 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/15 text-destructive ring-4 ring-destructive/10">
+            <Headphones className="h-7 w-7" />
+          </div>
+          <DialogTitle className="text-lg">{t.headphoneNotice.title}</DialogTitle>
+          <DialogDescription className="text-sm text-foreground">
+            {copy.description}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 py-1">
+        <div className="space-y-3 rounded-md border border-destructive/40 bg-destructive/10 p-3">
           {copy.rows.map((row, i) => (
             <NoticeRow key={i} icon={row.icon} text={row.text} />
           ))}
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" size="sm" onClick={handleDismiss}>
+          <Button variant="ghost" onClick={handleDismiss}>
             {t.common.cancel}
           </Button>
-          <Button size="sm" onClick={handleProceed}>
+          <Button onClick={handleProceed}>
+            <Headphones className="h-4 w-4" />
             {t.headphoneNotice.proceed}
           </Button>
         </DialogFooter>
@@ -122,8 +125,8 @@ export default function HeadphoneNoticeDialog({
 function NoticeRow({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="mt-0.5 text-muted-foreground">{icon}</div>
-      <p className="flex-1 text-xs text-muted-foreground">{text}</p>
+      <div className="mt-0.5 text-destructive">{icon}</div>
+      <p className="flex-1 text-sm font-medium text-foreground">{text}</p>
     </div>
   );
 }

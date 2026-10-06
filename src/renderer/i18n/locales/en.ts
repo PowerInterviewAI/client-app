@@ -751,8 +751,9 @@ export const en = {
   },
 
   headphoneNotice: {
-    title: 'Put your headphones on',
-    description: "This session needs the interviewer's voice going to your ears only.",
+    title: 'Headphones are required',
+    description:
+      "Put them on before you start. The interviewer's voice must reach your ears only - never your speakers.",
     liveSpeakers: 'On speakers, your microphone hears the interviewer as well as you do.',
     /** The failure is the quiet one, so it is named rather than left as "quality issues". */
     liveConsequence:
