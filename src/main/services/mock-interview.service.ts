@@ -62,7 +62,7 @@ function describeApiError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** A charge the balance could not cover - see `generateNextQuestion`. */
+/** A refusal for credits - no longer sent by any backend; see `generateNextQuestion`. */
 const HTTP_PAYMENT_REQUIRED = 402;
 
 function initialSession(): MockInterviewSessionState {
@@ -304,11 +304,12 @@ class MockInterviewService {
         const response = await this.api.generateQuestion(request);
         if (seq !== this.sessionSeq) return;
 
-        // Not retried, and not lumped in with the failures below. A balance that cannot pay for
-        // this question cannot pay for it a second time either, so a retry only doubles the wait
-        // before the candidate is told - and what they are told is already the whole answer,
-        // naming the price and their balance, so it is passed through rather than prefixed with
-        // "could not generate the question", which describes a fault they do not have.
+        // Not expected from any backend now: a mock is billed by the minute on its ASR socket,
+        // the current backend never answers 402 here, and an older one did only for a client
+        // that declared per-turn billing, which this one does not. Kept as a guard: if a refusal
+        // for credits ever does arrive, it is not retried (a balance that cannot pay once cannot
+        // pay twice) and its message is passed through rather than prefixed with "could not
+        // generate the question", which describes a fault the candidate does not have.
         if (response.status === HTTP_PAYMENT_REQUIRED) {
           this.lastQuestionError =
             response.error?.message || uiStrings().mockErrors.notEnoughCredits;
