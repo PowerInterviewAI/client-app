@@ -154,9 +154,16 @@ export async function run() {
   // still reads Idle. Ignoring it ran a whole session on a socket that never reconnects.
   check(
     'a mock refusal before the session is active is held, not ignored',
-    /MockInterviewState\.Idle\)\s*\{\s*if \(captureRunningRef\.current\) outOfCreditsPending\.current = true;/.test(
+    /MockInterviewState\.Idle\)\s*\{\s*if \(!captureRunningRef\.current\) return;[\s\S]{0,120}else outOfCreditsPending\.current = true;/.test(
       mockHook
     )
+  );
+  // Main's start resolves over one IPC message and the running state arrives over another, so
+  // Idle can still be read for a moment after the pending check has already run.
+  check(
+    'and once main has started, a refusal still reading Idle is acted on at once',
+    /if \(mainStarted\.current\) endForCredits\(\);/.test(mockHook) &&
+      /mainStarted\.current = true;\s*if \(outOfCreditsPending\.current\)/.test(mockHook)
   );
   check(
     'and acted on once main has started the session',

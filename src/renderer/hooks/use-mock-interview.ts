@@ -85,10 +85,14 @@ export function useMockInterview() {
   //
   // The socket opens before main is asked to start, so a refusal can land while the session is
   // still Idle here. That one is held and acted on once main's start has resolved: ignoring it
-  // would run a whole session on a socket that will never reconnect.
+  // would run a whole session on a socket that will never reconnect. After that, Idle can still be
+  // what this side reads for a moment - the start resolves over one IPC message and the state
+  // that says the session is running arrives over another - so a refusal then is acted on at
+  // once rather than held for a check that has already run.
   const navigate = useNavigate();
   const stateRef = useRef<MockInterviewState | null>(null);
   const outOfCreditsPending = useRef(false);
+  const mainStarted = useRef(false);
   useLayoutEffect(() => {
     stateRef.current = session?.state ?? null;
   });
@@ -107,7 +111,9 @@ export function useMockInterview() {
       mockTranscriptionService.onOutOfCredits(() => {
         const state = stateRef.current;
         if (state === null || state === MockInterviewState.Idle) {
-          if (captureRunningRef.current) outOfCreditsPending.current = true;
+          if (!captureRunningRef.current) return;
+          if (mainStarted.current) endForCredits();
+          else outOfCreditsPending.current = true;
           return;
         }
         if (
@@ -144,6 +150,7 @@ export function useMockInterview() {
     if (!electron) throw new Error('Electron API not available');
 
     outOfCreditsPending.current = false;
+    mainStarted.current = false;
     await mockTranscriptionService.start(
       config?.audioInputDeviceName ?? '',
       config?.sessionToken ?? '',
@@ -161,6 +168,7 @@ export function useMockInterview() {
       throw error;
     }
 
+    mainStarted.current = true;
     if (outOfCreditsPending.current) {
       outOfCreditsPending.current = false;
       endForCredits();
