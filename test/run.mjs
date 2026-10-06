@@ -76,6 +76,7 @@ for (const module of [
   // Source-level and independent of the session-driving files above: it reads the client's two
   // billing declarations off disk rather than running anything.
   './mock-billing-contract.test.mjs',
+  './credit-gate.test.mjs',
   './mock-session-scroll.test.mjs',
   './speech-chunks.test.mjs',
   './audio-device-switch.test.mjs',

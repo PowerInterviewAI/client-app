@@ -26,7 +26,6 @@ import {
   GenerateMockReportRequest,
   isMockInterviewSessionActive,
   MockAnswer,
-  MockBilling,
   MockCurrentQuestion,
   MockInterviewSessionState,
   MockInterviewSetup,
@@ -294,10 +293,6 @@ class MockInterviewService {
       // The number this question will carry once installed. `installQuestion` advances the
       // counter only for a new question, so a follow-up keeps the one on screen.
       question_number: isFollowUp ? this.session.questionNumber : this.session.questionNumber + 1,
-      // This client pays per turn and its ASR socket asks not to be metered, so it says so on
-      // every request that is charged for. An older backend ignores the field and meters the
-      // socket as it always did; see `MockBilling`.
-      billing: MockBilling.PerTurn,
     };
 
     let attempt = 0;
@@ -614,16 +609,6 @@ class MockInterviewService {
     this.setState(MockInterviewState.Evaluating);
     this.broadcast();
 
-    // What the rest of the session still owes, for the follow-up's billing test below. `setup` is
-    // non-null for any session that has reached `Listening`, but the type cannot know that, and
-    // reading a missing one as "nothing left to ask" is the harmless direction: the backend then
-    // tests the follow-up against the report alone, on a session that is already inconsistent.
-    const remainingQuestions = Math.max(
-      0,
-      (this.session.setup?.question_count ?? this.session.questionNumber) -
-        this.session.questionNumber
-    );
-
     let action: MockTurnAction = MockTurnAction.Next;
     let followUpQuestion = '';
     try {
@@ -633,11 +618,6 @@ class MockInterviewService {
         answer: answerText,
         kind: question.kind,
         follow_up_count: this.followUpCount,
-        // Lets the backend decline a follow-up that would leave the session unable to finish the
-        // questions it was quoted. Counted off `questionNumber`, which a follow-up deliberately
-        // does not advance.
-        remaining_questions: remainingQuestions,
-        billing: MockBilling.PerTurn,
       };
       const response = await this.api.evaluateTurn(request);
       if (seq !== this.sessionSeq) return;
@@ -791,7 +771,6 @@ class MockInterviewService {
         profile_data: interviewConfig.profileData,
         context: interviewConfig.context,
         questions: this.session.answers.map((a) => ({ question: a.question, answer: a.answer })),
-        billing: MockBilling.PerTurn,
       };
       const response = await this.api.generateReport(request);
       if (seq !== this.sessionSeq) return;

@@ -11,6 +11,7 @@ import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useT } from '@/i18n';
 import { isMac } from '@/lib/consts';
+import { canStartSession, minimumStartCredits } from '@/lib/credit-gate';
 import { getElectron } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 
@@ -109,6 +110,19 @@ export default function ControlPanel() {
         onFail?.();
         return false;
       }
+    }
+
+    // Last, like the mock form's, and the same rule: at least a minute of credit. The backend
+    // closes the socket at zero, so a session started on less would be cut off almost at once.
+    if (!canStartSession(appState?.credits, appState?.creditsPerMinute)) {
+      toast.error(t.creditGate.tooLow, {
+        description: t.creditGate.tooLowHint(
+          minimumStartCredits(appState?.creditsPerMinute),
+          appState?.credits ?? 0
+        ),
+        action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+      });
+      return false;
     }
     return true;
   };
