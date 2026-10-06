@@ -1142,6 +1142,9 @@ export const ru: Translation = {
     tooLow: 'Недостаточно кредитов для начала',
     outOfCredits: 'Кредиты закончились - сессия завершена',
     outOfCreditsHint: 'Пополните баланс, чтобы начать новую.',
+    lowBalance: (minutes: number) =>
+      `Кредитов осталось примерно на ${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}`,
+    lowBalanceHint: 'Когда кредиты закончатся, сессия завершится.',
     tooLowHint: (minimum: number, credits: number) =>
       `Нужно хотя бы ${minimum} ${plural(minimum, 'кредит', 'кредита', 'кредитов')} (1 минута), а у вас ${credits}.`,
     buyCredits: 'Купить кредиты',

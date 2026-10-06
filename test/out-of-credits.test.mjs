@@ -115,6 +115,25 @@ export async function run() {
     mockSubscription.includes('mockInterview.endSession()')
   );
 
+  // --- the warnings before it -----------------------------------------------------------
+
+  const warning = read('../src/renderer/hooks/use-low-balance-warning.ts');
+  const mockPage = read('../src/renderer/pages/mock-interview/index.tsx');
+  check('there is a warning at five minutes and at one', warning.includes('[5, 1] as const'));
+  check('each fires once per session', /warned\.current\.has\(lowest\)/.test(warning));
+  check(
+    'and they re-arm when a session ends',
+    /if \(!active\) \{\s*warned\.current\.clear\(\)/.test(warning)
+  );
+  check(
+    'the live console warns while running',
+    controlPanel.includes('useLowBalanceWarning(runningState === RunningState.Running)')
+  );
+  check(
+    'the mock page warns while the session runs, but not over the report being scored',
+    /useLowBalanceWarning\([\s\S]{0,200}MockInterviewState\.Scoring/.test(mockPage)
+  );
+
   // --- the ledger tags ---------------------------------------------------------------------
 
   const buildUrl = methodBody(live, 'function buildStreamingUrl(');

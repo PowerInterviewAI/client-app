@@ -8,6 +8,7 @@ import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useEndLiveSession } from '@/hooks/use-end-live-session';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { useLowBalanceWarning } from '@/hooks/use-low-balance-warning';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useT } from '@/i18n';
 import { isMac } from '@/lib/consts';
@@ -45,6 +46,8 @@ export default function ControlPanel() {
   // page because this is where `endLiveSession` lives, and these hooks still run in stealth mode -
   // only the render is skipped. Read through a ref so the subscription is made once, not on every
   // render that hands `useEndLiveSession` a new closure.
+  useLowBalanceWarning(runningState === RunningState.Running);
+
   const endLiveSessionRef = useRef(endLiveSession);
   useLayoutEffect(() => {
     endLiveSessionRef.current = endLiveSession;

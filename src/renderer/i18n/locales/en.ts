@@ -1136,6 +1136,9 @@ export const en = {
     tooLow: 'Not enough credits to start',
     outOfCredits: 'Out of credits - the session has ended',
     outOfCreditsHint: 'Buy credits to start another one.',
+    lowBalance: (minutes: number) =>
+      `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} of credit left`,
+    lowBalanceHint: 'The session ends when your credits run out.',
     tooLowHint: (minimum: number, credits: number) =>
       `A session needs at least ${minimum} credits (1 minute). You have ${credits}.`,
     buyCredits: 'Buy credits',

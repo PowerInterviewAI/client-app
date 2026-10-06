@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { LoadingPage } from '@/components/custom/loading';
 import { useAppState } from '@/hooks/use-app-state';
 import { useInterviewNavigationLock } from '@/hooks/use-interview-lock';
+import { useLowBalanceWarning } from '@/hooks/use-low-balance-warning';
 import { useMockInterview } from '@/hooks/use-mock-interview';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import useTools from '@/hooks/use-tools';
@@ -51,6 +52,12 @@ export default function MockInterviewPage() {
   const endedOnUnmount = useRef(false);
   const sessionRef = useRef(session);
   sessionRef.current = session;
+
+  // Not while scoring: the clock is nearly done by then, and a warning would land on top of the
+  // report the candidate is waiting for.
+  useLowBalanceWarning(
+    isMockInterviewSessionActive(session) && session?.state !== MockInterviewState.Scoring
+  );
 
   // The control bar's setup dialog has already collected and validated a setup and shown its own
   // headphone notice by the time it navigates here - it hands the result off through router state
