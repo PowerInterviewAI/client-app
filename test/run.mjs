@@ -73,10 +73,11 @@ for (const module of [
   './mock-transcription-isolation.test.mjs',
   './mock-transcript-turns.test.mjs',
   './mock-tts-playback.test.mjs',
-  // Source-level and independent of the session-driving files above: it reads the client's two
-  // billing declarations off disk rather than running anything.
+  // Source-level and independent of the session-driving files above: it reads the client's
+  // billing parameters off disk rather than running anything.
   './mock-billing-contract.test.mjs',
   './credit-gate.test.mjs',
+  './out-of-credits.test.mjs',
   './mock-session-scroll.test.mjs',
   './speech-chunks.test.mjs',
   './audio-device-switch.test.mjs',

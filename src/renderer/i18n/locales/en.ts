@@ -1134,6 +1134,8 @@ export const en = {
   /** The one start rule live and mock share: at least one minute of credit. */
   creditGate: {
     tooLow: 'Not enough credits to start',
+    outOfCredits: 'Out of credits - the session has ended',
+    outOfCreditsHint: 'Buy credits to start another one.',
     tooLowHint: (minimum: number, credits: number) =>
       `A session needs at least ${minimum} credits (1 minute). You have ${credits}.`,
     buyCredits: 'Buy credits',

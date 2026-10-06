@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -13,6 +13,7 @@ import { useT } from '@/i18n';
 import { isMac } from '@/lib/consts';
 import { canStartSession, minimumStartCredits } from '@/lib/credit-gate';
 import { getElectron } from '@/lib/utils';
+import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
 
 import HeadphoneNoticeDialog from '../headphone-notice-dialog';
@@ -38,6 +39,27 @@ export default function ControlPanel() {
   const [headphoneNoticeOpen, setHeadphoneNoticeOpen] = useState(false);
 
   const { devices: audioInputDevices, ready: audioDevicesReady } = useAudioInputDevices();
+
+  // The backend closed the live sockets because the balance ran out. Ended the way Stop ends it,
+  // so the candidate is offered the transcript before it goes. Subscribed here rather than on the
+  // page because this is where `endLiveSession` lives, and these hooks still run in stealth mode -
+  // only the render is skipped. Read through a ref so the subscription is made once, not on every
+  // render that hands `useEndLiveSession` a new closure.
+  const endLiveSessionRef = useRef(endLiveSession);
+  useLayoutEffect(() => {
+    endLiveSessionRef.current = endLiveSession;
+  });
+  useEffect(
+    () =>
+      liveTranscriptionService.onOutOfCredits(() => {
+        toast.error(t.creditGate.outOfCredits, {
+          description: t.creditGate.outOfCreditsHint,
+          action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+        });
+        void endLiveSessionRef.current();
+      }),
+    [navigate, t]
+  );
 
   // Arriving here is how a live session gets started: the home screen and the command palette
   // ask for it through router state rather than owning a copy of the sequence below.

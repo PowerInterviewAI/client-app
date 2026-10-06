@@ -29,6 +29,46 @@ export const LIVE_STREAM_CHANNELS = 2;
 export const MOCK_STREAM_CHANNELS = 1;
 
 /**
+ * The close code the backend ends a socket with when the balance is exhausted, on the handshake
+ * or mid-session. Mirrors `WS_CLOSE_INSUFFICIENT_CREDITS` in the backend's `app/cfg/asr.py`.
+ *
+ * Never reconnected on: a reconnect is refused the same way, and the backoff loop would retry a
+ * socket that cannot open until the user stopped the session by hand.
+ */
+export const WS_CLOSE_INSUFFICIENT_CREDITS = 4402;
+
+/** Which kind of interview a socket belongs to. The backend uses it for the ledger only. */
+export type SessionKind = 'live' | 'mock';
+
+/** Thrown when a socket is refused because the balance is exhausted. */
+export class OutOfCreditsError extends Error {
+  constructor() {
+    super(currentTranslation().creditGate.outOfCredits);
+    this.name = 'OutOfCreditsError';
+  }
+}
+
+export interface AudioWsStreamOptions {
+  /**
+   * How many sockets the session this stream belongs to holds open, so the backend can charge
+   * the interview once rather than once per socket. Defaults to the live session's two.
+   */
+  channels?: number;
+  /** Defaults to live. */
+  kind?: SessionKind;
+  /**
+   * One id for every socket of one interview - both live channels, and every reconnect or
+   * language switch - so the backend's ledger can group them.
+   */
+  clientSessionId?: string;
+  /**
+   * Called once when the backend closes a running socket because the balance is exhausted. Not
+   * called for a socket refused while `start()` is still running: `start()` throws instead.
+   */
+  onOutOfCredits?: () => void;
+}
+
+/**
  * The streaming URL for one channel.
  *
  * English is sent as no parameter at all rather than as `language=en`. The backend treats an
@@ -41,11 +81,21 @@ export const MOCK_STREAM_CHANNELS = 1;
  * backend that predates the parameter ignores an unknown query parameter and bills exactly what
  * it billed before, so sending it costs nothing against an older deployment and is the whole fix
  * against a current one.
+ *
+ * `kind` and `client_session_id` are for the backend's ledger only; an older backend ignores
+ * both. `kind` is sent only for a mock, since its absence means live.
  */
-function buildStreamingUrl(language: Language, channels: number): string {
+function buildStreamingUrl(
+  language: Language,
+  channels: number,
+  kind: SessionKind,
+  clientSessionId: string | undefined
+): string {
   const params = new URLSearchParams();
   if (language !== DEFAULT_LANGUAGE) params.set('language', language);
   if (channels !== LIVE_STREAM_CHANNELS) params.set('channels', String(channels));
+  if (kind !== 'live') params.set('kind', kind);
+  if (clientSessionId) params.set('client_session_id', clientSessionId);
   const query = params.toString();
   return query ? `${STREAMING_URL}?${query}` : STREAMING_URL;
 }
@@ -120,6 +170,15 @@ export class AudioWsStream {
   // session behind it stays open for the life of the app.
   private switchSeq = 0;
 
+  // Set once the backend has closed this channel for credits. Nothing reconnects after that: the
+  // balance is what is missing, and every retry would be refused the same way.
+  private outOfCredits = false;
+
+  private readonly channels: number;
+  private readonly kind: SessionKind;
+  private readonly clientSessionId: string | undefined;
+  private readonly onOutOfCredits: (() => void) | undefined;
+
   constructor(
     private readonly channel: Channel,
     private stream: MediaStream,
@@ -129,16 +188,17 @@ export class AudioWsStream {
       type: 'partial' | 'final';
       text: string;
     }) => Promise<void>,
-    /**
-     * How many sockets the session this stream belongs to holds open, so the backend can charge
-     * the interview once rather than once per socket. Defaults to the live session's two, which
-     * is what every caller wanted before a mock session existed.
-     */
-    private readonly channels: number = LIVE_STREAM_CHANNELS
-  ) {}
+    options: AudioWsStreamOptions = {}
+  ) {
+    this.channels = options.channels ?? LIVE_STREAM_CHANNELS;
+    this.kind = options.kind ?? 'live';
+    this.clientSessionId = options.clientSessionId;
+    this.onOutOfCredits = options.onOutOfCredits;
+  }
 
   async start() {
     this.stopping = false;
+    this.outOfCredits = false;
     await this.connectWithRetry();
 
     this.ctx = new AudioContext();
@@ -179,6 +239,12 @@ export class AudioWsStream {
     this.source.connect(this.workletNode);
     this.workletNode.connect(this.monitorGain);
     this.monitorGain.connect(this.ctx.destination);
+
+    // Refused for credits while the graph above was being built: the socket opened (the backend
+    // accepts before it checks) and was closed straight after. Thrown rather than reported
+    // through `onOutOfCredits`, because the caller is still inside its start sequence and that is
+    // where a start that cannot happen belongs.
+    if (this.outOfCredits) throw new OutOfCreditsError();
 
     this.active = true;
   }
@@ -331,6 +397,7 @@ export class AudioWsStream {
       if (this.stopping) {
         throw new Error(`WebSocket connection stopped for ${this.channel}`);
       }
+      if (this.outOfCredits) throw new OutOfCreditsError();
       // Checked before the socket is built rather than only after. The next line assigns
       // `this.ws`, so a superseded loop waking from its backoff would otherwise overwrite the
       // socket the newer switch has already opened and leave that one unreferenced.
@@ -341,6 +408,13 @@ export class AudioWsStream {
         await this.connectWebSocket(seq);
         return;
       } catch (error) {
+        // Not retried: the balance is what is missing, and a retry is refused the same way.
+        // Reported here so a reconnect refused before it opened ends the session like one
+        // closed mid-stream; during `start()` nothing is notified and the throw is the report.
+        if (error instanceof OutOfCreditsError) {
+          this.handleOutOfCredits();
+          throw error;
+        }
         lastError = error;
         const delayMs = Math.min(
           WS_RETRY_BASE_DELAY_MS * Math.pow(2, attempt),
@@ -363,7 +437,9 @@ export class AudioWsStream {
     return new Promise<void>((resolve, reject) => {
       // Rebuilt per attempt rather than captured once, so a reconnect cannot outlive the
       // language the session opened with.
-      const ws = new WebSocket(buildStreamingUrl(this.language, this.channels));
+      const ws = new WebSocket(
+        buildStreamingUrl(this.language, this.channels, this.kind, this.clientSessionId)
+      );
       this.ws = ws;
       let settled = false;
 
@@ -405,6 +481,16 @@ export class AudioWsStream {
         window.clearTimeout(timeoutId);
         reject(new Error(`Failed to open websocket for ${this.channel}`));
       };
+
+      // Before open, a close only matters if it says why. The backend accepts and then closes a
+      // socket it refuses for credits, so the open normally arrives first and the handler bound
+      // in `bindWebSocketHandlers` sees the code; this covers a close that beats it.
+      ws.onclose = (event) => {
+        if (settled || event.code !== WS_CLOSE_INSUFFICIENT_CREDITS) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        reject(new OutOfCreditsError());
+      };
     });
   }
 
@@ -427,12 +513,23 @@ export class AudioWsStream {
       }
     };
 
-    ws.onclose = () => {
-      if (this.stopping || !this.active) return;
+    ws.onclose = (event) => {
+      if (this.stopping) return;
       // A close from a socket that is no longer the current one is not a disconnect; it is the
       // tail of a replacement that already happened. Reconnecting on it would clobber the live
       // socket with a second one.
       if (this.ws !== ws) return;
+
+      // Checked ahead of `active`, which `start()` only sets once the audio graph is built - a
+      // socket refused for credits closes inside that window, and `start()` reads this flag to
+      // throw. If this close is lost on the network it arrives as a 1006 instead, the reconnect
+      // below is refused with this code, and the session ends here one round trip later.
+      if (event.code === WS_CLOSE_INSUFFICIENT_CREDITS) {
+        this.handleOutOfCredits();
+        return;
+      }
+
+      if (!this.active) return;
 
       this.reportDisconnected();
 
@@ -444,8 +541,18 @@ export class AudioWsStream {
     };
   }
 
+  private handleOutOfCredits(): void {
+    if (this.outOfCredits) return;
+    this.outOfCredits = true;
+    if (this.reconnectTimer !== null) {
+      window.clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    if (this.active) this.onOutOfCredits?.();
+  }
+
   private scheduleReconnect(): void {
-    if (this.reconnectTimer !== null || this.stopping) return;
+    if (this.reconnectTimer !== null || this.stopping || this.outOfCredits) return;
     const seq = this.switchSeq;
     this.reconnectTimer = window.setTimeout(async () => {
       this.reconnectTimer = null;
@@ -507,6 +614,23 @@ class LiveTranscriptionService {
   // slower one lands last and the session ends up on a device the user already moved off.
   private micSwitchSeq = 0;
 
+  // Both channels close for credits within an interval of each other, and the session must end
+  // once, with one prompt and one toast - so the event is per session, not per channel.
+  private outOfCreditsListeners = new Set<() => void>();
+  private outOfCreditsReported = false;
+
+  /** Subscribe to the running session being closed for credits. Returns the unsubscribe. */
+  onOutOfCredits(listener: () => void): () => void {
+    this.outOfCreditsListeners.add(listener);
+    return () => this.outOfCreditsListeners.delete(listener);
+  }
+
+  private reportOutOfCredits(): void {
+    if (this.outOfCreditsReported) return;
+    this.outOfCreditsReported = true;
+    this.outOfCreditsListeners.forEach((listener) => listener());
+  }
+
   async start(
     audioInputDeviceName: string,
     sessionToken: string,
@@ -552,8 +676,20 @@ class LiveTranscriptionService {
       await electron.transcription.ingest(payload);
     };
 
-    const micChannel = new AudioWsStream('ch_1', this.micStream, language, onTranscript);
-    const loopbackChannel = new AudioWsStream('ch_0', this.loopbackStream, language, onTranscript);
+    this.outOfCreditsReported = false;
+    const options = {
+      kind: 'live' as const,
+      clientSessionId: crypto.randomUUID(),
+      onOutOfCredits: () => this.reportOutOfCredits(),
+    };
+    const micChannel = new AudioWsStream('ch_1', this.micStream, language, onTranscript, options);
+    const loopbackChannel = new AudioWsStream(
+      'ch_0',
+      this.loopbackStream,
+      language,
+      onTranscript,
+      options
+    );
     this.micChannel = micChannel;
     this.channels = [micChannel, loopbackChannel];
     await Promise.all(this.channels.map((channel) => channel.start()));

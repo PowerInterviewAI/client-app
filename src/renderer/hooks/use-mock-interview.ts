@@ -1,5 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
+import { currentTranslation } from '@/i18n';
 import { mockTranscriptionService } from '@/services/mock-transcription.service';
 import { mockTtsService } from '@/services/mock-tts.service';
 import { DEFAULT_LANGUAGE } from '@/types/language';
@@ -78,6 +81,38 @@ export function useMockInterview() {
   // Belt for a component unmounting mid-session (navigating away without going through
   // endSession first) - stops local audio so a stray track is not left open. Main's own state
   // is tidied up by the caller of endSession, not by this cleanup.
+  // The backend closed the socket because the balance ran out. Ended the same way the End button
+  // ends it, so the answer being spoken is kept and the session goes on to its report - which is
+  // still delivered at zero, on the free model. Ignored once scoring has begun: the socket is not
+  // needed any more, and ending here would discard the report already being written.
+  const navigate = useNavigate();
+  const stateRef = useRef<MockInterviewState | null>(null);
+  useLayoutEffect(() => {
+    stateRef.current = session?.state ?? null;
+  });
+  useEffect(
+    () =>
+      mockTranscriptionService.onOutOfCredits(() => {
+        const state = stateRef.current;
+        if (
+          state === null ||
+          state === MockInterviewState.Idle ||
+          state === MockInterviewState.Scoring ||
+          state === MockInterviewState.Finished ||
+          state === MockInterviewState.Stopping
+        ) {
+          return;
+        }
+        const t = currentTranslation();
+        toast.error(t.creditGate.outOfCredits, {
+          description: t.creditGate.outOfCreditsHint,
+          action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+        });
+        void window.electronAPI?.mockInterview.endSession();
+      }),
+    [navigate]
+  );
+
   useEffect(() => {
     return () => {
       if (captureRunningRef.current) {
