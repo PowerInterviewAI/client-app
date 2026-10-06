@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -78,41 +78,53 @@ export function useMockInterview() {
     }
   }, [session?.state, session?.currentQuestion]);
 
-  // Belt for a component unmounting mid-session (navigating away without going through
-  // endSession first) - stops local audio so a stray track is not left open. Main's own state
-  // is tidied up by the caller of endSession, not by this cleanup.
   // The backend closed the socket because the balance ran out. Ended the same way the End button
   // ends it, so the answer being spoken is kept and the session goes on to its report - which is
   // still delivered at zero, on the free model. Ignored once scoring has begun: the socket is not
   // needed any more, and ending here would discard the report already being written.
+  //
+  // The socket opens before main is asked to start, so a refusal can land while the session is
+  // still Idle here. That one is held and acted on once main's start has resolved: ignoring it
+  // would run a whole session on a socket that will never reconnect.
   const navigate = useNavigate();
   const stateRef = useRef<MockInterviewState | null>(null);
+  const outOfCreditsPending = useRef(false);
   useLayoutEffect(() => {
     stateRef.current = session?.state ?? null;
   });
+
+  const endForCredits = useCallback(() => {
+    const t = currentTranslation();
+    toast.error(t.creditGate.outOfCredits, {
+      description: t.creditGate.outOfCreditsHint,
+      action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+    });
+    void window.electronAPI?.mockInterview.endSession();
+  }, [navigate]);
+
   useEffect(
     () =>
       mockTranscriptionService.onOutOfCredits(() => {
         const state = stateRef.current;
+        if (state === null || state === MockInterviewState.Idle) {
+          if (captureRunningRef.current) outOfCreditsPending.current = true;
+          return;
+        }
         if (
-          state === null ||
-          state === MockInterviewState.Idle ||
           state === MockInterviewState.Scoring ||
           state === MockInterviewState.Finished ||
           state === MockInterviewState.Stopping
         ) {
           return;
         }
-        const t = currentTranslation();
-        toast.error(t.creditGate.outOfCredits, {
-          description: t.creditGate.outOfCreditsHint,
-          action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
-        });
-        void window.electronAPI?.mockInterview.endSession();
+        endForCredits();
       }),
-    [navigate]
+    [endForCredits]
   );
 
+  // Belt for a component unmounting mid-session (navigating away without going through
+  // endSession first) - stops local audio so a stray track is not left open. Main's own state
+  // is tidied up by the caller of endSession, not by this cleanup.
   useEffect(() => {
     return () => {
       if (captureRunningRef.current) {
@@ -131,6 +143,7 @@ export function useMockInterview() {
     const electron = window.electronAPI;
     if (!electron) throw new Error('Electron API not available');
 
+    outOfCreditsPending.current = false;
     await mockTranscriptionService.start(
       config?.audioInputDeviceName ?? '',
       config?.sessionToken ?? '',
@@ -143,8 +156,14 @@ export function useMockInterview() {
       await electron.mockInterview.start(setup);
     } catch (error) {
       captureRunningRef.current = false;
+      outOfCreditsPending.current = false;
       await mockTranscriptionService.stop();
       throw error;
+    }
+
+    if (outOfCreditsPending.current) {
+      outOfCreditsPending.current = false;
+      endForCredits();
     }
   };
 

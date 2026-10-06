@@ -150,6 +150,21 @@ export async function run() {
     mockSubscription.includes('mockInterview.endSession()')
   );
 
+  // The mock socket opens before main is asked to start, so a refusal can land while the session
+  // still reads Idle. Ignoring it ran a whole session on a socket that never reconnects.
+  check(
+    'a mock refusal before the session is active is held, not ignored',
+    /MockInterviewState\.Idle\)\s*\{\s*if \(captureRunningRef\.current\) outOfCreditsPending\.current = true;/.test(
+      mockHook
+    )
+  );
+  check(
+    'and acted on once main has started the session',
+    /await electron\.mockInterview\.start\(setup\);[\s\S]{0,300}if \(outOfCreditsPending\.current\) \{\s*outOfCreditsPending\.current = false;\s*endForCredits\(\)/.test(
+      mockHook
+    )
+  );
+
   // --- the warnings before it -----------------------------------------------------------
 
   const warning = read('../src/renderer/hooks/use-low-balance-warning.ts');

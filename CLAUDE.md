@@ -699,7 +699,9 @@ seconds after the sockets are up, and a stop inside that window was overwritten 
 `useEndLiveSession`, so the transcript can still be saved; in stealth it only stops, like the stop
 hotkey, because a save prompt and a jump to the dashboard do not belong on a screen share. The
 subscription is in the control panel because its hooks run in stealth mode too. Mock ends through `endSession()`, keeping the
-answer in progress, and ignores it once scoring has begun. `test/out-of-credits.test.mjs` pins all
+answer in progress, and ignores it once scoring has begun. Its socket opens before main is asked
+to start, so a refusal that lands while the session still reads Idle is held and acted on once
+main's start resolves. `test/out-of-credits.test.mjs` pins all
 of it.
 
 `useLowBalanceWarning` toasts once at five minutes and once at one, off the ping balance. Sockets
