@@ -40,10 +40,14 @@ export const WS_CLOSE_INSUFFICIENT_CREDITS = 4402;
 /** Which kind of interview a socket belongs to. The backend uses it for the ledger only. */
 export type SessionKind = 'live' | 'mock';
 
-/** Thrown when a socket is refused because the balance is exhausted. */
+/**
+ * Thrown when a socket is refused because the balance is exhausted. Its message is what a failed
+ * start shows, so it says the session could not start; a running session that runs out is
+ * reported through `onOutOfCredits` instead, with its own toast.
+ */
 export class OutOfCreditsError extends Error {
   constructor() {
-    super(currentTranslation().creditGate.outOfCredits);
+    super(currentTranslation().creditGate.tooLow);
     this.name = 'OutOfCreditsError';
   }
 }

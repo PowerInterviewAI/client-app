@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { currentTranslation } from '@/i18n';
-import { liveTranscriptionService } from '@/services/live-transcription.service';
+import { liveTranscriptionService, OutOfCreditsError } from '@/services/live-transcription.service';
 import { getLanguageOption, type Language } from '@/types/language';
 
 import { useConfigStore } from './use-config-store';
@@ -65,6 +65,9 @@ export function useInterviewLanguage() {
       setReconnectFailed(false);
     } catch (e) {
       if (seq !== switchSeq.current) return;
+      // Refused for credits: the session is ending, and the out-of-credits stop says so. Warning
+      // that the language only half applied would be both wrong and a second toast.
+      if (e instanceof OutOfCreditsError) return;
       console.error('Failed to switch transcription language', e);
       setReconnectFailed(true);
       const t = currentTranslation();

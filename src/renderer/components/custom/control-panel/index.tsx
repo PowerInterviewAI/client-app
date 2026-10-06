@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -52,31 +52,59 @@ export default function ControlPanel() {
   // it goes. In stealth it ends the way the stop hotkey does - stopped, nothing more - because
   // stealth means a screen share is likely live, and a modal save prompt and a jump to the
   // dashboard are the last things to put on it. The transcript stays, and the next Start asks.
+  //
+  // A report that arrives while the session is still `Starting` is held until it is `Running`.
+  // `startAssistant` waits a few seconds after the sockets are up before it writes `Running`, so
+  // a stop inside that window was overwritten by the start path - a console showing a live
+  // session with no sockets behind it. A start that fails instead drops the held report, since
+  // its own teardown already ended the session.
   const endLiveSessionRef = useRef(endLiveSession);
   const stopAssistantRef = useRef(stopAssistant);
   const isStealthRef = useRef(isStealth);
+  const runningStateRef = useRef(runningState);
+  const outOfCreditsPending = useRef(false);
   useLayoutEffect(() => {
     endLiveSessionRef.current = endLiveSession;
     stopAssistantRef.current = stopAssistant;
     isStealthRef.current = isStealth;
+    runningStateRef.current = runningState;
   });
+
+  const endForCredits = useCallback(() => {
+    toast.error(t.creditGate.outOfCredits, {
+      description: t.creditGate.outOfCreditsHint,
+      action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+    });
+    if (isStealthRef.current) {
+      void stopAssistantRef.current().catch((error) => {
+        console.error('Failed to stop the assistant after running out of credits:', error);
+      });
+    } else {
+      void endLiveSessionRef.current();
+    }
+  }, [navigate, t]);
+
   useEffect(
     () =>
       liveTranscriptionService.onOutOfCredits(() => {
-        toast.error(t.creditGate.outOfCredits, {
-          description: t.creditGate.outOfCreditsHint,
-          action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
-        });
-        if (isStealthRef.current) {
-          void stopAssistantRef.current().catch((error) => {
-            console.error('Failed to stop the assistant after running out of credits:', error);
-          });
-        } else {
-          void endLiveSessionRef.current();
+        if (runningStateRef.current === RunningState.Starting) {
+          outOfCreditsPending.current = true;
+          return;
         }
+        endForCredits();
       }),
-    [navigate, t]
+    [endForCredits]
   );
+
+  useEffect(() => {
+    if (!outOfCreditsPending.current) return;
+    if (runningState === RunningState.Running) {
+      outOfCreditsPending.current = false;
+      endForCredits();
+    } else if (runningState === RunningState.Idle) {
+      outOfCreditsPending.current = false;
+    }
+  }, [runningState, endForCredits]);
 
   // Arriving here is how a live session gets started: the home screen and the command palette
   // ask for it through router state rather than owning a copy of the sequence below.

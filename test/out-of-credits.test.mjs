@@ -94,11 +94,35 @@ export async function run() {
     live.includes('this.outOfCreditsReported = false;')
   );
 
+  const endForCredits = methodBody(controlPanel, 'const endForCredits = useCallback(');
   check(
     'out of stealth the live console ends the session through the Stop path',
-    /liveTranscriptionService\.onOutOfCredits\([\s\S]{0,800}\} else \{\s*void endLiveSessionRef\.current\(\)/.test(
+    /\} else \{\s*void endLiveSessionRef\.current\(\)/.test(endForCredits)
+  );
+  check(
+    'the subscription ends the session through that one path',
+    /liveTranscriptionService\.onOutOfCredits\([\s\S]{0,300}endForCredits\(\)/.test(controlPanel)
+  );
+
+  // `startAssistant` writes Running a few seconds after the sockets are up, so a stop inside that
+  // window would be overwritten and leave a console showing a session with nothing behind it.
+  check(
+    'a report during Starting is held rather than acted on',
+    /runningStateRef\.current === RunningState\.Starting\)\s*\{\s*outOfCreditsPending\.current = true;/.test(
       controlPanel
     )
+  );
+  check(
+    'and is acted on once Running, or dropped if the start failed',
+    /runningState === RunningState\.Running\)\s*\{\s*outOfCreditsPending\.current = false;\s*endForCredits\(\)/.test(
+      controlPanel
+    ) && /RunningState\.Idle\)\s*\{\s*outOfCreditsPending\.current = false;/.test(controlPanel)
+  );
+
+  const languageHook = read('../src/renderer/hooks/use-interview-language.ts');
+  check(
+    'a language switch refused for credits does not warn about a half-applied language',
+    /if \(e instanceof OutOfCreditsError\) return;/.test(languageHook)
   );
 
   check(

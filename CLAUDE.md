@@ -693,7 +693,9 @@ close handler *before* `active` (a socket refused during `start()` closes before
 built, and `start()` throws `OutOfCreditsError`), before open, and in the retry loop. A 4402 lost on
 the network arrives as a 1006, the reconnect is refused with 4402, and the session ends one round
 trip later. Live reports it once per session (both channels close), and only once both channels have
-started - a refusal during start is `start()` rejecting, not a stop. Out of stealth it ends through
+started - a refusal during start is `start()` rejecting, not a stop. A report that lands while
+`runningState` is still `Starting` is held until `Running`: `startAssistant` writes `Running` a few
+seconds after the sockets are up, and a stop inside that window was overwritten by it. Out of stealth it ends through
 `useEndLiveSession`, so the transcript can still be saved; in stealth it only stops, like the stop
 hotkey, because a save prompt and a jump to the dashboard do not belong on a screen share. The
 subscription is in the control panel because its hooks run in stealth mode too. Mock ends through `endSession()`, keeping the
