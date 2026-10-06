@@ -547,7 +547,7 @@ tests are.
 Idle it arrived at on its own, and nothing in the renderer read it - which did not show while that
 branch was unreachable, and would have turned a blank screen into a silent bounce to the launch
 cards the moment it was. The case it exists for is a dead or muted microphone: the silence backstop
-skips its way through a session whose questions have already been billed, `finishToScoring` resets
+skips its way through a session that has been on the meter the whole time, `finishToScoring` resets
 with a message naming the microphone, and the candidate is owed it. `/mock-interview` reports it
 deduplicated by the message rather than from one place, because both places see the same string and
 neither can be dropped - `start()` writes it onto the session *and* throws, so the broadcast races
