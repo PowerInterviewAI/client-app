@@ -665,53 +665,42 @@ sheet written for the live report's shape. Picking levels by nesting depth inste
 Answer", "Score" and "Stronger Answer" at H5, so three centred labels appeared over left-ranged
 body text in every question.
 
-### What a mock interview costs
+### What an interview costs
 
-A live interview is metered per minute; a mock one is priced per question, follow-up and report,
-and its ASR socket is not metered at all. The reason is how the two spend their wall clock: every
-minute of a real interview is a minute of value, while a mock session spends a large part of its
-clock in `Generating`, `Speaking`, `Evaluating` and `Scoring` - none of which the candidate can act
-during - and most of the rest on think-time, which is the behaviour the feature exists to train.
-Billing that by the second charges for the app talking to itself, and leaves the candidate unable
-to find out what a session costs before starting it.
+**Every interview, live or mock, is billed by the minute on its ASR socket, at the same rate, and
+nothing else charges.** A mock used to be priced per question, follow-up and report, with
+`billing=per_turn` on its requests and `metered=0` on its socket; both are gone. The mock socket is
+open from Start until the session reaches Idle or Finished (`use-mock-interview.ts`), so metering it
+already covers question generation, speaking, scoring and the report.
 
-**The prices arrive on the ping** (`AppState.mockPricing`, from `ClientPingResponse.mock_pricing`)
-rather than being mirrored as constants, because the backend owns them and a stale copy here would
-quote a number the user is not charged. `undefined` is not free and is not zero - it means the
-backend predates per-turn pricing and is still metering a mock by the minute, so the client quotes
-nothing and gates nothing, which is exactly what it did before any of this existed.
+The mock socket still sends `channels=1`, and that is the one parameter a tidy-up must not drop:
+the backend divides the per-minute price by the number of sockets a session holds, defaulting to
+the live session's two, so without it a mock pays half. `test/mock-billing-contract.test.mjs`
+pins it, and that nothing still declares per-turn billing - a backend that predates the switch
+would honour such a declaration *and* run the clock.
 
-**Two numbers are quoted, and the smaller one is the promise.** `mockSessionPrice()` is every
-question plus the report, and it is what the start gate reserves; `mockSessionCeiling()` adds the
-maximum follow-ups and is the number you are never charged more than. Follow-ups are charged only
-as they are asked, and the backend declines one rather than let it eat into the rest of the
-session - so quoting the ceiling as the price would refuse a five-question mock to someone holding
-200 credits for a session that will almost certainly cost 170.
+**One start rule for both** (`lib/credit-gate.ts`): at least one minute of credit. The home cards,
+the live control panel and the mock setup form all use it and send the user to Buy credits. The
+backend refuses only at zero, because it cannot tell a new session from a reconnect inside one; this
+side can, so the minimum lives here. An unknown balance (before the first ping) is let through
+rather than greying both cards out at launch. The mock setup screen gives an estimate in minutes and
+credits and says how far the balance goes, rather than disabling lengths.
 
-**A length the balance cannot cover is disabled in the picker, not refused on Start.** The answer
-to "not enough credits" is then a shorter interview the candidate can choose on the spot rather
-than a dead end. `checkCanStart`'s own credit check is the backstop for the case where *every*
-length is out of reach, and it carries the route out (a Buy credits action). The home screen's mock
-card says the same thing one level earlier, against the shortest session there is, so the candidate
-is not sent into a dialog in which nothing is selectable.
+**The backend ends a socket at zero with close code 4402** (`WS_CLOSE_INSUFFICIENT_CREDITS`), and
+`AudioWsStream` must never reconnect on it - a reconnect is refused the same way, and the backoff
+loop would retry it until the user stopped the session by hand. The code is checked in the bound
+close handler *before* `active` (a socket refused during `start()` closes before the graph is
+built, and `start()` throws `OutOfCreditsError`), before open, and in the retry loop. A 4402 lost on
+the network arrives as a 1006, the reconnect is refused with 4402, and the session ends one round
+trip later. Live reports it once per session (both channels close) and ends through
+`useEndLiveSession`, so the transcript can still be saved; the subscription is in the control
+panel because its hooks run in stealth mode too. Mock ends through `endSession()`, keeping the
+answer in progress, and ignores it once scoring has begun. `test/out-of-credits.test.mjs` pins all
+of it.
 
-**A 402 is not retried.** `generateNextQuestion` retries once on failure, which is right for a
-provider blip and pointless for a balance: a second attempt cannot succeed and only doubles the
-wait before the candidate is told. It is also reported differently - the backend's message already
-names the price and the balance, so it is passed through rather than prefixed with "could not
-generate the first question", which describes a fault the candidate does not have.
-
-**The client declares how it expects to be billed, and it is the only party that can.**
-`MockBilling.PerTurn` goes on all three charged requests and `metered=0` goes on the mock socket,
-because only this side knows whether that socket is asking to be metered. An older backend ignores
-both and bills by the minute; an older client sends neither and is billed by the minute. No mixed
-state charges twice, which is the only outcome that must not happen.
-
-The mock socket sends **both** `channels=1` and `metered=0`, and the pairing is what a tidy-up
-breaks. `channels=1` looks redundant once `metered=0` exists, but it is what keeps the older
-behaviour correct against a backend that ignores `metered`: the default of two assumes the live
-session's pair of sockets, so dropping it would halve every mock interview's bill on every
-deployment not yet updated. `test/mock-billing-contract.test.mjs` pins both halves.
+`useLowBalanceWarning` toasts once at five minutes and once at one, off the ping balance. Sockets
+also carry `kind=mock` and a per-session `client_session_id`, which the backend uses only to label
+and group its ledger rows.
 
 ### Window and Stealth Mode
 
