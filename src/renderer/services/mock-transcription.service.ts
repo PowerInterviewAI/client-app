@@ -5,7 +5,6 @@ import {
   AudioWsStream,
   MOCK_STREAM_CHANNELS,
   resolveMicDeviceId,
-  StreamMetering,
 } from './live-transcription.service';
 
 /**
@@ -27,6 +26,13 @@ import {
 class MockTranscriptionService {
   private micStream: MediaStream | null = null;
   private channel: AudioWsStream | null = null;
+  private outOfCreditsListeners = new Set<() => void>();
+
+  /** Subscribe to the running session being closed for credits. Returns the unsubscribe. */
+  onOutOfCredits(listener: () => void): () => void {
+    this.outOfCreditsListeners.add(listener);
+    return () => this.outOfCreditsListeners.delete(listener);
+  }
 
   async start(
     audioInputDeviceName: string,
@@ -55,22 +61,15 @@ class MockTranscriptionService {
     };
 
     try {
-      // Both billing parameters, and both are load-bearing against a different deployment.
-      //
-      // `metered=0` is the one that matters against a current backend: a mock interview is
-      // charged per question, follow-up and report, so charging its socket by the minute as well
-      // would bill one session twice. `MOCK_STREAM_CHANNELS` is what keeps the older behaviour
-      // right against a backend that predates that - it ignores `metered` and meters the socket,
-      // and without `channels=1` it would meter it at half rate, since the default of two
-      // assumes the live session's pair of sockets.
-      this.channel = new AudioWsStream(
-        'ch_1',
-        this.micStream,
-        language,
-        onTranscript,
-        MOCK_STREAM_CHANNELS,
-        StreamMetering.Unmetered
-      );
+      // A mock interview is billed by the minute on this socket, at the same rate as a live one.
+      // `channels=1` is what makes that true: the default of two assumes the live session's pair
+      // of sockets, and would bill this single one at half rate.
+      this.channel = new AudioWsStream('ch_1', this.micStream, language, onTranscript, {
+        channels: MOCK_STREAM_CHANNELS,
+        kind: 'mock',
+        clientSessionId: crypto.randomUUID(),
+        onOutOfCredits: () => this.outOfCreditsListeners.forEach((listener) => listener()),
+      });
       await this.channel.start();
     } catch (error) {
       // The microphone is already open by this point, and a caller that never saw `start()`

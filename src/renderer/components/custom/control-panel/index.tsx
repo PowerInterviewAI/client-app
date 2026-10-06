@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -8,10 +8,13 @@ import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useEndLiveSession } from '@/hooks/use-end-live-session';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
+import { useLowBalanceWarning } from '@/hooks/use-low-balance-warning';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useT } from '@/i18n';
 import { isMac } from '@/lib/consts';
+import { canStartSession, minimumStartCredits } from '@/lib/credit-gate';
 import { getElectron } from '@/lib/utils';
+import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
 
 import HeadphoneNoticeDialog from '../headphone-notice-dialog';
@@ -28,7 +31,7 @@ export default function ControlPanel() {
   const isStealth = useIsStealthMode();
   const navigate = useNavigate();
   const location = useLocation();
-  const { startAssistant } = useAssistantService();
+  const { startAssistant, stopAssistant } = useAssistantService();
   const endLiveSession = useEndLiveSession();
   const { runningState, appState } = useAppState();
   const { config } = useConfigStore();
@@ -37,6 +40,71 @@ export default function ControlPanel() {
   const [headphoneNoticeOpen, setHeadphoneNoticeOpen] = useState(false);
 
   const { devices: audioInputDevices, ready: audioDevicesReady } = useAudioInputDevices();
+
+  useLowBalanceWarning(runningState === RunningState.Running);
+
+  // The backend closed the live sockets because the balance ran out. Subscribed here rather than
+  // on the page because this is where `endLiveSession` lives, and these hooks still run in stealth
+  // mode - only the render is skipped. Read through refs so the subscription is made once, not on
+  // every render that hands `useEndLiveSession` a new closure.
+  //
+  // Out of stealth it ends the way Stop ends it, so the candidate is offered the transcript before
+  // it goes. In stealth it ends the way the stop hotkey does - stopped, nothing more - because
+  // stealth means a screen share is likely live, and a modal save prompt and a jump to the
+  // dashboard are the last things to put on it. The transcript stays, and the next Start asks.
+  //
+  // A report that arrives while the session is still `Starting` is held until it is `Running`.
+  // `startAssistant` waits a few seconds after the sockets are up before it writes `Running`, so
+  // a stop inside that window was overwritten by the start path - a console showing a live
+  // session with no sockets behind it. A start that fails instead drops the held report, since
+  // its own teardown already ended the session.
+  const endLiveSessionRef = useRef(endLiveSession);
+  const stopAssistantRef = useRef(stopAssistant);
+  const isStealthRef = useRef(isStealth);
+  const runningStateRef = useRef(runningState);
+  const outOfCreditsPending = useRef(false);
+  useLayoutEffect(() => {
+    endLiveSessionRef.current = endLiveSession;
+    stopAssistantRef.current = stopAssistant;
+    isStealthRef.current = isStealth;
+    runningStateRef.current = runningState;
+  });
+
+  const endForCredits = useCallback(() => {
+    toast.error(t.creditGate.outOfCredits, {
+      description: t.creditGate.outOfCreditsHint,
+      action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+    });
+    if (isStealthRef.current) {
+      void stopAssistantRef.current().catch((error) => {
+        console.error('Failed to stop the assistant after running out of credits:', error);
+      });
+    } else {
+      void endLiveSessionRef.current();
+    }
+  }, [navigate, t]);
+
+  useEffect(
+    () =>
+      liveTranscriptionService.onOutOfCredits(() => {
+        if (runningStateRef.current === RunningState.Starting) {
+          outOfCreditsPending.current = true;
+          return;
+        }
+        endForCredits();
+      }),
+    [endForCredits]
+  );
+
+  useEffect(() => {
+    if (!outOfCreditsPending.current) return;
+    if (runningState === RunningState.Running) {
+      outOfCreditsPending.current = false;
+      endForCredits();
+    } else if (runningState === RunningState.Idle) {
+      outOfCreditsPending.current = false;
+    }
+  }, [runningState, endForCredits]);
 
   // Arriving here is how a live session gets started: the home screen and the command palette
   // ask for it through router state rather than owning a copy of the sequence below.
@@ -109,6 +177,19 @@ export default function ControlPanel() {
         onFail?.();
         return false;
       }
+    }
+
+    // Last, like the mock form's, and the same rule: at least a minute of credit. The backend
+    // closes the socket at zero, so a session started on less would be cut off almost at once.
+    if (!canStartSession(appState?.credits, appState?.creditsPerMinute)) {
+      toast.error(t.creditGate.tooLow, {
+        description: t.creditGate.tooLowHint(
+          minimumStartCredits(appState?.creditsPerMinute),
+          appState?.credits ?? 0
+        ),
+        action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+      });
+      return false;
     }
     return true;
   };

@@ -240,8 +240,8 @@ export const ru: Translation = {
       unsupported: 'Пока недоступно на этом сервере. Обновите приложение или попробуйте позже.',
       liveRunning:
         'Сначала остановите живого ассистента - они не могут использовать микрофон одновременно.',
-      unaffordable: (price: number) =>
-        `Недостаточно кредитов - самое короткое пробное собеседование стоит ${price} ${plural(price, 'кредит', 'кредита', 'кредитов')}. Пополните баланс, чтобы тренироваться.`,
+      unaffordable: (minimum: number) =>
+        `Недостаточно кредитов - для начала нужно хотя бы ${minimum} ${plural(minimum, 'кредит', 'кредита', 'кредитов')} (1 минута). Пополните баланс, чтобы тренироваться.`,
     },
 
     live: {
@@ -251,6 +251,8 @@ export const ru: Translation = {
       running: 'Ассистент уже работает.',
       mockRunning:
         'Сначала завершите пробное собеседование - они не могут использовать микрофон одновременно.',
+      unaffordable: (minimum: number) =>
+        `Недостаточно кредитов - для начала нужно хотя бы ${minimum} ${plural(minimum, 'кредит', 'кредита', 'кредитов')} (1 минута).`,
     },
 
     accountLabel: 'Учётная запись',
@@ -843,7 +845,6 @@ export const ru: Translation = {
       questions: 'Вопросы',
       questionOption: (count: number, minutes: number) =>
         `${count} ${plural(count, 'вопрос', 'вопроса', 'вопросов')}, около ${minutes} ${plural(minutes, 'минуты', 'минут', 'минут')}`,
-      cannotAfford: ' - недостаточно кредитов',
       difficulty: 'Сложность',
       difficultyOptions: {
         easy: {
@@ -861,11 +862,12 @@ export const ru: Translation = {
       },
       languageDescription:
         'На каком языке спрашивает интервьюер, что распознаётся и на каком языке приходит разбор.',
-      price: (price: number) => `${price} ${plural(price, 'кредит', 'кредита', 'кредитов')}`,
-      priceLead: 'Стоит ',
-      priceCeiling: (ceiling: number) => `, и до ${ceiling}, если интервьюер уточнит каждый ответ`,
-      balance: (credits: number) =>
-        `У вас ${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}.`,
+      estimate: (minutes: number, credits: number) =>
+        `Обычно около ${minutes} ${plural(minutes, 'минуты', 'минут', 'минут')}, примерно ${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}.`,
+      covers: (minutes: number) =>
+        `Вашего баланса хватит примерно на ${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}.`,
+      endsEarly:
+        'Когда кредиты закончатся, собеседование завершится, а отчёт вы всё равно получите.',
     },
 
     session: {
@@ -1134,10 +1136,17 @@ export const ru: Translation = {
   mockStartChecks: {
     deviceNotFound: (deviceName: string) =>
       `Микрофон «${deviceName}» не найден. Выберите другой в настройках звука на главном экране.`,
-    unaffordable: (questionCount: number) =>
-      `Недостаточно кредитов на пробное собеседование из ${questionCount} ${plural(questionCount, 'вопроса', 'вопросов', 'вопросов')}`,
-    unaffordableHint: (price: number, credits: number) =>
-      `Оно стоит ${price} ${plural(price, 'кредит', 'кредита', 'кредитов')}, а у вас ${credits}.`,
+  },
+
+  creditGate: {
+    tooLow: 'Недостаточно кредитов для начала',
+    outOfCredits: 'Кредиты закончились - сессия завершена',
+    outOfCreditsHint: 'Пополните баланс, чтобы начать новую.',
+    lowBalance: (minutes: number) =>
+      `Кредитов осталось примерно на ${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}`,
+    lowBalanceHint: 'Когда кредиты закончатся, сессия завершится.',
+    tooLowHint: (minimum: number, credits: number) =>
+      `Нужно хотя бы ${minimum} ${plural(minimum, 'кредит', 'кредита', 'кредитов')} (1 минута), а у вас ${credits}.`,
     buyCredits: 'Купить кредиты',
   },
 

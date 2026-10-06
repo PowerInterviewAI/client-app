@@ -14,7 +14,7 @@ import { type AppState } from '../types/app-state.js';
  * `FAILURE_INTERVAL`/`SUCCESS_INTERVAL` later) silently overwrote it - an unguarded path onto a
  * financial field that happened to have no caller today.
  */
-const SERVER_OWNED_KEYS = ['credits', 'creditsPerMinute', 'userRole', 'mockPricing'] as const;
+const SERVER_OWNED_KEYS = ['credits', 'creditsPerMinute', 'userRole'] as const;
 
 function stripServerOwnedFields(updates: Partial<AppState>): Partial<AppState> {
   const sanitized = { ...updates };

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select';
 import type { MockInterviewSetupForm } from '@/hooks/use-mock-interview-setup-form';
 import { useT } from '@/i18n';
+import { effectiveRate, minutesCovered, mockSessionMinutes } from '@/lib/credit-gate';
 import { MockDifficulty, MockSeniority } from '@/types/mock-interview';
 
 /**
@@ -48,13 +49,11 @@ export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupFor
     questionCount,
     setQuestionCount,
     credits,
-    priceOf,
-    ceilingOf,
-    canAfford,
+    creditsPerMinute,
   } = form;
 
-  const price = priceOf(questionCount);
-  const ceiling = ceilingOf(questionCount);
+  const estimatedMinutes = mockSessionMinutes(questionCount);
+  const coveredMinutes = credits === undefined ? null : minutesCovered(credits, creditsPerMinute);
 
   return (
     <div className="space-y-6">
@@ -84,13 +83,9 @@ export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupFor
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {/* A length the balance cannot see through to its report is disabled rather than
-                  left to be refused on Start, so the answer to "not enough credits" is a shorter
-                  interview the user can pick right here instead of a dead end. */}
               {QUESTION_COUNTS.map((n) => (
-                <SelectItem key={n} value={String(n)} disabled={!canAfford(n)}>
-                  {t.mock.setup.questionOption(n, Math.round(n * 2.5))}
-                  {canAfford(n) ? '' : t.mock.setup.cannotAfford}
+                <SelectItem key={n} value={String(n)}>
+                  {t.mock.setup.questionOption(n, mockSessionMinutes(n))}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -98,20 +93,19 @@ export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupFor
         </div>
       </div>
 
-      {/* What this will cost, before the candidate commits to it.
-          Two numbers, and the smaller one is the promise: every question and the report are
-          guaranteed once the session starts, and follow-ups are charged only as they are asked -
-          the backend declines one rather than let it eat into the rest of the session. So the
-          ceiling is the number you are never charged more than, not the one to expect.
-          Nothing is shown at all against a backend that predates per-turn pricing, which still
-          meters a mock by the minute and has no per-question price to quote. */}
-      {price !== null && ceiling !== null && (
-        <p className="text-xs text-muted-foreground">
-          {t.mock.setup.priceLead}
-          <span className="font-medium text-foreground">{t.mock.setup.price(price)}</span>
-          {ceiling > price && t.mock.setup.priceCeiling(ceiling)}. {t.mock.setup.balance(credits)}
-        </p>
-      )}
+      {/* An estimate, not a quote: a mock is billed by the minute for the time it takes, at the
+          same rate as a live interview, and ends with its report when the credits run out. So no
+          length is refused here - the candidate is told how far the balance goes instead. */}
+      <p className="text-xs text-muted-foreground">
+        {t.mock.setup.estimate(
+          estimatedMinutes,
+          estimatedMinutes * effectiveRate(creditsPerMinute)
+        )}
+        {coveredMinutes !== null && <> {t.mock.setup.covers(coveredMinutes)}</>}
+        {coveredMinutes !== null && coveredMinutes < estimatedMinutes && (
+          <> {t.mock.setup.endsEarly}</>
+        )}
+      </p>
 
       <div className="space-y-2">
         {/* No htmlFor: this labels the group via aria-labelledby below, not one control. */}

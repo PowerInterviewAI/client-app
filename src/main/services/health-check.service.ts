@@ -63,13 +63,9 @@ export class HealthCheckService {
         credits: res.data?.credits,
         userRole: res.data?.user_role,
         providedLLMModel: res.data?.provided_llm_model,
-        // Undefined on a backend that predates per-turn pricing, and carried through as
-        // undefined rather than defaulted: the mock setup dialog reads the absence as "this
-        // deployment still meters a mock by the minute", and a zero would read as free.
-        mockPricing: res.data?.mock_pricing,
-        // Same reasoning: undefined here means "not answered yet", not free and not the
-        // compiled-in default - the renderer falls back to its own mirror for that case. An
-        // unusable rate is folded into that same absence; see `usableRate`.
+        // Undefined here means "not answered yet", not free and not the compiled-in default -
+        // the renderer falls back to its own mirror for that case. An unusable rate is folded
+        // into that same absence; see `usableRate`.
         creditsPerMinute: usableRate(res.data?.credits_per_minute),
       });
     } catch (error) {
@@ -199,7 +195,6 @@ export class HealthCheckService {
               credits: res.data?.credits,
               providedLLMModel: res.data?.provided_llm_model,
               userRole: res.data?.user_role,
-              mockPricing: res.data?.mock_pricing,
               creditsPerMinute: usableRate(res.data?.credits_per_minute),
             });
           }

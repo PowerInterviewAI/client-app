@@ -238,8 +238,8 @@ export const en = {
       ready: 'The AI asks, you answer out loud, and you get a scored report at the end.',
       unsupported: 'Not available on this server yet. Update the app, or try again later.',
       liveRunning: 'Stop the live assistant first - the two cannot share your microphone.',
-      unaffordable: (price: number) =>
-        `Not enough credits - the shortest mock costs ${price}. Buy more to practise.`,
+      unaffordable: (minimum: number) =>
+        `Not enough credits - you need at least ${minimum} (1 minute) to start. Buy more to practise.`,
     },
 
     live: {
@@ -248,6 +248,8 @@ export const en = {
       ready: 'Transcribes your real interview and suggests answers as it happens.',
       running: 'Your live assistant is already running.',
       mockRunning: 'Finish the mock interview first - the two cannot share your microphone.',
+      unaffordable: (minimum: number) =>
+        `Not enough credits - you need at least ${minimum} (1 minute) to start.`,
     },
 
     accountLabel: 'Account',
@@ -831,7 +833,6 @@ export const en = {
       /** `about 8 minutes` is the shape; the count drives the plural in both columns. */
       questionOption: (count: number, minutes: number) =>
         `${count} questions, about ${minutes} minutes`,
-      cannotAfford: ' - not enough credits',
       difficulty: 'Difficulty',
       difficultyOptions: {
         easy: {
@@ -849,15 +850,12 @@ export const en = {
       },
       languageDescription:
         'What the interviewer asks in, what is transcribed, and what your feedback comes back in.',
-      /**
-       * Two numbers, and the smaller one is the promise: every question and the report are
-       * guaranteed once the session starts, while follow-ups are charged only as they are asked.
-       */
-      price: (price: number) => `${price} credits`,
-      priceLead: 'Costs ',
-      priceCeiling: (ceiling: number) =>
-        `, up to ${ceiling} if the interviewer follows up on every answer`,
-      balance: (credits: number) => `You have ${credits.toLocaleString()}.`,
+      /** An estimate, not a price: the session is billed by the minute for the time it takes. */
+      estimate: (minutes: number, credits: number) =>
+        `Usually about ${minutes} minutes, about ${credits.toLocaleString()} credits.`,
+      covers: (minutes: number) =>
+        `Your balance covers about ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`,
+      endsEarly: 'The session ends when your credits run out, and you still get your report.',
     },
 
     session: {
@@ -1131,10 +1129,18 @@ export const en = {
   mockStartChecks: {
     deviceNotFound: (deviceName: string) =>
       `Audio input device "${deviceName}" is not found. Choose a different one from the main screen's audio settings.`,
-    unaffordable: (questionCount: number) =>
-      `Not enough credits for a ${questionCount}-question mock interview`,
-    unaffordableHint: (price: number, credits: number) =>
-      `It costs ${price} credits and you have ${credits}.`,
+  },
+
+  /** The one start rule live and mock share: at least one minute of credit. */
+  creditGate: {
+    tooLow: 'Not enough credits to start',
+    outOfCredits: 'Out of credits - the session has ended',
+    outOfCreditsHint: 'Buy credits to start another one.',
+    lowBalance: (minutes: number) =>
+      `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} of credit left`,
+    lowBalanceHint: 'The session ends when your credits run out.',
+    tooLowHint: (minimum: number, credits: number) =>
+      `A session needs at least ${minimum} credits (1 minute). You have ${credits}.`,
     buyCredits: 'Buy credits',
   },
 

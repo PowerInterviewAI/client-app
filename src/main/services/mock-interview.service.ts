@@ -26,7 +26,6 @@ import {
   GenerateMockReportRequest,
   isMockInterviewSessionActive,
   MockAnswer,
-  MockBilling,
   MockCurrentQuestion,
   MockInterviewSessionState,
   MockInterviewSetup,
@@ -63,7 +62,7 @@ function describeApiError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** A charge the balance could not cover - see `generateNextQuestion`. */
+/** A refusal for credits - no longer sent by any backend; see `generateNextQuestion`. */
 const HTTP_PAYMENT_REQUIRED = 402;
 
 function initialSession(): MockInterviewSessionState {
@@ -294,10 +293,6 @@ class MockInterviewService {
       // The number this question will carry once installed. `installQuestion` advances the
       // counter only for a new question, so a follow-up keeps the one on screen.
       question_number: isFollowUp ? this.session.questionNumber : this.session.questionNumber + 1,
-      // This client pays per turn and its ASR socket asks not to be metered, so it says so on
-      // every request that is charged for. An older backend ignores the field and meters the
-      // socket as it always did; see `MockBilling`.
-      billing: MockBilling.PerTurn,
     };
 
     let attempt = 0;
@@ -309,11 +304,12 @@ class MockInterviewService {
         const response = await this.api.generateQuestion(request);
         if (seq !== this.sessionSeq) return;
 
-        // Not retried, and not lumped in with the failures below. A balance that cannot pay for
-        // this question cannot pay for it a second time either, so a retry only doubles the wait
-        // before the candidate is told - and what they are told is already the whole answer,
-        // naming the price and their balance, so it is passed through rather than prefixed with
-        // "could not generate the question", which describes a fault they do not have.
+        // Not expected from any backend now: a mock is billed by the minute on its ASR socket,
+        // the current backend never answers 402 here, and an older one did only for a client
+        // that declared per-turn billing, which this one does not. Kept as a guard: if a refusal
+        // for credits ever does arrive, it is not retried (a balance that cannot pay once cannot
+        // pay twice) and its message is passed through rather than prefixed with "could not
+        // generate the question", which describes a fault the candidate does not have.
         if (response.status === HTTP_PAYMENT_REQUIRED) {
           this.lastQuestionError =
             response.error?.message || uiStrings().mockErrors.notEnoughCredits;
@@ -614,16 +610,6 @@ class MockInterviewService {
     this.setState(MockInterviewState.Evaluating);
     this.broadcast();
 
-    // What the rest of the session still owes, for the follow-up's billing test below. `setup` is
-    // non-null for any session that has reached `Listening`, but the type cannot know that, and
-    // reading a missing one as "nothing left to ask" is the harmless direction: the backend then
-    // tests the follow-up against the report alone, on a session that is already inconsistent.
-    const remainingQuestions = Math.max(
-      0,
-      (this.session.setup?.question_count ?? this.session.questionNumber) -
-        this.session.questionNumber
-    );
-
     let action: MockTurnAction = MockTurnAction.Next;
     let followUpQuestion = '';
     try {
@@ -633,11 +619,6 @@ class MockInterviewService {
         answer: answerText,
         kind: question.kind,
         follow_up_count: this.followUpCount,
-        // Lets the backend decline a follow-up that would leave the session unable to finish the
-        // questions it was quoted. Counted off `questionNumber`, which a follow-up deliberately
-        // does not advance.
-        remaining_questions: remainingQuestions,
-        billing: MockBilling.PerTurn,
       };
       const response = await this.api.evaluateTurn(request);
       if (seq !== this.sessionSeq) return;
@@ -791,7 +772,6 @@ class MockInterviewService {
         profile_data: interviewConfig.profileData,
         context: interviewConfig.context,
         questions: this.session.answers.map((a) => ({ question: a.question, answer: a.answer })),
-        billing: MockBilling.PerTurn,
       };
       const response = await this.api.generateReport(request);
       if (seq !== this.sessionSeq) return;
