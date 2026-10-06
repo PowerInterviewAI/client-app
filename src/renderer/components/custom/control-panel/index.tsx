@@ -31,7 +31,7 @@ export default function ControlPanel() {
   const isStealth = useIsStealthMode();
   const navigate = useNavigate();
   const location = useLocation();
-  const { startAssistant } = useAssistantService();
+  const { startAssistant, stopAssistant } = useAssistantService();
   const endLiveSession = useEndLiveSession();
   const { runningState, appState } = useAppState();
   const { config } = useConfigStore();
@@ -41,16 +41,24 @@ export default function ControlPanel() {
 
   const { devices: audioInputDevices, ready: audioDevicesReady } = useAudioInputDevices();
 
-  // The backend closed the live sockets because the balance ran out. Ended the way Stop ends it,
-  // so the candidate is offered the transcript before it goes. Subscribed here rather than on the
-  // page because this is where `endLiveSession` lives, and these hooks still run in stealth mode -
-  // only the render is skipped. Read through a ref so the subscription is made once, not on every
-  // render that hands `useEndLiveSession` a new closure.
   useLowBalanceWarning(runningState === RunningState.Running);
 
+  // The backend closed the live sockets because the balance ran out. Subscribed here rather than
+  // on the page because this is where `endLiveSession` lives, and these hooks still run in stealth
+  // mode - only the render is skipped. Read through refs so the subscription is made once, not on
+  // every render that hands `useEndLiveSession` a new closure.
+  //
+  // Out of stealth it ends the way Stop ends it, so the candidate is offered the transcript before
+  // it goes. In stealth it ends the way the stop hotkey does - stopped, nothing more - because
+  // stealth means a screen share is likely live, and a modal save prompt and a jump to the
+  // dashboard are the last things to put on it. The transcript stays, and the next Start asks.
   const endLiveSessionRef = useRef(endLiveSession);
+  const stopAssistantRef = useRef(stopAssistant);
+  const isStealthRef = useRef(isStealth);
   useLayoutEffect(() => {
     endLiveSessionRef.current = endLiveSession;
+    stopAssistantRef.current = stopAssistant;
+    isStealthRef.current = isStealth;
   });
   useEffect(
     () =>
@@ -59,7 +67,13 @@ export default function ControlPanel() {
           description: t.creditGate.outOfCreditsHint,
           action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
         });
-        void endLiveSessionRef.current();
+        if (isStealthRef.current) {
+          void stopAssistantRef.current().catch((error) => {
+            console.error('Failed to stop the assistant after running out of credits:', error);
+          });
+        } else {
+          void endLiveSessionRef.current();
+        }
       }),
     [navigate, t]
   );

@@ -619,6 +619,11 @@ class LiveTranscriptionService {
   private outOfCreditsListeners = new Set<() => void>();
   private outOfCreditsReported = false;
 
+  // Whether `start()` has finished bringing both channels up. A channel refused for credits while
+  // the other is still starting reports nothing: `start()` rejects, and the caller's start path
+  // tears the session down. Reporting it as well would run a stop alongside that teardown.
+  private running = false;
+
   /** Subscribe to the running session being closed for credits. Returns the unsubscribe. */
   onOutOfCredits(listener: () => void): () => void {
     this.outOfCreditsListeners.add(listener);
@@ -626,7 +631,7 @@ class LiveTranscriptionService {
   }
 
   private reportOutOfCredits(): void {
-    if (this.outOfCreditsReported) return;
+    if (!this.running || this.outOfCreditsReported) return;
     this.outOfCreditsReported = true;
     this.outOfCreditsListeners.forEach((listener) => listener());
   }
@@ -677,6 +682,7 @@ class LiveTranscriptionService {
     };
 
     this.outOfCreditsReported = false;
+    this.running = false;
     const options = {
       kind: 'live' as const,
       clientSessionId: crypto.randomUUID(),
@@ -693,6 +699,7 @@ class LiveTranscriptionService {
     this.micChannel = micChannel;
     this.channels = [micChannel, loopbackChannel];
     await Promise.all(this.channels.map((channel) => channel.start()));
+    this.running = true;
   }
 
   /**
@@ -758,6 +765,7 @@ class LiveTranscriptionService {
   }
 
   async stop(): Promise<void> {
+    this.running = false;
     await Promise.all(this.channels.map((channel) => channel.stop()));
     this.channels = [];
     this.micChannel = null;

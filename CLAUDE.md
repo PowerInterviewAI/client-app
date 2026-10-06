@@ -692,9 +692,11 @@ loop would retry it until the user stopped the session by hand. The code is chec
 close handler *before* `active` (a socket refused during `start()` closes before the graph is
 built, and `start()` throws `OutOfCreditsError`), before open, and in the retry loop. A 4402 lost on
 the network arrives as a 1006, the reconnect is refused with 4402, and the session ends one round
-trip later. Live reports it once per session (both channels close) and ends through
-`useEndLiveSession`, so the transcript can still be saved; the subscription is in the control
-panel because its hooks run in stealth mode too. Mock ends through `endSession()`, keeping the
+trip later. Live reports it once per session (both channels close), and only once both channels have
+started - a refusal during start is `start()` rejecting, not a stop. Out of stealth it ends through
+`useEndLiveSession`, so the transcript can still be saved; in stealth it only stops, like the stop
+hotkey, because a save prompt and a jump to the dashboard do not belong on a screen share. The
+subscription is in the control panel because its hooks run in stealth mode too. Mock ends through `endSession()`, keeping the
 answer in progress, and ignores it once scoring has begun. `test/out-of-credits.test.mjs` pins all
 of it.
 

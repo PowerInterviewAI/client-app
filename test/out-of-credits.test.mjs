@@ -86,7 +86,8 @@ export async function run() {
   const report = methodBody(live, 'private reportOutOfCredits(');
   check(
     'two live channels end the session once',
-    /if \(this\.outOfCreditsReported\) return;/.test(report)
+    /this\.outOfCreditsReported\) return;/.test(report) &&
+      report.includes('this.outOfCreditsReported = true;')
   );
   check(
     'and the guard is reset for each new session',
@@ -94,10 +95,20 @@ export async function run() {
   );
 
   check(
-    'the live console ends the session through the Stop path',
-    /liveTranscriptionService\.onOutOfCredits\([\s\S]{0,400}endLiveSessionRef\.current\(\)/.test(
+    'out of stealth the live console ends the session through the Stop path',
+    /liveTranscriptionService\.onOutOfCredits\([\s\S]{0,800}\} else \{\s*void endLiveSessionRef\.current\(\)/.test(
       controlPanel
     )
+  );
+
+  check(
+    'a channel refused while the other is still starting does not also stop the session',
+    /if \(!this\.running \|\| this\.outOfCreditsReported\) return;/.test(report) &&
+      /channel\.start\(\)\)\);\s*this\.running = true;/.test(live)
+  );
+  check(
+    'in stealth it stops like the hotkey, with no save prompt over a screen share',
+    /if \(isStealthRef\.current\) \{[\s\S]{0,200}stopAssistantRef\.current\(\)/.test(controlPanel)
   );
 
   // --- the mock -------------------------------------------------------------------------------
