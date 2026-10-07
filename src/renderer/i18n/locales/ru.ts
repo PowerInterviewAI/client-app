@@ -1016,8 +1016,8 @@ export const ru: Translation = {
       },
       perCredits: (credits: number) =>
         ` / ${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
-      minutesOfAssistance: (minutes: number) =>
-        `примерно ${minutes.toLocaleString('ru-RU')} ${plural(minutes, 'минута', 'минуты', 'минут')} работы ассистента`,
+      // "на" takes the accusative, which is the case `duration` is written in
+      timeOfAssistance: (duration: string) => `примерно на ${duration} работы ассистента`,
       selected: 'Выбрано',
       buy: 'Купить',
       detailsTitle: 'Детали оплаты',

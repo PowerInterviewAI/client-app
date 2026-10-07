@@ -1011,8 +1011,7 @@ export const en = {
         enterprise: 'For heavy users and teams',
       },
       perCredits: (credits: number) => ` / ${credits.toLocaleString()} credits`,
-      minutesOfAssistance: (minutes: number) =>
-        `~${minutes.toLocaleString()} minutes of AI assistance`,
+      timeOfAssistance: (duration: string) => `~${duration} of AI assistance`,
       selected: 'Selected',
       buy: 'Buy',
       detailsTitle: 'Payment Details',

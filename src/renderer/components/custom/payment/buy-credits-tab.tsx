@@ -184,7 +184,9 @@ export default function BuyCreditsTab({
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {t.payment.buy.minutesOfAssistance(minutes)}
+                      {t.payment.buy.timeOfAssistance(
+                        t.payment.buy.duration(Math.floor(minutes / 60), minutes % 60)
+                      )}
                     </p>
                   </CardHeader>
 
