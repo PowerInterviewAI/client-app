@@ -26,10 +26,9 @@ import useTools from './use-tools';
  * formats, or let it go. It is skipped entirely when there is nothing but the placeholder copy
  * to lose, which is what `hasHistory` reports.
  *
- * Deliberately not what the stop *hotkey* does. That one is the stealth-mode escape - it fires
- * while the app is hidden during a screen share, where raising a modal dialog and navigating to
- * a dashboard is the opposite of what was asked for. It stops, and the next start still asks
- * about the transcript it left behind.
+ * The stop *hotkey* uses this out of stealth mode. In stealth it only stops: the app is hidden
+ * during a screen share, where raising a modal dialog and navigating to a dashboard is the
+ * opposite of what was asked for, and the next start still asks about the transcript it left.
  */
 export function useEndLiveSession() {
   const navigate = useNavigate();

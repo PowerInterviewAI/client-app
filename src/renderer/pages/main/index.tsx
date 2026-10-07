@@ -15,6 +15,7 @@ import TrialUserNotice from '@/components/custom/trial-user-notice';
 import { useAppState } from '@/hooks/use-app-state';
 import { useAssistantService } from '@/hooks/use-assistant-service';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useEndLiveSession } from '@/hooks/use-end-live-session';
 import { useInterviewNavigationLock } from '@/hooks/use-interview-lock';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
@@ -65,18 +66,39 @@ export default function MainPage() {
   const { visible: transcriptDockEnabled, toggle: toggleTranscriptDock } = useTranscriptPanel();
   const { toggle: toggleSuggestionMode } = useSuggestionMode();
 
-  // Listen for hotkey to stop assistant
+  const isStealth = useIsStealthMode();
+  const endLiveSession = useEndLiveSession();
+
+  // Listen for hotkey to stop assistant. Out of stealth it ends the session the way the Stop
+  // button does (save prompt, then home). In stealth a screen share is likely live, so it only
+  // stops: a modal and a jump to the dashboard are the last things to put on it.
+  //
+  // Acts only on a Running session, and only once: the Stop button is disabled during Starting
+  // and Stopping, and the hotkey has to honour the same rule or a second press re-runs the
+  // teardown and re-asks the save prompt, and a press mid-start races the start path.
+  const runningStateRef = useRef(appState?.runningState);
+  runningStateRef.current = appState?.runningState;
+  const hotkeyStopInFlight = useRef(false);
+
   useEffect(() => {
     if (!window?.electronAPI?.onHotkeyStopAssistant) return;
 
     const cleanup = window.electronAPI.onHotkeyStopAssistant(() => {
-      stopAssistant().catch((err) => {
-        console.error('Failed to stop assistant from hotkey:', err);
+      if (runningStateRef.current !== RunningState.Running || hotkeyStopInFlight.current) return;
+      hotkeyStopInFlight.current = true;
+
+      const done = isStealth
+        ? stopAssistant().catch((err) => {
+            console.error('Failed to stop assistant from hotkey:', err);
+          })
+        : endLiveSession();
+      void Promise.resolve(done).finally(() => {
+        hotkeyStopInFlight.current = false;
       });
     });
 
     return cleanup;
-  }, [stopAssistant]);
+  }, [stopAssistant, endLiveSession, isStealth]);
 
   // Listen for hotkey to toggle the transcription dock. Stealth mode hides the control panel
   // that carries the button, so the hotkey is the only way to reach the dock there.
@@ -178,8 +200,6 @@ export default function MainPage() {
         : 0
     );
   }, [hasSuggestions, showTranscriptDock, dockPref]);
-
-  const isStealth = useIsStealthMode();
 
   const [startupPermGateOpen, setStartupPermGateOpen] = useState(false);
   const startupPermChecked = useRef(false);
