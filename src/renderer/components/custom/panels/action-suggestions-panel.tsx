@@ -221,11 +221,11 @@ function ActionSuggestionsPanel({
                   <div className="sticky top-0 z-10 flex gap-3 bg-card pb-2">
                     {idx === 0 &&
                     (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) ? (
-                      <Loader className="h-4 w-4 mt-px text-accent shrink-0 animate-spin" />
+                      <Loader className="h-4 w-4 mt-px text-primary shrink-0 animate-spin" />
                     ) : s.state === SuggestionState.Stopped ? (
                       <PauseCircle className="h-4 w-4 mt-px text-muted-foreground shrink-0" />
                     ) : (
-                      <Zap className="h-4 w-4 mt-px text-accent shrink-0" />
+                      <Zap className="h-4 w-4 mt-px text-primary shrink-0" />
                     )}
 
                     {/* min-w-0: a flex item defaults to min-width:auto, so one long unbroken
@@ -250,13 +250,13 @@ function ActionSuggestionsPanel({
                               <img
                                 key={i}
                                 src={url}
-                                className="h-12 w-16 object-cover rounded-md border border-blue-400 bg-muted"
+                                className="h-12 w-16 object-cover rounded-md border border-border bg-muted"
                                 alt={`thumb-${i}`}
                               />
                             ) : (
                               <div
                                 key={i}
-                                className="h-12 w-16 flex items-center justify-center rounded-md border border-blue-400 bg-muted"
+                                className="h-12 w-16 flex items-center justify-center rounded-md border border-border bg-muted"
                               >
                                 <ImageUp className="h-4 w-4 text-muted-foreground" />
                               </div>
@@ -296,7 +296,7 @@ function ActionSuggestionsPanel({
       {!autoScroll && hasItems && (
         <Button
           size="icon-sm"
-          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-primary text-primary-foreground hover:bg-primary/90"
           onClick={() => scrollToLatest('smooth')}
           aria-label={t.panels.scrollToTop}
         >

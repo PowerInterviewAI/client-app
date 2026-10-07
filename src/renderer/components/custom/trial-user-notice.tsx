@@ -23,8 +23,7 @@ export default function TrialUserNotice({ onClick }: TrialUserNoticeProps) {
         {t.trialNotice.sotaTail}
       </span>
       <Button
-        variant="ghost"
-        className="ml-1 rounded-full size-6 cursor-pointer bg-primary text-white hover:text-white shrink-0"
+        className="ml-1 rounded-full size-6 cursor-pointer shrink-0"
         aria-label={t.notices.dismiss}
         onClick={() => onClick()}
       >

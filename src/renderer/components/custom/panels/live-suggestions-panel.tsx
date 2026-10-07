@@ -48,9 +48,9 @@ function SuggestionAnswer({
     return (
       // The headline is the line that has to land in a glance. SafeMarkdown gives it weight - it
       // renders as `strong` at 600 over regular body - and the size bump here is what separates it
-      // from the bullets under it. Full-strength foreground rather than text-accent: the accent is
-      // an oklch 0.77 orange, which reads as a highlight on the dark card and as low-contrast body
-      // text on the light one. Applied here, not in SafeMarkdown, because the action panel renders
+      // from the bullets under it. Full-strength foreground rather than text-primary: the brand
+      // orange is reserved for controls and markers, and a headline in it reads as a link.
+      // Applied here, not in SafeMarkdown, because the action panel renders
       // whole documents through the same component and has no headline line to promote.
       <div className="text-sm text-foreground leading-relaxed [&>p:first-child]:text-[0.95rem] [&_ul]:mt-1 [&_li]:my-0.5">
         <SafeMarkdown content={answer + suffix} />
@@ -274,11 +274,11 @@ function LiveSuggestionsPanel({
                   <div className="sticky top-0 z-10 flex gap-3 bg-card pb-2">
                     {idx === 0 &&
                     (s.state === SuggestionState.Pending || s.state === SuggestionState.Loading) ? (
-                      <Loader className="h-4 w-4 mt-px text-accent shrink-0 animate-spin" />
+                      <Loader className="h-4 w-4 mt-px text-primary shrink-0 animate-spin" />
                     ) : s.state === SuggestionState.Stopped ? (
                       <PauseCircle className="h-4 w-4 mt-px text-muted-foreground shrink-0" />
                     ) : (
-                      <Zap className="h-4 w-4 mt-px text-accent shrink-0" />
+                      <Zap className="h-4 w-4 mt-px text-primary shrink-0" />
                     )}
                     {/* min-w-0: a flex item defaults to min-width:auto, so one long unbroken
                         token would widen the card past the panel instead of wrapping */}
@@ -323,7 +323,7 @@ function LiveSuggestionsPanel({
       {!autoScroll && hasItems && (
         <Button
           size="icon-sm"
-          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-primary text-primary-foreground hover:bg-primary/90"
           onClick={() => scrollToLatest('smooth')}
           aria-label={t.panels.scrollToTop}
         >

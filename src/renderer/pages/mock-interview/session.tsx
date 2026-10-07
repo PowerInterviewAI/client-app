@@ -249,7 +249,7 @@ export function SessionScreen({ session, onDone, onEnd, onAnswerReady }: Session
           <TooltipTrigger asChild>
             <Button
               size="sm"
-              className="h-8 gap-1.5 rounded-lg px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-600/90"
+              className="h-8 gap-1.5 rounded-lg px-4 text-xs font-semibold"
               disabled={
                 state !== MockInterviewState.Listening ||
                 busy !== null ||

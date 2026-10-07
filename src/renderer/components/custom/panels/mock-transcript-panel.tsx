@@ -299,7 +299,7 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
       {!autoScroll && (
         <Button
           size="icon-sm"
-          className="absolute bottom-3 right-3 rounded-full shadow-md bg-blue-600 text-white hover:bg-blue-600/90"
+          className="absolute bottom-3 right-3 rounded-full shadow-md bg-primary text-primary-foreground hover:bg-primary/90"
           onClick={() => scrollToEnd()}
           aria-label={t.panels.scrollToBottom}
         >
