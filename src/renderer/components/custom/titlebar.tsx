@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import { useCommandPaletteStore } from '@/hooks/use-command-palette';
+import { useHideTaskbar } from '@/hooks/use-hide-taskbar';
 import { useInterviewLock } from '@/hooks/use-interview-lock';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useT } from '@/i18n';
@@ -56,6 +57,9 @@ export default function Titlebar() {
   // Disabled at the trigger rather than entry by entry, because the honest answer for the whole
   // surface is the same one.
   const { locked } = useInterviewLock();
+
+  // No taskbar icon to restore from, and main refuses minimize in this mode too.
+  const { enabled: minimizeBlocked } = useHideTaskbar();
 
   if (isStealth) return null;
 
@@ -121,30 +125,32 @@ export default function Titlebar() {
 
           {!isMac && (
             <>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleMinimize}
-                    aria-label={t.titlebar.minimize}
-                    className="h-7 w-8 flex items-center justify-center rounded hover:bg-muted"
-                    style={NO_DRAG}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
+              {!minimizeBlocked && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleMinimize}
+                      aria-label={t.titlebar.minimize}
+                      className="h-7 w-8 flex items-center justify-center rounded hover:bg-muted"
+                      style={NO_DRAG}
                     >
-                      <path d="M5 12h14" strokeLinecap="round" />
-                    </svg>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t.titlebar.minimize}</p>
-                </TooltipContent>
-              </Tooltip>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path d="M5 12h14" strokeLinecap="round" />
+                      </svg>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t.titlebar.minimize}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button

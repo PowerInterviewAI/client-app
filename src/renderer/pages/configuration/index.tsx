@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { HotkeyCheatsheetDialog } from '@/components/custom/hotkey-cheatsheet';
 import PageHeader from '@/components/custom/page-header';
+import { HideTaskbarField } from '@/components/custom/settings/hide-taskbar-field';
 import { LanguageField } from '@/components/custom/settings/language-field';
 import { MicrophoneField } from '@/components/custom/settings/microphone-field';
 import { MockHintsField } from '@/components/custom/settings/mock-hints-field';
@@ -50,6 +51,7 @@ export default function ConfigurationPage() {
         <MockHintsField />
         <ZoomField />
         <TranscriptPanelField />
+        <HideTaskbarField />
 
         {/* The wizard is not a one-time thing the user is stuck having skipped. Reachable here
             rather than only on a first launch, which is also what lets it be skippable without

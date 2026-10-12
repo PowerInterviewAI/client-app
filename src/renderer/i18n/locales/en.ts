@@ -348,6 +348,11 @@ export const en = {
       `Keeps a live transcript docked under your suggestions. Turn it off for more room to read them. Toggle any time with ${combo}.`,
   },
 
+  hideTaskbarField: {
+    label: 'Hide taskbar icon during live interviews',
+    description:
+      'Off by default. When on, the app leaves the taskbar (and the Dock on macOS) and stays on top of other windows while a live interview is running. The window cannot be minimized while this is on. If the window gets lost, launch the app again to bring it back.',
+  },
   mockHintsField: {
     label: 'Show hints in mock interviews',
     description:
@@ -929,7 +934,7 @@ export const en = {
     lostWindow: {
       title: 'Lost the window?',
       body: (appName: string) =>
-        `In stealth mode ${appName} leaves the taskbar and the macOS Dock so it is not visible when you share your screen, which also means a minimized window has no button to click. Just launch ${appName} again: it does not start a second copy, it brings this window back. Outside stealth mode the usual taskbar button and Dock icon are there.`,
+        `In stealth mode ${appName} leaves the taskbar and the macOS Dock so it is not visible when you share your screen, which also means a minimized window has no button to click. Just launch ${appName} again: it does not start a second copy, it brings this window back. Outside stealth mode the usual taskbar button and Dock icon are there, unless you turned on "Hide taskbar icon during live interviews".`,
     },
 
     language: {
@@ -1114,6 +1119,7 @@ export const en = {
     saveSuggestionModeFailed: 'Failed to save the suggestion mode',
     saveTranscriptPanelFailed: 'Failed to save transcription panel setting',
     saveMockHintsFailed: 'Failed to save live suggestions setting',
+    saveHideTaskbarFailed: 'Could not save the taskbar setting. Please try again.',
     saveUiLanguageFailed: 'Failed to save the app language',
   },
 
