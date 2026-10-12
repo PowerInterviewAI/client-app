@@ -126,6 +126,12 @@ export async function run(userDataDir) {
     store.configStore.getConfig().mockLiveHintsEnabled === true
   );
 
+  // The taskbar-hiding setting is opt-in: an install that never saw it must read as off.
+  check(
+    'hideTaskbarWhileRunning defaults to off',
+    store.configStore.getConfig().hideTaskbarWhileRunning === false
+  );
+
   // `lastSessionMode` backed the control bar's split Start button, which no longer exists.
   // Seeded above, so this pins the scrub rather than merely that RuntimeConfig stopped declaring
   // it - every read and write in the store spreads the raw stored object through, and nothing

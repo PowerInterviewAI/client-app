@@ -208,7 +208,7 @@ function applySurfaceVisibility(): void {
     // button back, so setSkipTaskbar below has to be the one that runs last of the two.
     const pinChanged = applyAlwaysOnTop(hidden);
     // setVisibleOnAllWorkspaces can drop the Dock icon for a moment on macOS, so re-assert it.
-    if (pinChanged && isMac) dockVisible = null;
+    if (pinChanged && isMac && !hidden && dockVisible === true) dockVisible = null;
 
     try {
       win.setSkipTaskbar(hidden);

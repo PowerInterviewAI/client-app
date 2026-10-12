@@ -138,6 +138,7 @@ export async function run() {
 
   await wait(1300);
   windowButtonVisible.length = 0;
+  windowControl.setHideTaskbarWhileRunning(true);
   appStateService.updateState({ runningState: RunningState.Running });
   windowControl.refreshWindowSurfaces();
   check('starting the assistant drops the Dock icon', surfaceIs(calls, 'hidden'));

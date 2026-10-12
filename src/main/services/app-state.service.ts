@@ -273,8 +273,8 @@ export class AppStateService {
       this.notifyRenderer();
     }
 
-    // The taskbar button, the Dock icon and always-on-top follow the running state as well as
-    // stealth, and this is the only place a run starts or ends. Done after the state is written,
+    // The taskbar button, the Dock icon and always-on-top follow the running state (when the
+    // hideTaskbarWhileRunning setting is on) as well as stealth, and this is the only place a run starts or ends. Done after the state is written,
     // since window-control reads it back. Never allowed to fail the update itself.
     if (runningChanged) {
       try {

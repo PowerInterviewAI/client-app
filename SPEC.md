@@ -105,7 +105,7 @@ Nothing in it is a trap: Skip is on every step, every setting has a working defa
 
 ### Session Window Behaviour
 
-While the assistant is running - or while stealth mode is on - the window is pinned above other windows (`screen-saver` level, and visible over a fullscreen call on macOS) and drops its taskbar button and Dock icon. The two conditions are independent: switching stealth off mid-session leaves both in place until the session actually stops. macOS traffic lights stay visible outside stealth, since the window is still interactive. Service: [src/main/services/window-control.service.ts](src/main/services/window-control.service.ts).
+While stealth mode is on - or while the assistant is running with the opt-in "Hide taskbar icon during live interviews" setting enabled - the window is pinned above other windows (`screen-saver` level, visible over a fullscreen call on macOS), re-raised every 2 seconds, cannot be minimized, and drops its taskbar button and Dock icon. With the setting off (the default) a running assistant leaves the window alone. The two conditions are independent: switching stealth off mid-session with the setting on leaves everything in place until the session stops. macOS traffic lights stay visible outside stealth, since the window is still interactive. Service: [src/main/services/window-control.service.ts](src/main/services/window-control.service.ts).
 
 ### Interview Config Sync
 

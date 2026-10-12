@@ -57,7 +57,7 @@ export async function run() {
   );
   check(
     'the surface predicate covers stealth and running',
-    /_stealth \|\| isAssistantRunning\(\)/.test(windowControl)
+    /_stealth \|\| \(_hideTaskbarWhileRunning && isAssistantRunning\(\)\)/.test(windowControl)
   );
   check(
     'the Dock icon follows the same predicate',
