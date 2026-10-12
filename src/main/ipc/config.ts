@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 
 import { appStateService } from '../services/app-state.service.js';
+import { setHideTaskbarWhileRunning } from '../services/window-control.service.js';
 import { configStore, RuntimeConfig } from '../store/config.store.js';
 
 export function registerConfigHandlers(): void {
@@ -24,6 +25,10 @@ export function registerConfigHandlers(): void {
       // the panels of an otherwise translated app. Keyed on the update rather than on the value
       // changing, which is enough: the re-seed is a no-op once a real interview has started.
       if (updates.uiLanguage !== undefined) appStateService.refreshPlaceholderLanguage();
+
+      if (updates.hideTaskbarWhileRunning !== undefined) {
+        setHideTaskbarWhileRunning(config.hideTaskbarWhileRunning);
+      }
 
       return config;
     } catch (error) {
