@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, dialog, screen } from 'electron';
 
 import { MIN_HEIGHT, MIN_WIDTH, OPACITY_LEVELS, RAISE_INTERVAL_MS } from '../consts.js';
 import { configStore } from '../store/config.store.js';
@@ -93,6 +93,17 @@ interface WindowBounds {
   y?: number;
   width?: number;
   height?: number;
+}
+
+/**
+ * A save dialog owned by the main window. Unowned, it opens as an ordinary window and sits under
+ * the main window whenever that is pinned on top, out of reach until the pin is released.
+ */
+export function showSaveDialog(
+  options: Electron.SaveDialogOptions
+): Promise<Electron.SaveDialogReturnValue> {
+  if (win && !win.isDestroyed()) return dialog.showSaveDialog(win, options);
+  return dialog.showSaveDialog(options);
 }
 
 /**
