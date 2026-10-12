@@ -57,12 +57,29 @@ export async function run() {
   );
   check(
     'the surface predicate covers stealth and running',
-    /_stealth \|\| isAssistantRunning\(\)/.test(windowControl)
+    /_stealth \|\| \(_hideTaskbarWhileRunning && isAssistantRunning\(\)\)/.test(windowControl)
   );
   check(
     'the Dock icon follows the same predicate',
     /wantVisible = !shouldHideSurfaces\(\)/.test(windowControl)
   );
+
+  // Save dialogs are owned by the main window. Unowned, one opens under the window whenever it is
+  // pinned on top and, on Windows, gets a taskbar button of its own while the app's is hidden.
+  check(
+    'the save dialog helper passes the main window',
+    /dialog\.showSaveDialog\(win, options\)/.test(windowControl)
+  );
+  for (const file of [
+    ['services', 'tools.service.js'],
+    ['ipc', 'tools.js'],
+  ]) {
+    const src = fs.readFileSync(path.join(ROOT, 'electron-dist', ...file), 'utf8');
+    check(
+      `${file.join('/')} does not open an unowned save dialog`,
+      !/dialog\.showSaveDialog\(/.test(src)
+    );
+  }
 
   // In stealth mode there is no taskbar button and no Dock icon: without this, closing or
   // minimizing the window leaves a running process with no way back to it.

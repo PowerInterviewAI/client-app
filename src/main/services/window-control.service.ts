@@ -1,6 +1,6 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, dialog, screen } from 'electron';
 
-import { MIN_HEIGHT, MIN_WIDTH, OPACITY_LEVELS } from '../consts.js';
+import { MIN_HEIGHT, MIN_WIDTH, OPACITY_LEVELS, RAISE_INTERVAL_MS } from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { RunningState } from '../types/app-state.js';
 import { isMockInterviewSessionActive } from '../types/mock-interview.js';
@@ -24,6 +24,17 @@ const ALWAYS_ON_TOP_LEVEL = 'screen-saver' as const;
 let win: BrowserWindow | null = null;
 let _stealth = configStore.getStealth();
 
+// Cached so the window events that run applySurfaceVisibility do not hit the disk each time.
+let _hideTaskbarWhileRunning = readHideTaskbarSetting();
+
+// While surfaces are hidden the window is re-raised on this interval, since something else
+// (a call app, a fullscreen share) can still end up above it.
+let raiseTimer: NodeJS.Timeout | null = null;
+
+// Last minimizable state we asked for. Changing it alters the window style, which on Windows
+// makes the shell re-add the taskbar button, so it is only touched on a real change.
+let minimizableApplied: boolean | null = null;
+
 // Last z-order state we asked for. `null` means nothing has been applied to this window yet,
 // which is what makes the first call after a window is registered always go through.
 let alwaysOnTopApplied: boolean | null = null;
@@ -32,6 +43,15 @@ let alwaysOnTopApplied: boolean | null = null;
 let dockVisible: boolean | null = null;
 let lastDockCallAt = 0;
 let dockRecheckTimer: NodeJS.Timeout | null = null;
+
+function readHideTaskbarSetting(): boolean {
+  try {
+    return configStore.getConfig().hideTaskbarWhileRunning === true;
+  } catch (e) {
+    console.warn('Failed to read hideTaskbarWhileRunning:', e);
+    return false;
+  }
+}
 
 // helper: return the display the window mostly occupies (fallback to primary)
 function getCurrentDisplay(): Electron.Display {
@@ -76,6 +96,17 @@ interface WindowBounds {
 }
 
 /**
+ * A save dialog owned by the main window. Unowned, it opens as an ordinary window and sits under
+ * the main window whenever that is pinned on top, out of reach until the pin is released.
+ */
+export function showSaveDialog(
+  options: Electron.SaveDialogOptions
+): Promise<Electron.SaveDialogReturnValue> {
+  if (win && !win.isDestroyed()) return dialog.showSaveDialog(win, options);
+  return dialog.showSaveDialog(options);
+}
+
+/**
  * Set the window reference for all control functions
  */
 export function setWindowReference(window: BrowserWindow): void {
@@ -84,6 +115,8 @@ export function setWindowReference(window: BrowserWindow): void {
   // The tracked z-order belongs to the previous window, not this one. Carrying it over would
   // read the first real call as a no-op and leave the new window unpinned.
   alwaysOnTopApplied = null;
+  minimizableApplied = null;
+  stopRaiseTimer();
 
   // The shell re-registers the taskbar button whenever the window is re-shown or re-shaped, and
   // most of those paths are not ours to intercept - Alt+Tab restoring a minimized window, for one.
@@ -93,6 +126,7 @@ export function setWindowReference(window: BrowserWindow): void {
     window.on('restore', applySurfaceVisibility);
     window.on('maximize', applySurfaceVisibility);
     window.on('unmaximize', applySurfaceVisibility);
+    window.on('closed', stopRaiseTimer);
   }
 
   applySurfaceVisibility();
@@ -120,12 +154,67 @@ function isAssistantRunning(): boolean {
  * above the call.
  *
  * Two independent inputs, either of which is enough. Stealth is the explicit request for it.
- * A running assistant is the implicit one: that is precisely when a screen share is likely to be
- * live, and when the suggestions are useless if the call window covers them. The two are not
- * nested - leaving stealth mid-session must not hand the taskbar button back.
+ * A running assistant is the implicit one, but only when the user opted in with
+ * `hideTaskbarWhileRunning`: otherwise the window is an ordinary one, icon and z-order included.
+ * The two are not nested - leaving stealth mid-session with the setting on must not hand the
+ * taskbar button back.
  */
 function shouldHideSurfaces(): boolean {
-  return _stealth || isAssistantRunning();
+  return _stealth || (_hideTaskbarWhileRunning && isAssistantRunning());
+}
+
+/**
+ * Minimize is unavailable whenever the setting is on (even at idle, so there is no gap around a
+ * session) and in stealth: with the taskbar button gone there is nothing to restore from.
+ */
+export function canMinimize(): boolean {
+  return !_stealth && !_hideTaskbarWhileRunning;
+}
+
+/** Apply a changed `hideTaskbarWhileRunning` setting to the live window. */
+export function setHideTaskbarWhileRunning(value: boolean): void {
+  _hideTaskbarWhileRunning = value;
+  refreshWindowSurfaces();
+}
+
+function applyMinimizable(): void {
+  if (!win || win.isDestroyed()) return;
+  const allowed = canMinimize();
+  if (minimizableApplied === allowed) return;
+  try {
+    win.setMinimizable(allowed);
+    minimizableApplied = allowed;
+    // Only the setting, not stealth: restore() activates the window, which must not pull focus
+    // out of a call. A window minimized before stealth is brought back by restoreWindow().
+    if (!allowed && !_stealth && win.isMinimized()) win.restore();
+  } catch (e) {
+    console.warn('setMinimizable failed:', e);
+  }
+}
+
+function stopRaiseTimer(): void {
+  if (!raiseTimer) return;
+  clearInterval(raiseTimer);
+  raiseTimer = null;
+}
+
+function syncRaiseTimer(hidden: boolean): void {
+  if (!hidden) {
+    stopRaiseTimer();
+    return;
+  }
+  if (raiseTimer) return;
+  raiseTimer = setInterval(() => {
+    if (!win || win.isDestroyed() || !win.isVisible() || win.isMinimized()) return;
+    try {
+      // moveTop does not take focus and does not re-register the taskbar button, unlike
+      // re-issuing setAlwaysOnTop.
+      win.moveTop();
+    } catch (e) {
+      console.warn('moveTop failed:', e);
+    }
+  }, RAISE_INTERVAL_MS);
+  raiseTimer.unref?.();
 }
 
 /**
@@ -144,6 +233,9 @@ function applySurfaceVisibility(): void {
   const hidden = shouldHideSurfaces();
 
   if (win && !win.isDestroyed()) {
+    // Style change, so before setSkipTaskbar for the same reason as the z-order below.
+    applyMinimizable();
+
     // Z-order first. Changing it re-registers the window with the shell and hands the taskbar
     // button back, so setSkipTaskbar below has to be the one that runs last of the two.
     applyAlwaysOnTop(hidden);
@@ -153,6 +245,8 @@ function applySurfaceVisibility(): void {
     } catch (e) {
       console.warn('setSkipTaskbar failed:', e);
     }
+
+    syncRaiseTimer(hidden);
 
     // `titleBarStyle: 'hidden'` draws the traffic lights as native chrome, independent of
     // setSkipTaskbar/the Dock icon - they stay on screen in stealth mode unless hidden here too.

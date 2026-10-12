@@ -1,7 +1,8 @@
-import { dialog, ipcMain } from 'electron';
+import { ipcMain } from 'electron';
 import fs from 'fs/promises';
 
 import { toolsService } from '../services/tools.service.js';
+import { showSaveDialog } from '../services/window-control.service.js';
 import { ExportFormat } from '../types/export.js';
 import { uiStrings } from '../utils/ui-strings.js';
 
@@ -22,7 +23,7 @@ export function registerToolsHandlers(): void {
     'tools:save-image',
     async (_event, { filename, data }: { filename: string; data: number[] }) => {
       const strings = uiStrings();
-      const { canceled, filePath } = await dialog.showSaveDialog({
+      const { canceled, filePath } = await showSaveDialog({
         title: strings.saveImageTitle,
         defaultPath: filename,
         filters: [{ name: strings.pngFilter, extensions: ['png'] }],

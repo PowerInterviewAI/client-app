@@ -45,6 +45,10 @@ export interface RuntimeConfig {
   // mock interview: also generate what the live assistant would have suggested for each
   // question. On by default - see the note on the default value below.
   mockLiveHintsEnabled: boolean;
+
+  // Hide the taskbar/Dock icon, pin on top and drop minimize while a live interview runs.
+  // Off by default: the window is a normal window unless stealth mode is on.
+  hideTaskbarWhileRunning: boolean;
 }
 
 // Default runtime configuration
@@ -86,6 +90,7 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   // the only answer they are ever offered - and the session bar still turns it off for the run
   // where composing unaided is the point.
   mockLiveHintsEnabled: true,
+  hideTaskbarWhileRunning: false,
 };
 
 // interviewConf (full name, profile, context) used to be cached under `runtime`, but it's now
@@ -307,6 +312,7 @@ export const configStore = new ConfigStore();
       ?.mockLiveSuggestionsEnabled;
     migration.mockLiveHintsEnabled = typeof legacy === 'boolean' ? legacy : true;
   }
+  if (raw?.hideTaskbarWhileRunning === undefined) migration.hideTaskbarWhileRunning = false;
   // perform migration only if there are values to set
   if (Object.keys(migration).length > 0) {
     configStore.updateConfig(migration);

@@ -38,4 +38,7 @@ export interface Config {
   // Mock interview: also show what the live assistant would have suggested. The default; the
   // session bar turns it off for the run where composing unaided is the point.
   mockLiveHintsEnabled: boolean;
+
+  // Hide the taskbar/Dock icon, pin on top and drop minimize while a live interview runs.
+  hideTaskbarWhileRunning: boolean;
 }

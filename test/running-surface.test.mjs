@@ -1,6 +1,6 @@
 /**
- * The taskbar button, the Dock icon and always-on-top follow `stealth OR running`, not stealth
- * alone. A running assistant is exactly when a screen share is most likely to be live, and when
+ * The taskbar button, the Dock icon and always-on-top follow `stealth OR (running AND the
+ * hideTaskbarWhileRunning setting)`, not stealth alone. A running assistant is exactly when a screen share is most likely to be live, and when
  * suggestions are useless if the call window covers them.
  *
  * The trap this pins is that the two inputs are independent, not nested. Leaving stealth while a
@@ -20,6 +20,8 @@ export async function run() {
   const alwaysOnTop = [];
   const skipTaskbar = [];
   const workspaces = [];
+  const minimizable = [];
+  let moveTopCalls = 0;
   // One ordered log across both calls, so the sequence between them can be asserted.
   const order = [];
   const handlers = {};
@@ -37,6 +39,10 @@ export async function run() {
       order.push('skipTaskbar');
     },
     setWindowButtonVisibility: () => {},
+    setMinimizable: (v) => minimizable.push(v),
+    moveTop: () => {
+      moveTopCalls++;
+    },
     setVisibleOnAllWorkspaces: (on, opts) => workspaces.push({ on, opts }),
     setIgnoreMouseEvents: () => {},
     setFocusable: () => {},
@@ -55,6 +61,40 @@ export async function run() {
 
   check('idle out of stealth keeps the taskbar button', skipTaskbar.at(-1) === false);
   check('idle out of stealth is not pinned on top', alwaysOnTop.at(-1)?.enabled === false);
+
+  // 0. Setting off (the default): a running assistant leaves the window alone.
+  skipTaskbar.length = 0;
+  alwaysOnTop.length = 0;
+  start();
+  check('setting off: running keeps the taskbar button', skipTaskbar.at(-1) !== true);
+  check('setting off: running does not pin the window', alwaysOnTop.at(-1)?.enabled !== true);
+  check('setting off: minimize stays available', minimizable.at(-1) === true);
+  check('setting off: canMinimize is true', windowControl.canMinimize() === true);
+  stop();
+
+  // Turning the setting on mid-session applies at once, and also removes minimize at idle.
+  windowControl.setHideTaskbarWhileRunning(true);
+  check('setting on: minimize is removed even at idle', minimizable.at(-1) === false);
+  check('setting on: canMinimize is false', windowControl.canMinimize() === false);
+  check('setting on: idle still shows the taskbar button', skipTaskbar.at(-1) === false);
+  windowControl.setHideTaskbarWhileRunning(false);
+  start();
+  skipTaskbar.length = 0;
+  windowControl.setHideTaskbarWhileRunning(true);
+  check('toggling the setting on mid-run hides the button', skipTaskbar.at(-1) === true);
+  check('toggling the setting on mid-run pins the window', alwaysOnTop.at(-1)?.enabled === true);
+
+  // While hidden the window is re-raised on an interval, and only then.
+  moveTopCalls = 0;
+  await new Promise((r) => setTimeout(r, 2300));
+  check('hidden window is re-raised on the interval', moveTopCalls >= 1);
+  windowControl.setHideTaskbarWhileRunning(false);
+  moveTopCalls = 0;
+  await new Promise((r) => setTimeout(r, 2300));
+  check('re-raising stops once surfaces are released', moveTopCalls === 0);
+  check('releasing the setting restores minimize', minimizable.at(-1) === true);
+  stop();
+  windowControl.setHideTaskbarWhileRunning(true);
 
   // 1. Running alone, no stealth involved.
   skipTaskbar.length = 0;
@@ -124,7 +164,11 @@ export async function run() {
   check('stopping the assistant unpins the window', alwaysOnTop.at(-1)?.enabled === false);
   check('and stops following the user across Spaces', workspaces.at(-1)?.on === false);
 
-  // 5. Stealth still works on its own with no session running.
+  // 5. Stealth still works on its own with no session running, whatever the setting says.
+  windowControl.setHideTaskbarWhileRunning(false);
+  check('stealth is never minimizable', (windowControl.enableStealth(), windowControl.canMinimize()) === false);
+  windowControl.disableStealth();
+  windowControl.setHideTaskbarWhileRunning(true);
   skipTaskbar.length = 0;
   alwaysOnTop.length = 0;
   windowControl.enableStealth();

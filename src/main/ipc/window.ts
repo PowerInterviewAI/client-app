@@ -19,7 +19,7 @@ export function registerWindowHandlers(): void {
 
   ipcMain.on('window:minimize', () => {
     const win = window();
-    if (win && !win.isDestroyed()) win.minimize();
+    if (win && !win.isDestroyed() && windowControls.canMinimize()) win.minimize();
   });
 
   ipcMain.on('window:maximize', () => {

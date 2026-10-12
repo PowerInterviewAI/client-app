@@ -1,5 +1,4 @@
 import { convertMarkdownToDocx } from '@mohtasham/md-to-docx';
-import { dialog } from 'electron';
 import fs from 'fs/promises';
 
 import { LLMApi } from '../api/llm.js';
@@ -14,6 +13,7 @@ import { mockInterviewService } from './mock-interview.service.js';
 import { actionSuggestionService } from './suggestion-action.service.js';
 import { liveSuggestionService } from './suggestion-live.service.js';
 import { transcriptService } from './transcript.service.js';
+import { showSaveDialog } from './window-control.service.js';
 
 /**
  * The Word style sheet both exports are rendered with.
@@ -81,7 +81,7 @@ class ToolsService {
     // The document inside follows the interview language; this window is being read by the
     // person at the keyboard, so it follows the chrome language.
     const strings = uiStrings();
-    const { canceled, filePath } = await dialog.showSaveDialog({
+    const { canceled, filePath } = await showSaveDialog({
       title: strings.saveTranscriptTitle,
       defaultPath: generateExportFilename(format),
       filters: isMarkdown
@@ -125,7 +125,7 @@ class ToolsService {
     const isMarkdown = format === 'md';
 
     const strings = uiStrings();
-    const { canceled, filePath } = await dialog.showSaveDialog({
+    const { canceled, filePath } = await showSaveDialog({
       title: strings.saveMockReportTitle,
       defaultPath: generateExportFilename(format, 'mock-interview'),
       filters: isMarkdown

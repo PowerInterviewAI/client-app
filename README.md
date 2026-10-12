@@ -65,7 +65,7 @@ Stay on top of the conversation with live ASR:
 
 ### Staying Out of Sight
 
-The app keeps itself off the surfaces a screen share exposes. There is no desktop shortcut, and stealth mode hides the window from screen capture while also removing the Windows taskbar button and the macOS Dock icon and Cmd+Tab entry. Outside stealth mode the app behaves like any other window, taskbar button and Dock icon included.
+The app keeps itself off the surfaces a screen share exposes. There is no desktop shortcut, and stealth mode hides the window from screen capture while also removing the Windows taskbar button and the macOS Dock icon and Cmd+Tab entry. Outside stealth mode the app behaves like any other window, taskbar button and Dock icon included, unless you turn on "Hide taskbar icon during live interviews" in Configuration.
 
 **Lost the window?** Launch Power Interview again. It does not start a second copy - the running app brings its window back and focuses it.
 
