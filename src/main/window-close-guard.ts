@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 
 import { appStateService } from './services/app-state.service.js';
-import { getWindowReference } from './services/window-control.service.js';
+import { getWindowReference, restoreWindow } from './services/window-control.service.js';
 
 /**
  * Hold the window open long enough to ask whether the interview should be saved.
@@ -53,6 +53,9 @@ export function installCloseGuard(win: BrowserWindow): void {
     if (prompting) return;
 
     prompting = true;
+    // The prompt renders inside this window. A close from the Dock or taskbar can arrive while it
+    // is minimized, and the prompt would then be invisible and the quit look ignored.
+    if (win.isMinimized() || !win.isVisible()) restoreWindow();
     wc.send('app:save-history-prompt');
   });
 }

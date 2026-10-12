@@ -106,6 +106,12 @@ export async function run() {
   const guard = readSource(new URL('../src/main/window-close-guard.ts', import.meta.url));
   check('the close is vetoed', guard.includes('event.preventDefault()'));
   check('the renderer is asked', guard.includes("wc.send('app:save-history-prompt')"));
+  // The prompt is rendered in the window, so a close arriving while it is minimized brings it back.
+  check(
+    'a minimized window is restored before it is asked',
+    guard.indexOf('restoreWindow()') !== -1 &&
+      guard.indexOf('restoreWindow()') < guard.indexOf("wc.send('app:save-history-prompt')")
+  );
   check(
     'a confirmed close is not vetoed twice',
     guard.includes('if (closeConfirmed ||') && guard.includes('closeConfirmed = true')
