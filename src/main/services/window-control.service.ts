@@ -227,9 +227,7 @@ function applySurfaceVisibility(): void {
 
     // Z-order first. Changing it re-registers the window with the shell and hands the taskbar
     // button back, so setSkipTaskbar below has to be the one that runs last of the two.
-    const pinChanged = applyAlwaysOnTop(hidden);
-    // setVisibleOnAllWorkspaces can drop the Dock icon for a moment on macOS, so re-assert it.
-    if (pinChanged && isMac && !hidden && dockVisible === true) dockVisible = null;
+    applyAlwaysOnTop(hidden);
 
     try {
       win.setSkipTaskbar(hidden);
@@ -270,9 +268,9 @@ function applySurfaceVisibility(): void {
  * invisible: on Windows it re-raises the window to the front of the topmost band, and on macOS
  * Electron re-runs the whole level lookup and the Cocoa call with no early return of its own.
  */
-function applyAlwaysOnTop(pinned: boolean): boolean {
-  if (!win || win.isDestroyed()) return false;
-  if (alwaysOnTopApplied === pinned) return false;
+function applyAlwaysOnTop(pinned: boolean): void {
+  if (!win || win.isDestroyed()) return;
+  if (alwaysOnTopApplied === pinned) return;
 
   try {
     if (pinned) {
@@ -299,7 +297,6 @@ function applyAlwaysOnTop(pinned: boolean): boolean {
   }
 
   alwaysOnTopApplied = pinned;
-  return true;
 }
 
 /**
