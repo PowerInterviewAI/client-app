@@ -117,10 +117,10 @@ export const SUGGESTION_STALL_MS = 15_000;
 // above the longest legitimate action suggestion.
 export const ACTION_LOCK_MAX_HOLD_MS = 180_000;
 
-// Stealth mode opacity levels (cycles on each toggle; default = second highest)
 // How often a hidden-surface window is moved back to the top of the z-order.
 export const RAISE_INTERVAL_MS = 2000;
 
+// Stealth mode opacity levels (cycles on each toggle; default = second highest)
 export const OPACITY_LEVELS = [0.2, 0.5, 0.73, 0.9] as const;
 export const OPACITY_DEFAULT = OPACITY_LEVELS[OPACITY_LEVELS.length - 2]; // 0.73
 

@@ -27,11 +27,13 @@ let _stealth = configStore.getStealth();
 // Cached so the window events that run applySurfaceVisibility do not hit the disk each time.
 let _hideTaskbarWhileRunning = readHideTaskbarSetting();
 
-// Last pin state we asked for ...
-
 // While surfaces are hidden the window is re-raised on this interval, since something else
 // (a call app, a fullscreen share) can still end up above it.
 let raiseTimer: NodeJS.Timeout | null = null;
+
+// Last minimizable state we asked for. Changing it alters the window style, which on Windows
+// makes the shell re-add the taskbar button, so it is only touched on a real change.
+let minimizableApplied: boolean | null = null;
 
 // Last z-order state we asked for. `null` means nothing has been applied to this window yet,
 // which is what makes the first call after a window is registered always go through.
@@ -102,6 +104,7 @@ export function setWindowReference(window: BrowserWindow): void {
   // The tracked z-order belongs to the previous window, not this one. Carrying it over would
   // read the first real call as a no-op and leave the new window unpinned.
   alwaysOnTopApplied = null;
+  minimizableApplied = null;
   stopRaiseTimer();
 
   // The shell re-registers the taskbar button whenever the window is re-shown or re-shaped, and
@@ -163,6 +166,21 @@ export function setHideTaskbarWhileRunning(value: boolean): void {
   refreshWindowSurfaces();
 }
 
+function applyMinimizable(): void {
+  if (!win || win.isDestroyed()) return;
+  const allowed = canMinimize();
+  if (minimizableApplied === allowed) return;
+  try {
+    win.setMinimizable(allowed);
+    minimizableApplied = allowed;
+    // Only the setting, not stealth: restore() activates the window, which must not pull focus
+    // out of a call. A window minimized before stealth is brought back by restoreWindow().
+    if (!allowed && !_stealth && win.isMinimized()) win.restore();
+  } catch (e) {
+    console.warn('setMinimizable failed:', e);
+  }
+}
+
 function stopRaiseTimer(): void {
   if (!raiseTimer) return;
   clearInterval(raiseTimer);
@@ -204,6 +222,9 @@ function applySurfaceVisibility(): void {
   const hidden = shouldHideSurfaces();
 
   if (win && !win.isDestroyed()) {
+    // Style change, so before setSkipTaskbar for the same reason as the z-order below.
+    applyMinimizable();
+
     // Z-order first. Changing it re-registers the window with the shell and hands the taskbar
     // button back, so setSkipTaskbar below has to be the one that runs last of the two.
     const pinChanged = applyAlwaysOnTop(hidden);
@@ -214,13 +235,6 @@ function applySurfaceVisibility(): void {
       win.setSkipTaskbar(hidden);
     } catch (e) {
       console.warn('setSkipTaskbar failed:', e);
-    }
-
-    try {
-      win.setMinimizable(canMinimize());
-      if (!canMinimize() && win.isMinimized()) win.restore();
-    } catch (e) {
-      console.warn('setMinimizable failed:', e);
     }
 
     syncRaiseTimer(hidden);
