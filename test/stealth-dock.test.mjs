@@ -152,5 +152,19 @@ export async function run() {
   windowControl.refreshWindowSurfaces();
   check('stopping the assistant brings the Dock icon back', surfaceIs(calls, 'visible'));
 
+  // With the setting off (the default) a running session leaves the Dock icon where it is.
+  await wait(1300);
+  windowControl.setHideTaskbarWhileRunning(false);
+  const beforeOffRun = calls.length;
+  appStateService.updateState({ runningState: RunningState.Running });
+  windowControl.refreshWindowSurfaces();
+  check(
+    'setting off: running does not drop the Dock icon',
+    !calls.slice(beforeOffRun).includes('dock.hide')
+  );
+  check('setting off: the Dock icon is still there', surfaceIs(calls, 'visible'));
+  appStateService.updateState({ runningState: RunningState.Idle });
+  windowControl.refreshWindowSurfaces();
+
   return failures;
 }
