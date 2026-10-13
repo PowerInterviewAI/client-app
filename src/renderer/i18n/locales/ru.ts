@@ -240,7 +240,7 @@ export const ru: Translation = {
       unsupported: 'Пока недоступно на этом сервере. Обновите приложение или попробуйте позже.',
       liveRunning:
         'Сначала остановите живого ассистента - они не могут использовать микрофон одновременно.',
-      unaffordable: 'Бесплатный час закончился. Оформите подписку, чтобы продолжить тренировки.',
+      unaffordable: 'Бесплатное время закончилось. Оформите подписку, чтобы продолжить тренировки.',
     },
 
     live: {
@@ -250,7 +250,7 @@ export const ru: Translation = {
       running: 'Ассистент уже работает.',
       mockRunning:
         'Сначала завершите пробное собеседование - они не могут использовать микрофон одновременно.',
-      unaffordable: 'Бесплатный час закончился. Оформите подписку, чтобы продолжить.',
+      unaffordable: 'Бесплатное время закончилось. Оформите подписку, чтобы продолжить.',
     },
 
     accountLabel: 'Учётная запись',
@@ -650,7 +650,7 @@ export const ru: Translation = {
       return parts.join(' ') || '0 минут';
     },
     lessThanAMinute: 'Меньше минуты',
-    noFreeTimeLeft: 'Бесплатный час закончился',
+    noFreeTimeLeft: 'Бесплатное время закончилось',
   },
 
   panels: {
@@ -1005,7 +1005,7 @@ export const ru: Translation = {
       freePlan: 'Бесплатный тариф',
       // "на" takes the accusative, which is the case `duration` is written in
       freeLeft: (duration: string) => `Осталось собеседований на ${duration} на базовой модели.`,
-      freeUsedUp: 'Бесплатный час закончился. Оформите подписку, чтобы продолжить.',
+      freeUsedUp: 'Бесплатное время закончилось. Оформите подписку, чтобы продолжить.',
       duration: (hours: number, minutes: number) => {
         const parts: string[] = [];
         if (hours) parts.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
@@ -1155,8 +1155,8 @@ export const ru: Translation = {
   },
 
   creditGate: {
-    tooLow: 'Бесплатный час закончился',
-    outOfCredits: 'Бесплатный час закончился - сессия завершена',
+    tooLow: 'Бесплатное время закончилось',
+    outOfCredits: 'Бесплатное время закончилось - сессия завершена',
     outOfCreditsHint: 'Оформите подписку для собеседований без ограничений.',
     lowBalance: (minutes: number) =>
       `Бесплатного времени осталось примерно на ${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}`,

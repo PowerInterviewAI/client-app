@@ -238,7 +238,7 @@ export const en = {
       ready: 'The AI asks, you answer out loud, and you get a scored report at the end.',
       unsupported: 'Not available on this server yet. Update the app, or try again later.',
       liveRunning: 'Stop the live assistant first - the two cannot share your microphone.',
-      unaffordable: 'Your free hour is used up. Subscribe to keep practising.',
+      unaffordable: 'No free time left. Subscribe to keep practising.',
     },
 
     live: {
@@ -247,7 +247,7 @@ export const en = {
       ready: 'Transcribes your real interview and suggests answers as it happens.',
       running: 'Your live assistant is already running.',
       mockRunning: 'Finish the mock interview first - the two cannot share your microphone.',
-      unaffordable: 'Your free hour is used up. Subscribe to keep interviewing.',
+      unaffordable: 'No free time left. Subscribe to keep interviewing.',
     },
 
     accountLabel: 'Account',
@@ -634,7 +634,7 @@ export const en = {
       return parts.join(' ') || '0 mins';
     },
     lessThanAMinute: 'Less than 1 min',
-    noFreeTimeLeft: 'Free hour used up',
+    noFreeTimeLeft: 'No free time left',
   },
 
   panels: {
@@ -999,7 +999,7 @@ export const en = {
       daysLeft: (days: number) => `${days} ${days === 1 ? 'day' : 'days'} left`,
       freePlan: 'Free plan',
       freeLeft: (duration: string) => `${duration} of interviews left on the free model.`,
-      freeUsedUp: 'Your free hour is used up. Subscribe to keep interviewing.',
+      freeUsedUp: 'No free time left. Subscribe to keep interviewing.',
       duration: (hours: number, minutes: number) => {
         const parts: string[] = [];
         if (hours) parts.push(`${hours} hour${hours === 1 ? '' : 's'}`);
@@ -1148,8 +1148,8 @@ export const en = {
 
   /** The one start rule live and mock share: subscribed, or at least a minute of free time. */
   creditGate: {
-    tooLow: 'Your free hour is used up',
-    outOfCredits: 'Your free hour is used up - the session has ended',
+    tooLow: 'No free time left',
+    outOfCredits: 'Out of free time - the session has ended',
     outOfCreditsHint: 'Subscribe for unlimited interviews.',
     lowBalance: (minutes: number) =>
       `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} of free time left`,
