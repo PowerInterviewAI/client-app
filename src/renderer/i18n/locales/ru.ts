@@ -1014,10 +1014,6 @@ export const ru: Translation = {
       },
       loadingPlans: 'Загружаем тарифы…',
       mostPopular: 'Выгоднее всего',
-      planNames: {
-        monthly: 'Месячная',
-        yearly: 'Годовая',
-      },
       planDescriptions: {
         monthly: 'Собеседования без ограничений на передовой модели на 30 дней',
         yearly: 'Собеседования без ограничений на передовой модели на год',

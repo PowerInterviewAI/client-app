@@ -1008,10 +1008,6 @@ export const en = {
       },
       loadingPlans: 'Loading plans…',
       mostPopular: 'Best value',
-      planNames: {
-        monthly: 'Monthly',
-        yearly: 'Yearly',
-      },
       planDescriptions: {
         monthly: 'Unlimited interviews on the SOTA model for 30 days',
         yearly: 'Unlimited interviews on the SOTA model for a year',

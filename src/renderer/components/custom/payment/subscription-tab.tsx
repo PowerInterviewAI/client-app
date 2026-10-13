@@ -85,7 +85,7 @@ export default function SubscriptionTab({
   /** The plan's display name; a plan this build has no name for shows its id. */
   const planNameOf = (plan: SubscriptionPlanInfo) => {
     const key = planKey(plan.plan);
-    return key === 'other' ? plan.plan : t.payment.buy.planNames[key];
+    return key === 'other' ? plan.plan : t.creditsDisplay.planNames[key];
   };
 
   const handleSelectPlan = useCallback((plan: SubscriptionPlanInfo) => {
