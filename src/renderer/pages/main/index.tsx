@@ -29,6 +29,7 @@ import {
   TRANSCRIPT_DOCK_MIN_HEIGHT,
   TRANSCRIPT_DOCK_RATIO,
 } from '@/lib/consts';
+import { subscriptionOf } from '@/lib/subscription';
 import { getElectron } from '@/lib/utils';
 import { RunningState, UserRole } from '@/types/app-state';
 import { type ActionSuggestion, type LiveSuggestion } from '@/types/suggestion';
@@ -355,9 +356,9 @@ export default function MainPage() {
         )}
 
         {/* Show trial user notice */}
-        {appState?.userRole === UserRole.TrialUser && !trialNoticeClosed && (
-          <TrialUserNotice onClick={() => setTrialNoticeClosed(true)} />
-        )}
+        {appState?.userRole === UserRole.TrialUser &&
+          !appState?.subscribed &&
+          !trialNoticeClosed && <TrialUserNotice onClick={() => setTrialNoticeClosed(true)} />}
 
         {!hasSuggestions && !showTranscriptDock && (
           <div className="flex-1 flex items-center justify-center">
@@ -395,8 +396,8 @@ export default function MainPage() {
         <StatusPanel
           runningState={appState?.runningState ?? RunningState.Idle}
           credits={appState?.credits ?? 0}
+          subscription={subscriptionOf(appState)}
           llmModel={appState?.providedLLMModel ?? ''}
-          userRole={appState?.userRole}
           creditsPerMinute={appState?.creditsPerMinute}
         />
       )}

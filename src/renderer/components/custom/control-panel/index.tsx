@@ -12,7 +12,7 @@ import { useLowBalanceWarning } from '@/hooks/use-low-balance-warning';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useT } from '@/i18n';
 import { isMac } from '@/lib/consts';
-import { canStartSession, minimumStartCredits } from '@/lib/credit-gate';
+import { canStartSession } from '@/lib/credit-gate';
 import { getElectron } from '@/lib/utils';
 import { liveTranscriptionService } from '@/services/live-transcription.service';
 import { RunningState } from '@/types/app-state';
@@ -73,7 +73,7 @@ export default function ControlPanel() {
   const endForCredits = useCallback(() => {
     toast.error(t.creditGate.outOfCredits, {
       description: t.creditGate.outOfCreditsHint,
-      action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+      action: { label: t.creditGate.subscribe, onClick: () => navigate('/payment') },
     });
     if (isStealthRef.current) {
       void stopAssistantRef.current().catch((error) => {
@@ -179,15 +179,12 @@ export default function ControlPanel() {
       }
     }
 
-    // Last, like the mock form's, and the same rule: at least a minute of credit. The backend
-    // closes the socket at zero, so a session started on less would be cut off almost at once.
-    if (!canStartSession(appState?.credits, appState?.creditsPerMinute)) {
+    // Last, like the mock form's, and the same rule: subscribed, or a minute of free time. The
+    // backend closes a free socket at zero, so a session started on less would be cut off at once.
+    if (!canStartSession(appState?.credits, appState?.creditsPerMinute, appState?.subscribed)) {
       toast.error(t.creditGate.tooLow, {
-        description: t.creditGate.tooLowHint(
-          minimumStartCredits(appState?.creditsPerMinute),
-          appState?.credits ?? 0
-        ),
-        action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+        description: t.creditGate.tooLowHint,
+        action: { label: t.creditGate.subscribe, onClick: () => navigate('/payment') },
       });
       return false;
     }

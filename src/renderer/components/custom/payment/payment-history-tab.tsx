@@ -102,7 +102,7 @@ export default function PaymentHistoryTab({
           </CardHeader>
           <CardContent>
             <Button onClick={onSwitchToBuy} className="w-full">
-              {t.payment.history.buyCredits}
+              {t.payment.history.subscribe}
             </Button>
           </CardContent>
         </Card>
@@ -139,7 +139,10 @@ export default function PaymentHistoryTab({
                   </TableCell>
                   <TableCell className="text-sm font-mono">{payment.payment_id}</TableCell>
                   <TableCell className="text-sm font-medium">
-                    {payment.credits_amount.toLocaleString()}
+                    {t.payment.history.grant(
+                      payment.days_granted ?? payment.days_amount ?? 0,
+                      payment.credits_amount
+                    )}
                   </TableCell>
                   <TableCell className="text-sm">
                     {payment.pay_amount && payment.pay_currency

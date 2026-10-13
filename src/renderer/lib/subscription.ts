@@ -1,0 +1,40 @@
+/** What the UI needs to know about an account's subscription, read off the ping. */
+export interface SubscriptionSummary {
+  subscribed: boolean;
+  /** Unix ms; null for an account that never had one. */
+  expiresAt: number | null;
+  /** `monthly` / `yearly`, or null when unknown. */
+  plan: string | null;
+}
+
+export function subscriptionOf(
+  state:
+    | {
+        subscribed?: boolean;
+        subscriptionExpiresAt?: number | null;
+        subscriptionPlan?: string | null;
+      }
+    | null
+    | undefined
+): SubscriptionSummary {
+  return {
+    subscribed: state?.subscribed === true,
+    expiresAt: state?.subscriptionExpiresAt ?? null,
+    plan: state?.subscriptionPlan ?? null,
+  };
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Whole days left, rounded up, so the last day reads "1 day" rather than "0 days". */
+export function daysLeft(expiresAt: number, now: number): number {
+  return Math.max(0, Math.ceil((expiresAt - now) / DAY_MS));
+}
+
+/** Days left at or below which the end date is shown as a warning. */
+export const EXPIRY_WARNING_DAYS = 3;
+
+/** Which locale name an active plan is shown as; `other` when the backend did not say. */
+export function planKey(plan: string | null): 'monthly' | 'yearly' | 'other' {
+  return plan === 'monthly' || plan === 'yearly' ? plan : 'other';
+}

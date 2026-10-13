@@ -167,7 +167,7 @@ export function CommandPalette() {
             </CommandItem>
             <CommandItem onSelect={() => run(() => navigate('/payment'))}>
               <CreditCard />
-              {t.commandPalette.buyCredits}
+              {t.commandPalette.subscribe}
             </CommandItem>
           </CommandGroup>
 

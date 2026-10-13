@@ -238,8 +238,7 @@ export const en = {
       ready: 'The AI asks, you answer out loud, and you get a scored report at the end.',
       unsupported: 'Not available on this server yet. Update the app, or try again later.',
       liveRunning: 'Stop the live assistant first - the two cannot share your microphone.',
-      unaffordable: (minimum: number) =>
-        `Not enough credits - you need at least ${minimum} (1 minute) to start. Buy more to practise.`,
+      unaffordable: 'Your free hour is used up. Subscribe to keep practising.',
     },
 
     live: {
@@ -248,15 +247,14 @@ export const en = {
       ready: 'Transcribes your real interview and suggests answers as it happens.',
       running: 'Your live assistant is already running.',
       mockRunning: 'Finish the mock interview first - the two cannot share your microphone.',
-      unaffordable: (minimum: number) =>
-        `Not enough credits - you need at least ${minimum} (1 minute) to start.`,
+      unaffordable: 'Your free hour is used up. Subscribe to keep interviewing.',
     },
 
     accountLabel: 'Account',
     notSignedIn: 'Not signed in',
-    creditsLabel: 'Credits',
-    creditsUnavailable: 'Unavailable',
-    buyCredits: 'Buy Credits',
+    planLabel: 'Plan',
+    planUnavailable: 'Unavailable',
+    subscribe: 'Subscription',
 
     nav: {
       account: 'Account',
@@ -496,7 +494,7 @@ export const en = {
     home: 'Home',
     account: 'Account',
     configuration: 'Configuration',
-    buyCredits: 'Buy Credits',
+    subscribe: 'Subscription',
     startMock: 'Start mock interview',
     startLive: 'Start live assistant',
     switchToFullSentence: 'Switch to full-sentence mode',
@@ -621,10 +619,14 @@ export const en = {
   },
 
   creditsDisplay: {
-    trialPlan: 'Trial Plan',
-    paidPlan: 'Paid Plan',
-    summary: (credits: number, availableTime: string) =>
-      `${credits.toLocaleString()} credits - ${availableTime}`,
+    freePlan: 'Free',
+    /** The plan an active subscription was bought as; `other` when the backend did not say. */
+    planNames: { monthly: 'Monthly', yearly: 'Yearly', other: 'Subscribed' },
+    date: (ms: number) =>
+      new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    unlimitedUntil: (date: string) => `Unlimited until ${date}`,
+    endsIn: (days: number) => `Ends in ${days} ${days === 1 ? 'day' : 'days'}`,
+    freeLeft: (availableTime: string) => `${availableTime} free`,
     duration: (hours: number, minutes: number) => {
       const parts: string[] = [];
       if (hours) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
@@ -632,7 +634,7 @@ export const en = {
       return parts.join(' ') || '0 mins';
     },
     lessThanAMinute: 'Less than 1 min',
-    noCreditsLeft: 'No credits left',
+    noFreeTimeLeft: 'Free hour used up',
   },
 
   panels: {
@@ -856,12 +858,12 @@ export const en = {
       },
       languageDescription:
         'What the interviewer asks in, what is transcribed, and what your feedback comes back in.',
-      /** An estimate, not a price: the session is billed by the minute for the time it takes. */
-      estimate: (minutes: number, credits: number) =>
-        `Usually about ${minutes} minutes, about ${credits.toLocaleString()} credits.`,
+      /** An estimate, not a limit: a free session spends free time by the minute for as long as it takes. */
+      estimate: (minutes: number) => `Usually about ${minutes} minutes.`,
+      unlimited: 'Unlimited with your subscription.',
       covers: (minutes: number) =>
-        `Your balance covers about ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`,
-      endsEarly: 'The session ends when your credits run out, and you still get your report.',
+        `Your free time covers about ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`,
+      endsEarly: 'The session ends when your free time runs out, and you still get your report.',
     },
 
     session: {
@@ -984,44 +986,46 @@ export const en = {
   },
 
   payment: {
-    title: 'Buy Credits',
+    title: 'Subscription',
     tabs: {
-      buy: 'Buy Credits',
+      buy: 'Plans',
       history: 'History',
       status: 'Status',
     },
 
     buy: {
-      currentBalance: 'Current Balance',
-      credits: (credits: number) => `${credits.toLocaleString()} credits`,
-      /** "Available for ~2 hours 15 minutes (10 credits per minute)". */
-      availableFor: (duration: string, perMinute: number) =>
-        `Available for ~${duration} (${perMinute} credits per minute)`,
+      currentPlan: 'Your plan',
+      subscribedUntil: (plan: string, date: string) => `${plan}, until ${date}`,
+      daysLeft: (days: number) => `${days} ${days === 1 ? 'day' : 'days'} left`,
+      freePlan: 'Free plan',
+      freeLeft: (duration: string) => `${duration} of interviews left on the free model.`,
+      freeUsedUp: 'Your free hour is used up. Subscribe to keep interviewing.',
       duration: (hours: number, minutes: number) => {
         const parts: string[] = [];
         if (hours) parts.push(`${hours} hour${hours === 1 ? '' : 's'}`);
         if (minutes) parts.push(`${minutes} minute${minutes === 1 ? '' : 's'}`);
         return parts.join(' ') || '0 minutes';
       },
-      loadingPlans: 'Loading payment plans…',
-      mostPopular: 'Most Popular',
+      loadingPlans: 'Loading plans…',
+      mostPopular: 'Best value',
       planNames: {
-        starter: 'Starter',
-        pro: 'Pro',
-        enterprise: 'Enterprise',
+        monthly: 'Monthly',
+        yearly: 'Yearly',
       },
       planDescriptions: {
-        starter: 'Perfect for trying out the platform',
-        pro: 'Best value for serious job seekers',
-        enterprise: 'For heavy users and teams',
+        monthly: 'Unlimited interviews on the SOTA model for 30 days',
+        yearly: 'Unlimited interviews on the SOTA model for a year',
       },
-      perCredits: (credits: number) => ` / ${credits.toLocaleString()} credits`,
-      timeOfAssistance: (duration: string) => `~${duration} of AI assistance`,
+      perMonth: ' / month',
+      billedAs: (price: number, days: number) => `$${price} paid once, for ${days} days`,
+      save: (percent: number) => `Save ${percent}%`,
+      prepaid: 'Paid once in crypto. A pass never renews on its own.',
+      extends: 'Your subscription is active: a new pass adds its days after the current end date.',
       selected: 'Selected',
-      buy: 'Buy',
+      buy: 'Choose',
       detailsTitle: 'Payment Details',
-      detailsLead: 'Complete your purchase of ',
-      detailsFor: ' for ',
+      detailsLead: 'Complete your purchase of the ',
+      detailsFor: ' plan for ',
       currencyLabel: 'Payment Currency',
       currencyPlaceholder: 'Select a currency',
       currencySearchPlaceholder: 'Search currency…',
@@ -1034,13 +1038,18 @@ export const en = {
       loading: 'Loading payment history…',
       loadFailed: 'Failed to load payment history',
       emptyTitle: 'No Payment History',
-      emptyBody: 'You have not made any payments yet. Purchase credits to get started.',
-      buyCredits: 'Buy Credits',
+      emptyBody: 'You have not made any payments yet. Subscribe to get started.',
+      subscribe: 'See plans',
       refreshing: 'Refreshing…',
+      /** What an order bought: days of subscription, or credits on an order from before subscriptions. */
+      grant: (days: number, credits: number) =>
+        days > 0
+          ? `${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}`
+          : `${credits.toLocaleString()} credits`,
       columns: {
         created: 'Created',
         paymentId: 'Payment ID',
-        credits: 'Credits',
+        credits: 'Purchase',
         amount: 'Amount',
         status: 'Status',
         action: 'Action',
@@ -1073,7 +1082,7 @@ export const en = {
       amountToSend: 'Amount to Send',
       sendExactly: 'Send exactly this amount to the address above.',
       successTitle: 'Payment Successful!',
-      successBody: 'Your credits have been added to your account.',
+      successBody: 'Your subscription has been applied to your account.',
       expiredTitle: 'Payment Expired',
       failedTitle: 'Payment Failed',
       expiredBody: 'This payment has expired. Please create a new payment.',
@@ -1137,17 +1146,16 @@ export const en = {
       `Audio input device "${deviceName}" is not found. Choose a different one from the main screen's audio settings.`,
   },
 
-  /** The one start rule live and mock share: at least one minute of credit. */
+  /** The one start rule live and mock share: subscribed, or at least a minute of free time. */
   creditGate: {
-    tooLow: 'Not enough credits to start',
-    outOfCredits: 'Out of credits - the session has ended',
-    outOfCreditsHint: 'Buy credits to start another one.',
+    tooLow: 'Your free hour is used up',
+    outOfCredits: 'Your free hour is used up - the session has ended',
+    outOfCreditsHint: 'Subscribe for unlimited interviews.',
     lowBalance: (minutes: number) =>
-      `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} of credit left`,
-    lowBalanceHint: 'The session ends when your credits run out.',
-    tooLowHint: (minimum: number, credits: number) =>
-      `A session needs at least ${minimum} credits (1 minute). You have ${credits}.`,
-    buyCredits: 'Buy credits',
+      `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} of free time left`,
+    lowBalanceHint: 'The session ends when your free time runs out.',
+    tooLowHint: 'Subscribe for unlimited interviews on the SOTA model.',
+    subscribe: 'See plans',
   },
 
   trialNotice: {
@@ -1157,10 +1165,10 @@ export const en = {
      * English puts "free tier" before the noun it qualifies and Russian puts its equivalent
      * after it, so the tail is what absorbs the difference.
      */
-    freeTierLead: 'Trial plan: 1 hour of free usage with the ',
+    freeTierLead: 'Free plan: 1 hour of interviews with the ',
     freeTier: 'free tier',
     freeTierTail: ' model.',
-    sotaLead: 'Buy credits to unlock ',
+    sotaLead: 'Subscribe for unlimited interviews on the ',
     sota: 'SOTA',
     sotaTail: ' model.',
   },

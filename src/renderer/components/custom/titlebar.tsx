@@ -13,6 +13,7 @@ import { useInterviewLock } from '@/hooks/use-interview-lock';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useT } from '@/i18n';
 import { APP_NAME, isMac } from '@/lib/consts';
+import { subscriptionOf } from '@/lib/subscription';
 import { getElectron } from '@/lib/utils';
 
 // WebkitAppRegion is an Electron-specific CSS property not included in React.CSSProperties
@@ -84,8 +85,8 @@ export default function Titlebar() {
         {appState?.isLoggedIn && appState?.credits !== undefined && (
           <CreditsDisplay
             credits={appState.credits ?? 0}
+            subscription={subscriptionOf(appState)}
             llmModel={appState.providedLLMModel ?? ''}
-            userRole={appState.userRole}
             creditsPerMinute={appState.creditsPerMinute}
             style={DRAG}
           />

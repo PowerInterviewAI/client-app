@@ -4,6 +4,9 @@ import { CREDITS_PER_MINUTE } from './consts';
  * One rule for whether a session may start, shared by the live and mock start paths and the home
  * screen cards that front them.
  *
+ * A subscriber may always start: their sessions are not metered. Everyone else spends the free hour,
+ * and the rest of this applies to that balance.
+ *
  * Both kinds of interview are metered by the minute on their audio socket at the same rate, and
  * the backend closes that socket when the balance reaches zero. A session started on a few seconds
  * of credit would be cut off almost at once, so starting asks for at least one minute's worth.
@@ -32,9 +35,12 @@ export function minimumStartCredits(creditsPerMinute: number | undefined): numbe
  */
 export function canStartSession(
   credits: number | undefined,
-  creditsPerMinute: number | undefined
+  creditsPerMinute: number | undefined,
+  subscribed?: boolean
 ): boolean {
-  return credits === undefined || credits >= minimumStartCredits(creditsPerMinute);
+  return (
+    subscribed === true || credits === undefined || credits >= minimumStartCredits(creditsPerMinute)
+  );
 }
 
 /** Whole minutes this balance pays for. */

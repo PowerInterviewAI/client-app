@@ -7,13 +7,14 @@ import { CreditCard, History, Receipt } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import PageHeader from '@/components/custom/page-header';
-import BuyCreditsTab from '@/components/custom/payment/buy-credits-tab';
 import PaymentHistoryTab from '@/components/custom/payment/payment-history-tab';
 import PaymentStatusTab from '@/components/custom/payment/payment-status-tab';
+import SubscriptionTab from '@/components/custom/payment/subscription-tab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppState } from '@/hooks/use-app-state';
 import { usePayment } from '@/hooks/use-payment';
 import { useT } from '@/i18n';
+import { subscriptionOf } from '@/lib/subscription';
 
 type PaymentTab = 'buy' | 'history' | 'status';
 
@@ -42,7 +43,7 @@ export default function PaymentPage() {
     setActiveTab('buy');
   };
 
-  const remainingCredits = appState?.credits ?? 0;
+  const freeCredits = appState?.credits ?? 0;
 
   return (
     <Tabs
@@ -51,7 +52,7 @@ export default function PaymentPage() {
       className="w-full flex flex-col bg-background"
     >
       {/* Header. Falls back to `/main` rather than home: this page is most often opened from the
-          interview screen, on a credits warning the user wants to get back from. */}
+          interview screen, on a free-time warning the user wants to get back from. */}
       <PageHeader title={t.payment.title} fallback="/main">
         <TabsList className="ml-auto">
           <TabsTrigger value="buy" className="flex items-center gap-1.5">
@@ -72,8 +73,9 @@ export default function PaymentPage() {
       {/* Content */}
       <div className="flex-1 overflow-hidden px-4 py-3 w-full max-w-3xl mx-auto">
         <TabsContent value="buy" className="flex-1 mt-0">
-          <BuyCreditsTab
-            credits={remainingCredits}
+          <SubscriptionTab
+            credits={freeCredits}
+            subscription={subscriptionOf(appState)}
             creditsPerMinute={appState?.creditsPerMinute}
             onPaymentCreated={handlePaymentCreated}
           />
