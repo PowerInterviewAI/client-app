@@ -255,9 +255,7 @@ export default function SubscriptionTab({
                 <CardTitle className="text-base">{t.payment.buy.detailsTitle}</CardTitle>
                 <CardDescription className="text-xs">
                   {t.payment.buy.detailsLead}
-                  <span className="font-bold">
-                    {planNameOf(selectedPlan)}
-                  </span>
+                  <span className="font-bold">{planNameOf(selectedPlan)}</span>
                   {t.payment.buy.detailsFor}
                   <span className="font-bold">${selectedPlan.priceUsd} USD</span>
                 </CardDescription>
