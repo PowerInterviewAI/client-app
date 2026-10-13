@@ -16,8 +16,7 @@ import { ApiClient, ApiResponse } from './client.js';
 
 export class PaymentApi extends ApiClient {
   /**
-   * Get the subscription passes on sale. `/api/payment/plans` is the legacy credit packs, kept by
-   * the backend only for clients that predate subscriptions.
+   * Get the subscription passes on sale.
    */
   async getPlans(): Promise<
     ApiResponse<
