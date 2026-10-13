@@ -668,7 +668,7 @@ body text in every question.
 ### What an interview costs
 
 **Pricing is a subscription.** A free hour once on the free-tier model, then a prepaid monthly
-($20) or yearly ($144) pass: unlimited interviews on the SOTA model, no auto-renewal. A
+($20) or yearly ($96) pass: unlimited interviews on the SOTA model, no auto-renewal. A
 subscriber's sockets are not metered; everything below is about the free hour.
 
 **`AppState.credits` is the free balance, and `AppState.subscribed` sits beside it.** The backend

@@ -32,7 +32,7 @@ export interface SubscriptionPlanInfo {
   priceUsd: number;
   /** How many days of subscription the pass adds. */
   days: number;
-  /** The price per month, for display: $144 for a year is $12 a month. */
+  /** The price per month, for display: $96 for a year is $8 a month. */
   pricePerMonthUsd: number;
   popular: boolean;
 }

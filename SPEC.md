@@ -69,7 +69,7 @@ Earlier attempts worked on this from the other end - having the reveal wait for 
 
 ### What a Mock Interview Costs
 
-Nothing extra. Pricing is a subscription: a free hour once on the free-tier model, then a $20 monthly or $144 yearly pass with unlimited interviews on the SOTA model. A subscriber's mock and live sessions are not metered at all. A free user's sessions, live or mock, spend the free hour by the minute on their transcription socket and stop when it runs out; a mock still ends with its report.
+Nothing extra. Pricing is a subscription: a free hour once on the free-tier model, then a $20 monthly or $96 yearly pass with unlimited interviews on the SOTA model. A subscriber's mock and live sessions are not metered at all. A free user's sessions, live or mock, spend the free hour by the minute on their transcription socket and stop when it runs out; a mock still ends with its report.
 
 The setup dialog gives an estimate in minutes. For a free user it adds how far the free time goes and that the session ends early if it runs out; for a subscriber it says the session is unlimited. No length is ever refused.
 
