@@ -17,7 +17,7 @@ import { CREDITS_PER_MINUTE } from './consts';
  */
 
 /** The rate to divide by: the backend's when it has said, the compiled-in mirror until then. */
-export function effectiveRate(creditsPerMinute: number | undefined): number {
+function effectiveRate(creditsPerMinute: number | undefined): number {
   return creditsPerMinute ?? CREDITS_PER_MINUTE;
 }
 
