@@ -667,8 +667,20 @@ body text in every question.
 
 ### What an interview costs
 
-**Every interview, live or mock, is billed by the minute on its ASR socket, at the same rate, and
-nothing else charges.** A mock used to be priced per question, follow-up and report, with
+**Pricing is a subscription.** A free hour once on the free-tier model, then a prepaid monthly
+($20) or yearly ($144) pass: unlimited interviews on the SOTA model, no auto-renewal. A
+subscriber's sockets are not metered; everything below is about the free hour.
+
+**`AppState.credits` is the free balance, and `AppState.subscribed` sits beside it.** The backend
+sends the free balance as `free_credits` and keeps `credits` for clients that predate
+subscriptions - for a subscriber that is the time left expressed in credits, so an old client does
+not lock a paying user out. `balanceState` (`src/main/utils/balance.ts`) reads `free_credits` when
+present and falls back to `credits` against an older backend; `test/balance.test.mjs` pins it.
+Never show the legacy figure. Anything that reads the clock in render goes through `useNow`: the
+React Compiler refuses `Date.now()` there.
+
+**Every free interview, live or mock, is billed by the minute on its ASR socket, at the same rate,
+and nothing else charges.** A mock used to be priced per question, follow-up and report, with
 `billing=per_turn` on its requests and `metered=0` on its socket; both are gone. The mock socket is
 open from Start until the session reaches Idle or Finished (`use-mock-interview.ts`), so metering it
 already covers question generation, speaking, scoring and the report.
@@ -679,8 +691,9 @@ the live session's two, so without it a mock pays half. `test/mock-billing-contr
 pins it, and that nothing still declares per-turn billing - a backend that predates the switch
 would honour such a declaration *and* run the clock.
 
-**One start rule for both** (`lib/credit-gate.ts`): at least one minute of credit. The home cards,
-the live control panel and the mock setup form all use it and send the user to Buy credits. The
+**One start rule for both** (`lib/credit-gate.ts`): subscribed, or at least one minute of the free
+hour. The home cards, the live control panel and the mock setup form all use it and send the user
+to the subscription page. The
 backend refuses only at zero, because it cannot tell a new session from a reconnect inside one; this
 side can, so the minimum lives here. An unknown balance (before the first ping) is let through
 rather than greying both cards out at launch. The mock setup screen gives an estimate in minutes and
@@ -704,7 +717,9 @@ to start, so a refusal that lands while the session still reads Idle is held and
 main's start resolves. `test/out-of-credits.test.mjs` pins all
 of it.
 
-`useLowBalanceWarning` toasts once at five minutes and once at one, off the ping balance. Sockets
+`useLowBalanceWarning` toasts once at five minutes and once at one, off the ping balance, and never
+for a subscriber. A subscription within three days of its end shows "Ends in N days" in the title
+bar instead of its end date. Sockets
 also carry `kind=mock` and a per-session `client_session_id`, which the backend uses only to label
 and group its ledger rows.
 
@@ -716,7 +731,7 @@ The main window reference is passed to `windowControlService` and `zoomService` 
 36px titlebar. The home screen did not: six full-width rows down a column half the window wide
 came to roughly 580px against 564px of room, so the app's front door opened on a scrollbar with
 the sign-out row below the fold. Nothing was dropped to fix it - the two launch cards share a row,
-the account strip carries Buy Credits on its own line, and the three navigations are one row of
+the account strip carries Subscription on its own line, and the three navigations are one row of
 three, which is spending the width the window already has rather than the height it does not.
 The outer container keeps `overflow-auto` as a safety valve for large zoom factors.
 

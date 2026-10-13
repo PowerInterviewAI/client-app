@@ -69,11 +69,9 @@ Earlier attempts worked on this from the other end - having the reveal wait for 
 
 ### What a Mock Interview Costs
 
-A live interview is metered per minute; a mock one is priced per question (20 credits), follow-up (10) and report (40), and its transcription socket is not metered at all. The two spend their wall clock differently: a mock session spends much of it generating the question, speaking it, scoring the turn and writing the report - none of which the candidate can act during - and most of the rest on think-time, which is the behaviour the feature exists to train.
+Nothing extra. Pricing is a subscription: a free hour once on the free-tier model, then a $20 monthly or $144 yearly pass with unlimited interviews on the SOTA model. A subscriber's mock and live sessions are not metered at all. A free user's sessions, live or mock, spend the free hour by the minute on their transcription socket and stop when it runs out; a mock still ends with its report.
 
-The prices come from the backend on the 5-second ping, never from local constants, so a quote can never name a number the user is not charged. The setup dialog shows two: what the session is guaranteed to cost, and the ceiling if the interviewer follows up on every answer. The smaller one is the promise - every question quoted and the report are guaranteed once the session starts, and a follow-up is declined rather than allowed to eat into them.
-
-A length the balance cannot cover is disabled in the question-count picker with the reason, so the answer to "not enough credits" is a shorter interview chosen on the same screen; the home screen's mock card says the same thing one level earlier, against the shortest session there is. A backend that predates per-turn pricing sends no prices, and the client then quotes nothing and gates nothing.
+The setup dialog gives an estimate in minutes. For a free user it adds how far the free time goes and that the session ends early if it runs out; for a subscriber it says the session is unlimited. No length is ever refused.
 
 ### Hint-Only Mode
 
@@ -99,7 +97,7 @@ Nothing in it is a trap: Skip is on every step, every setting has a working defa
 
 ### Navigation
 
-`/` is a launch hub naming the five things a user comes to the app to do: start a mock interview, start the live assistant, open Account (`/account` - sign-in identity, profile, context, password), open Configuration (`/configuration` - app language, microphone, interview language, suggestion style, interface size, transcript panel), or buy credits.
+`/` is a launch hub naming the five things a user comes to the app to do: start a mock interview, start the live assistant, open Account (`/account` - sign-in identity, profile, context, password), open Configuration (`/configuration` - app language, microphone, interview language, suggestion style, interface size, transcript panel), or manage the subscription.
 
 **It is the only place a session begins.** Both launch buttons start one; neither implements starting one. Live hands off to `/main` through router state, because `/main`'s control panel owns the whole start sequence; mock hands off to `/mock-interview` with the setup its dialog collected. `/main` itself carries only Stop - it is the live assistant, not a place to choose one - and shows a way back to `/` on the rare idle visit (a start cancelled at the headphone notice, or the route opened directly). Stopping asks whether to save the interview, clears it, and returns to `/`. See [docs/ux-conventions.md](docs/ux-conventions.md) for where a new capability belongs.
 
@@ -111,9 +109,11 @@ While stealth mode is on - or while the assistant is running with the opt-in "Hi
 
 Full name, profile/CV, and context are stored on the user's backend account and pulled on login or a remembered session, so the setup follows the user across devices. Service: [src/main/services/account.service.ts](src/main/services/account.service.ts). The full values are kept in the main process and fetched on demand over `account:get`; the app-state broadcast carries only a `{ fullName, hasProfileData }` summary, since the profile and context can each run to 128,000 characters.
 
-### Credits and Payments
+### Subscription and Payments
 
-Purchase and usage tracking via the payment API. Route: `/payment`. Plans, the credit balance and the per-minute burn rate are always served by the backend (`/api/payment/plans`, `/api/payment/credits`, plus the balance and `credits_per_minute` carried on every 5-second `/api/health-check/ping-client`); a failed plan fetch surfaces as an error rather than falling back to stale figures. `CREDITS_PER_MINUTE` in `renderer/lib/consts.ts` is a fallback mirror only, used while `AppState.creditsPerMinute` is `undefined` - before the first ping answers, or against a backend old enough not to send it - since the real rate is an env-overridable deployment setting rather than a constant.
+Route: `/payment`. The Plans tab shows the account's plan (the active pass and its end date, or the free time left) and the passes on sale from `/api/payment/subscription-plans`, bought through the same crypto checkout as before. Passes are prepaid and never renew; buying one while subscribed adds its days after the current end date. Plans, the balance and the subscription are always served by the backend (`/api/payment/credits`, plus `free_credits`, `subscribed`, `subscription_expires_at`, `subscription_plan` and `credits_per_minute` on every 5-second `/api/health-check/ping-client`); a failed plan fetch surfaces as an error rather than falling back to stale figures.
+
+`AppState.credits` is always the free balance: `free_credits` when the backend sends it, else `credits` (`balanceState` in `src/main/utils/balance.ts`). The backend's own `credits` is, for a subscriber, a compatibility figure for clients that predate subscriptions, and must not be shown. `CREDITS_PER_MINUTE` in `renderer/lib/consts.ts` is a fallback mirror only, used while `AppState.creditsPerMinute` is `undefined` - before the first ping answers, or against a backend old enough not to send it - since the real rate is an env-overridable deployment setting rather than a constant.
 
 ### Auto-Updates
 
