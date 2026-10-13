@@ -7,20 +7,30 @@ import {
   AvailableCurrency,
   CreatePaymentRequest,
   CreatePaymentResponse,
-  CreditPlan,
   PaymentHistory,
+  PaymentPlan,
   PaymentStatusResponse,
 } from '../types/payment.js';
+import type { BackendBalance } from '../utils/balance.js';
 import { ApiClient, ApiResponse } from './client.js';
 
 export class PaymentApi extends ApiClient {
   /**
-   * Get available credit plans
+   * Get the subscription passes on sale. `/api/payment/plans` is the legacy credit packs, kept by
+   * the backend only for clients that predate subscriptions.
    */
   async getPlans(): Promise<
-    ApiResponse<{ plan: CreditPlan; credits: number; price_usd: number; popular: boolean }[]>
+    ApiResponse<
+      {
+        plan: PaymentPlan;
+        price_usd: number;
+        days: number;
+        price_per_month_usd: number;
+        popular: boolean;
+      }[]
+    >
   > {
-    return this.get('/api/payment/plans');
+    return this.get('/api/payment/subscription-plans');
   }
 
   /**
@@ -52,9 +62,9 @@ export class PaymentApi extends ApiClient {
   }
 
   /**
-   * Get current user credits
+   * Get the current balance and subscription
    */
-  async getCredits(): Promise<ApiResponse<{ credits: number }>> {
+  async getCredits(): Promise<ApiResponse<BackendBalance>> {
     return this.get('/api/payment/credits');
   }
 }

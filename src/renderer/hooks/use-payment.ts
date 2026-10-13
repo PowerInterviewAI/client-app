@@ -10,9 +10,9 @@ import type {
   AvailableCurrency,
   CreatePaymentRequest,
   CreatePaymentResponse,
-  CreditPlanInfo,
   PaymentHistory,
   PaymentStatusResponse,
+  SubscriptionPlanInfo,
 } from '@/types/payment';
 
 export function usePayment() {
@@ -20,7 +20,7 @@ export function usePayment() {
   // dependency: they are memoised and close over it, so without that a language change would
   // leave the old wording in place for the rest of the session.
   const t = useT();
-  const [plans, setPlans] = useState<CreditPlanInfo[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlanInfo[]>([]);
   const [currencies, setCurrencies] = useState<AvailableCurrency[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

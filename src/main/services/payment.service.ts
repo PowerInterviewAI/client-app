@@ -8,10 +8,11 @@ import {
   AvailableCurrency,
   CreatePaymentRequest,
   CreatePaymentResponse,
-  CreditPlanInfo,
   PaymentHistory,
   PaymentStatusResponse,
+  SubscriptionPlanInfo,
 } from '../types/payment.js';
+import { balanceState } from '../utils/balance.js';
 import { uiStrings } from '../utils/ui-strings.js';
 import { appStateService } from './app-state.service.js';
 
@@ -23,12 +24,12 @@ export class PaymentService {
   }
 
   /**
-   * Get available credit plans.
+   * Get the subscription passes on sale.
    *
    * Pricing is never synthesized locally: a stale hardcoded plan would quote the user one price
    * and charge another. Failures surface as errors so the UI can say so.
    */
-  async getPlans(): Promise<{ success: boolean; data?: CreditPlanInfo[]; error?: string }> {
+  async getPlans(): Promise<{ success: boolean; data?: SubscriptionPlanInfo[]; error?: string }> {
     try {
       const response = await this.api.getPlans();
 
@@ -41,11 +42,12 @@ export class PaymentService {
       }
 
       // Map backend plans to frontend format
-      const plans: CreditPlanInfo[] =
+      const plans: SubscriptionPlanInfo[] =
         response.data?.map((plan) => ({
           plan: plan.plan,
-          credits: plan.credits,
           priceUsd: plan.price_usd,
+          days: plan.days,
+          pricePerMonthUsd: plan.price_per_month_usd,
           popular: plan.popular,
         })) || [];
 
@@ -165,12 +167,15 @@ export class PaymentService {
         };
       }
 
-      // Update app state with latest credits
+      // Update app state with the latest balance and subscription
       if (response.data?.credits !== undefined) {
-        appStateService.updateState({ credits: response.data.credits });
+        appStateService.updateState(balanceState(response.data));
       }
 
-      return { success: true, credits: response.data?.credits || 0 };
+      return {
+        success: true,
+        credits: response.data?.free_credits ?? response.data?.credits ?? 0,
+      };
     } catch (error) {
       console.error('[PaymentService] Failed to get credits:', error);
       return { success: false, error: uiStrings().paymentErrors.getCredits };

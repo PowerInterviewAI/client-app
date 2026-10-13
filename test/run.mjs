@@ -28,6 +28,7 @@ for (const module of [
   // their parameterised strings rather than type-checking them.
   './locale-runtime.test.mjs',
   './app-state.test.mjs',
+  './balance.test.mjs',
   './account.test.mjs',
   // After account.test.mjs: both swap the accountService singleton's client, and that one's
   // sequence depends on the pull it sets up for itself.
