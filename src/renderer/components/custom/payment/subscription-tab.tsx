@@ -82,6 +82,12 @@ export default function SubscriptionTab({
   const freeMinutes = minutesCovered(credits, creditsPerMinute);
   const active = subscription.subscribed && subscription.expiresAt !== null;
 
+  /** The plan's display name; a plan this build has no name for shows its id. */
+  const planNameOf = (plan: SubscriptionPlanInfo) => {
+    const key = planKey(plan.plan);
+    return key === 'other' ? plan.plan : t.payment.buy.planNames[key];
+  };
+
   const handleSelectPlan = useCallback((plan: SubscriptionPlanInfo) => {
     setSelectedPlan(plan);
     setTimeout(() => {
@@ -156,10 +162,10 @@ export default function SubscriptionTab({
         <>
           <div className="mx-auto grid gap-2 md:grid-cols-2">
             {plans.map((plan) => {
-              const isPro = plan.popular;
+              const isPopular = plan.popular;
               const isSelected = selectedPlan?.plan === plan.plan;
               const key = planKey(plan.plan);
-              const planName = key === 'other' ? plan.plan : t.payment.buy.planNames[key];
+              const planName = planNameOf(plan);
               const planDescription = key === 'other' ? '' : t.payment.buy.planDescriptions[key];
               const saving = savingPercent(plan, plans);
 
@@ -168,7 +174,7 @@ export default function SubscriptionTab({
                   key={plan.plan}
                   className={cn(
                     'relative flex flex-col gap-3 py-4 transition-all duration-150',
-                    isPro
+                    isPopular
                       ? 'border-primary shadow-lg hover:shadow-xl'
                       : 'shadow-sm hover:shadow-lg',
                     isSelected
@@ -182,7 +188,7 @@ export default function SubscriptionTab({
                     </div>
                   )}
 
-                  {isPro && (
+                  {isPopular && (
                     <div className="absolute -top-3 left-0 right-0 flex justify-center">
                       <span className="rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
                         {t.payment.buy.mostPopular}
@@ -216,11 +222,11 @@ export default function SubscriptionTab({
                         'w-full cursor-pointer',
                         isSelected
                           ? ''
-                          : isPro
+                          : isPopular
                             ? ''
                             : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
                       )}
-                      variant={isSelected || isPro ? 'default' : 'outline'}
+                      variant={isSelected || isPopular ? 'default' : 'outline'}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSelectPlan(plan);
@@ -250,9 +256,7 @@ export default function SubscriptionTab({
                 <CardDescription className="text-xs">
                   {t.payment.buy.detailsLead}
                   <span className="font-bold">
-                    {planKey(selectedPlan.plan) === 'other'
-                      ? selectedPlan.plan
-                      : t.payment.buy.planNames[planKey(selectedPlan.plan) as 'monthly' | 'yearly']}
+                    {planNameOf(selectedPlan)}
                   </span>
                   {t.payment.buy.detailsFor}
                   <span className="font-bold">${selectedPlan.priceUsd} USD</span>

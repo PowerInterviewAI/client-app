@@ -1049,7 +1049,7 @@ export const en = {
       columns: {
         created: 'Created',
         paymentId: 'Payment ID',
-        credits: 'Purchase',
+        purchase: 'Purchase',
         amount: 'Amount',
         status: 'Status',
         action: 'Action',
@@ -1113,7 +1113,7 @@ export const en = {
       createPayment: 'Failed to create payment',
       getStatus: 'Failed to get payment status',
       getHistory: 'Failed to get payment history',
-      getCredits: 'Failed to get credits',
+      getCredits: 'Failed to load your plan',
     },
   },
 

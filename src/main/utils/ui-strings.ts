@@ -190,7 +190,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       createPayment: 'Failed to create payment',
       getStatus: 'Failed to get payment status',
       getHistory: 'Failed to get payment history',
-      getCredits: 'Failed to get credits',
+      getCredits: 'Failed to load your plan',
       pollingTimeout: 'Payment polling timeout',
     },
 
@@ -284,7 +284,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       createPayment: 'Не удалось создать платёж',
       getStatus: 'Не удалось получить статус платежа',
       getHistory: 'Не удалось получить историю платежей',
-      getCredits: 'Не удалось получить баланс кредитов',
+      getCredits: 'Не удалось загрузить данные о тарифе',
       pollingTimeout: 'Платёж не подтвердился вовремя',
     },
 

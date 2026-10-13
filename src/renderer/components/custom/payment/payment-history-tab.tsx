@@ -124,7 +124,7 @@ export default function PaymentHistoryTab({
               <TableRow>
                 <TableHead>{t.payment.history.columns.created}</TableHead>
                 <TableHead>{t.payment.history.columns.paymentId}</TableHead>
-                <TableHead>{t.payment.history.columns.credits}</TableHead>
+                <TableHead>{t.payment.history.columns.purchase}</TableHead>
                 <TableHead>{t.payment.history.columns.amount}</TableHead>
                 <TableHead>{t.payment.history.columns.status}</TableHead>
                 <TableHead>{t.payment.history.columns.action}</TableHead>

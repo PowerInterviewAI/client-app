@@ -1055,7 +1055,7 @@ export const ru: Translation = {
       columns: {
         created: 'Создан',
         paymentId: 'ID платежа',
-        credits: 'Покупка',
+        purchase: 'Покупка',
         amount: 'Сумма',
         status: 'Статус',
         action: 'Действие',
@@ -1118,7 +1118,7 @@ export const ru: Translation = {
       createPayment: 'Не удалось создать платёж',
       getStatus: 'Не удалось получить статус платежа',
       getHistory: 'Не удалось получить историю платежей',
-      getCredits: 'Не удалось получить баланс кредитов',
+      getCredits: 'Не удалось загрузить данные о тарифе',
     },
   },
 
