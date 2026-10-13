@@ -211,7 +211,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       nothingRecorded:
         'The interview ended with nothing recorded. Check that the right microphone is selected and that it is not muted, then try again.',
       endedBeforeScoring: 'The interview was ended before scoring finished.',
-      notEnoughCredits: 'Not enough credits',
+      notEnoughCredits: 'Out of free time',
     },
 
     actionNames: {
@@ -305,7 +305,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       nothingRecorded:
         'Собеседование закончилось, и ничего не записано. Проверьте, что выбран нужный микрофон и он не выключен, затем попробуйте снова.',
       endedBeforeScoring: 'Собеседование завершили до того, как закончилась оценка.',
-      notEnoughCredits: 'Недостаточно кредитов',
+      notEnoughCredits: 'Бесплатное время закончилось',
     },
 
     actionNames: {
