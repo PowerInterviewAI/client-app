@@ -11,8 +11,13 @@ import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useT } from '@/i18n';
-import { canStartSession, minutesCovered } from '@/lib/credit-gate';
-import { planKey, subscriptionOf, type SubscriptionSummary } from '@/lib/subscription';
+import { canStartSession } from '@/lib/credit-gate';
+import {
+  freeTimeLabel,
+  planKey,
+  subscriptionOf,
+  type SubscriptionSummary,
+} from '@/lib/subscription';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 import type { MockInterviewSetup } from '@/types/mock-interview';
@@ -373,8 +378,5 @@ function describePlan(
     );
   }
   if (credits === undefined) return undefined;
-  const minutes = minutesCovered(credits, creditsPerMinute);
-  return minutes > 0
-    ? t.creditsDisplay.freeLeft(t.creditsDisplay.duration(Math.floor(minutes / 60), minutes % 60))
-    : t.creditsDisplay.noFreeTimeLeft;
+  return freeTimeLabel(t, credits, creditsPerMinute);
 }

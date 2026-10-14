@@ -238,7 +238,7 @@ export const en = {
       ready: 'The AI asks, you answer out loud, and you get a scored report at the end.',
       unsupported: 'Not available on this server yet. Update the app, or try again later.',
       liveRunning: 'Stop the live assistant first - the two cannot share your microphone.',
-      unaffordable: 'No free time left. Subscribe to keep practising.',
+      unaffordable: 'Less than a minute of free time left. Subscribe to keep practising.',
     },
 
     live: {
@@ -247,7 +247,7 @@ export const en = {
       ready: 'Transcribes your real interview and suggests answers as it happens.',
       running: 'Your live assistant is already running.',
       mockRunning: 'Finish the mock interview first - the two cannot share your microphone.',
-      unaffordable: 'No free time left. Subscribe to keep interviewing.',
+      unaffordable: 'Less than a minute of free time left. Subscribe to keep interviewing.',
     },
 
     accountLabel: 'Account',
@@ -1144,13 +1144,14 @@ export const en = {
 
   /** The one start rule live and mock share: subscribed, or at least a minute of free time. */
   creditGate: {
-    tooLow: 'No free time left',
+    tooLow: 'Not enough free time to start',
     outOfCredits: 'Out of free time - the session has ended',
     outOfCreditsHint: 'Subscribe for unlimited interviews.',
     lowBalance: (minutes: number) =>
       `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} of free time left`,
     lowBalanceHint: 'The session ends when your free time runs out.',
-    tooLowHint: 'Subscribe for unlimited interviews on the SOTA model.',
+    tooLowHint:
+      'A session needs at least a minute. Subscribe for unlimited interviews on the SOTA model.',
     subscribe: 'See plans',
   },
 

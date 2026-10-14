@@ -142,7 +142,9 @@ export default function SubscriptionTab({
                 ? t.payment.buy.freeLeft(
                     t.payment.buy.duration(Math.floor(freeMinutes / 60), freeMinutes % 60)
                   )
-                : t.payment.buy.freeUsedUp}
+                : credits > 0
+                  ? t.payment.buy.freeLeft(t.creditsDisplay.lessThanAMinute)
+                  : t.payment.buy.freeUsedUp}
             </div>
           </>
         )}

@@ -2,10 +2,11 @@ import React from 'react';
 
 import { useNow } from '@/hooks/use-now';
 import { useT } from '@/i18n';
-import { CREDITS_PER_MINUTE } from '@/lib/consts';
+import { minutesCovered } from '@/lib/credit-gate';
 import {
   daysLeft,
   EXPIRY_WARNING_DAYS,
+  freeTimeLabel,
   planKey,
   type SubscriptionSummary,
 } from '@/lib/subscription';
@@ -80,19 +81,8 @@ function FreeSummary({
   creditsPerMinute?: number;
 }) {
   const t = useT();
-  const availableMinutes = Math.floor(credits / (creditsPerMinute ?? CREDITS_PER_MINUTE));
-
-  // Split into hours and minutes here and assembled in the locale, because which plural form
-  // each number takes is a property of the language: `2 hours 15 mins` against
-  // `2 часа 15 минут`, where 2 and 22 agree and 5 and 25 do not.
-  const availableTime =
-    availableMinutes > 0
-      ? t.creditsDisplay.freeLeft(
-          t.creditsDisplay.duration(Math.floor(availableMinutes / 60), availableMinutes % 60)
-        )
-      : credits > 0
-        ? t.creditsDisplay.freeLeft(t.creditsDisplay.lessThanAMinute)
-        : t.creditsDisplay.noFreeTimeLeft;
+  const availableMinutes = minutesCovered(credits, creditsPerMinute);
+  const availableTime = freeTimeLabel(t, credits, creditsPerMinute);
 
   return (
     <>
