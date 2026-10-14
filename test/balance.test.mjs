@@ -36,5 +36,15 @@ export async function run() {
   check('and reads as not subscribed rather than unknown', legacy.subscribed === false);
   check('with no plan', legacy.subscriptionPlan === null);
 
+  // Subscribed with no end date is not a state the display can show, so it is not subscribed: the
+  // start gate and the title bar must agree about whether the account is unlimited.
+  const noEnd = balanceState({
+    credits: 0,
+    free_credits: 0,
+    subscribed: true,
+    subscription_expires_at: null,
+  });
+  check('subscribed without an end date reads as not subscribed', noEnd.subscribed === false);
+
   return failures;
 }

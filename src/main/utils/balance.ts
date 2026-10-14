@@ -20,10 +20,25 @@ export interface BackendBalance {
  * `credits`, which is then the real (and only) balance, and nothing about a subscription.
  */
 export function balanceState(data: BackendBalance): Partial<AppState> {
+  const expiresAt = data.subscription_expires_at ?? null;
   return {
     credits: data.free_credits ?? data.credits,
-    subscribed: data.subscribed ?? false,
-    subscriptionExpiresAt: data.subscription_expires_at ?? null,
+    // Subscribed only with an end date to show: the display and the start gate both need one, and
+    // they must not disagree about whether this account is unlimited.
+    subscribed: data.subscribed === true && expiresAt !== null,
+    subscriptionExpiresAt: expiresAt,
     subscriptionPlan: data.subscription_plan ?? null,
   };
 }
+
+/**
+ * The AppState slice with no account's balance in it: "not answered yet", as at launch. Written on
+ * sign-in and sign-out so one account's free time and subscription never show for the next one on
+ * a shared machine while the first ping is still on its way.
+ */
+export const CLEARED_BALANCE: Partial<AppState> = {
+  credits: undefined,
+  subscribed: undefined,
+  subscriptionExpiresAt: undefined,
+  subscriptionPlan: undefined,
+};

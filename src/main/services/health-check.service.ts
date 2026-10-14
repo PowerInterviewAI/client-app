@@ -5,7 +5,7 @@
 
 import { HealthCheckApi } from '../api/health-check.js';
 import { MockInterviewApi } from '../api/mock-interview.js';
-import { balanceState } from '../utils/balance.js';
+import { balanceState, CLEARED_BALANCE } from '../utils/balance.js';
 import { safeSleep } from '../utils/sleep.js';
 import { uiStrings } from '../utils/ui-strings.js';
 import { accountService } from './account.service.js';
@@ -61,7 +61,7 @@ export class HealthCheckService {
       loggedIn = res.status === 200;
       appStateService.updateState({
         isLoggedIn: loggedIn,
-        ...(res.data ? balanceState(res.data) : { credits: undefined }),
+        ...(res.data ? balanceState(res.data) : CLEARED_BALANCE),
         userRole: res.data?.user_role,
         providedLLMModel: res.data?.provided_llm_model,
         // Undefined here means "not answered yet", not free and not the compiled-in default -
