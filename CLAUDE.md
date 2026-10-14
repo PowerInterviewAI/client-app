@@ -696,8 +696,8 @@ hour. The home cards, the live control panel and the mock setup form all use it 
 to the subscription page. The
 backend refuses only at zero, because it cannot tell a new session from a reconnect inside one; this
 side can, so the minimum lives here. An unknown balance (before the first ping) is let through
-rather than greying both cards out at launch. The mock setup screen gives an estimate in minutes and
-credits and says how far the balance goes, rather than disabling lengths.
+rather than greying both cards out at launch. The mock setup screen gives an estimate in minutes and,
+on the free hour, says how far the free time goes, rather than disabling lengths.
 
 **The backend ends a socket at zero with close code 4402** (`WS_CLOSE_INSUFFICIENT_CREDITS`), and
 `AudioWsStream` must never reconnect on it - a reconnect is refused the same way, and the backoff
