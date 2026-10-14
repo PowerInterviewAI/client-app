@@ -94,6 +94,7 @@ for (const module of [
   // Source-level and independent of everything above: it reads the renderer's navigation lock
   // and the mock route off disk, so it sits with the other source-level checks.
   './interview-lock.test.mjs',
+  './subscription-expiry-warning.test.mjs',
   // Source-level too, and next to the lock for the same reason: it reads which component owns
   // the signed-out redirect off disk.
   './signed-out-redirect.test.mjs',
