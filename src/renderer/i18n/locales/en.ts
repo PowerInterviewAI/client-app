@@ -1154,6 +1154,16 @@ export const en = {
     subscribe: 'See plans',
   },
 
+  /** Toasts for a subscription about to end, or just ended; see `useSubscriptionExpiryWarning`. */
+  subscriptionExpiry: {
+    endingSoon: (days: number) =>
+      `Your subscription ends in ${days} ${days === 1 ? 'day' : 'days'}`,
+    endingSoonHint:
+      'Buy another pass to keep interviews unlimited. Its days are added after the current end date.',
+    ended: 'Your subscription has ended',
+    endedHint: 'Interviews now use your free time on the free model.',
+  },
+
   trialNotice: {
     /**
      * Split into lead / emphasis / tail rather than one sentence with a `<strong>` in it,

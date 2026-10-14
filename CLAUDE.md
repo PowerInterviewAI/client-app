@@ -719,7 +719,9 @@ of it.
 
 `useLowBalanceWarning` toasts once at five minutes and once at one, off the ping balance, and never
 for a subscriber. A subscription within three days of its end shows "Ends in N days" in the title
-bar instead of its end date. Sockets
+bar instead of its end date, and `useSubscriptionExpiryWarning` (mounted in `MainFrame`) toasts
+once at each of three, two and one days left, and once when a subscription this session saw active
+lapses - never for one that lapsed before launch, and never across a sign-out. Sockets
 also carry `kind=mock` and a per-session `client_session_id`, which the backend uses only to label
 and group its ledger rows.
 
