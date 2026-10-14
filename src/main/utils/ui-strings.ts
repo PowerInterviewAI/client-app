@@ -77,13 +77,7 @@ export interface UiStrings {
 
   /** Same shape again for the payment service, whose every path sets its own message. */
   paymentErrors: Record<
-    | 'getPlans'
-    | 'getCurrencies'
-    | 'createPayment'
-    | 'getStatus'
-    | 'getHistory'
-    | 'getCredits'
-    | 'pollingTimeout',
+    'getPlans' | 'getCurrencies' | 'createPayment' | 'getStatus' | 'getHistory',
     string
   >;
 
@@ -190,8 +184,6 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       createPayment: 'Failed to create payment',
       getStatus: 'Failed to get payment status',
       getHistory: 'Failed to get payment history',
-      getCredits: 'Failed to load your plan',
-      pollingTimeout: 'Payment polling timeout',
     },
 
     suggestionErrors: {
@@ -284,8 +276,6 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       createPayment: 'Не удалось создать платёж',
       getStatus: 'Не удалось получить статус платежа',
       getHistory: 'Не удалось получить историю платежей',
-      getCredits: 'Не удалось загрузить данные о тарифе',
-      pollingTimeout: 'Платёж не подтвердился вовремя',
     },
 
     suggestionErrors: {

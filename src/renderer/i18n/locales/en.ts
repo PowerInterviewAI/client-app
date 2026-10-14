@@ -1109,7 +1109,6 @@ export const en = {
       createPayment: 'Failed to create payment',
       getStatus: 'Failed to get payment status',
       getHistory: 'Failed to get payment history',
-      getCredits: 'Failed to load your plan',
     },
   },
 

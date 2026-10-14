@@ -11,7 +11,6 @@ import {
   PaymentPlan,
   PaymentStatusResponse,
 } from '../types/payment.js';
-import type { BackendBalance } from '../utils/balance.js';
 import { ApiClient, ApiResponse } from './client.js';
 
 export class PaymentApi extends ApiClient {
@@ -58,12 +57,5 @@ export class PaymentApi extends ApiClient {
    */
   async getPaymentHistory(): Promise<ApiResponse<PaymentHistory[]>> {
     return this.get('/api/payment/history');
-  }
-
-  /**
-   * Get the current balance and subscription
-   */
-  async getCredits(): Promise<ApiResponse<BackendBalance>> {
-    return this.get('/api/payment/credits');
   }
 }

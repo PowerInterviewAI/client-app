@@ -124,25 +124,6 @@ export function usePayment() {
     }
   }, [t]);
 
-  // Get current credits
-  const getCredits = useCallback(async (): Promise<number | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await window.electronAPI?.payment.getCredits();
-      if (result?.success && result.credits !== undefined) {
-        return result.credits;
-      } else {
-        throw new Error(result?.error || t.payment.errors.getCredits);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.payment.errors.getCredits);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
   // Load plans on mount
   useEffect(() => {
     getPlans();
@@ -159,6 +140,5 @@ export function usePayment() {
     createPayment,
     getPaymentStatus,
     getPaymentHistory,
-    getCredits,
   };
 }

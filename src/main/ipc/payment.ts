@@ -71,14 +71,4 @@ export function registerPaymentHandlers(): void {
       return paymentService.getPaymentHistory();
     }
   );
-
-  /**
-   * Get current user credits
-   */
-  ipcMain.handle(
-    'payment:get-credits',
-    async (): Promise<{ success: boolean; credits?: number; error?: string }> => {
-      return paymentService.getCredits();
-    }
-  );
 }

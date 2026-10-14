@@ -12,9 +12,7 @@ import {
   PaymentStatusResponse,
   SubscriptionPlanInfo,
 } from '../types/payment.js';
-import { balanceState } from '../utils/balance.js';
 import { uiStrings } from '../utils/ui-strings.js';
-import { appStateService } from './app-state.service.js';
 
 export class PaymentService {
   private api: PaymentApi;
@@ -151,82 +149,6 @@ export class PaymentService {
       console.error('[PaymentService] Failed to get payment history:', error);
       return { success: false, error: uiStrings().paymentErrors.getHistory };
     }
-  }
-
-  /**
-   * Get current user credits
-   */
-  async getCredits(): Promise<{ success: boolean; credits?: number; error?: string }> {
-    try {
-      const response = await this.api.getCredits();
-
-      if (response.error) {
-        return {
-          success: false,
-          error: response.error.message || uiStrings().paymentErrors.getCredits,
-        };
-      }
-
-      // Update app state with the latest balance and subscription
-      if (response.data?.credits !== undefined) {
-        appStateService.updateState(balanceState(response.data));
-      }
-
-      return {
-        success: true,
-        credits: response.data?.free_credits ?? response.data?.credits ?? 0,
-      };
-    } catch (error) {
-      console.error('[PaymentService] Failed to get credits:', error);
-      return { success: false, error: uiStrings().paymentErrors.getCredits };
-    }
-  }
-
-  /**
-   * Poll payment status until it's completed or failed
-   */
-  async pollPaymentStatus(
-    paymentId: string,
-    onUpdate?: (status: PaymentStatusResponse) => void,
-    maxAttempts: number = 60,
-    intervalMs: number = 5000
-  ): Promise<{ success: boolean; data?: PaymentStatusResponse; error?: string }> {
-    let attempts = 0;
-
-    const poll = async (): Promise<{
-      success: boolean;
-      data?: PaymentStatusResponse;
-      error?: string;
-    }> => {
-      if (attempts >= maxAttempts) {
-        return { success: false, error: uiStrings().paymentErrors.pollingTimeout };
-      }
-
-      attempts++;
-      const result = await this.getPaymentStatus(paymentId);
-
-      if (!result.success || !result.data) {
-        return result;
-      }
-
-      onUpdate?.(result.data);
-
-      // Check if payment is in a final state
-      const finalStates = ['finished', 'failed', 'refunded', 'expired'];
-      if (finalStates.includes(result.data.payment_status)) {
-        // Refresh credits if payment is finished
-        if (result.data.payment_status === 'finished') {
-          await this.getCredits();
-        }
-        return result;
-      }
-
-      // Continue polling
-      await new Promise((resolve) => setTimeout(resolve, intervalMs));
-      return poll();
-    };
-
-    return poll();
   }
 }
 

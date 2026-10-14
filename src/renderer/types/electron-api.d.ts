@@ -99,7 +99,6 @@ declare global {
         paymentId: string
       ) => Promise<{ success: boolean; data?: PaymentStatusResponse; error?: string }>;
       getHistory: () => Promise<{ success: boolean; data?: PaymentHistory[]; error?: string }>;
-      getCredits: () => Promise<{ success: boolean; credits?: number; error?: string }>;
     };
 
     // App state management
