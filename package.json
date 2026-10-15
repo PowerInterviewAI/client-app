@@ -147,9 +147,9 @@
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "category": "public.app-category.productivity",
       "minimumSystemVersion": "14.4.0",
-      "identity": "-",
-      "hardenedRuntime": false,
-      "notarize": false,
+      "hardenedRuntime": true,
+      "notarize": true,
+      "forceCodeSigning": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
       "extendInfo": {

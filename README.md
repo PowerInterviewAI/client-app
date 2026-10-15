@@ -78,12 +78,10 @@ Power Interview desktop client is supported on:
 
 Release binaries are published on the [GitHub Releases](https://github.com/PowerInterviewAI/client-app/releases) page.
 
-### Unsigned builds
+### Code signing
 
-Release artifacts are not yet code-signed, so the OS will warn on first launch:
-
-- **macOS**: the app is ad-hoc signed (so it runs on Apple Silicon) but not notarized. If you see "app is damaged" or it is blocked, run `xattr -cr "/Applications/Power Interview AI.app"`, or right-click the app and choose Open.
-- **Windows**: SmartScreen shows "Windows protected your PC". Click "More info" then "Run anyway".
+- **macOS**: release builds are signed with a Developer ID Application certificate and notarized by Apple, so they open without a Gatekeeper warning. The release workflow needs the `CSC_LINK`, `CSC_KEY_PASSWORD`, `APPLE_API_KEY_P8`, `APPLE_API_KEY_ID`, `APPLE_API_ISSUER` and `APPLE_TEAM_ID` repository secrets; `mac.forceCodeSigning` fails the build if the certificate is missing. Releases up to v1.9.4 were ad-hoc signed only: if one shows "app is damaged", run `xattr -cr "/Applications/Power Interview AI.app"`.
+- **Windows**: the installer is not code-signed yet, so SmartScreen shows "Windows protected your PC". Click "More info" then "Run anyway".
 
 ## Architecture
 
