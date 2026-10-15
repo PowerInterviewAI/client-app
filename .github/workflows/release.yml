@@ -87,13 +87,28 @@ jobs:
       - name: Build renderer assets
         run: pnpm run build
 
+      # electron-builder takes APPLE_API_KEY as a file path, not the key text.
+      - name: Write App Store Connect API key
+        if: matrix.platform == 'mac'
+        env:
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: |
+          KEY_PATH="$RUNNER_TEMP/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8"
+          printf '%s' "$APPLE_API_KEY_P8" > "$KEY_PATH"
+          echo "APPLE_API_KEY=$KEY_PATH" >> "$GITHUB_ENV"
+        shell: bash
+
       - name: Build release packages
-        # No signing certificate yet: mac.identity "-" in package.json forces ad-hoc signing so
-        # Apple Silicon builds launch. electron-builder only consults CSC_IDENTITY_AUTO_DISCOVERY
-        # when identity is unset, so it has no effect here - left unset for clarity, not because
-        # it changes this build.
+        # The Windows job must not see CSC_LINK: it would try to sign the NSIS installer with
+        # the Apple .p12.
         run: ${{ matrix.build_command }}
         shell: bash
+        env:
+          CSC_LINK: ${{ matrix.platform == 'mac' && secrets.CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ matrix.platform == 'mac' && secrets.CSC_KEY_PASSWORD || '' }}
+          APPLE_API_KEY_ID: ${{ matrix.platform == 'mac' && secrets.APPLE_API_KEY_ID || '' }}
+          APPLE_API_ISSUER: ${{ matrix.platform == 'mac' && secrets.APPLE_API_ISSUER || '' }}
+          APPLE_TEAM_ID: ${{ matrix.platform == 'mac' && secrets.APPLE_TEAM_ID || '' }}
 
       # The mac job packages x64 and arm64 from one node_modules, and pnpm only materialises
       # the runner's own architecture, so a missing native binary is invisible until a user
@@ -102,14 +117,54 @@ jobs:
         run: node test/verify-packaged-sharp.mjs release
         shell: bash
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      # Each installer is its own unzipped artifact so one build can be downloaded and tested
+      # without pulling the whole platform set. archive: false takes exactly one file and names
+      # the artifact after it, hence one step per glob.
+      - name: Upload Windows installer
+        if: matrix.platform == 'win'
+        uses: actions/upload-artifact@v7
         with:
-          name: release-${{ matrix.platform }}
+          path: release/*.exe
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload macOS arm64 DMG
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v7
+        with:
+          path: release/*-arm64.dmg
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload macOS x64 DMG
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v7
+        with:
+          path: release/*-x64.dmg
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload macOS arm64 update zip
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v7
+        with:
+          path: release/*-arm64.zip
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload macOS x64 update zip
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v7
+        with:
+          path: release/*-x64.zip
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload update metadata
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-meta-${{ matrix.platform }}
           path: |
-            release/*.exe
-            release/*.dmg
-            release/*.zip
             release/*.yml
             release/*.yaml
             release/*.blockmap
@@ -128,10 +183,22 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.sha }}
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      # The installers were uploaded unzipped. Without skip-decompress the mac update .zip files
+      # would be extracted instead of uploaded to the release as-is.
+      - name: Download installers
+        uses: actions/download-artifact@v8
         with:
+          pattern: Power*
           path: release-artifacts
+          merge-multiple: true
+          skip-decompress: true
+
+      - name: Download update metadata
+        uses: actions/download-artifact@v8
+        with:
+          pattern: release-meta-*
+          path: release-artifacts
+          merge-multiple: true
 
       - name: Tag and publish release
         env:

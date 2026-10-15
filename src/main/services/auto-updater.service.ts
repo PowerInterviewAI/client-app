@@ -150,10 +150,11 @@ class AutoUpdaterService {
     }
   }
 
-  // Squirrel.Mac (electron-updater's mac install mechanism) requires the app to be signed with
-  // a real Developer ID certificate. This build only ad-hoc signs (see package.json mac.identity),
-  // so silent apply is not viable on macOS - this checks GitHub releases directly instead and
-  // leaves installing to the user via a downloaded .dmg (see quitAndInstall).
+  // Squirrel.Mac (electron-updater's mac install mechanism) requires the installed app to be
+  // signed with a real Developer ID certificate. Releases are Developer ID signed since #145, but
+  // installs from before that are ad-hoc signed and cannot apply an update silently - this checks
+  // GitHub releases directly instead and leaves installing to the user via a downloaded .dmg (see
+  // quitAndInstall), which is the path those installs take to reach a signed build.
   private async checkForUpdatesMac(): Promise<void> {
     this.updateCheckInProgress = true;
     this.notifyRenderer(UpdateStatus.Checking, null);
