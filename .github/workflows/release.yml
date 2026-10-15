@@ -117,14 +117,54 @@ jobs:
         run: node test/verify-packaged-sharp.mjs release
         shell: bash
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      # Each installer is its own unzipped artifact so one build can be downloaded and tested
+      # without pulling the whole platform set. archive: false takes exactly one file and names
+      # the artifact after it, hence one step per glob.
+      - name: Upload Windows installer
+        if: matrix.platform == 'win'
+        uses: actions/upload-artifact@v7
         with:
-          name: release-${{ matrix.platform }}
+          path: release/*.exe
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload macOS arm64 DMG
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v7
+        with:
+          path: release/*-arm64.dmg
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload macOS x64 DMG
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v7
+        with:
+          path: release/*-x64.dmg
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload macOS arm64 update zip
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v7
+        with:
+          path: release/*-arm64.zip
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload macOS x64 update zip
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v7
+        with:
+          path: release/*-x64.zip
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload update metadata
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-meta-${{ matrix.platform }}
           path: |
-            release/*.exe
-            release/*.dmg
-            release/*.zip
             release/*.yml
             release/*.yaml
             release/*.blockmap
@@ -143,10 +183,22 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.sha }}
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      # The installers were uploaded unzipped. Without skip-decompress the mac update .zip files
+      # would be extracted instead of uploaded to the release as-is.
+      - name: Download installers
+        uses: actions/download-artifact@v8
         with:
+          pattern: Power*
           path: release-artifacts
+          merge-multiple: true
+          skip-decompress: true
+
+      - name: Download update metadata
+        uses: actions/download-artifact@v8
+        with:
+          pattern: release-meta-*
+          path: release-artifacts
+          merge-multiple: true
 
       - name: Tag and publish release
         env:
