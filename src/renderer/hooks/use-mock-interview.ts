@@ -101,7 +101,7 @@ export function useMockInterview() {
     const t = currentTranslation();
     toast.error(t.creditGate.outOfCredits, {
       description: t.creditGate.outOfCreditsHint,
-      action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+      action: { label: t.creditGate.subscribe, onClick: () => navigate('/payment') },
     });
     void window.electronAPI?.mockInterview.endSession();
   }, [navigate]);

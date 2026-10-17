@@ -10,9 +10,9 @@ import type {
   AvailableCurrency,
   CreatePaymentRequest,
   CreatePaymentResponse,
-  CreditPlanInfo,
   PaymentHistory,
   PaymentStatusResponse,
+  SubscriptionPlanInfo,
 } from '@/types/payment';
 
 export function usePayment() {
@@ -20,7 +20,7 @@ export function usePayment() {
   // dependency: they are memoised and close over it, so without that a language change would
   // leave the old wording in place for the rest of the session.
   const t = useT();
-  const [plans, setPlans] = useState<CreditPlanInfo[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlanInfo[]>([]);
   const [currencies, setCurrencies] = useState<AvailableCurrency[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,25 +124,6 @@ export function usePayment() {
     }
   }, [t]);
 
-  // Get current credits
-  const getCredits = useCallback(async (): Promise<number | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await window.electronAPI?.payment.getCredits();
-      if (result?.success && result.credits !== undefined) {
-        return result.credits;
-      } else {
-        throw new Error(result?.error || t.payment.errors.getCredits);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.payment.errors.getCredits);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
   // Load plans on mount
   useEffect(() => {
     getPlans();
@@ -159,6 +140,5 @@ export function usePayment() {
     createPayment,
     getPaymentStatus,
     getPaymentHistory,
-    getCredits,
   };
 }

@@ -6,9 +6,9 @@ import type {
   AvailableCurrency,
   CreatePaymentRequest,
   CreatePaymentResponse,
-  CreditPlanInfo,
   PaymentHistory,
   PaymentStatusResponse,
+  SubscriptionPlanInfo,
 } from './payment';
 import type { PushNotification } from './push-notification';
 
@@ -81,14 +81,12 @@ declare global {
         data: { fullName: string; profileData: string; context: string };
         error?: string;
       }>;
-      setOnboardingCompleted: (
-        completed: boolean
-      ) => Promise<{ success: boolean; error?: string }>;
+      setOnboardingCompleted: (completed: boolean) => Promise<{ success: boolean; error?: string }>;
     };
 
     // Payment management
     payment: {
-      getPlans: () => Promise<{ success: boolean; data?: CreditPlanInfo[]; error?: string }>;
+      getPlans: () => Promise<{ success: boolean; data?: SubscriptionPlanInfo[]; error?: string }>;
       getCurrencies: () => Promise<{
         success: boolean;
         data?: AvailableCurrency[];
@@ -101,7 +99,6 @@ declare global {
         paymentId: string
       ) => Promise<{ success: boolean; data?: PaymentStatusResponse; error?: string }>;
       getHistory: () => Promise<{ success: boolean; data?: PaymentHistory[]; error?: string }>;
-      getCredits: () => Promise<{ success: boolean; credits?: number; error?: string }>;
     };
 
     // App state management

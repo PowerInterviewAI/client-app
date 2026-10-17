@@ -38,7 +38,18 @@ export interface AppState {
   transcripts: Transcript[];
   liveSuggestions: LiveSuggestion[];
   actionSuggestions: ActionSuggestion[];
+  /** The free-tier balance: the free hour, in credits. Only spent while not subscribed. */
   credits?: number;
+  /**
+   * Whether the account has an active subscription: unlimited interviews on the paid model. False
+   * (never undefined once a ping has answered) against a backend that predates subscriptions.
+   * While true, `credits` (the free balance) is not spent and does not gate a start.
+   */
+  subscribed?: boolean;
+  /** When the subscription ends, in unix ms; null for an account that never had one. */
+  subscriptionExpiresAt?: number | null;
+  /** The last pass applied (`monthly` / `yearly`), for display; null when unknown. */
+  subscriptionPlan?: string | null;
   userRole?: UserRole;
   providedLLMModel?: string;
   interviewConfig: InterviewConfigSummary;

@@ -28,6 +28,7 @@ for (const module of [
   // their parameterised strings rather than type-checking them.
   './locale-runtime.test.mjs',
   './app-state.test.mjs',
+  './balance.test.mjs',
   './account.test.mjs',
   // After account.test.mjs: both swap the accountService singleton's client, and that one's
   // sequence depends on the pull it sets up for itself.
@@ -93,6 +94,7 @@ for (const module of [
   // Source-level and independent of everything above: it reads the renderer's navigation lock
   // and the mock route off disk, so it sits with the other source-level checks.
   './interview-lock.test.mjs',
+  './subscription-expiry-warning.test.mjs',
   // Source-level too, and next to the lock for the same reason: it reads which component owns
   // the signed-out redirect off disk.
   './signed-out-redirect.test.mjs',

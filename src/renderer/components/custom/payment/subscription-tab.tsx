@@ -12,39 +12,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useNow } from '@/hooks/use-now';
 import { usePayment } from '@/hooks/use-payment';
 import { useT } from '@/i18n';
-import { CREDITS_PER_MINUTE } from '@/lib/consts';
+import { minutesCovered } from '@/lib/credit-gate';
+import { daysLeft, planKey, type SubscriptionSummary } from '@/lib/subscription';
 import { cn } from '@/lib/utils';
-import type { AvailableCurrency, CreditPlanInfo } from '@/types/payment';
-import { CreditPlan } from '@/types/payment';
+import type { AvailableCurrency, SubscriptionPlanInfo } from '@/types/payment';
 
-/**
- * Which locale entry names each plan. `Pro` is a real purchasable SKU, so the names stay as the
- * brand's own words in both languages; only the descriptions are prose.
- */
-const planKeys: Record<CreditPlan, 'starter' | 'pro' | 'enterprise'> = {
-  [CreditPlan.Starter]: 'starter',
-  [CreditPlan.Pro]: 'pro',
-  [CreditPlan.Enterprise]: 'enterprise',
-};
-
-interface BuyCreditsTabProps {
+interface SubscriptionTabProps {
+  /** The free-tier balance, in credits. */
   credits: number;
+  subscription: SubscriptionSummary;
   /** From the backend ping; falls back to the compiled-in mirror while that has not arrived. */
   creditsPerMinute?: number;
   onPaymentCreated: (paymentId: string) => void;
 }
 
-export default function BuyCreditsTab({
+/** How much cheaper a pass is per month than the dearest one on offer, in whole percent. */
+function savingPercent(plan: SubscriptionPlanInfo, plans: SubscriptionPlanInfo[]): number {
+  const dearest = Math.max(...plans.map((p) => p.pricePerMonthUsd));
+  if (dearest <= 0) return 0;
+  return Math.round(((dearest - plan.pricePerMonthUsd) / dearest) * 100);
+}
+
+export default function SubscriptionTab({
   credits,
+  subscription,
   creditsPerMinute,
   onPaymentCreated,
-}: BuyCreditsTabProps) {
+}: SubscriptionTabProps) {
   const t = useT();
-  const effectiveCreditsPerMinute = creditsPerMinute ?? CREDITS_PER_MINUTE;
   const { plans, currencies, loading, error, createPayment } = usePayment();
-  const [selectedPlan, setSelectedPlan] = useState<CreditPlanInfo | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlanInfo | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
   const [creating, setCreating] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
@@ -78,11 +78,17 @@ export default function BuyCreditsTab({
     if (!open) setCurrencySearch('');
   }, []);
 
-  const availableMinutes = Math.floor(credits / effectiveCreditsPerMinute);
-  const availableHours = Math.floor(availableMinutes / 60);
-  const availableRemMinutes = availableMinutes % 60;
+  const now = useNow();
+  const freeMinutes = minutesCovered(credits, creditsPerMinute);
+  const active = subscription.subscribed && subscription.expiresAt !== null;
 
-  const handleSelectPlan = useCallback((plan: CreditPlanInfo) => {
+  /** The plan's display name; a plan this build has no name for shows its id. */
+  const planNameOf = (plan: SubscriptionPlanInfo) => {
+    const key = planKey(plan.plan);
+    return key === 'other' ? plan.plan : t.creditsDisplay.planNames[key];
+  };
+
+  const handleSelectPlan = useCallback((plan: SubscriptionPlanInfo) => {
     setSelectedPlan(plan);
     setTimeout(() => {
       paymentDetailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -112,16 +118,36 @@ export default function BuyCreditsTab({
   return (
     <div className="space-y-3">
       <div className="bg-muted/50 p-3 rounded-lg">
-        <div className="text-xs font-medium">{t.payment.buy.currentBalance}</div>
-        <div className="text-lg font-bold">{t.payment.buy.credits(credits)}</div>
-        {/* Assembled in the locale rather than out of JSX fragments: the hours and minutes each
-            take their own plural form, and which one is a property of the number. */}
-        <div className="text-xs text-muted-foreground">
-          {t.payment.buy.availableFor(
-            t.payment.buy.duration(availableHours, availableRemMinutes),
-            effectiveCreditsPerMinute
-          )}
-        </div>
+        <div className="text-xs font-medium">{t.payment.buy.currentPlan}</div>
+        {active && subscription.expiresAt !== null ? (
+          <>
+            <div className="text-lg font-bold">
+              {t.payment.buy.subscribedUntil(
+                t.creditsDisplay.planNames[planKey(subscription.plan)],
+                t.creditsDisplay.date(subscription.expiresAt)
+              )}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {t.payment.buy.daysLeft(daysLeft(subscription.expiresAt, now))}.{' '}
+              {t.payment.buy.extends}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-lg font-bold">{t.payment.buy.freePlan}</div>
+            {/* Assembled in the locale rather than out of JSX fragments: the hours and minutes
+                each take their own plural form, and which one is a property of the number. */}
+            <div className="text-xs text-muted-foreground">
+              {freeMinutes > 0
+                ? t.payment.buy.freeLeft(
+                    t.payment.buy.duration(Math.floor(freeMinutes / 60), freeMinutes % 60)
+                  )
+                : credits > 0
+                  ? t.payment.buy.freeLeft(t.creditsDisplay.lessThanAMinute)
+                  : t.payment.buy.freeUsedUp}
+            </div>
+          </>
+        )}
       </div>
 
       {error && (
@@ -136,23 +162,21 @@ export default function BuyCreditsTab({
         </div>
       ) : (
         <>
-          <div className="mx-auto grid gap-2 md:grid-cols-3">
+          <div className="mx-auto grid gap-2 md:grid-cols-2">
             {plans.map((plan) => {
-              const isPro = plan.plan === CreditPlan.Pro;
+              const isPopular = plan.popular;
               const isSelected = selectedPlan?.plan === plan.plan;
-              const minutes = Math.floor(plan.credits / effectiveCreditsPerMinute);
-              const planKey = planKeys[plan.plan];
-              const planName = planKey ? t.payment.buy.planNames[planKey] : plan.plan;
-              const planDescription = planKey
-                ? t.payment.buy.planDescriptions[planKey]
-                : plan.description || '';
+              const key = planKey(plan.plan);
+              const planName = planNameOf(plan);
+              const planDescription = key === 'other' ? '' : t.payment.buy.planDescriptions[key];
+              const saving = savingPercent(plan, plans);
 
               return (
                 <Card
                   key={plan.plan}
                   className={cn(
                     'relative flex flex-col gap-3 py-4 transition-all duration-150',
-                    isPro
+                    isPopular
                       ? 'border-primary shadow-lg hover:shadow-xl'
                       : 'shadow-sm hover:shadow-lg',
                     isSelected
@@ -166,7 +190,7 @@ export default function BuyCreditsTab({
                     </div>
                   )}
 
-                  {isPro && (
+                  {isPopular && (
                     <div className="absolute -top-3 left-0 right-0 flex justify-center">
                       <span className="rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
                         {t.payment.buy.mostPopular}
@@ -178,15 +202,18 @@ export default function BuyCreditsTab({
                     <CardTitle className="text-lg">{planName}</CardTitle>
                     <CardDescription className="text-xs">{planDescription}</CardDescription>
                     <div className="mt-2">
-                      <span className="text-2xl font-bold">${plan.priceUsd}</span>
+                      <span className="text-2xl font-bold">${plan.pricePerMonthUsd}</span>
                       <span className="text-xs text-muted-foreground">
-                        {t.payment.buy.perCredits(plan.credits)}
+                        {t.payment.buy.perMonth}
                       </span>
+                      {saving > 0 && (
+                        <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                          {t.payment.buy.save(saving)}
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {t.payment.buy.timeOfAssistance(
-                        t.payment.buy.duration(Math.floor(minutes / 60), minutes % 60)
-                      )}
+                      {t.payment.buy.billedAs(plan.priceUsd, plan.days)}
                     </p>
                   </CardHeader>
 
@@ -197,11 +224,11 @@ export default function BuyCreditsTab({
                         'w-full cursor-pointer',
                         isSelected
                           ? ''
-                          : isPro
+                          : isPopular
                             ? ''
                             : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
                       )}
-                      variant={isSelected || isPro ? 'default' : 'outline'}
+                      variant={isSelected || isPopular ? 'default' : 'outline'}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSelectPlan(plan);
@@ -222,13 +249,15 @@ export default function BuyCreditsTab({
             })}
           </div>
 
+          <p className="text-center text-xs text-muted-foreground">{t.payment.buy.prepaid}</p>
+
           {selectedPlan && (
             <Card ref={paymentDetailsRef} className="gap-3 py-4">
               <CardHeader className="gap-1 px-4">
                 <CardTitle className="text-base">{t.payment.buy.detailsTitle}</CardTitle>
                 <CardDescription className="text-xs">
                   {t.payment.buy.detailsLead}
-                  <span className="font-bold">{t.payment.buy.credits(selectedPlan.credits)}</span>
+                  <span className="font-bold">{planNameOf(selectedPlan)}</span>
                   {t.payment.buy.detailsFor}
                   <span className="font-bold">${selectedPlan.priceUsd} USD</span>
                 </CardDescription>

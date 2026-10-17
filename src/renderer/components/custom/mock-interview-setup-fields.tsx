@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select';
 import type { MockInterviewSetupForm } from '@/hooks/use-mock-interview-setup-form';
 import { useT } from '@/i18n';
-import { effectiveRate, minutesCovered, mockSessionMinutes } from '@/lib/credit-gate';
+import { minutesCovered, mockSessionMinutes } from '@/lib/credit-gate';
 import { MockDifficulty, MockSeniority } from '@/types/mock-interview';
 
 /**
@@ -50,10 +50,13 @@ export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupFor
     setQuestionCount,
     credits,
     creditsPerMinute,
+    subscribed,
   } = form;
 
   const estimatedMinutes = mockSessionMinutes(questionCount);
-  const coveredMinutes = credits === undefined ? null : minutesCovered(credits, creditsPerMinute);
+  // A subscriber's session is not metered, so how far a balance goes says nothing to them.
+  const coveredMinutes =
+    subscribed || credits === undefined ? null : minutesCovered(credits, creditsPerMinute);
 
   return (
     <div className="space-y-6">
@@ -93,14 +96,12 @@ export function MockInterviewSetupFields({ form }: { form: MockInterviewSetupFor
         </div>
       </div>
 
-      {/* An estimate, not a quote: a mock is billed by the minute for the time it takes, at the
-          same rate as a live interview, and ends with its report when the credits run out. So no
-          length is refused here - the candidate is told how far the balance goes instead. */}
+      {/* An estimate, not a quote: a free mock spends free time by the minute for as long as it
+          takes, and ends with its report when that runs out. So no length is refused here - the
+          candidate is told how far their free time goes instead. */}
       <p className="text-xs text-muted-foreground">
-        {t.mock.setup.estimate(
-          estimatedMinutes,
-          estimatedMinutes * effectiveRate(creditsPerMinute)
-        )}
+        {t.mock.setup.estimate(estimatedMinutes)}
+        {subscribed && <> {t.mock.setup.unlimited}</>}
         {coveredMinutes !== null && <> {t.mock.setup.covers(coveredMinutes)}</>}
         {coveredMinutes !== null && coveredMinutes < estimatedMinutes && (
           <> {t.mock.setup.endsEarly}</>

@@ -240,8 +240,8 @@ export const ru: Translation = {
       unsupported: 'Пока недоступно на этом сервере. Обновите приложение или попробуйте позже.',
       liveRunning:
         'Сначала остановите живого ассистента - они не могут использовать микрофон одновременно.',
-      unaffordable: (minimum: number) =>
-        `Недостаточно кредитов - для начала нужно хотя бы ${minimum} ${plural(minimum, 'кредит', 'кредита', 'кредитов')} (1 минута). Пополните баланс, чтобы тренироваться.`,
+      unaffordable:
+        'Осталось меньше минуты бесплатного времени. Оформите подписку, чтобы продолжить тренировки.',
     },
 
     live: {
@@ -251,15 +251,15 @@ export const ru: Translation = {
       running: 'Ассистент уже работает.',
       mockRunning:
         'Сначала завершите пробное собеседование - они не могут использовать микрофон одновременно.',
-      unaffordable: (minimum: number) =>
-        `Недостаточно кредитов - для начала нужно хотя бы ${minimum} ${plural(minimum, 'кредит', 'кредита', 'кредитов')} (1 минута).`,
+      unaffordable:
+        'Осталось меньше минуты бесплатного времени. Оформите подписку, чтобы продолжить.',
     },
 
     accountLabel: 'Учётная запись',
     notSignedIn: 'Вход не выполнен',
-    creditsLabel: 'Кредиты',
-    creditsUnavailable: 'Нет данных',
-    buyCredits: 'Купить кредиты',
+    planLabel: 'Тариф',
+    planUnavailable: 'Нет данных',
+    subscribe: 'Подписка',
 
     nav: {
       account: 'Учётная запись',
@@ -512,7 +512,7 @@ export const ru: Translation = {
     home: 'Главная',
     account: 'Учётная запись',
     configuration: 'Настройки',
-    buyCredits: 'Купить кредиты',
+    subscribe: 'Подписка',
     startMock: 'Начать пробное собеседование',
     startLive: 'Запустить ассистента',
     switchToFullSentence: 'Переключиться на полные фразы',
@@ -637,10 +637,14 @@ export const ru: Translation = {
   },
 
   creditsDisplay: {
-    trialPlan: 'Пробный тариф',
-    paidPlan: 'Платный тариф',
-    summary: (credits: number, availableTime: string) =>
-      `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')} - ${availableTime}`,
+    freePlan: 'Бесплатно',
+    planNames: { monthly: 'Месячная', yearly: 'Годовая', other: 'Подписка' },
+    // The numeric form ("30.10.2026"), which needs no format options: those are English words to
+    // the check that every string here is translated.
+    date: (ms: number) => new Date(ms).toLocaleDateString('ru-RU'),
+    unlimitedUntil: (date: string) => `Без ограничений до ${date}`,
+    endsIn: (days: number) => `Закончится через ${days} ${plural(days, 'день', 'дня', 'дней')}`,
+    freeLeft: (availableTime: string) => `${availableTime} бесплатно`,
     duration: (hours: number, minutes: number) => {
       const parts: string[] = [];
       if (hours) parts.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
@@ -648,7 +652,7 @@ export const ru: Translation = {
       return parts.join(' ') || '0 минут';
     },
     lessThanAMinute: 'Меньше минуты',
-    noCreditsLeft: 'Кредиты закончились',
+    noFreeTimeLeft: 'Бесплатное время закончилось',
   },
 
   panels: {
@@ -868,12 +872,13 @@ export const ru: Translation = {
       },
       languageDescription:
         'На каком языке спрашивает интервьюер, что распознаётся и на каком языке приходит разбор.',
-      estimate: (minutes: number, credits: number) =>
-        `Обычно около ${minutes} ${plural(minutes, 'минуты', 'минут', 'минут')}, примерно ${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}.`,
+      estimate: (minutes: number) =>
+        `Обычно около ${minutes} ${plural(minutes, 'минуты', 'минут', 'минут')}.`,
+      unlimited: 'С подпиской - без ограничений.',
       covers: (minutes: number) =>
-        `Вашего баланса хватит примерно на ${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}.`,
+        `Бесплатного времени хватит примерно на ${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}.`,
       endsEarly:
-        'Когда кредиты закончатся, собеседование завершится, а отчёт вы всё равно получите.',
+        'Когда бесплатное время закончится, собеседование завершится, а отчёт вы всё равно получите.',
     },
 
     session: {
@@ -988,19 +993,21 @@ export const ru: Translation = {
   },
 
   payment: {
-    title: 'Покупка кредитов',
+    title: 'Подписка',
     tabs: {
-      buy: 'Покупка',
+      buy: 'Тарифы',
       history: 'История',
       status: 'Статус',
     },
 
     buy: {
-      currentBalance: 'Текущий баланс',
-      credits: (credits: number) =>
-        `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
-      availableFor: (duration: string, perMinute: number) =>
-        `Хватит примерно на ${duration} (${perMinute} ${plural(perMinute, 'кредит', 'кредита', 'кредитов')} в минуту)`,
+      currentPlan: 'Ваш тариф',
+      subscribedUntil: (plan: string, date: string) => `${plan}, до ${date}`,
+      daysLeft: (days: number) => `Осталось ${days} ${plural(days, 'день', 'дня', 'дней')}`,
+      freePlan: 'Бесплатный тариф',
+      // "на" takes the accusative, which is the case `duration` is written in
+      freeLeft: (duration: string) => `Осталось собеседований на ${duration} на базовой модели.`,
+      freeUsedUp: 'Бесплатное время закончилось. Оформите подписку, чтобы продолжить.',
       duration: (hours: number, minutes: number) => {
         const parts: string[] = [];
         if (hours) parts.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
@@ -1008,25 +1015,21 @@ export const ru: Translation = {
         return parts.join(' ') || '0 минут';
       },
       loadingPlans: 'Загружаем тарифы…',
-      mostPopular: 'Чаще всего берут',
-      planNames: {
-        starter: 'Starter',
-        pro: 'Pro',
-        enterprise: 'Enterprise',
-      },
+      mostPopular: 'Выгоднее всего',
       planDescriptions: {
-        starter: 'Чтобы попробовать платформу',
-        pro: 'Лучший выбор, если вы серьёзно ищете работу',
-        enterprise: 'Для интенсивного использования и команд',
+        monthly: 'Собеседования без ограничений на передовой модели на 30 дней',
+        yearly: 'Собеседования без ограничений на передовой модели на год',
       },
-      perCredits: (credits: number) =>
-        ` / ${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
-      // "на" takes the accusative, which is the case `duration` is written in
-      timeOfAssistance: (duration: string) => `примерно на ${duration} работы ассистента`,
+      perMonth: ' / месяц',
+      billedAs: (price: number, days: number) =>
+        `$${price} единоразово, на ${days} ${plural(days, 'день', 'дня', 'дней')}`,
+      save: (percent: number) => `Скидка ${percent}%`,
+      prepaid: 'Оплата один раз в криптовалюте. Подписка не продлевается сама.',
+      extends: 'Подписка активна: новый тариф добавит свои дни после текущей даты окончания.',
       selected: 'Выбрано',
-      buy: 'Купить',
+      buy: 'Выбрать',
       detailsTitle: 'Детали оплаты',
-      detailsLead: 'Завершите покупку: ',
+      detailsLead: 'Завершите покупку тарифа ',
       detailsFor: ' за ',
       currencyLabel: 'Валюта платежа',
       currencyPlaceholder: 'Выберите валюту',
@@ -1040,13 +1043,17 @@ export const ru: Translation = {
       loading: 'Загружаем историю платежей…',
       loadFailed: 'Не удалось загрузить историю платежей',
       emptyTitle: 'История платежей пуста',
-      emptyBody: 'Вы ещё не совершали платежей. Купите кредиты, чтобы начать.',
-      buyCredits: 'Купить кредиты',
+      emptyBody: 'Вы ещё не совершали платежей. Оформите подписку, чтобы начать.',
+      subscribe: 'Тарифы',
       refreshing: 'Обновляем…',
+      grant: (days: number, credits: number) =>
+        days > 0
+          ? `${days.toLocaleString('ru-RU')} ${plural(days, 'день', 'дня', 'дней')}`
+          : `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
       columns: {
         created: 'Создан',
         paymentId: 'ID платежа',
-        credits: 'Кредиты',
+        purchase: 'Покупка',
         amount: 'Сумма',
         status: 'Статус',
         action: 'Действие',
@@ -1079,7 +1086,7 @@ export const ru: Translation = {
       amountToSend: 'Сумма к отправке',
       sendExactly: 'Отправьте ровно эту сумму на адрес выше.',
       successTitle: 'Платёж прошёл',
-      successBody: 'Кредиты зачислены на вашу учётную запись.',
+      successBody: 'Подписка применена к вашей учётной записи.',
       expiredTitle: 'Срок платежа истёк',
       failedTitle: 'Платёж не прошёл',
       expiredBody: 'Срок этого платежа истёк. Создайте новый платёж.',
@@ -1109,7 +1116,6 @@ export const ru: Translation = {
       createPayment: 'Не удалось создать платёж',
       getStatus: 'Не удалось получить статус платежа',
       getHistory: 'Не удалось получить историю платежей',
-      getCredits: 'Не удалось получить баланс кредитов',
     },
   },
 
@@ -1146,23 +1152,32 @@ export const ru: Translation = {
   },
 
   creditGate: {
-    tooLow: 'Недостаточно кредитов для начала',
-    outOfCredits: 'Кредиты закончились - сессия завершена',
-    outOfCreditsHint: 'Пополните баланс, чтобы начать новую.',
+    tooLow: 'Недостаточно бесплатного времени для начала',
+    outOfCredits: 'Бесплатное время закончилось - сессия завершена',
+    outOfCreditsHint: 'Оформите подписку для собеседований без ограничений.',
     lowBalance: (minutes: number) =>
-      `Кредитов осталось примерно на ${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}`,
-    lowBalanceHint: 'Когда кредиты закончатся, сессия завершится.',
-    tooLowHint: (minimum: number, credits: number) =>
-      `Нужно хотя бы ${minimum} ${plural(minimum, 'кредит', 'кредита', 'кредитов')} (1 минута), а у вас ${credits}.`,
-    buyCredits: 'Купить кредиты',
+      `Бесплатного времени осталось примерно на ${minutes} ${plural(minutes, 'минуту', 'минуты', 'минут')}`,
+    lowBalanceHint: 'Когда бесплатное время закончится, сессия завершится.',
+    tooLowHint:
+      'Для сессии нужна хотя бы минута. Оформите подписку для собеседований без ограничений на передовой модели.',
+    subscribe: 'Тарифы',
+  },
+
+  subscriptionExpiry: {
+    endingSoon: (days: number) =>
+      `Подписка закончится через ${days} ${plural(days, 'день', 'дня', 'дней')}`,
+    endingSoonHint:
+      'Купите новый срок, чтобы собеседования оставались без ограничений. Его дни добавятся после текущей даты окончания.',
+    ended: 'Подписка закончилась',
+    endedHint: 'Собеседования снова расходуют бесплатное время на базовой модели.',
   },
 
   trialNotice: {
-    freeTierLead: 'Пробный тариф: 1 час бесплатно на модели ',
+    freeTierLead: 'Бесплатный тариф: 1 час собеседований на модели ',
     freeTier: 'базового уровня',
     freeTierTail: '.',
-    sotaLead: 'Купите кредиты, чтобы открыть ',
-    sota: 'передовую',
-    sotaTail: ' модель.',
+    sotaLead: 'Оформите подписку, чтобы без ограничений работать с ',
+    sota: 'передовой',
+    sotaTail: ' моделью.',
   },
 };

@@ -10,18 +10,18 @@ import {
   AvailableCurrency,
   CreatePaymentRequest,
   CreatePaymentResponse,
-  CreditPlanInfo,
   PaymentHistory,
   PaymentStatusResponse,
+  SubscriptionPlanInfo,
 } from '../types/payment.js';
 
 export function registerPaymentHandlers(): void {
   /**
-   * Get available credit plans
+   * Get the subscription passes on sale
    */
   ipcMain.handle(
     'payment:get-plans',
-    async (): Promise<{ success: boolean; data?: CreditPlanInfo[]; error?: string }> => {
+    async (): Promise<{ success: boolean; data?: SubscriptionPlanInfo[]; error?: string }> => {
       return paymentService.getPlans();
     }
   );
@@ -69,16 +69,6 @@ export function registerPaymentHandlers(): void {
     'payment:get-history',
     async (): Promise<{ success: boolean; data?: PaymentHistory[]; error?: string }> => {
       return paymentService.getPaymentHistory();
-    }
-  );
-
-  /**
-   * Get current user credits
-   */
-  ipcMain.handle(
-    'payment:get-credits',
-    async (): Promise<{ success: boolean; credits?: number; error?: string }> => {
-      return paymentService.getCredits();
     }
   );
 }

@@ -7,20 +7,28 @@ import {
   AvailableCurrency,
   CreatePaymentRequest,
   CreatePaymentResponse,
-  CreditPlan,
   PaymentHistory,
+  PaymentPlan,
   PaymentStatusResponse,
 } from '../types/payment.js';
 import { ApiClient, ApiResponse } from './client.js';
 
 export class PaymentApi extends ApiClient {
   /**
-   * Get available credit plans
+   * Get the subscription passes on sale.
    */
   async getPlans(): Promise<
-    ApiResponse<{ plan: CreditPlan; credits: number; price_usd: number; popular: boolean }[]>
+    ApiResponse<
+      {
+        plan: PaymentPlan;
+        price_usd: number;
+        days: number;
+        price_per_month_usd: number;
+        popular: boolean;
+      }[]
+    >
   > {
-    return this.get('/api/payment/plans');
+    return this.get('/api/payment/subscription-plans');
   }
 
   /**
@@ -49,12 +57,5 @@ export class PaymentApi extends ApiClient {
    */
   async getPaymentHistory(): Promise<ApiResponse<PaymentHistory[]>> {
     return this.get('/api/payment/history');
-  }
-
-  /**
-   * Get current user credits
-   */
-  async getCredits(): Promise<ApiResponse<{ credits: number }>> {
-    return this.get('/api/payment/credits');
   }
 }

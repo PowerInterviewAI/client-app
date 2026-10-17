@@ -1,14 +1,22 @@
 import React from 'react';
 
+import { useNow } from '@/hooks/use-now';
 import { useT } from '@/i18n';
-import { CREDITS_PER_MINUTE } from '@/lib/consts';
+import { minutesCovered } from '@/lib/credit-gate';
+import {
+  daysLeft,
+  EXPIRY_WARNING_DAYS,
+  freeTimeLabel,
+  planKey,
+  type SubscriptionSummary,
+} from '@/lib/subscription';
 import { cn } from '@/lib/utils';
-import { UserRole } from '@/types/app-state';
 
 interface CreditsDisplayProps {
+  /** The free-tier balance, in credits. */
   credits: number;
+  subscription: SubscriptionSummary;
   llmModel?: string;
-  userRole?: UserRole;
   /** From the backend ping; falls back to the compiled-in mirror while that has not arrived. */
   creditsPerMinute?: number;
   className?: string;
@@ -17,41 +25,69 @@ interface CreditsDisplayProps {
 
 export default function CreditsDisplay({
   credits,
+  subscription,
   llmModel,
-  userRole,
   creditsPerMinute,
   className,
   style,
 }: CreditsDisplayProps) {
-  const t = useT();
-
-  // Not a real plan name - "Pro" is an actual purchasable SKU (see CreditPlan), so labeling
-  // every non-trial user that way shows a starter or enterprise buyer a plan they never bought.
-  const planLabel =
-    userRole === UserRole.TrialUser ? t.creditsDisplay.trialPlan : t.creditsDisplay.paidPlan;
-  const availableMinutes = Math.floor(credits / (creditsPerMinute ?? CREDITS_PER_MINUTE));
-
-  // Split into hours and minutes here and assembled in the locale, because which plural form
-  // each number takes is a property of the language: `2 hours 15 mins` against
-  // `2 часа 15 минут`, where 2 and 22 agree and 5 and 25 do not.
-  const formatDuration = (mins: number) =>
-    t.creditsDisplay.duration(Math.floor(mins / 60), mins % 60);
-
-  const availableTime =
-    availableMinutes <= 0
-      ? credits > 0
-        ? t.creditsDisplay.lessThanAMinute
-        : t.creditsDisplay.noCreditsLeft
-      : formatDuration(availableMinutes);
-
   return (
     <div className={cn('flex text-xs font-bold gap-2', className)} style={style}>
-      {userRole !== undefined && (
+      {subscription.subscribed && subscription.expiresAt !== null ? (
+        <SubscribedSummary subscription={subscription} expiresAt={subscription.expiresAt} />
+      ) : (
+        <FreeSummary credits={credits} creditsPerMinute={creditsPerMinute} />
+      )}
+      {llmModel && (
         <>
-          <span className="text-muted-foreground">{planLabel}</span>
           <hr className="h-4 border border-border" />
+          <span className="text-muted-foreground">{llmModel}</span>
         </>
       )}
+    </div>
+  );
+}
+
+function SubscribedSummary({
+  subscription,
+  expiresAt,
+}: {
+  subscription: SubscriptionSummary;
+  expiresAt: number;
+}) {
+  const t = useT();
+  const planLabel = t.creditsDisplay.planNames[planKey(subscription.plan)];
+  const days = daysLeft(expiresAt, useNow());
+  const ending = days <= EXPIRY_WARNING_DAYS;
+
+  return (
+    <>
+      <span className="text-muted-foreground">{planLabel}</span>
+      <hr className="h-4 border border-border" />
+      <span className={ending ? 'text-yellow-600' : 'text-muted-foreground'}>
+        {ending
+          ? t.creditsDisplay.endsIn(days)
+          : t.creditsDisplay.unlimitedUntil(t.creditsDisplay.date(expiresAt))}
+      </span>
+    </>
+  );
+}
+
+function FreeSummary({
+  credits,
+  creditsPerMinute,
+}: {
+  credits: number;
+  creditsPerMinute?: number;
+}) {
+  const t = useT();
+  const availableMinutes = minutesCovered(credits, creditsPerMinute);
+  const availableTime = freeTimeLabel(t, credits, creditsPerMinute);
+
+  return (
+    <>
+      <span className="text-muted-foreground">{t.creditsDisplay.freePlan}</span>
+      <hr className="h-4 border border-border" />
       <span
         className={cn(
           availableMinutes >= 5
@@ -61,14 +97,8 @@ export default function CreditsDisplay({
               : 'text-destructive animate-pulse'
         )}
       >
-        {t.creditsDisplay.summary(credits, availableTime)}
+        {availableTime}
       </span>
-      {llmModel && (
-        <>
-          <hr className="h-4 border border-border" />
-          <span className="text-muted-foreground">{llmModel}</span>
-        </>
-      )}
-    </div>
+    </>
   );
 }

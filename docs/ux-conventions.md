@@ -63,7 +63,7 @@ feature can still fail a non-developer if it doesn't read as polished and easy t
 new or changed UI surface must:
 
 - **Use plain, user-facing language**, not internal identifiers — labels, menu items, and error
-  messages are written for the person using the app, not for the codebase (e.g. "Buy Credits",
+  messages are written for the person using the app, not for the codebase (e.g. "Subscription",
   not a raw enum or hotkey constant name).
 - **Define an explicit state for empty, loading, and error** — no surface ships with only a
   "happy path" and a blank area or unhandled exception for everything else.

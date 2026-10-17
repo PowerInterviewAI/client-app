@@ -22,12 +22,15 @@ export const LOW_BALANCE_WARNING_MINUTES = [5, 1] as const;
  * under: starting with half a minute left says "one minute", not "five" and then "one".
  *
  * `active` is whether a session is running now; the warnings re-arm each time it turns true.
+ *
+ * Only the free hour runs down: a subscriber's session is not metered, so it never warns them.
  */
 export function useLowBalanceWarning(active: boolean) {
   const t = useT();
   const { appState } = useAppState();
   const credits = appState?.credits;
   const creditsPerMinute = appState?.creditsPerMinute;
+  const subscribed = appState?.subscribed === true;
 
   // The thresholds already warned about in this session.
   const warned = useRef(new Set<number>());
@@ -37,7 +40,7 @@ export function useLowBalanceWarning(active: boolean) {
       warned.current.clear();
       return;
     }
-    if (credits === undefined) return;
+    if (credits === undefined || subscribed) return;
 
     const minutes = minutesCovered(credits, creditsPerMinute);
     const crossed = LOW_BALANCE_WARNING_MINUTES.filter((threshold) => minutes < threshold + 1);
@@ -52,5 +55,5 @@ export function useLowBalanceWarning(active: boolean) {
     toast.warning(t.creditGate.lowBalance(Math.max(minutes, 1)), {
       description: t.creditGate.lowBalanceHint,
     });
-  }, [active, credits, creditsPerMinute, t]);
+  }, [active, credits, creditsPerMinute, subscribed, t]);
 }
