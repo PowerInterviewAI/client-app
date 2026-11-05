@@ -336,7 +336,7 @@ export const en = {
   hideTaskbarField: {
     label: 'Hide taskbar icon during live interviews',
     description:
-      'Also hides the Dock icon and keeps the window on top. It cannot be minimized - relaunch the app if it gets lost.',
+      'Keeps the window on top (on macOS, the Dock icon is hidden too). It cannot be minimized - relaunch the app if it gets lost.',
   },
   allowScreenCaptureField: {
     label: 'Allow screen capture',
