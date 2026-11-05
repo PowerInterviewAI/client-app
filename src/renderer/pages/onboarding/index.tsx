@@ -225,7 +225,7 @@ export default function OnboardingPage() {
   if (appState?.isLoggedIn !== true) return <LoadingPage disclaimer={t.common.loading} />;
 
   return (
-    <div className="flex-1 overflow-auto [scrollbar-gutter:stable]">
+    <div className="flex-1 overflow-auto [scrollbar-gutter:stable_both-edges]">
       {/* A form, so Enter advances from any single-line field - the fastest way through a wizard,
           and the first thing a keyboard user tries. The two long fields are textareas, which keep
           Enter for newlines. */}
