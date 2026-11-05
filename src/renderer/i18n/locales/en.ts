@@ -353,6 +353,11 @@ export const en = {
     description:
       'Off by default. When on, the app leaves the taskbar (and the Dock on macOS) and stays on top of other windows while a live interview is running. The window cannot be minimized while this is on. If the window gets lost, launch the app again to bring it back.',
   },
+  allowScreenCaptureField: {
+    label: 'Allow screen capture',
+    description:
+      'Off by default. When on, the app window appears in screen shares, recordings and screenshots. Stealth mode always hides it, whatever this is set to.',
+  },
   mockHintsField: {
     label: 'Show hints in mock interviews',
     description:
@@ -1120,6 +1125,7 @@ export const en = {
     saveTranscriptPanelFailed: 'Failed to save transcription panel setting',
     saveMockHintsFailed: 'Failed to save live suggestions setting',
     saveHideTaskbarFailed: 'Could not save the taskbar setting. Please try again.',
+    saveAllowScreenCaptureFailed: 'Could not save the screen capture setting. Please try again.',
     saveUiLanguageFailed: 'Failed to save the app language',
   },
 
