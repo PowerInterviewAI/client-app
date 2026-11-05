@@ -91,7 +91,6 @@ export const ru: Translation = {
       zoom: {
         label: 'Размер',
         title: 'Так читать удобно?',
-        description: 'Сделайте подсказки удобными для чтения одним взглядом.',
       },
       transcript: {
         label: 'Расшифровка',

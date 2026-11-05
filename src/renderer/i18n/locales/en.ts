@@ -82,7 +82,6 @@ export const en = {
       zoom: {
         label: 'Size',
         title: 'Is this comfortable to read?',
-        description: 'Make suggestions comfortable to read at a glance.',
       },
       transcript: {
         label: 'Transcript',
