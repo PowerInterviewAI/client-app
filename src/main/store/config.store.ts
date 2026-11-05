@@ -49,6 +49,10 @@ export interface RuntimeConfig {
   // Hide the taskbar/Dock icon, pin on top and drop minimize while a live interview runs.
   // Off by default: the window is a normal window unless stealth mode is on.
   hideTaskbarWhileRunning: boolean;
+
+  // Let screen capture see the main window. Off by default: content protection is on unless the
+  // user opts out here, and stealth mode protects the window whatever this says.
+  allowScreenCapture: boolean;
 }
 
 // Default runtime configuration
@@ -91,6 +95,7 @@ const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   // where composing unaided is the point.
   mockLiveHintsEnabled: true,
   hideTaskbarWhileRunning: false,
+  allowScreenCapture: false,
 };
 
 // interviewConf (full name, profile, context) used to be cached under `runtime`, but it's now
@@ -313,6 +318,7 @@ export const configStore = new ConfigStore();
     migration.mockLiveHintsEnabled = typeof legacy === 'boolean' ? legacy : true;
   }
   if (raw?.hideTaskbarWhileRunning === undefined) migration.hideTaskbarWhileRunning = false;
+  if (raw?.allowScreenCapture === undefined) migration.allowScreenCapture = false;
   // perform migration only if there are values to set
   if (Object.keys(migration).length > 0) {
     configStore.updateConfig(migration);
