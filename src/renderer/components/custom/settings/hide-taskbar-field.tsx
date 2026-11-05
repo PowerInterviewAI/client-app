@@ -1,4 +1,4 @@
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { useHideTaskbar } from '@/hooks/use-hide-taskbar';
 import { useT } from '@/i18n';
 
@@ -12,9 +12,9 @@ export function HideTaskbarField() {
         <p className="text-sm font-medium">{t.hideTaskbarField.label}</p>
         <p className="text-xs text-muted-foreground">{t.hideTaskbarField.description}</p>
       </div>
-      <Checkbox
+      <Switch
         checked={enabled}
-        onCheckedChange={(v) => setEnabled(v === true)}
+        onCheckedChange={setEnabled}
         aria-label={t.hideTaskbarField.label}
       />
     </label>

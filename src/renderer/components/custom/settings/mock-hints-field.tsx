@@ -1,4 +1,4 @@
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { useMockLiveSuggestions } from '@/hooks/use-mock-live-suggestions';
 import { useT } from '@/i18n';
 
@@ -20,11 +20,7 @@ export function MockHintsField() {
         <p className="text-sm font-medium">{t.mockHintsField.label}</p>
         <p className="text-xs text-muted-foreground">{t.mockHintsField.description}</p>
       </div>
-      <Checkbox
-        checked={enabled}
-        onCheckedChange={(v) => setEnabled(v === true)}
-        aria-label={t.mockHintsField.label}
-      />
+      <Switch checked={enabled} onCheckedChange={setEnabled} aria-label={t.mockHintsField.label} />
     </label>
   );
 }

@@ -1,4 +1,4 @@
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { useAllowScreenCapture } from '@/hooks/use-allow-screen-capture';
 import { useT } from '@/i18n';
 
@@ -12,9 +12,9 @@ export function AllowScreenCaptureField() {
         <p className="text-sm font-medium">{t.allowScreenCaptureField.label}</p>
         <p className="text-xs text-muted-foreground">{t.allowScreenCaptureField.description}</p>
       </div>
-      <Checkbox
+      <Switch
         checked={enabled}
-        onCheckedChange={(v) => setEnabled(v === true)}
+        onCheckedChange={setEnabled}
         aria-label={t.allowScreenCaptureField.label}
       />
     </label>

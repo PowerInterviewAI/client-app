@@ -1,4 +1,4 @@
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
 import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
@@ -21,7 +21,7 @@ export function TranscriptPanelField() {
           {t.transcriptPanelField.description(HOTKEYS[Hotkey.ToggleTranscript].combo)}
         </p>
       </div>
-      <Checkbox
+      <Switch
         checked={visible}
         onCheckedChange={() => toggle()}
         aria-label={t.transcriptPanelField.label}
