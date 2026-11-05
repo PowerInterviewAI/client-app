@@ -159,9 +159,7 @@ async function createWindow() {
     win.setAutoHideMenuBar(true);
   }
 
-  // Pass --disable-content-protection on the CLI to allow screen recording (dev/testing only)
-  win.setContentProtection(!process.argv.includes('--disable-content-protection'));
-
+  // Content protection is applied by setWindowReference, from the allowScreenCapture setting.
   setWindowReference(win);
   setZoomWindowReference(win);
 
