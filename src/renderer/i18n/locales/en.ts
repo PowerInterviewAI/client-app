@@ -356,7 +356,7 @@ export const en = {
   allowScreenCaptureField: {
     label: 'Allow screen capture',
     description:
-      'Off by default. When on, the app window appears in screen shares, recordings and screenshots. Stealth mode always hides it, whatever this is set to.',
+      "Off by default. When on, the app window appears in screen shares, recordings and other apps' screenshots. The app's own screenshots and stealth mode always leave it out, whatever this is set to.",
   },
   mockHintsField: {
     label: 'Show hints in mock interviews',
