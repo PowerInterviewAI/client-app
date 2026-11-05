@@ -1,4 +1,6 @@
-import { Checkbox } from '@/components/ui/checkbox';
+import { useId } from 'react';
+
+import { Switch } from '@/components/ui/switch';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
 import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
@@ -11,20 +13,22 @@ import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
  */
 export function TranscriptPanelField() {
   const t = useT();
+  const descriptionId = useId();
   const { visible, toggle } = useTranscriptPanel();
 
   return (
     <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-3">
       <div>
         <p className="text-sm font-medium">{t.transcriptPanelField.label}</p>
-        <p className="text-xs text-muted-foreground">
+        <p id={descriptionId} className="text-xs text-muted-foreground">
           {t.transcriptPanelField.description(HOTKEYS[Hotkey.ToggleTranscript].combo)}
         </p>
       </div>
-      <Checkbox
+      <Switch
         checked={visible}
         onCheckedChange={() => toggle()}
         aria-label={t.transcriptPanelField.label}
+        aria-describedby={descriptionId}
       />
     </label>
   );

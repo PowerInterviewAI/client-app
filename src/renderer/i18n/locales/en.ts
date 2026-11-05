@@ -34,8 +34,7 @@ export const en = {
 
   uiLanguageField: {
     label: 'App language',
-    description:
-      'The app itself: buttons, headings and messages. What your interview runs in is a separate setting.',
+    description: 'Buttons, menus and messages. Separate from the interview language.',
   },
 
   onboarding: {
@@ -50,53 +49,43 @@ export const en = {
       uiLanguage: {
         label: 'App language',
         title: 'Which language should the app be in?',
-        description:
-          'Pick the language you read most comfortably. Everything from here on, including this step, follows it.',
+        description: 'Pick the one you read most easily. The rest of setup follows it.',
       },
       profile: {
         label: 'Profile',
         title: 'Tell us who you are',
-        description:
-          'Every suggestion is written from this, in your own experience and your own words. It is the one thing the app cannot run without.',
+        description: 'Suggestions are written from your experience, so this is required.',
       },
       context: {
         label: 'Job context',
         title: 'What are you interviewing for?',
-        description:
-          'Optional, and worth the paste: with the job description in hand the assistant answers for that role rather than in general.',
+        description: 'Optional. Paste the job description for answers tailored to the role.',
       },
       language: {
         label: 'Language',
         title: 'Pick your interview language',
-        description: 'This sets both what gets transcribed and what your suggestions come back in.',
       },
       microphone: {
         label: 'Microphone',
         title: 'Choose your microphone',
         description:
-          'Pick the microphone you will actually be speaking into, then test it. Wear headphones during interviews - on speakers the app hears the interviewer through your microphone and goes quiet.',
+          'Pick the microphone you will speak into and test it. Use headphones - on speakers the app can stop answering.',
       },
       mode: {
         label: 'Suggestions',
         title: 'How should suggestions read?',
-        description: 'Change your mind at any time, including mid-interview.',
       },
       mockHints: {
         label: 'Mock interview',
         title: 'Hints in a mock interview?',
-        description:
-          'A mock interview is where you practise against the AI interviewer. This decides whether it hands you the answer as well.',
       },
       zoom: {
         label: 'Size',
         title: 'Is this comfortable to read?',
-        description:
-          'The interview window is small on purpose, so it does not cover the call. Size it now, while you can take your time over it, rather than mid-question.',
       },
       transcript: {
         label: 'Transcript',
-        title: 'One last thing',
-        description: 'Whether to keep a live transcript on screen under your suggestions.',
+        title: 'Show a live transcript?',
       },
     },
 
@@ -325,11 +314,9 @@ export const en = {
   suggestionModeField: {
     label: 'Suggestion style',
     hintOnly: 'Hint-only',
-    hintOnlyDescription:
-      'A headline and keyword bullets you can read at a glance while you keep talking. Recommended.',
+    hintOnlyDescription: 'A headline and keywords to read at a glance. Recommended.',
     fullSentences: 'Full sentences',
-    fullSentencesDescription:
-      'The answer written out the way it would be spoken. More to read, less to improvise.',
+    fullSentencesDescription: 'The full answer, written out as you would say it.',
     switchHint: (combo: string) => `Switchable mid-interview from the control bar or ${combo}.`,
   },
 
@@ -338,30 +325,27 @@ export const en = {
     smaller: 'Smaller',
     larger: 'Larger',
     reset: 'Reset',
-    description: (combo: string) =>
-      `Scales the whole app. The interview window is small on purpose - this is how you make the suggestions readable at a glance. Also on ${combo}.`,
+    description: (combo: string) => `Scales the whole app. Also on ${combo}.`,
   },
 
   transcriptPanelField: {
     label: 'Show the transcript panel',
-    description: (combo: string) =>
-      `Keeps a live transcript docked under your suggestions. Turn it off for more room to read them. Toggle any time with ${combo}.`,
+    description: (combo: string) => `Live transcript under your suggestions. Toggle with ${combo}.`,
   },
 
   hideTaskbarField: {
     label: 'Hide taskbar icon during live interviews',
     description:
-      'Off by default. When on, the app leaves the taskbar (and the Dock on macOS) and stays on top of other windows while a live interview is running. The window cannot be minimized while this is on. If the window gets lost, launch the app again to bring it back.',
+      'Keeps the window on top (on macOS, the Dock icon is hidden too). It cannot be minimized - relaunch the app if it gets lost.',
   },
   allowScreenCaptureField: {
     label: 'Allow screen capture',
     description:
-      "Off by default. When on, the app window appears in screen shares, recordings and other apps' screenshots. The app's own screenshots and stealth mode always leave it out, whatever this is set to.",
+      'Lets screen shares and recordings see the app window. Stealth mode always hides it.',
   },
   mockHintsField: {
     label: 'Show hints in mock interviews',
-    description:
-      'Puts what the live assistant would have answered beside each mock interview question, so you can compare it against your own. Turn it off to answer unaided - either way, you can switch it mid-session from the mock interview bar. This changes nothing about a real interview.',
+    description: "Shows the assistant's answer beside each mock question, to compare with yours.",
   },
 
   languageField: {
@@ -685,42 +669,42 @@ export const en = {
     live: {
       clear: {
         title: 'Save this interview before clearing?',
-        body: 'Clearing drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
+        body: 'The transcript and suggestions will be lost.',
         discard: 'Clear without saving',
       },
       start: {
         title: 'Save this interview before starting a new one?',
-        body: 'Starting a session drops the transcript and the suggestions from the last one, and nothing is written to disk until you export.',
+        body: 'The transcript and suggestions will be lost.',
         discard: 'Start without saving',
       },
       close: {
         title: 'Save this interview before closing?',
-        body: 'Closing drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
+        body: 'The transcript and suggestions will be lost.',
         discard: 'Close without saving',
       },
       update: {
         title: 'Save this interview before installing the update?',
-        body: 'Installing restarts the app and drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
+        body: 'The app restarts and the transcript and suggestions will be lost.',
         discard: 'Install without saving',
       },
       signout: {
         title: 'Save this interview before signing out?',
-        body: 'Signing out drops the transcript and the suggestions from this session, and nothing is written to disk until you export.',
+        body: 'The transcript and suggestions will be lost.',
         discard: 'Sign out without saving',
       },
       stop: {
         title: 'Save this interview?',
-        body: 'Your interview has ended. The transcript and the suggestions are dropped from here, and nothing has been written to disk.',
+        body: 'The interview has ended. Its transcript and suggestions are not saved anywhere yet.',
         discard: 'Discard and go home',
       },
       'mock-done': {
         title: 'Save your report before you finish?',
-        body: 'Your score, the feedback and every answer you gave exist only in this app until you save them to a file.',
+        body: 'Your score, feedback and answers will be lost.',
         discard: 'Finish without saving',
       },
       'mock-again': {
         title: 'Save this report before the next round?',
-        body: 'Practising again starts a fresh interview and replaces this score, its feedback and the answers behind it.',
+        body: 'This score, feedback and your answers will be replaced.',
         discard: 'Practise again without saving',
       },
     },
@@ -729,32 +713,32 @@ export const en = {
     mock: {
       clear: {
         title: 'Save your mock interview report first?',
-        body: 'Clearing drops this report and the answers behind it, and nothing is written to disk until you save.',
+        body: 'This report and your answers will be lost.',
         discard: 'Clear without saving',
       },
       start: {
         title: 'Save your mock interview report first?',
-        body: 'Starting a session replaces this report and the answers behind it, and nothing is written to disk until you save.',
+        body: 'This report and your answers will be lost.',
         discard: 'Start without saving',
       },
       close: {
         title: 'Save your mock interview report before closing?',
-        body: 'This report and the answers behind it exist only in this app, and closing drops them.',
+        body: 'This report and your answers will be lost.',
         discard: 'Close without saving',
       },
       update: {
         title: 'Save your mock interview report before installing the update?',
-        body: 'Installing restarts the app, which drops this report and the answers behind it.',
+        body: 'The app restarts and this report and your answers will be lost.',
         discard: 'Install without saving',
       },
       signout: {
         title: 'Save your mock interview report before signing out?',
-        body: 'Signing out drops this report and the answers behind it, and nothing has been written to disk.',
+        body: 'This report and your answers will be lost.',
         discard: 'Sign out without saving',
       },
       stop: {
         title: 'Save your mock interview report?',
-        body: 'The interview has ended. This report and the answers behind it are dropped from here, and nothing has been written to disk.',
+        body: 'The interview has ended. This report is not saved anywhere yet.',
         discard: 'Discard and go home',
       },
     },

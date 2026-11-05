@@ -225,7 +225,7 @@ export default function OnboardingPage() {
   if (appState?.isLoggedIn !== true) return <LoadingPage disclaimer={t.common.loading} />;
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto [scrollbar-gutter:stable_both-edges]">
       {/* A form, so Enter advances from any single-line field - the fastest way through a wizard,
           and the first thing a keyboard user tries. The two long fields are textareas, which keep
           Enter for newlines. */}
@@ -259,7 +259,13 @@ export default function OnboardingPage() {
         <h1 ref={headingRef} tabIndex={-1} className="text-xl font-semibold outline-none">
           {copy.title}
         </h1>
-        <p className="mt-1 mb-6 text-sm text-muted-foreground">{copy.description}</p>
+        {/* Steps whose field carries its own helper line have no subtitle, or the step would say
+            the same thing twice. */}
+        {'description' in copy ? (
+          <p className="mt-1 mb-6 text-sm text-muted-foreground">{copy.description}</p>
+        ) : (
+          <div className="mb-6" />
+        )}
 
         {/* Floored rather than left to the content, so the footer does not jump up the screen
             between a step with two textareas and a step with one checkbox. */}
