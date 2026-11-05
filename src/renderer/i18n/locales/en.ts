@@ -64,7 +64,6 @@ export const en = {
       language: {
         label: 'Language',
         title: 'Pick your interview language',
-        description: 'This sets both what gets transcribed and what your suggestions come back in.',
       },
       microphone: {
         label: 'Microphone',
@@ -75,12 +74,10 @@ export const en = {
       mode: {
         label: 'Suggestions',
         title: 'How should suggestions read?',
-        description: 'Change your mind at any time, including mid-interview.',
       },
       mockHints: {
         label: 'Mock interview',
         title: 'Hints in a mock interview?',
-        description: 'Whether mock interviews show the answer as well as the question.',
       },
       zoom: {
         label: 'Size',
@@ -89,8 +86,7 @@ export const en = {
       },
       transcript: {
         label: 'Transcript',
-        title: 'One last thing',
-        description: 'Whether to keep a live transcript on screen under your suggestions.',
+        title: 'Show a live transcript?',
       },
     },
 
@@ -341,7 +337,7 @@ export const en = {
   hideTaskbarField: {
     label: 'Hide taskbar icon during live interviews',
     description:
-      'Hides the app from the taskbar and Dock and keeps it on top during live interviews. It cannot be minimized - relaunch the app if it gets lost.',
+      'Also hides the Dock icon and keeps the window on top. It cannot be minimized - relaunch the app if it gets lost.',
   },
   allowScreenCaptureField: {
     label: 'Allow screen capture',
