@@ -18,7 +18,7 @@ import { SuggestionMode } from '@/types/llm';
 import { type LiveSuggestion, SuggestionState } from '@/types/suggestion';
 
 import { Button } from '../../ui/button';
-import { Checkbox } from '../../ui/checkbox';
+import { Switch } from '../../ui/switch';
 import { SafeMarkdown } from '../safe-markdown';
 import SuggestionReveal from './suggestion-reveal';
 
@@ -222,7 +222,8 @@ function LiveSuggestionsPanel({
 
         {!isStealth && (
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Checkbox
+            <Switch
+              size="sm"
               checked={autoScroll}
               onCheckedChange={(v) => {
                 const enabled = v === true;
@@ -231,7 +232,6 @@ function LiveSuggestionsPanel({
                   console.error('Failed to persist auto-scroll setting', e)
                 );
               }}
-              className="h-4 w-4 rounded border-border bg-background text-primary"
               aria-label={t.panels.enableAutoScroll}
             />
             <span className="text-xs text-muted-foreground">{t.panels.autoScroll}</span>

@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 import { Switch } from '@/components/ui/switch';
 import { useMockLiveSuggestions } from '@/hooks/use-mock-live-suggestions';
 import { useT } from '@/i18n';
@@ -12,15 +14,23 @@ import { useT } from '@/i18n';
  */
 export function MockHintsField() {
   const t = useT();
+  const descriptionId = useId();
   const { enabled, setEnabled } = useMockLiveSuggestions();
 
   return (
     <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-3">
       <div>
         <p className="text-sm font-medium">{t.mockHintsField.label}</p>
-        <p className="text-xs text-muted-foreground">{t.mockHintsField.description}</p>
+        <p id={descriptionId} className="text-xs text-muted-foreground">
+          {t.mockHintsField.description}
+        </p>
       </div>
-      <Switch checked={enabled} onCheckedChange={setEnabled} aria-label={t.mockHintsField.label} />
+      <Switch
+        checked={enabled}
+        onCheckedChange={setEnabled}
+        aria-label={t.mockHintsField.label}
+        aria-describedby={descriptionId}
+      />
     </label>
   );
 }

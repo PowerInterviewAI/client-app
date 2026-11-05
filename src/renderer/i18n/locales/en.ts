@@ -49,7 +49,7 @@ export const en = {
       uiLanguage: {
         label: 'App language',
         title: 'Which language should the app be in?',
-        description: 'Everything from here on follows it.',
+        description: 'Pick the one you read most easily. The rest of setup follows it.',
       },
       profile: {
         label: 'Profile',
@@ -70,7 +70,7 @@ export const en = {
         label: 'Microphone',
         title: 'Choose your microphone',
         description:
-          'Pick the microphone you will speak into and test it. Use headphones during interviews.',
+          'Pick the microphone you will speak into and test it. Use headphones - on speakers the app can stop answering.',
       },
       mode: {
         label: 'Suggestions',
@@ -341,7 +341,7 @@ export const en = {
   hideTaskbarField: {
     label: 'Hide taskbar icon during live interviews',
     description:
-      'Hides the app from the taskbar and keeps it on top during live interviews. It cannot be minimized - relaunch the app if it gets lost.',
+      'Hides the app from the taskbar and Dock and keeps it on top during live interviews. It cannot be minimized - relaunch the app if it gets lost.',
   },
   allowScreenCaptureField: {
     label: 'Allow screen capture',
@@ -704,12 +704,12 @@ export const en = {
       },
       'mock-done': {
         title: 'Save your report before you finish?',
-        body: 'Your score, the feedback and every answer you gave exist only in this app until you save them to a file.',
+        body: 'Your score, feedback and answers will be lost.',
         discard: 'Finish without saving',
       },
       'mock-again': {
         title: 'Save this report before the next round?',
-        body: 'Practising again starts a fresh interview and replaces this score, its feedback and the answers behind it.',
+        body: 'This score, feedback and your answers will be replaced.',
         discard: 'Practise again without saving',
       },
     },
