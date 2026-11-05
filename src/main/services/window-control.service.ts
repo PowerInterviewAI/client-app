@@ -1,6 +1,12 @@
 import { app, BrowserWindow, dialog, screen } from 'electron';
 
-import { MIN_HEIGHT, MIN_WIDTH, OPACITY_LEVELS, RAISE_INTERVAL_MS } from '../consts.js';
+import {
+  CAPTURE_PROTECTION_SETTLE_MS,
+  MIN_HEIGHT,
+  MIN_WIDTH,
+  OPACITY_LEVELS,
+  RAISE_INTERVAL_MS,
+} from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { RunningState } from '../types/app-state.js';
 import { isMockInterviewSessionActive } from '../types/mock-interview.js';
@@ -42,6 +48,10 @@ let minimizableApplied: boolean | null = null;
 
 // Last content-protection state we asked for, so window events do not re-issue it.
 let contentProtectionApplied: boolean | null = null;
+
+// The app's own screenshots in flight. Each one protects the window for its duration, whatever
+// the setting says, so a capturable window does not end up in the image sent to the model.
+let ownCaptures = 0;
 
 // Last z-order state we asked for. `null` means nothing has been applied to this window yet,
 // which is what makes the first call after a window is registered always go through.
@@ -194,7 +204,28 @@ export function canMinimize(): boolean {
  * request to be invisible, and a capture setting chosen for an ordinary window must not undo it.
  */
 function shouldProtectContent(): boolean {
-  return _stealth || !(_allowScreenCapture || captureForcedByFlag);
+  return _stealth || ownCaptures > 0 || !(_allowScreenCapture || captureForcedByFlag);
+}
+
+/**
+ * Run the app's own screen capture with the window protected. The user allowing capture is about
+ * other apps seeing the window; the action-suggestion screenshot exists to show the model what is
+ * *behind* it, and with the window in the image it can cover the question and feed the model its
+ * own earlier answers.
+ */
+export async function withContentProtection<T>(capture: () => Promise<T>): Promise<T> {
+  ownCaptures++;
+  try {
+    const before = contentProtectionApplied;
+    applyContentProtection();
+    if (before === false && contentProtectionApplied === true) {
+      await new Promise((resolve) => setTimeout(resolve, CAPTURE_PROTECTION_SETTLE_MS));
+    }
+    return await capture();
+  } finally {
+    ownCaptures--;
+    applyContentProtection();
+  }
 }
 
 /** Apply a changed `allowScreenCapture` setting to the live window. */

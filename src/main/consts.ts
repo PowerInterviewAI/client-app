@@ -85,6 +85,11 @@ export const ACTION_TIMEOUT_MS = 30_000; // 30 seconds
 // the failure mode of over-shrinking is silent - a confident answer about a blurry image.
 export const CAPTURE_MAX_EDGE_PX = 1920;
 
+// How long to wait after re-protecting a capturable window before the app takes its own
+// screenshot. setContentProtection lands on the next desktop composition, not when it returns,
+// so a capture started at once can still contain the window it was meant to exclude.
+export const CAPTURE_PROTECTION_SETTLE_MS = 100;
+
 // How long a suggestion request may spend *reaching* the backend - DNS, TLS, the upload, and the
 // response headers coming back. Shared by all three suggestion paths, because none of it depends
 // on what was asked for.

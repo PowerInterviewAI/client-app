@@ -43,8 +43,32 @@ export async function run() {
   windowControl.disableStealth();
   check('leaving stealth returns to the setting', protection.at(-1) === false);
 
+  // The app's own screenshot is of what is behind the window, so it protects the window for the
+  // capture even when the user allowed other apps to see it, and settles before capturing.
+  protection.length = 0;
+  let duringCapture;
+  const result = await windowControl.withContentProtection(async () => {
+    duringCapture = protection.at(-1);
+    return 'shot';
+  });
+  check('an own capture protects a capturable window', duringCapture === true);
+  check('an own capture returns what the capture returned', result === 'shot');
+  check('an own capture restores the setting afterwards', protection.at(-1) === false);
+
+  protection.length = 0;
+  await windowControl
+    .withContentProtection(async () => {
+      throw new Error('capture failed');
+    })
+    .catch(() => {});
+  check('a failed own capture still restores the setting', protection.at(-1) === false);
+
   windowControl.setAllowScreenCapture(false);
   check('turning the setting off protects again', protection.at(-1) === true);
+
+  protection.length = 0;
+  await windowControl.withContentProtection(async () => {});
+  check('an own capture on a protected window changes nothing', protection.length === 0);
 
   return failures;
 }
