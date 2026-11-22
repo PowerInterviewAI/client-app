@@ -1,6 +1,7 @@
 import { Check, Search } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import ExternalLink from '@/components/custom/external-link';
 import { Loading } from '@/components/custom/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -254,7 +255,15 @@ export default function SubscriptionTab({
             })}
           </div>
 
-          <p className="text-center text-xs text-muted-foreground">{t.payment.buy.prepaid}</p>
+          <p className="text-center text-xs text-muted-foreground">
+            {t.payment.buy.prepaid} {t.payment.buy.refundPrompt}{' '}
+            <ExternalLink
+              href="mailto:team@vectorleappulse.xyz"
+              className="underline underline-offset-2"
+            >
+              {t.payment.buy.refundContact}
+            </ExternalLink>
+          </p>
 
           {selectedPlan && (
             <Card ref={paymentDetailsRef} className="gap-3 py-4">

@@ -1012,6 +1012,8 @@ export const en = {
         `$${price} paid once, for ${months} ${months === 1 ? 'month' : 'months'}`,
       save: (percent: number) => `Save ${percent}%`,
       prepaid: 'Paid once in crypto. A pass never renews on its own.',
+      refundPrompt: 'Need a refund?',
+      refundContact: 'Contact support',
       extends: 'Your subscription is active: a new pass adds its time after the current end date.',
       selected: 'Selected',
       buy: 'Choose',
@@ -1085,7 +1087,7 @@ export const en = {
       expiredBody: 'This payment has expired. Please create a new payment.',
       failedBody: 'The payment could not be processed. Please try again.',
       refundedTitle: 'Payment Refunded',
-      refundedBody: 'This payment was refunded, and any subscription time it added was removed.',
+      refundedBody: 'This payment was refunded. Contact support if you have any questions.',
       receivedTitle: 'Payment Received',
       receivedBody:
         'Your payment is being confirmed on the network. No further payment is needed, and your subscription is applied automatically.',
