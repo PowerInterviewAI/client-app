@@ -89,6 +89,8 @@ export interface PaymentHistory {
   months_amount?: number;
   /** What the order actually granted once applied, overpay bonus included. */
   days_granted?: number | null;
+  /** Set on a follow-up payment for the remainder of a partially paid order. */
+  root_payment_id?: string | null;
   price_amount: number;
   pay_address: string | null;
   pay_amount: number | null;

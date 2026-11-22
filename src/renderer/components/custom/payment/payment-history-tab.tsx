@@ -139,11 +139,13 @@ export default function PaymentHistoryTab({
                   </TableCell>
                   <TableCell className="text-sm font-mono">{payment.payment_id}</TableCell>
                   <TableCell className="text-sm font-medium">
-                    {t.payment.history.grant(
-                      payment.months_amount ?? 0,
-                      payment.days_granted ?? 0,
-                      payment.credits_amount
-                    )}
+                    {payment.root_payment_id
+                      ? t.payment.history.remainder
+                      : t.payment.history.grant(
+                          payment.months_amount ?? 0,
+                          payment.days_granted ?? 0,
+                          payment.credits_amount
+                        )}
                   </TableCell>
                   <TableCell className="text-sm">
                     {payment.pay_amount && payment.pay_currency

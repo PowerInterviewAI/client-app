@@ -227,7 +227,7 @@ export const en = {
       ready: 'The AI asks, you answer out loud, and you get a scored report at the end.',
       unsupported: 'Not available on this server yet. Update the app, or try again later.',
       liveRunning: 'Stop the live assistant first - the two cannot share your microphone.',
-      unaffordable: 'Less than a minute of free time left. Subscribe to keep practising.',
+      unaffordable: 'Not enough free time left. Subscribe to keep practising.',
     },
 
     live: {
@@ -236,7 +236,7 @@ export const en = {
       ready: 'Transcribes your real interview and suggests answers as it happens.',
       running: 'Your live assistant is already running.',
       mockRunning: 'Finish the mock interview first - the two cannot share your microphone.',
-      unaffordable: 'Less than a minute of free time left. Subscribe to keep interviewing.',
+      unaffordable: 'Not enough free time left. Subscribe to keep interviewing.',
     },
 
     accountLabel: 'Account',
@@ -1033,6 +1033,7 @@ export const en = {
       emptyBody: 'You have not made any payments yet. Subscribe to get started.',
       subscribe: 'See plans',
       refreshing: 'Refreshing…',
+      remainder: 'Remaining balance',
       /** What an order bought: days of subscription, or credits on an order from before subscriptions. */
       grant: (months: number, days: number, credits: number) =>
         months > 0
