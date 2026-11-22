@@ -195,18 +195,28 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   }, [paymentStatus?.order_id, t]);
 
   const paymentStatusRef = React.useRef<PaymentStatusResponse | null>(null);
+  // The id on screen, and the one asked for last: a poll of the old payment that answers after
+  // the user asked for another must not put the old one back.
+  const watchedIdRef = useRef(initialPaymentId);
+  const requestedIdRef = useRef(initialPaymentId);
 
   const handleCheckStatus = useCallback(
-    async (id?: string, silent = false) => {
-      const checkId = id || paymentId;
+    async (checkId: string, silent = false) => {
       if (!checkId) return;
 
-      if (!silent) setLoading(true);
-      if (silent) setRefreshing(true);
-      setError(null);
+      if (silent) {
+        setRefreshing(true);
+      } else {
+        requestedIdRef.current = checkId;
+        setLoading(true);
+        setError(null);
+      }
       try {
         const status = await getPaymentStatus(checkId);
+        if (checkId !== requestedIdRef.current) return;
         if (status) {
+          watchedIdRef.current = checkId;
+          setError(null);
           setWatchedId(checkId);
           // only update state if the object really changed
           const prev = paymentStatusRef.current;
@@ -214,17 +224,22 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
             setPaymentStatus(status);
             paymentStatusRef.current = status;
           }
-        } else {
+        } else if (!silent) {
+          // A background check that fails says nothing: the payment on screen is still valid.
+          requestedIdRef.current = watchedIdRef.current;
           setError(t.payment.status.notFound);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : t.payment.status.fetchFailed);
+        if (!silent) {
+          requestedIdRef.current = watchedIdRef.current;
+          setError(err instanceof Error ? err.message : t.payment.status.fetchFailed);
+        }
       } finally {
         if (!silent) setLoading(false);
         if (silent) setRefreshing(false);
       }
     },
-    [paymentId, getPaymentStatus, t]
+    [getPaymentStatus, t]
   );
 
   type CopyField = 'address' | 'amount' | 'currency';
@@ -283,12 +298,10 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
 
   // Auto-check if initialPaymentId changes
   useEffect(() => {
-    if (initialPaymentId) {
-      setPaymentId(initialPaymentId);
-      setTimeout(() => {
-        handleCheckStatus(initialPaymentId);
-      }, 100);
-    }
+    if (!initialPaymentId) return;
+    setPaymentId(initialPaymentId);
+    const timer = window.setTimeout(() => handleCheckStatus(initialPaymentId), 100);
+    return () => window.clearTimeout(timer);
   }, [initialPaymentId, handleCheckStatus]);
 
   const isTerminal =
@@ -334,7 +347,7 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               className="max-w-40"
               maxLength={100}
             />
-            <Button onClick={() => handleCheckStatus()} disabled={!paymentId || loading}>
+            <Button onClick={() => handleCheckStatus(paymentId)} disabled={!paymentId || loading}>
               {loading ? t.payment.status.checking : t.payment.status.check}
             </Button>
           </div>
