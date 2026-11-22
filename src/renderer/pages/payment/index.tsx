@@ -51,9 +51,9 @@ export default function PaymentPage() {
       onValueChange={(value) => setActiveTab(value as PaymentTab)}
       className="w-full flex flex-col bg-background"
     >
-      {/* Header. Falls back to `/main` rather than home: this page is most often opened from the
-          interview screen, on a free-time warning the user wants to get back from. */}
-      <PageHeader title={t.payment.title} fallback="/main">
+      {/* Header. Falls back to home: the interview lock keeps this page from being opened
+          mid-session, so with no history `/main` would be an idle console with nothing to use. */}
+      <PageHeader title={t.payment.title}>
         <TabsList className="ml-auto">
           <TabsTrigger value="buy" className="flex items-center gap-1.5">
             <CreditCard className="h-4 w-4" />

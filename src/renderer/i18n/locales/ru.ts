@@ -1031,8 +1031,9 @@ export const ru: Translation = {
       selected: 'Выбрано',
       buy: 'Выбрать',
       detailsTitle: 'Детали оплаты',
-      detailsLead: 'Завершите покупку тарифа ',
-      detailsFor: ' за ',
+      // Quoted, because the plan names are adjectives ("Месячная") that cannot agree with "тарифа".
+      detailsLead: 'Завершите покупку тарифа «',
+      detailsFor: '» за ',
       currencyLabel: 'Валюта платежа',
       currencyPlaceholder: 'Выберите валюту',
       currencySearchPlaceholder: 'Поиск валюты…',
