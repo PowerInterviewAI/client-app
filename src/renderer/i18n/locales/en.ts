@@ -1158,6 +1158,8 @@ export const en = {
     tooLow: 'Not enough free time to start',
     outOfCredits: 'Out of free time - the session has ended',
     outOfCreditsHint: 'Subscribe for unlimited interviews.',
+    replaced: 'Interview ended - a new one started on this account',
+    replacedHint: 'An account can run one interview at a time.',
     lowBalance: (minutes: number) =>
       `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} of free time left`,
     lowBalanceHint: 'The session ends when your free time runs out.',

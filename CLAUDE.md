@@ -717,6 +717,8 @@ to start, so a refusal that lands while the session still reads Idle is held and
 main's start resolves. `test/out-of-credits.test.mjs` pins all
 of it.
 
+**An account runs one interview at a time.** Starting a new one closes the old one's sockets with 4409 (`WS_CLOSE_SESSION_REPLACED`). `AudioWsStream` treats it like 4402: it never reconnects, and the session ends through the same path, with its own toast and no subscribe action.
+
 `useLowBalanceWarning` toasts once at five minutes and once at one, off the ping balance, and never
 for a subscriber. A subscription within three days of its end shows "Ends in N days" in the title
 bar instead of its end date, and `useSubscriptionExpiryWarning` (mounted in `MainFrame`) toasts

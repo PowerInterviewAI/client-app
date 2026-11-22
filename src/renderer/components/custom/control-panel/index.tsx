@@ -71,10 +71,14 @@ export default function ControlPanel() {
   });
 
   const endForCredits = useCallback(() => {
-    toast.error(t.creditGate.outOfCredits, {
-      description: t.creditGate.outOfCreditsHint,
-      action: { label: t.creditGate.subscribe, onClick: () => navigate('/payment') },
-    });
+    if (liveTranscriptionService.wasReplaced()) {
+      toast.error(t.creditGate.replaced, { description: t.creditGate.replacedHint });
+    } else {
+      toast.error(t.creditGate.outOfCredits, {
+        description: t.creditGate.outOfCreditsHint,
+        action: { label: t.creditGate.subscribe, onClick: () => navigate('/payment') },
+      });
+    }
     if (isStealthRef.current) {
       void stopAssistantRef.current().catch((error) => {
         console.error('Failed to stop the assistant after running out of credits:', error);
