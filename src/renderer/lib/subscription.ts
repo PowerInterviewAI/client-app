@@ -37,6 +37,14 @@ export function daysLeft(expiresAt: number, now: number): number {
 /** Days left at or below which the end date is shown as a warning. */
 export const EXPIRY_WARNING_DAYS = 3;
 
+/**
+ * Whether to show the subscription as running. `subscribed` is as of the last ping, so past the
+ * end date, or offline, it would otherwise read "Ends in 0 days".
+ */
+export function isSubscriptionActive(subscription: SubscriptionSummary, now: number): boolean {
+  return subscription.subscribed && subscription.expiresAt !== null && subscription.expiresAt > now;
+}
+
 /** Which locale name an active plan is shown as; `other` when the backend did not say. */
 export function planKey(plan: string | null): 'monthly' | 'quarterly' | 'yearly' | 'other' {
   return plan === 'monthly' || plan === 'quarterly' || plan === 'yearly' ? plan : 'other';

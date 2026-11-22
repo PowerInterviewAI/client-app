@@ -16,7 +16,12 @@ import { useNow } from '@/hooks/use-now';
 import { usePayment } from '@/hooks/use-payment';
 import { useT } from '@/i18n';
 import { minutesCovered } from '@/lib/credit-gate';
-import { daysLeft, planKey, type SubscriptionSummary } from '@/lib/subscription';
+import {
+  daysLeft,
+  isSubscriptionActive,
+  planKey,
+  type SubscriptionSummary,
+} from '@/lib/subscription';
 import { cn } from '@/lib/utils';
 import type { AvailableCurrency, SubscriptionPlanInfo } from '@/types/payment';
 
@@ -80,7 +85,7 @@ export default function SubscriptionTab({
 
   const now = useNow();
   const freeMinutes = minutesCovered(credits, creditsPerMinute);
-  const active = subscription.subscribed && subscription.expiresAt !== null;
+  const active = isSubscriptionActive(subscription, now);
 
   /** The plan's display name; a plan this build has no name for shows its id. */
   const planNameOf = (plan: SubscriptionPlanInfo) => {

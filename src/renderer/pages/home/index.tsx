@@ -9,11 +9,13 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useNow } from '@/hooks/use-now';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useT } from '@/i18n';
 import { canStartSession } from '@/lib/credit-gate';
 import {
   freeTimeLabel,
+  isSubscriptionActive,
   planKey,
   subscriptionOf,
   type SubscriptionSummary,
@@ -171,7 +173,14 @@ export default function HomePage() {
   // user declined "remember me", which would report a signed-in user as not signed in.
   const email = appState?.accountEmail || config?.email;
   const subscription = subscriptionOf(appState);
-  const planSummary = describePlan(t, subscription, appState?.credits, appState?.creditsPerMinute);
+  const now = useNow();
+  const planSummary = describePlan(
+    t,
+    subscription,
+    appState?.credits,
+    appState?.creditsPerMinute,
+    now
+  );
   // appState starts null before the first IPC round-trip resolves, and the config arrives over a
   // second one - both need to settle before "no data" is trustworthy.
   const accountReady = !configLoading && config !== undefined && appState !== null;
@@ -369,9 +378,10 @@ function describePlan(
   t: ReturnType<typeof useT>,
   subscription: SubscriptionSummary,
   credits: number | undefined,
-  creditsPerMinute: number | undefined
+  creditsPerMinute: number | undefined,
+  now: number
 ): string | undefined {
-  if (subscription.subscribed && subscription.expiresAt !== null) {
+  if (isSubscriptionActive(subscription, now) && subscription.expiresAt !== null) {
     return t.payment.buy.subscribedUntil(
       t.creditsDisplay.planNames[planKey(subscription.plan)],
       t.creditsDisplay.date(subscription.expiresAt)

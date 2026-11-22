@@ -7,6 +7,7 @@ import {
   daysLeft,
   EXPIRY_WARNING_DAYS,
   freeTimeLabel,
+  isSubscriptionActive,
   planKey,
   type SubscriptionSummary,
 } from '@/lib/subscription';
@@ -31,10 +32,16 @@ export default function CreditsDisplay({
   className,
   style,
 }: CreditsDisplayProps) {
+  const now = useNow();
+
   return (
     <div className={cn('flex text-xs font-bold gap-2', className)} style={style}>
-      {subscription.subscribed && subscription.expiresAt !== null ? (
-        <SubscribedSummary subscription={subscription} expiresAt={subscription.expiresAt} />
+      {isSubscriptionActive(subscription, now) && subscription.expiresAt !== null ? (
+        <SubscribedSummary
+          subscription={subscription}
+          expiresAt={subscription.expiresAt}
+          now={now}
+        />
       ) : (
         <FreeSummary credits={credits} creditsPerMinute={creditsPerMinute} />
       )}
@@ -51,13 +58,15 @@ export default function CreditsDisplay({
 function SubscribedSummary({
   subscription,
   expiresAt,
+  now,
 }: {
   subscription: SubscriptionSummary;
   expiresAt: number;
+  now: number;
 }) {
   const t = useT();
   const planLabel = t.creditsDisplay.planNames[planKey(subscription.plan)];
-  const days = daysLeft(expiresAt, useNow());
+  const days = daysLeft(expiresAt, now);
   const ending = days <= EXPIRY_WARNING_DAYS;
 
   return (
