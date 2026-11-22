@@ -105,8 +105,8 @@ export function usePayment() {
     [t]
   );
 
-  // Get payment history
-  const getPaymentHistory = useCallback(async (): Promise<PaymentHistory[]> => {
+  // Get payment history. Null when it could not be read, which is not the same as having none.
+  const getPaymentHistory = useCallback(async (): Promise<PaymentHistory[] | null> => {
     try {
       setLoading(true);
       setError(null);
@@ -118,7 +118,7 @@ export function usePayment() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t.payment.errors.getHistory);
-      return [];
+      return null;
     } finally {
       setLoading(false);
     }

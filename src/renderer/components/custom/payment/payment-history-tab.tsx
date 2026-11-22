@@ -50,15 +50,20 @@ export default function PaymentHistoryTab({
     async (silent = false) => {
       if (!silent) setLoading(true);
       if (silent) setRefreshing(true);
-      setError(null);
       try {
         const result = await getPaymentHistory();
+        if (result === null) {
+          // A failed background poll keeps the list on screen and says nothing.
+          if (!silent) setError(t.payment.history.loadFailed);
+          return;
+        }
+        setError(null);
         // only update state when new data differs from the current list
         if (JSON.stringify(result) !== JSON.stringify(historyRef.current)) {
           setHistory(result);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : t.payment.history.loadFailed);
+        if (!silent) setError(err instanceof Error ? err.message : t.payment.history.loadFailed);
       } finally {
         if (!silent) setLoading(false);
         if (silent) setRefreshing(false);
@@ -94,7 +99,7 @@ export default function PaymentHistoryTab({
         <div className="py-8">
           <Loading disclaimer={t.payment.history.loading} />
         </div>
-      ) : history.length === 0 ? (
+      ) : history.length === 0 && error ? null : history.length === 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>{t.payment.history.emptyTitle}</CardTitle>
