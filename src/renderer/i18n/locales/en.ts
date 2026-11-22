@@ -621,7 +621,12 @@ export const en = {
   creditsDisplay: {
     freePlan: 'Free',
     /** The plan an active subscription was bought as; `other` when the backend did not say. */
-    planNames: { monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Annual', other: 'Subscribed' },
+    planNames: {
+      monthly: 'Monthly',
+      quarterly: 'Quarterly',
+      yearly: 'Annual',
+      other: 'Subscribed',
+    },
     date: (ms: number) =>
       new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     unlimitedUntil: (date: string) => `Unlimited until ${date}`,
@@ -1042,7 +1047,9 @@ export const en = {
       grant: (days: number, credits: number) =>
         days > 0
           ? `${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}`
-          : `${credits.toLocaleString()} credits`,
+          : credits > 0
+            ? `${credits.toLocaleString()} credits`
+            : '-',
       columns: {
         created: 'Created',
         paymentId: 'Payment ID',

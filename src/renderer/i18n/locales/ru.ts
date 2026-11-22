@@ -638,7 +638,12 @@ export const ru: Translation = {
 
   creditsDisplay: {
     freePlan: 'Бесплатно',
-    planNames: { monthly: 'Месячная', quarterly: 'Квартальная', yearly: 'Годовая', other: 'Подписка' },
+    planNames: {
+      monthly: 'Месячная',
+      quarterly: 'Квартальная',
+      yearly: 'Годовая',
+      other: 'Подписка',
+    },
     // The numeric form ("30.10.2026"), which needs no format options: those are English words to
     // the check that every string here is translated.
     date: (ms: number) => new Date(ms).toLocaleDateString('ru-RU'),
@@ -1050,7 +1055,9 @@ export const ru: Translation = {
       grant: (days: number, credits: number) =>
         days > 0
           ? `${days.toLocaleString('ru-RU')} ${plural(days, 'день', 'дня', 'дней')}`
-          : `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`,
+          : credits > 0
+            ? `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`
+            : '-',
       columns: {
         created: 'Создан',
         paymentId: 'ID платежа',
