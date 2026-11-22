@@ -5,8 +5,8 @@ import { StreamingQuestion } from '@/components/custom/panels/streaming-question
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useT } from '@/i18n';
@@ -219,7 +219,8 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
               every ASR partial pulled the panel back to the bottom, so re-reading an earlier
               answer mid-interview was not possible while the candidate was still speaking. */}
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Checkbox
+            <Switch
+              size="sm"
               checked={autoScroll}
               onCheckedChange={(v) => {
                 const enabled = v === true;
@@ -228,7 +229,6 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
                   console.error('Failed to persist auto-scroll setting', e)
                 );
               }}
-              className="h-4 w-4 rounded border-border bg-background"
               aria-label={t.panels.enableAutoScroll}
             />
             <span className="select-none">{t.panels.autoScroll}</span>

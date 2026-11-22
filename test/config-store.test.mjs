@@ -132,6 +132,12 @@ export async function run(userDataDir) {
     store.configStore.getConfig().hideTaskbarWhileRunning === false
   );
 
+  // Content protection is the default; capture is an opt-out the user has to choose.
+  check(
+    'allowScreenCapture defaults to off',
+    store.configStore.getConfig().allowScreenCapture === false
+  );
+
   // `lastSessionMode` backed the control bar's split Start button, which no longer exists.
   // Seeded above, so this pins the scrub rather than merely that RuntimeConfig stopped declaring
   // it - every read and write in the store spreads the raw stored object through, and nothing

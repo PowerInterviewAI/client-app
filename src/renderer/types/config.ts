@@ -41,4 +41,7 @@ export interface Config {
 
   // Hide the taskbar/Dock icon, pin on top and drop minimize while a live interview runs.
   hideTaskbarWhileRunning: boolean;
+
+  // Let screen capture see the main window. Stealth mode hides it regardless.
+  allowScreenCapture: boolean;
 }

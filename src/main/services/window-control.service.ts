@@ -1,6 +1,12 @@
 import { app, BrowserWindow, dialog, screen } from 'electron';
 
-import { MIN_HEIGHT, MIN_WIDTH, OPACITY_LEVELS, RAISE_INTERVAL_MS } from '../consts.js';
+import {
+  CAPTURE_PROTECTION_SETTLE_MS,
+  MIN_HEIGHT,
+  MIN_WIDTH,
+  OPACITY_LEVELS,
+  RAISE_INTERVAL_MS,
+} from '../consts.js';
 import { configStore } from '../store/config.store.js';
 import { RunningState } from '../types/app-state.js';
 import { isMockInterviewSessionActive } from '../types/mock-interview.js';
@@ -26,6 +32,11 @@ let _stealth = configStore.getStealth();
 
 // Cached so the window events that run applySurfaceVisibility do not hit the disk each time.
 let _hideTaskbarWhileRunning = readHideTaskbarSetting();
+let _allowScreenCapture = readAllowScreenCaptureSetting();
+
+// Dev/testing override, kept from before the setting existed: launching with it allows capture
+// outside stealth whatever the setting says.
+const captureForcedByFlag = process.argv.includes('--disable-content-protection');
 
 // While surfaces are hidden the window is re-raised on this interval, since something else
 // (a call app, a fullscreen share) can still end up above it.
@@ -34,6 +45,13 @@ let raiseTimer: NodeJS.Timeout | null = null;
 // Last minimizable state we asked for. Changing it alters the window style, which on Windows
 // makes the shell re-add the taskbar button, so it is only touched on a real change.
 let minimizableApplied: boolean | null = null;
+
+// Last content-protection state we asked for, so window events do not re-issue it.
+let contentProtectionApplied: boolean | null = null;
+
+// The app's own screenshots in flight. Each one protects the window for its duration, whatever
+// the setting says, so a capturable window does not end up in the image sent to the model.
+let ownCaptures = 0;
 
 // Last z-order state we asked for. `null` means nothing has been applied to this window yet,
 // which is what makes the first call after a window is registered always go through.
@@ -49,6 +67,15 @@ function readHideTaskbarSetting(): boolean {
     return configStore.getConfig().hideTaskbarWhileRunning === true;
   } catch (e) {
     console.warn('Failed to read hideTaskbarWhileRunning:', e);
+    return false;
+  }
+}
+
+function readAllowScreenCaptureSetting(): boolean {
+  try {
+    return configStore.getConfig().allowScreenCapture === true;
+  } catch (e) {
+    console.warn('Failed to read allowScreenCapture:', e);
     return false;
   }
 }
@@ -116,6 +143,7 @@ export function setWindowReference(window: BrowserWindow): void {
   // read the first real call as a no-op and leave the new window unpinned.
   alwaysOnTopApplied = null;
   minimizableApplied = null;
+  contentProtectionApplied = null;
   stopRaiseTimer();
 
   // The shell re-registers the taskbar button whenever the window is re-shown or re-shaped, and
@@ -169,6 +197,53 @@ function shouldHideSurfaces(): boolean {
  */
 export function canMinimize(): boolean {
   return !_stealth && !_hideTaskbarWhileRunning;
+}
+
+/**
+ * Whether the window is hidden from screen capture. Stealth always protects: it is the explicit
+ * request to be invisible, and a capture setting chosen for an ordinary window must not undo it.
+ */
+function shouldProtectContent(): boolean {
+  return _stealth || ownCaptures > 0 || !(_allowScreenCapture || captureForcedByFlag);
+}
+
+/**
+ * Run the app's own screen capture with the window protected. The user allowing capture is about
+ * other apps seeing the window; the action-suggestion screenshot exists to show the model what is
+ * *behind* it, and with the window in the image it can cover the question and feed the model its
+ * own earlier answers.
+ */
+export async function withContentProtection<T>(capture: () => Promise<T>): Promise<T> {
+  ownCaptures++;
+  try {
+    const before = contentProtectionApplied;
+    applyContentProtection();
+    if (before === false && contentProtectionApplied === true) {
+      await new Promise((resolve) => setTimeout(resolve, CAPTURE_PROTECTION_SETTLE_MS));
+    }
+    return await capture();
+  } finally {
+    ownCaptures--;
+    applyContentProtection();
+  }
+}
+
+/** Apply a changed `allowScreenCapture` setting to the live window. */
+export function setAllowScreenCapture(value: boolean): void {
+  _allowScreenCapture = value;
+  applySurfaceVisibility();
+}
+
+function applyContentProtection(): void {
+  if (!win || win.isDestroyed()) return;
+  const enabled = shouldProtectContent();
+  if (contentProtectionApplied === enabled) return;
+  try {
+    if (typeof win.setContentProtection === 'function') win.setContentProtection(enabled);
+    contentProtectionApplied = enabled;
+  } catch (e) {
+    console.warn('setContentProtection failed:', e);
+  }
 }
 
 /** Apply a changed `hideTaskbarWhileRunning` setting to the live window. */
@@ -233,6 +308,9 @@ function applySurfaceVisibility(): void {
   const hidden = shouldHideSurfaces();
 
   if (win && !win.isDestroyed()) {
+    // Ahead of setSkipTaskbar like the other window mutations, in case the shell re-registers.
+    applyContentProtection();
+
     // Style change, so before setSkipTaskbar for the same reason as the z-order below.
     applyMinimizable();
 

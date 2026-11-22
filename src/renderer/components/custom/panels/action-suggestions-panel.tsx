@@ -12,7 +12,7 @@ import { type ActionSuggestion, SuggestionState } from '@/types/suggestion';
 const MAX_QUESTION_LENGTH = 256;
 
 import { Button } from '../../ui/button';
-import { Checkbox } from '../../ui/checkbox';
+import { Switch } from '../../ui/switch';
 import { SafeMarkdown } from '../safe-markdown';
 import SuggestionReveal from './suggestion-reveal';
 
@@ -176,7 +176,8 @@ function ActionSuggestionsPanel({
 
         {!isStealth && (
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Checkbox
+            <Switch
+              size="sm"
               checked={autoScroll}
               onCheckedChange={(v) => {
                 const enabled = v === true;
@@ -185,7 +186,6 @@ function ActionSuggestionsPanel({
                   console.error('Failed to persist auto-scroll setting', e)
                 );
               }}
-              className="h-4 w-4 rounded border-border bg-background text-primary"
               aria-label={t.panels.enableAutoScroll}
             />
             <span className="text-xs text-muted-foreground">{t.panels.autoScroll}</span>

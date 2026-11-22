@@ -1,7 +1,10 @@
 import { ipcMain } from 'electron';
 
 import { appStateService } from '../services/app-state.service.js';
-import { setHideTaskbarWhileRunning } from '../services/window-control.service.js';
+import {
+  setAllowScreenCapture,
+  setHideTaskbarWhileRunning,
+} from '../services/window-control.service.js';
 import { configStore, RuntimeConfig } from '../store/config.store.js';
 
 export function registerConfigHandlers(): void {
@@ -28,6 +31,10 @@ export function registerConfigHandlers(): void {
 
       if (updates.hideTaskbarWhileRunning !== undefined) {
         setHideTaskbarWhileRunning(config.hideTaskbarWhileRunning);
+      }
+
+      if (updates.allowScreenCapture !== undefined) {
+        setAllowScreenCapture(config.allowScreenCapture);
       }
 
       return config;

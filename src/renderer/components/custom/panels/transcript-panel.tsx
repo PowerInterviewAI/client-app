@@ -9,7 +9,7 @@ import { useT } from '@/i18n';
 import { Speaker, type Transcript } from '@/types/transcript';
 
 import { Button } from '../../ui/button';
-import { Checkbox } from '../../ui/checkbox';
+import { Switch } from '../../ui/switch';
 
 // Every entry is from the same session, so the date carries no information and its width is
 // what would push the speaker onto a line of its own.
@@ -94,7 +94,8 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
 
         {!isStealth && (
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Checkbox
+            <Switch
+              size="sm"
               checked={autoScroll}
               onCheckedChange={(v) => {
                 const enabled = v === true;
@@ -103,7 +104,6 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
                   console.error('Failed to persist auto-scroll setting', e)
                 );
               }}
-              className="h-4 w-4 rounded border-border bg-background"
               aria-label={t.panels.enableAutoScroll}
             />
             <span className="select-none">{t.panels.autoScroll}</span>

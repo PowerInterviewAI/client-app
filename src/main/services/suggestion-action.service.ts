@@ -29,6 +29,7 @@ import { UuidUtil } from '../utils/uuid.js';
 import { actionLockService, ActionType } from './action-lock.service.js';
 import { appStateService } from './app-state.service.js';
 import { pushNotificationService } from './push-notification.service.js';
+import { withContentProtection } from './window-control.service.js';
 
 export class ActionSuggestionService {
   private llmApi: LLMApi = new LLMApi();
@@ -378,18 +379,20 @@ export class ActionSuggestionService {
 
       // desktopCapturer is Electron's built-in screen-capture API.
       // A timeout guards against indefinite hangs on restricted or virtual display adapters.
-      const sources = await Promise.race([
-        desktopCapturer.getSources({
-          types: ['screen'],
-          thumbnailSize: { width: captureWidth, height: captureHeight },
-        }),
-        new Promise<never>((_, reject) =>
-          setTimeout(
-            () => reject(new Error(`Screenshot timed out after ${ACTION_TIMEOUT_MS}ms`)),
-            ACTION_TIMEOUT_MS
-          )
-        ),
-      ]);
+      const sources = await withContentProtection(() =>
+        Promise.race([
+          desktopCapturer.getSources({
+            types: ['screen'],
+            thumbnailSize: { width: captureWidth, height: captureHeight },
+          }),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error(`Screenshot timed out after ${ACTION_TIMEOUT_MS}ms`)),
+              ACTION_TIMEOUT_MS
+            )
+          ),
+        ])
+      );
 
       if (!sources || sources.length === 0) {
         throw new Error('No screen sources captured from any display');
