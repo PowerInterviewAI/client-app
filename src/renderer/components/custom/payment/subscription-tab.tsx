@@ -130,7 +130,7 @@ export default function SubscriptionTab({
             <div className="text-lg font-bold">
               {t.payment.buy.subscribedUntil(
                 t.creditsDisplay.planNames[planKey(subscription.plan)],
-                t.creditsDisplay.date(subscription.expiresAt)
+                t.creditsDisplay.dateTime(subscription.expiresAt)
               )}
             </div>
             <div className="text-xs text-muted-foreground">

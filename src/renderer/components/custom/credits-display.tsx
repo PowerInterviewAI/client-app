@@ -73,7 +73,10 @@ function SubscribedSummary({
     <>
       <span className="text-muted-foreground">{planLabel}</span>
       <hr className="h-4 border border-border" />
-      <span className={ending ? 'text-yellow-600' : 'text-muted-foreground'}>
+      <span
+        className={ending ? 'text-yellow-600' : 'text-muted-foreground'}
+        title={t.creditsDisplay.dateTime(expiresAt)}
+      >
         {ending
           ? t.creditsDisplay.endsIn(days)
           : t.creditsDisplay.unlimitedUntil(t.creditsDisplay.date(expiresAt))}

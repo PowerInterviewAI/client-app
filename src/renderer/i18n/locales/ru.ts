@@ -639,6 +639,8 @@ export const ru: Translation = {
     // The numeric form ("30.10.2026"), which needs no format options: those are English words to
     // the check that every string here is translated.
     date: (ms: number) => new Date(ms).toLocaleDateString('ru-RU'),
+    dateTime: (ms: number) =>
+      `${new Date(ms).toLocaleDateString('ru-RU')}, ${new Date(ms).toLocaleTimeString('ru-RU').slice(0, 5)}`,
     unlimitedUntil: (date: string) => `Без ограничений до ${date}`,
     endsIn: (days: number) => `Закончится через ${days} ${plural(days, 'день', 'дня', 'дней')}`,
     freeLeft: (availableTime: string) => `${availableTime} бесплатно`,

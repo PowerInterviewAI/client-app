@@ -618,6 +618,9 @@ export const en = {
     },
     date: (ms: number) =>
       new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    /** In the user's own time zone, so it needs no zone label. */
+    dateTime: (ms: number) =>
+      new Date(ms).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
     unlimitedUntil: (date: string) => `Unlimited until ${date}`,
     endsIn: (days: number) => `Ends in ${days} ${days === 1 ? 'day' : 'days'}`,
     freeLeft: (availableTime: string) => `${availableTime} free`,

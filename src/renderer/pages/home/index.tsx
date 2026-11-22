@@ -384,7 +384,7 @@ function describePlan(
   if (isSubscriptionActive(subscription, now) && subscription.expiresAt !== null) {
     return t.payment.buy.subscribedUntil(
       t.creditsDisplay.planNames[planKey(subscription.plan)],
-      t.creditsDisplay.date(subscription.expiresAt)
+      t.creditsDisplay.dateTime(subscription.expiresAt)
     );
   }
   if (credits === undefined) return undefined;
