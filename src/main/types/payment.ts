@@ -85,8 +85,6 @@ export interface PaymentHistory {
   order_id: string;
   plan: PaymentPlan;
   credits_amount: number;
-  /** Absent from a backend that predates subscriptions. */
-  days_amount?: number;
   /** Calendar months a pass buys. */
   months_amount?: number;
   /** What the order actually granted once applied, overpay bonus included. */

@@ -141,7 +141,7 @@ export default function PaymentHistoryTab({
                   <TableCell className="text-sm font-medium">
                     {t.payment.history.grant(
                       payment.months_amount ?? 0,
-                      payment.days_granted ?? payment.days_amount ?? 0,
+                      payment.days_granted ?? 0,
                       payment.credits_amount
                     )}
                   </TableCell>
