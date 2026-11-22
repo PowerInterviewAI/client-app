@@ -1083,6 +1083,11 @@ export const en = {
       failedTitle: 'Payment Failed',
       expiredBody: 'This payment has expired. Please create a new payment.',
       failedBody: 'The payment could not be processed. Please try again.',
+      refundedTitle: 'Payment Refunded',
+      refundedBody: 'This payment was refunded, and any subscription time it added was removed.',
+      partialTitle: 'Partial Payment Received',
+      partialBody:
+        'We are preparing a new address for the remaining balance. It will appear here and arrive by email. Do not send more to the previous address.',
       created: 'Created:',
       updated: 'Updated:',
       addressCopied: 'Payment address copied to clipboard',

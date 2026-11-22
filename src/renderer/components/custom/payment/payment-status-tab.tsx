@@ -95,10 +95,19 @@ interface PaymentStatusTabProps {
   initialPaymentId?: string;
 }
 
+const TERMINAL_STATUSES: readonly PaymentStatus[] = [
+  PaymentStatus.Finished,
+  PaymentStatus.Failed,
+  PaymentStatus.Expired,
+  PaymentStatus.Refunded,
+];
+
 export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatusTabProps) {
   const t = useT();
   const { getPaymentStatus } = usePayment();
   const [paymentId, setPaymentId] = useState(initialPaymentId);
+  // What is polled. Separate from the input, so a half-typed id is never sent to the backend.
+  const [watchedId, setWatchedId] = useState(initialPaymentId);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatusResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -198,6 +207,7 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
       try {
         const status = await getPaymentStatus(checkId);
         if (status) {
+          setWatchedId(checkId);
           // only update state if the object really changed
           const prev = paymentStatusRef.current;
           if (JSON.stringify(prev) !== JSON.stringify(status)) {
@@ -281,26 +291,32 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
     }
   }, [initialPaymentId, handleCheckStatus]);
 
+  const isTerminal =
+    paymentStatus !== null && TERMINAL_STATUSES.includes(paymentStatus.payment_status);
+  const closedNotice =
+    paymentStatus?.payment_status === PaymentStatus.Expired
+      ? { title: t.payment.status.expiredTitle, body: t.payment.status.expiredBody }
+      : paymentStatus?.payment_status === PaymentStatus.Refunded
+        ? { title: t.payment.status.refundedTitle, body: t.payment.status.refundedBody }
+        : paymentStatus?.payment_status === PaymentStatus.Failed
+          ? { title: t.payment.status.failedTitle, body: t.payment.status.failedBody }
+          : null;
+
   // poll for status every 5 seconds while we have an ID and the payment
   // hasn't reached a terminal state. this keeps the UI up‑to‑date without
   // requiring manual clicks.
   useEffect(() => {
     let interval: number | null = null;
-    const isTerminal =
-      paymentStatus !== null &&
-      [PaymentStatus.Finished, PaymentStatus.Failed, PaymentStatus.Expired].includes(
-        paymentStatus.payment_status
-      );
 
     // only poll when there's an ID and the payment hasn't reached a final state
-    if (paymentId && !isTerminal) {
-      interval = window.setInterval(() => handleCheckStatus(undefined, true), 5000);
+    if (watchedId && !isTerminal) {
+      interval = window.setInterval(() => handleCheckStatus(watchedId, true), 5000);
     }
 
     return () => {
       if (interval !== null) window.clearInterval(interval);
     };
-  }, [paymentId, paymentStatus, handleCheckStatus]);
+  }, [watchedId, isTerminal, handleCheckStatus]);
 
   return (
     <div className="space-y-4">
@@ -385,98 +401,109 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               )}
             </div>
 
-            {paymentStatus.payment_status !== PaymentStatus.Finished &&
-              paymentStatus.payment_status !== PaymentStatus.Failed &&
-              paymentStatus.payment_status !== PaymentStatus.Expired && (
-                <>
-                  <div className="border-t pt-4">
-                    <p className="text-sm font-medium mb-3">{t.payment.status.paymentMethods}</p>
-                    <Tabs defaultValue="qr" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="qr">{t.payment.status.qrTab}</TabsTrigger>
-                        <TabsTrigger value="address">{t.payment.status.addressTab}</TabsTrigger>
-                      </TabsList>
+            {/* A top-up to the original address is not matched to the order, so its QR and
+                address must not stay on screen once a payment is partial. */}
+            {paymentStatus.payment_status === PaymentStatus.PartiallyPaid && (
+              <div className="bg-yellow-50 dark:bg-yellow-950 p-4 rounded-lg">
+                <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+                  {t.payment.status.partialTitle}
+                </p>
+                <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+                  {t.payment.status.partialBody}
+                </p>
+              </div>
+            )}
 
-                      <TabsContent value="qr" className="mt-4">
-                        <div className="flex flex-col items-center space-y-3">
-                          <MemoQr
-                            t={t}
-                            paymentUri={paymentUri}
-                            setQrcode={handleQrcodeReady}
-                            isQrcodeReady={isQrcodeReady}
-                            orderId={paymentStatus.order_id}
-                            onDownload={handleDownloadQr}
-                          />
-                          <p className="text-sm text-muted-foreground text-center">
-                            {t.payment.status.scanWithWallet}
+            {!isTerminal && paymentStatus.payment_status !== PaymentStatus.PartiallyPaid && (
+              <>
+                <div className="border-t pt-4">
+                  <p className="text-sm font-medium mb-3">{t.payment.status.paymentMethods}</p>
+                  <Tabs defaultValue="qr" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="qr">{t.payment.status.qrTab}</TabsTrigger>
+                      <TabsTrigger value="address">{t.payment.status.addressTab}</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="qr" className="mt-4">
+                      <div className="flex flex-col items-center space-y-3">
+                        <MemoQr
+                          t={t}
+                          paymentUri={paymentUri}
+                          setQrcode={handleQrcodeReady}
+                          isQrcodeReady={isQrcodeReady}
+                          orderId={paymentStatus.order_id}
+                          onDownload={handleDownloadQr}
+                        />
+                        <p className="text-sm text-muted-foreground text-center">
+                          {t.payment.status.scanWithWallet}
+                        </p>
+                        <p className="text-xs text-muted-foreground text-center">
+                          {t.payment.status.qrIncludes(
+                            `${paymentStatus.pay_amount} ${paymentStatus.pay_currency.toUpperCase()}`
+                          )}
+                        </p>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="address" className="mt-4">
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-2">
+                            {t.payment.status.paymentAddress}
                           </p>
-                          <p className="text-xs text-muted-foreground text-center">
-                            {t.payment.status.qrIncludes(
-                              `${paymentStatus.pay_amount} ${paymentStatus.pay_currency.toUpperCase()}`
-                            )}
-                          </p>
+                          <div className="flex gap-2 items-center">
+                            <Button size="sm" variant="secondary" onClick={handleCopyAddress}>
+                              {copiedField === 'address' ? (
+                                <CopyCheck className="h-4 w-4" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <code className="flex-1 bg-muted p-2 rounded text-sm">
+                              {paymentStatus.pay_address}
+                            </code>
+                          </div>
                         </div>
-                      </TabsContent>
-
-                      <TabsContent value="address" className="mt-4">
-                        <div className="space-y-3">
-                          <div>
-                            <p className="text-sm font-medium mb-2">
-                              {t.payment.status.paymentAddress}
-                            </p>
-                            <div className="flex gap-2 items-center">
-                              <Button size="sm" variant="secondary" onClick={handleCopyAddress}>
-                                {copiedField === 'address' ? (
+                        <div>
+                          <p className="text-sm font-medium mb-2">
+                            {t.payment.status.amountToSend}
+                          </p>
+                          <div className="flex gap-2">
+                            <div className="flex flex-1 gap-2 items-center">
+                              <Button size="sm" variant="secondary" onClick={handleCopyAmount}>
+                                {copiedField === 'amount' ? (
                                   <CopyCheck className="h-4 w-4" />
                                 ) : (
                                   <Copy className="h-4 w-4" />
                                 )}
                               </Button>
                               <code className="flex-1 bg-muted p-2 rounded text-sm">
-                                {paymentStatus.pay_address}
+                                {paymentStatus.pay_amount}
+                              </code>
+                            </div>
+                            <div className="flex gap-2 items-center">
+                              <Button size="sm" variant="secondary" onClick={handleCopyCurrency}>
+                                {copiedField === 'currency' ? (
+                                  <CopyCheck className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <code className="bg-muted p-2 rounded text-sm">
+                                {paymentStatus.pay_currency.toUpperCase()}
                               </code>
                             </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium mb-2">
-                              {t.payment.status.amountToSend}
-                            </p>
-                            <div className="flex gap-2">
-                              <div className="flex flex-1 gap-2 items-center">
-                                <Button size="sm" variant="secondary" onClick={handleCopyAmount}>
-                                  {copiedField === 'amount' ? (
-                                    <CopyCheck className="h-4 w-4" />
-                                  ) : (
-                                    <Copy className="h-4 w-4" />
-                                  )}
-                                </Button>
-                                <code className="flex-1 bg-muted p-2 rounded text-sm">
-                                  {paymentStatus.pay_amount}
-                                </code>
-                              </div>
-                              <div className="flex gap-2 items-center">
-                                <Button size="sm" variant="secondary" onClick={handleCopyCurrency}>
-                                  {copiedField === 'currency' ? (
-                                    <CopyCheck className="h-4 w-4" />
-                                  ) : (
-                                    <Copy className="h-4 w-4" />
-                                  )}
-                                </Button>
-                                <code className="bg-muted p-2 rounded text-sm">
-                                  {paymentStatus.pay_currency.toUpperCase()}
-                                </code>
-                              </div>
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {t.payment.status.sendExactly}
-                          </p>
                         </div>
-                      </TabsContent>
-                    </Tabs>
-                  </div>
-                </>
-              )}
+                        <p className="text-xs text-muted-foreground">
+                          {t.payment.status.sendExactly}
+                        </p>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </>
+            )}
 
             {paymentStatus.payment_status === PaymentStatus.Finished && (
               <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
@@ -489,19 +516,12 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               </div>
             )}
 
-            {(paymentStatus.payment_status === PaymentStatus.Failed ||
-              paymentStatus.payment_status === PaymentStatus.Expired) && (
+            {closedNotice && (
               <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg">
                 <p className="text-sm font-medium text-red-900 dark:text-red-100">
-                  {paymentStatus.payment_status === PaymentStatus.Expired
-                    ? t.payment.status.expiredTitle
-                    : t.payment.status.failedTitle}
+                  {closedNotice.title}
                 </p>
-                <p className="text-sm text-red-800 dark:text-red-200 mt-1">
-                  {paymentStatus.payment_status === PaymentStatus.Expired
-                    ? t.payment.status.expiredBody
-                    : t.payment.status.failedBody}
-                </p>
+                <p className="text-sm text-red-800 dark:text-red-200 mt-1">{closedNotice.body}</p>
               </div>
             )}
 

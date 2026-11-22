@@ -132,7 +132,7 @@ export default function PaymentHistoryTab({
             </TableHeader>
             <TableBody>
               {history.slice(0, 30).map((payment) => (
-                <TableRow key={payment.payment_id}>
+                <TableRow key={payment.payment_id ?? payment.order_id}>
                   <TableCell className="text-sm">
                     {new Date(payment.created_at).toLocaleDateString()}{' '}
                     {new Date(payment.created_at).toLocaleTimeString()}
@@ -165,6 +165,7 @@ export default function PaymentHistoryTab({
                     <Button
                       size="sm"
                       variant="outline"
+                      disabled={!payment.payment_id}
                       onClick={() => onViewPayment(payment.payment_id ?? '')}
                     >
                       {t.payment.history.view}
