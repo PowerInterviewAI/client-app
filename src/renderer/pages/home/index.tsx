@@ -231,7 +231,7 @@ export default function HomePage() {
     // opened on a scrollbar and a sign-out button below the fold. Nothing here was removed to
     // fix that - the screen is the same six things - they are laid out across the width the
     // window already has instead of down a column half of it wide. The two launch cards share a
-    // row, the account strip carries Buy Credits on its own line rather than above one, and the
+    // row, the account strip carries Subscription on its own line rather than above one, and the
     // three navigations are one row of three. Vertical rhythm went from 8/6-step gaps to 4, and
     // the outer padding from py-10 to py-6.
     <div className="flex-1 overflow-auto">
