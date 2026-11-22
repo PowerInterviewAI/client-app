@@ -48,7 +48,7 @@ export interface AppState {
   subscribed?: boolean;
   /** When the subscription ends, in unix ms; null for an account that never had one. */
   subscriptionExpiresAt?: number | null;
-  /** The last pass applied (`monthly` / `yearly`), for display; null when unknown. */
+  /** The last pass applied (`monthly` / `quarterly` / `yearly`), for display; null when unknown. */
   subscriptionPlan?: string | null;
   userRole?: UserRole;
   providedLLMModel?: string;

@@ -621,7 +621,7 @@ export const en = {
   creditsDisplay: {
     freePlan: 'Free',
     /** The plan an active subscription was bought as; `other` when the backend did not say. */
-    planNames: { monthly: 'Monthly', yearly: 'Yearly', other: 'Subscribed' },
+    planNames: { monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Annual', other: 'Subscribed' },
     date: (ms: number) =>
       new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     unlimitedUntil: (date: string) => `Unlimited until ${date}`,
@@ -1007,9 +1007,10 @@ export const en = {
         return parts.join(' ') || '0 minutes';
       },
       loadingPlans: 'Loading plans…',
-      mostPopular: 'Best value',
+      mostPopular: 'Most popular',
       planDescriptions: {
         monthly: 'Unlimited interviews on the SOTA model for 30 days',
+        quarterly: 'Unlimited interviews on the SOTA model for 90 days',
         yearly: 'Unlimited interviews on the SOTA model for a year',
       },
       perMonth: ' / month',

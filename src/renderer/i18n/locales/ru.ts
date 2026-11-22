@@ -638,7 +638,7 @@ export const ru: Translation = {
 
   creditsDisplay: {
     freePlan: 'Бесплатно',
-    planNames: { monthly: 'Месячная', yearly: 'Годовая', other: 'Подписка' },
+    planNames: { monthly: 'Месячная', quarterly: 'Квартальная', yearly: 'Годовая', other: 'Подписка' },
     // The numeric form ("30.10.2026"), which needs no format options: those are English words to
     // the check that every string here is translated.
     date: (ms: number) => new Date(ms).toLocaleDateString('ru-RU'),
@@ -1015,9 +1015,10 @@ export const ru: Translation = {
         return parts.join(' ') || '0 минут';
       },
       loadingPlans: 'Загружаем тарифы…',
-      mostPopular: 'Выгоднее всего',
+      mostPopular: 'Популярный выбор',
       planDescriptions: {
         monthly: 'Собеседования без ограничений на передовой модели на 30 дней',
+        quarterly: 'Собеседования без ограничений на передовой модели на 90 дней',
         yearly: 'Собеседования без ограничений на передовой модели на год',
       },
       perMonth: ' / месяц',

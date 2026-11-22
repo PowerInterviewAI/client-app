@@ -6,7 +6,7 @@ export interface SubscriptionSummary {
   subscribed: boolean;
   /** Unix ms; null for an account that never had one. */
   expiresAt: number | null;
-  /** `monthly` / `yearly`, or null when unknown. */
+  /** `monthly` / `quarterly` / `yearly`, or null when unknown. */
   plan: string | null;
 }
 
@@ -38,8 +38,8 @@ export function daysLeft(expiresAt: number, now: number): number {
 export const EXPIRY_WARNING_DAYS = 3;
 
 /** Which locale name an active plan is shown as; `other` when the backend did not say. */
-export function planKey(plan: string | null): 'monthly' | 'yearly' | 'other' {
-  return plan === 'monthly' || plan === 'yearly' ? plan : 'other';
+export function planKey(plan: string | null): 'monthly' | 'quarterly' | 'yearly' | 'other' {
+  return plan === 'monthly' || plan === 'quarterly' || plan === 'yearly' ? plan : 'other';
 }
 
 /**

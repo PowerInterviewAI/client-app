@@ -162,7 +162,7 @@ export default function SubscriptionTab({
         </div>
       ) : (
         <>
-          <div className="mx-auto grid gap-2 md:grid-cols-2">
+          <div className="mx-auto grid gap-2 md:grid-cols-3">
             {plans.map((plan) => {
               const isPopular = plan.popular;
               const isSelected = selectedPlan?.plan === plan.plan;

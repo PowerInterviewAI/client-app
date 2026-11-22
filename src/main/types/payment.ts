@@ -15,11 +15,12 @@ export enum PaymentStatus {
 }
 
 /**
- * What a payment buys. Monthly and yearly are the subscription passes on sale; the credit packs
+ * What a payment buys. Monthly, quarterly and yearly are the passes on sale; the credit packs
  * are only here because orders placed before subscriptions carry them.
  */
 export enum PaymentPlan {
   Monthly = 'monthly',
+  Quarterly = 'quarterly',
   Yearly = 'yearly',
   Starter = 'starter',
   Pro = 'pro',
@@ -32,7 +33,7 @@ export interface SubscriptionPlanInfo {
   priceUsd: number;
   /** How many days of subscription the pass adds. */
   days: number;
-  /** The price per month, for display: $96 for a year is $8 a month. */
+  /** The price per month, for display: $180 for a year is $15 a month. */
   pricePerMonthUsd: number;
   popular: boolean;
 }
