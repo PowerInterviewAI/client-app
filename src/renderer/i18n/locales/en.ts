@@ -1014,15 +1014,16 @@ export const en = {
       loadingPlans: 'Loading plans…',
       mostPopular: 'Most popular',
       planDescriptions: {
-        monthly: 'Unlimited interviews on the SOTA model for 30 days',
-        quarterly: 'Unlimited interviews on the SOTA model for 90 days',
+        monthly: 'Unlimited interviews on the SOTA model for one month',
+        quarterly: 'Unlimited interviews on the SOTA model for three months',
         yearly: 'Unlimited interviews on the SOTA model for a year',
       },
       perMonth: ' / month',
-      billedAs: (price: number, days: number) => `$${price} paid once, for ${days} days`,
+      billedAs: (price: number, months: number) =>
+        `$${price} paid once, for ${months} ${months === 1 ? 'month' : 'months'}`,
       save: (percent: number) => `Save ${percent}%`,
       prepaid: 'Paid once in crypto. A pass never renews on its own.',
-      extends: 'Your subscription is active: a new pass adds its days after the current end date.',
+      extends: 'Your subscription is active: a new pass adds its time after the current end date.',
       selected: 'Selected',
       buy: 'Choose',
       detailsTitle: 'Payment Details',
@@ -1044,12 +1045,14 @@ export const en = {
       subscribe: 'See plans',
       refreshing: 'Refreshing…',
       /** What an order bought: days of subscription, or credits on an order from before subscriptions. */
-      grant: (days: number, credits: number) =>
-        days > 0
-          ? `${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}`
-          : credits > 0
-            ? `${credits.toLocaleString()} credits`
-            : '-',
+      grant: (months: number, days: number, credits: number) =>
+        months > 0
+          ? `${months} ${months === 1 ? 'month' : 'months'}`
+          : days > 0
+            ? `${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}`
+            : credits > 0
+              ? `${credits.toLocaleString()} credits`
+              : '-',
       columns: {
         created: 'Created',
         paymentId: 'Payment ID',
@@ -1167,7 +1170,7 @@ export const en = {
     endingSoon: (days: number) =>
       `Your subscription ends in ${days} ${days === 1 ? 'day' : 'days'}`,
     endingSoonHint:
-      'Buy another pass to keep interviews unlimited. Its days are added after the current end date.',
+      'Buy another pass to keep interviews unlimited. Its time is added after the current end date.',
     ended: 'Your subscription has ended',
     endedHint: 'Interviews now use your free time on the free model.',
   },

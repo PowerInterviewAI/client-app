@@ -22,7 +22,7 @@ export class PaymentApi extends ApiClient {
       {
         plan: PaymentPlan;
         price_usd: number;
-        days: number;
+        months: number;
         price_per_month_usd: number;
         popular: boolean;
       }[]

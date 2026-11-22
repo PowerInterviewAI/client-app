@@ -31,8 +31,8 @@ export enum PaymentPlan {
 export interface SubscriptionPlanInfo {
   plan: PaymentPlan;
   priceUsd: number;
-  /** How many days of subscription the pass adds. */
-  days: number;
+  /** How many calendar months of subscription the pass adds. */
+  months: number;
   /** The price per month, for display: $180 for a year is $15 a month. */
   pricePerMonthUsd: number;
   popular: boolean;
@@ -87,6 +87,8 @@ export interface PaymentHistory {
   credits_amount: number;
   /** Absent from a backend that predates subscriptions. */
   days_amount?: number;
+  /** Calendar months a pass buys. */
+  months_amount?: number;
   /** What the order actually granted once applied, overpay bonus included. */
   days_granted?: number | null;
   price_amount: number;

@@ -213,7 +213,7 @@ export default function SubscriptionTab({
                       )}
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {t.payment.buy.billedAs(plan.priceUsd, plan.days)}
+                      {t.payment.buy.billedAs(plan.priceUsd, plan.months)}
                     </p>
                   </CardHeader>
 

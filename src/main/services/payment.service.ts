@@ -44,7 +44,7 @@ export class PaymentService {
         response.data?.map((plan) => ({
           plan: plan.plan,
           priceUsd: plan.price_usd,
-          days: plan.days,
+          months: plan.months,
           pricePerMonthUsd: plan.price_per_month_usd,
           popular: plan.popular,
         })) || [];

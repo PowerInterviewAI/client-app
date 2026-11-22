@@ -1022,16 +1022,16 @@ export const ru: Translation = {
       loadingPlans: 'Загружаем тарифы…',
       mostPopular: 'Популярный выбор',
       planDescriptions: {
-        monthly: 'Собеседования без ограничений на передовой модели на 30 дней',
-        quarterly: 'Собеседования без ограничений на передовой модели на 90 дней',
+        monthly: 'Собеседования без ограничений на передовой модели на месяц',
+        quarterly: 'Собеседования без ограничений на передовой модели на три месяца',
         yearly: 'Собеседования без ограничений на передовой модели на год',
       },
       perMonth: ' / месяц',
-      billedAs: (price: number, days: number) =>
-        `$${price} единоразово, на ${days} ${plural(days, 'день', 'дня', 'дней')}`,
+      billedAs: (price: number, months: number) =>
+        `$${price} единоразово, на ${months} ${plural(months, 'месяц', 'месяца', 'месяцев')}`,
       save: (percent: number) => `Скидка ${percent}%`,
       prepaid: 'Оплата один раз в криптовалюте. Подписка не продлевается сама.',
-      extends: 'Подписка активна: новый тариф добавит свои дни после текущей даты окончания.',
+      extends: 'Подписка активна: новый тариф добавит своё время после текущей даты окончания.',
       selected: 'Выбрано',
       buy: 'Выбрать',
       detailsTitle: 'Детали оплаты',
@@ -1052,12 +1052,14 @@ export const ru: Translation = {
       emptyBody: 'Вы ещё не совершали платежей. Оформите подписку, чтобы начать.',
       subscribe: 'Тарифы',
       refreshing: 'Обновляем…',
-      grant: (days: number, credits: number) =>
-        days > 0
-          ? `${days.toLocaleString('ru-RU')} ${plural(days, 'день', 'дня', 'дней')}`
-          : credits > 0
-            ? `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`
-            : '-',
+      grant: (months: number, days: number, credits: number) =>
+        months > 0
+          ? `${months} ${plural(months, 'месяц', 'месяца', 'месяцев')}`
+          : days > 0
+            ? `${days.toLocaleString('ru-RU')} ${plural(days, 'день', 'дня', 'дней')}`
+            : credits > 0
+              ? `${credits.toLocaleString('ru-RU')} ${plural(credits, 'кредит', 'кредита', 'кредитов')}`
+              : '-',
       columns: {
         created: 'Создан',
         paymentId: 'ID платежа',
@@ -1175,7 +1177,7 @@ export const ru: Translation = {
     endingSoon: (days: number) =>
       `Подписка закончится через ${days} ${plural(days, 'день', 'дня', 'дней')}`,
     endingSoonHint:
-      'Купите новый срок, чтобы собеседования оставались без ограничений. Его дни добавятся после текущей даты окончания.',
+      'Купите новый срок, чтобы собеседования оставались без ограничений. Его время добавится после текущей даты окончания.',
     ended: 'Подписка закончилась',
     endedHint: 'Собеседования снова расходуют бесплатное время на базовой модели.',
   },
