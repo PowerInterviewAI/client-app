@@ -564,6 +564,11 @@ export const ru: Translation = {
     willReconnect: 'Распознавание переподключится; текущая фраза может оборваться.',
   },
 
+  languageSearch: {
+    placeholder: 'Поиск языка…',
+    empty: 'Язык не найден.',
+  },
+
   suggestionMode: {
     // The one place the short form is kept rather than the mode's full name: this is a pill on
     // the stealth-mode status row, beside the credits readout and the transcript badge.
@@ -953,7 +958,7 @@ export const ru: Translation = {
       title: 'Собеседование на другом языке',
       oneSetting:
         'Одна настройка охватывает всю сессию: какая модель распознаёт речь, на каком языке пишутся подсказки и на каком языке будет экспортированный отчёт. Её можно задать кнопкой языка на панели управления, на странице настроек или в диалоге пробного собеседования - всё это меняет одно и то же.',
-      supported: (count: number) => `Поддерживаемые языки (${count}): `,
+      supported: (count: number) => `Поддерживаемые языки (${count}):`,
       midInterview:
         'Язык можно сменить во время собеседования. Подсказки переключаются сразу, начиная со следующего ответа. Распознаванию нужно чуть больше времени: оно переподключается, поэтому фраза, которая звучит в этот момент, может оборваться в расшифровке.',
       textOnly:

@@ -3,13 +3,19 @@ import { Language } from '../types/language.js';
 import { transcriptSeparator } from './transcript-join.js';
 
 // Sentence-final punctuation, Latin and CJK. Japanese uses '。' rather than '.', which is why
-// this needs to be language-aware at all - the same reason `transcriptSeparator` is.
-const SENTENCE_END_LATIN = /[.!?]+(?=\s|$)/g;
+// this needs to be language-aware at all - the same reason `transcriptSeparator` is. The spaced
+// pattern also takes the danda ('।', Hindi, Marathi, Bengali) and the Arabic-script full stop and
+// question mark ('۔', '؟', Urdu): those languages put a space after a sentence like Latin ones do,
+// and without them a whole voiced question waited for one chunk instead of starting on the first
+// sentence.
+const SENTENCE_END_LATIN = /[.!?।۔؟]+(?=\s|$)/g;
 const SENTENCE_END_CJK = /[。！？…]+/g;
 
 const CJK_LANGUAGES: ReadonlySet<Language> = new Set([
   Language.Japanese,
   Language.Chinese,
+  Language.Cantonese,
+  Language.ChineseTraditional,
   Language.Thai,
 ]);
 

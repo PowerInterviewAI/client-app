@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import ExternalLink from '@/components/custom/external-link';
 import { HotkeyCheatsheet } from '@/components/custom/hotkey-cheatsheet';
@@ -68,23 +68,22 @@ export default function DocumentationPage() {
             </AccordionTrigger>
             <AccordionContent>
               <p className="text-sm text-muted-foreground">{t.documentation.language.oneSetting}</p>
-              {/* A list rather than a sentence: at 28 entries the run-on paragraph this used to
-                  be could not be scanned for one's own language, which is the only question a
-                  reader opens this section with. Derived from LANGUAGES so it cannot drift. */}
+              {/* A list rather than a sentence, and in columns: at 97 entries a run-on paragraph
+                  cannot be scanned for one's own language, which is the only question a reader
+                  opens this section with. Derived from LANGUAGES so it cannot drift. */}
               <p className="mt-2 text-sm text-muted-foreground">
                 {t.documentation.language.supported(LANGUAGES.length)}
-                {/* Each name is its own isolate rather than one `dir="auto"` span around the
-                    lot. Joined into a single string, the two right-to-left names sit adjacent
-                    with only a neutral between them, so the bidi algorithm resolves that
-                    separator right-to-left too and lays the pair out as one run - printing the
-                    last two languages in the list in the opposite order to every other pair. */}
-                {LANGUAGES.map((language, index) => (
-                  <React.Fragment key={language.code}>
-                    {index > 0 && ' · '}
-                    <bdi>{language.nativeName}</bdi>
-                  </React.Fragment>
-                ))}
               </p>
+              {/* Each name is its own isolate. Adjacent right-to-left names with only a neutral
+                  between them would otherwise be resolved as one run and printed in the opposite
+                  order to every other pair. */}
+              <ul className="mt-1 columns-2 gap-4 text-sm text-muted-foreground sm:columns-3">
+                {LANGUAGES.map((language) => (
+                  <li key={language.code} className="truncate">
+                    <bdi>{language.nativeName}</bdi>
+                  </li>
+                ))}
+              </ul>
               <p className="mt-2 text-sm text-muted-foreground">
                 {t.documentation.language.midInterview}
               </p>

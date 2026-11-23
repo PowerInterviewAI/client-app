@@ -14,7 +14,7 @@ export async function run() {
   const { buildExportMarkdown, generateExportFilename } = await loadMain(
     'utils/export-markdown.js'
   );
-  const { getExportLabels } = await loadMain('utils/export-labels.js');
+  const { getExportLabels, hasTranslatedExportLabels } = await loadMain('utils/export-labels.js');
   const { Language } = await loadMain('types/language.js');
 
   const transcripts = [
@@ -86,6 +86,37 @@ export async function run() {
         (key) => typeof labels?.[key] === 'string' && labels[key].length > 0
       );
     })
+  );
+
+  // An English fallback would satisfy the check above for every language, so it says nothing about
+  // translation. The fallback list is a type in export-labels.ts; this pins the other half - that
+  // the major languages, the ones most reports are in, are never quietly on it.
+  check(
+    'the major languages have labels of their own',
+    [
+      'es',
+      'de',
+      'fr',
+      'pt',
+      'ru',
+      'ja',
+      'zh',
+      'zh-hk',
+      'zh-tw',
+      'ko',
+      'hi',
+      'bn',
+      'ur',
+      'fa',
+      'ar',
+      'tr',
+      'vi',
+      'id',
+    ].every((code) => hasTranslatedExportLabels(code))
+  );
+  check(
+    'a low-resource language falls back to English on purpose',
+    !hasTranslatedExportLabels('ab') && getExportLabels('ab').transcripts === 'Transcripts'
   );
 
   // Resolved rather than thrown on. `configStore.getConfig()` already stops an unknown code, so

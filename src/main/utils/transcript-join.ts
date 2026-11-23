@@ -11,6 +11,8 @@ import { Language } from '../types/language.js';
 const UNSPACED_LANGUAGES: ReadonlySet<Language> = new Set([
   Language.Japanese,
   Language.Chinese,
+  Language.Cantonese,
+  Language.ChineseTraditional,
   Language.Thai,
 ]);
 

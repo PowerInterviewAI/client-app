@@ -7,6 +7,8 @@
  */
 import { createChecker, loadMain, readSource } from './helpers.mjs';
 
+const CODE = /^[a-z]{2,3}(-[a-z]{2})?$/;
+
 export async function run() {
   const { check, failures } = createChecker('language');
 
@@ -22,9 +24,12 @@ export async function run() {
   // provider streams, so the literal moved rather than the rule: the picker must never offer a
   // language the ASR cannot hear.
   check('English is in the set', Object.values(Language).includes('en'));
+  // ISO 639-1 where one exists, ISO 639-3 where it does not (`ckb`, `kok`), and a region suffix
+  // for the two Chinese variants. Lowercase throughout, because `resolveLanguage` lowercases what
+  // it reads and a mixed-case value could never be matched.
   check(
-    'every code is a bare lowercase ISO 639-1 pair',
-    Object.values(Language).every((code) => /^[a-z]{2}$/.test(code))
+    'every code is a lowercase 639-1 or 639-3 code, optionally with a region',
+    Object.values(Language).every((code) => CODE.test(code))
   );
   check(
     'no code is listed twice',
@@ -38,7 +43,7 @@ export async function run() {
   // text because it is never built into electron-dist, which is all `loadMain` can reach.
   const rendererSource = readSource(new URL('../src/renderer/types/language.ts', import.meta.url));
   const rendererCodes = [...rendererSource.matchAll(/code: Language\.\w+, name: '/g)].length;
-  const rendererEnum = [...rendererSource.matchAll(/^  \w+ = '([a-z]{2})',$/gm)].map((m) => m[1]);
+  const rendererEnum = [...rendererSource.matchAll(/^  \w+ = '([a-z-]+)',$/gm)].map((m) => m[1]);
 
   check(
     'the renderer mirrors every code in the main enum',
@@ -50,7 +55,7 @@ export async function run() {
   // Parsed as whole entries rather than as columns, because the failures below are all
   // per-entry: a short label that belongs to the line above, a name left on a copied row.
   const memberCodes = new Map(
-    [...rendererSource.matchAll(/^  (\w+) = '([a-z]{2})',$/gm)].map((m) => [m[1], m[2]])
+    [...rendererSource.matchAll(/^  (\w+) = '([a-z-]+)',$/gm)].map((m) => [m[1], m[2]])
   );
   const entries = [
     ...rendererSource.matchAll(
@@ -71,13 +76,20 @@ export async function run() {
     entries.every((entry) => entry.code !== undefined)
   );
 
-  // The trigger is 32px of reserved width and the one question it answers at a glance is which
-  // language the session is set to. `short` is the uppercased code rather than anything derived
-  // from the name, which is what keeps every entry two characters wide - and a row copied from
-  // the one above it keeps the wrong two, which shows the wrong language and reads as correct.
+  // The one question the trigger answers at a glance is which language the session is set to.
+  // `short` is the uppercased code rather than anything derived from the name - and a row copied
+  // from the one above it keeps the wrong label, which shows the wrong language and reads as
+  // correct. The two Chinese variants are the only exceptions, since `ZH-HK` is five characters.
+  const SHORT_OVERRIDES = { 'zh-hk': 'YUE', 'zh-tw': 'ZHT' };
   check(
     'every short label is the uppercased code of its own entry',
-    entries.every((entry) => entry.short === entry.code?.toUpperCase())
+    entries.every(
+      (entry) => entry.short === (SHORT_OVERRIDES[entry.code] ?? entry.code?.toUpperCase())
+    )
+  );
+  check(
+    'every short label is two or three letters',
+    entries.every((entry) => /^[A-Z]{2,3}$/.test(entry.short))
   );
   check(
     'no two entries share a short label',
@@ -103,6 +115,8 @@ export async function run() {
   check('empty resolves to English', resolveLanguage('') === 'en');
   check('an unknown code resolves to English', resolveLanguage('kl') === 'en');
   check('a regional variant resolves to English', resolveLanguage('en-GB') === 'en');
+  check('Cantonese is kept whole', resolveLanguage('zh-HK') === 'zh-hk');
+  check('Traditional Mandarin is kept whole', resolveLanguage('zh-tw') === 'zh-tw');
   check('a known code is kept', resolveLanguage('es') === 'es');
   check('case and whitespace are normalised', resolveLanguage(' ES ') === 'es');
 
@@ -115,22 +129,30 @@ export async function run() {
   check('Japanese merges with nothing', transcriptSeparator('ja') === '');
   check('Chinese merges with nothing', transcriptSeparator('zh') === '');
   check('Thai merges with nothing', transcriptSeparator('th') === '');
+  check('Cantonese merges with nothing', transcriptSeparator('zh-hk') === '');
+  check('Traditional Mandarin merges with nothing', transcriptSeparator('zh-tw') === '');
   check(
     'every unspaced language is one the picker actually offers',
-    ['ja', 'zh', 'th'].every((code) => Object.values(Language).includes(code))
+    ['ja', 'zh', 'zh-hk', 'zh-tw', 'th'].every((code) => Object.values(Language).includes(code))
   );
 
-  // Deepgram's Aura TTS speaks 7 of these 28 languages, mirroring the backend's
+  // Deepgram's Flux TTS speaks 44 of these 97 languages, mirroring the backend's
   // DEEPGRAM_TTS_VOICES map. Getting this wrong is quiet in both directions: a language wrongly
   // marked hasVoice sends a mock-interview /speak request that always comes back empty, and one
   // wrongly marked false denies a real voice to a user who has one.
-  const ttsLanguages = new Set(['en', 'es', 'de', 'fr', 'nl', 'it', 'ja']);
+  // prettier-ignore
+  const ttsLanguages = new Set([
+    'en', 'es', 'de', 'fr', 'pt', 'it', 'nl', 'pl', 'ru', 'uk', 'cs',
+    'ro', 'el', 'hu', 'sv', 'da', 'no', 'fi', 'tr', 'hi', 'ja', 'ko',
+    'zh', 'vi', 'id', 'bn', 'bg', 'ca', 'zh-hk', 'zh-tw', 'hr', 'et', 'gu',
+    'kn', 'lv', 'lt', 'ms', 'mr', 'sk', 'sl', 'tl', 'ta', 'te', 'ur',
+  ]);
   check(
-    'hasVoice is exactly the 7 Aura-supported languages',
+    'hasVoice is exactly the 44 Flux-voiced languages',
     entries.every((entry) => entry.hasVoice === ttsLanguages.has(entry.code))
   );
 
-  // Three tables have to agree on which languages Aura speaks, and only two of them were pinned.
+  // Three tables have to agree on which languages Flux speaks, and only two of them were pinned.
   // The renderer's `hasVoice` above is display metadata - it draws the badge on the setup screen.
   // The backend's DEEPGRAM_TTS_VOICES is pinned by test_tts_language.py. This one, TTS_LANGUAGES,
   // is the decisive one: `installQuestion` reads it to set `hasAudio`, which is what decides
@@ -142,7 +164,7 @@ export async function run() {
   // to see. The other direction recovers on its own (a /speak that answers 204 falls through
   // speechFailed to the text-only path), which is exactly why only this direction stays silent.
   check(
-    'TTS_LANGUAGES is exactly the same 7 the picker marks as voiced',
+    'TTS_LANGUAGES is exactly the same 44 the picker marks as voiced',
     JSON.stringify([...TTS_LANGUAGES].sort()) === JSON.stringify([...ttsLanguages].sort())
   );
 

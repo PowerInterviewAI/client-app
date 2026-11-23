@@ -14,8 +14,8 @@
  * `MOCK_ANSWER_SILENCE_MS` then submitted the turn eight seconds later without a word of it
  * having been meant as one.
  *
- * Polish is the voiceless language used throughout - it is in the ASR's 28 and not in the seven
- * Aura speaks - and the language is read once at `start()`, so it is set on the store first.
+ * Thai is the voiceless language used throughout - the ASR transcribes it and Flux has no voice
+ * for it - and the language is read once at `start()`, so it is set on the store first.
  */
 import { createChecker, loadMain } from './helpers.mjs';
 
@@ -34,7 +34,7 @@ export async function run() {
   const { TTS_LANGUAGES, Language } = await loadMain('types/language.js');
   const { configStore } = await loadMain('store/config.store.js');
 
-  check('the language under test really has no voice', !TTS_LANGUAGES.has(Language.Polish));
+  check('the language under test really has no voice', !TTS_LANGUAGES.has(Language.Thai));
 
   const originalFetch = globalThis.fetch;
   const originalLanguage = configStore.getConfig().language;
@@ -54,7 +54,7 @@ export async function run() {
   };
 
   try {
-    configStore.updateConfig({ language: Language.Polish });
+    configStore.updateConfig({ language: Language.Thai });
     await mockInterviewService.start({
       role: '',
       seniority: 'mid',
