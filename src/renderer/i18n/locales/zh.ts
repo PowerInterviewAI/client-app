@@ -229,6 +229,11 @@ export const zh: Translation = {
 
   account: {
     title: '账户',
+    completeness: {
+      title: (done: number, total: number) => `资料完成度 ${done}/${total}`,
+      complete: '资料已完善',
+      hint: '建议根据你的资料和应聘职位生成。填写得越详细，回答就越像你。',
+    },
     signedInAs: '当前登录',
     password: {
       title: '密码',
@@ -469,6 +474,14 @@ export const zh: Translation = {
       deviceNotFound: (deviceName: string) => `找不到音频输入设备“${deviceName}”`,
     },
     startFailed: '启动助手失败',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: '正在聆听',
+      reconnecting: '正在重新连接…',
+      listeningHint: '麦克风和转录已连接',
+      reconnectingHint: '转录连接已断开 - 正在自动重新连接',
+    },
   },
 
   audioGroup: {
@@ -855,6 +868,10 @@ export const zh: Translation = {
     redirectingToLogin: '正在跳转到登录页…',
     authenticating: '正在验证身份…',
     transcriptionHidden: '转录已隐藏',
+    awaitingFirstQuestion: {
+      title: '正在等待第一个问题…',
+      description: '面试官一提问，建议就会显示在这里。面试中常用的快捷键：',
+    },
   },
 
   documentation: {
@@ -921,6 +938,11 @@ export const zh: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: '无限次实时面试和模拟面试',
+        model: '我们最强大的 AI 模型',
+        noRenewal: '预付 - 不自动续费',
+      },
       currentPlan: '你的套餐',
       subscribedUntil: (plan: string, date: string) => `${plan}，至 ${date}`,
       daysLeft: (days: number) => `剩余 ${days} 天`,

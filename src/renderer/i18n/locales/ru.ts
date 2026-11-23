@@ -261,6 +261,11 @@ export const ru: Translation = {
 
   account: {
     title: 'Учётная запись',
+    completeness: {
+      title: (done: number, total: number) => `Профиль заполнен: ${done} из ${total}`,
+      complete: 'Профиль заполнен полностью',
+      hint: 'Подсказки строятся на вашем профиле и описании вакансии. Чем больше вы добавите, тем больше они будут похожи на вас.',
+    },
     signedInAs: 'Вы вошли как',
     password: {
       title: 'Пароль',
@@ -532,6 +537,14 @@ export const ru: Translation = {
       deviceNotFound: (deviceName: string) => `Микрофон «${deviceName}» не найден`,
     },
     startFailed: 'Не удалось запустить ассистента',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: 'Слушаю',
+      reconnecting: 'Переподключение…',
+      listeningHint: 'Микрофон и транскрипция подключены',
+      reconnectingHint: 'Соединение транскрипции прервано - переподключаемся автоматически',
+    },
   },
 
   audioGroup: {
@@ -937,6 +950,11 @@ export const ru: Translation = {
     redirectingToLogin: 'Переходим к входу…',
     authenticating: 'Проверяем вход…',
     transcriptionHidden: 'Расшифровка скрыта',
+    awaitingFirstQuestion: {
+      title: 'Ждём первый вопрос…',
+      description:
+        'Подсказки появятся здесь, как только интервьюер что-нибудь спросит. Полезные сочетания клавиш во время собеседования:',
+    },
   },
 
   documentation: {
@@ -1003,6 +1021,11 @@ export const ru: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: 'Безлимитные живые и тренировочные собеседования',
+        model: 'Наша самая мощная модель ИИ',
+        noRenewal: 'Предоплата - без автопродления',
+      },
       currentPlan: 'Ваш тариф',
       subscribedUntil: (plan: string, date: string) => `${plan}, до ${date}`,
       daysLeft: (days: number) => `Осталось ${days} ${plural(days, 'день', 'дня', 'дней')}`,

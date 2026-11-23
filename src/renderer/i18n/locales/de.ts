@@ -242,6 +242,11 @@ export const de: Translation = {
 
   account: {
     title: 'Konto',
+    completeness: {
+      title: (done: number, total: number) => `Profil: ${done} von ${total} ausgefüllt`,
+      complete: 'Profil vollständig',
+      hint: 'Vorschläge basieren auf deinem Profil und der Stelle. Je mehr du angibst, desto mehr klingen sie nach dir.',
+    },
     signedInAs: 'Angemeldet als',
     password: {
       title: 'Passwort',
@@ -508,6 +513,15 @@ export const de: Translation = {
       deviceNotFound: (deviceName: string) => `Audio-Eingabegerät „${deviceName}“ nicht gefunden`,
     },
     startFailed: 'Assistent konnte nicht gestartet werden',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: 'Hört zu',
+      reconnecting: 'Verbindung wird wiederhergestellt…',
+      listeningHint: 'Mikrofon und Transkription sind verbunden',
+      reconnectingHint:
+        'Transkriptionsverbindung unterbrochen - wird automatisch wiederhergestellt',
+    },
   },
 
   audioGroup: {
@@ -911,6 +925,11 @@ export const de: Translation = {
     redirectingToLogin: 'Weiterleitung zur Anmeldung…',
     authenticating: 'Anmeldung wird geprüft…',
     transcriptionHidden: 'Die Transkription ist ausgeblendet',
+    awaitingFirstQuestion: {
+      title: 'Warte auf die erste Frage…',
+      description:
+        'Vorschläge erscheinen hier, sobald der Interviewer etwas fragt. Hilfreiche Tastenkürzel während des Gesprächs:',
+    },
   },
 
   documentation: {
@@ -977,6 +996,11 @@ export const de: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: 'Unbegrenzte Live- und Übungsinterviews',
+        model: 'Unser leistungsstärkstes KI-Modell',
+        noRenewal: 'Vorausbezahlt - keine automatische Verlängerung',
+      },
       currentPlan: 'Dein Tarif',
       subscribedUntil: (plan: string, date: string) => `${plan}, bis ${date}`,
       daysLeft: (days: number) => `Noch ${days} ${n(days, 'Tag', 'Tage')}`,

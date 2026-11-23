@@ -248,6 +248,11 @@ export const fr: Translation = {
 
   account: {
     title: 'Compte',
+    completeness: {
+      title: (done: number, total: number) => `Profil complété : ${done} sur ${total}`,
+      complete: 'Profil complet',
+      hint: 'Les suggestions s’appuient sur votre profil et le poste. Plus vous en dites, plus elles vous ressemblent.',
+    },
     signedInAs: 'Connecté en tant que',
     password: {
       title: 'Mot de passe',
@@ -511,6 +516,14 @@ export const fr: Translation = {
         `Périphérique d’entrée audio « ${deviceName} » introuvable`,
     },
     startFailed: 'Impossible de démarrer l’assistant',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: 'À l’écoute',
+      reconnecting: 'Reconnexion…',
+      listeningHint: 'Le micro et la transcription sont connectés',
+      reconnectingHint: 'Connexion de transcription perdue - reconnexion automatique',
+    },
   },
 
   audioGroup: {
@@ -914,6 +927,11 @@ export const fr: Translation = {
     redirectingToLogin: 'Redirection vers la connexion…',
     authenticating: 'Authentification…',
     transcriptionHidden: 'La transcription est masquée',
+    awaitingFirstQuestion: {
+      title: 'En attente de la première question…',
+      description:
+        'Les suggestions s’affichent ici dès que le recruteur pose une question. Raccourcis utiles pendant l’entretien :',
+    },
   },
 
   documentation: {
@@ -981,6 +999,11 @@ export const fr: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: 'Entretiens en direct et d’entraînement illimités',
+        model: 'Notre modèle d’IA le plus performant',
+        noRenewal: 'Prépayé - sans renouvellement automatique',
+      },
       currentPlan: 'Votre formule',
       subscribedUntil: (plan: string, date: string) => `${plan}, jusqu’au ${date}`,
       daysLeft: (days: number) => `${days} ${n(days, 'jour restant', 'jours restants')}`,

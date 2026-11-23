@@ -235,6 +235,11 @@ export const ko: Translation = {
 
   account: {
     title: '계정',
+    completeness: {
+      title: (done: number, total: number) => `프로필 ${done}/${total} 완료`,
+      complete: '프로필 작성 완료',
+      hint: '제안은 프로필과 지원 직무를 바탕으로 작성됩니다. 많이 입력할수록 더 나다운 답변이 됩니다.',
+    },
     signedInAs: '로그인 계정',
     password: {
       title: '비밀번호',
@@ -485,6 +490,14 @@ export const ko: Translation = {
         `오디오 입력 장치 “${deviceName}”을(를) 찾을 수 없습니다`,
     },
     startFailed: '어시스턴트를 시작하지 못했습니다',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: '듣는 중',
+      reconnecting: '다시 연결 중…',
+      listeningHint: '마이크와 전사가 연결되어 있습니다',
+      reconnectingHint: '전사 연결이 끊어졌습니다 - 자동으로 다시 연결하는 중',
+    },
   },
 
   audioGroup: {
@@ -876,6 +889,10 @@ export const ko: Translation = {
     redirectingToLogin: '로그인 화면으로 이동하는 중…',
     authenticating: '인증하는 중…',
     transcriptionHidden: '전사가 숨겨져 있습니다',
+    awaitingFirstQuestion: {
+      title: '첫 질문을 기다리는 중…',
+      description: '면접관이 질문하면 바로 여기에 제안이 표시됩니다. 면접 중 유용한 단축키:',
+    },
   },
 
   documentation: {
@@ -942,6 +959,11 @@ export const ko: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: '라이브 및 모의 면접 무제한',
+        model: '가장 뛰어난 AI 모델',
+        noRenewal: '선불 - 자동 갱신 없음',
+      },
       currentPlan: '내 요금제',
       subscribedUntil: (plan: string, date: string) => `${plan}, ${date}까지`,
       daysLeft: (days: number) => `${days}일 남음`,

@@ -244,6 +244,11 @@ export const es: Translation = {
 
   account: {
     title: 'Cuenta',
+    completeness: {
+      title: (done: number, total: number) => `Perfil completado: ${done} de ${total}`,
+      complete: 'Perfil completo',
+      hint: 'Las sugerencias se escriben a partir de tu perfil y del puesto. Cuanto más añadas, más sonarán como tú.',
+    },
     signedInAs: 'Sesión iniciada como',
     password: {
       title: 'Contraseña',
@@ -505,6 +510,14 @@ export const es: Translation = {
         `No se encuentra el dispositivo de entrada de audio "${deviceName}"`,
     },
     startFailed: 'No se pudo iniciar el asistente',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: 'Escuchando',
+      reconnecting: 'Reconectando…',
+      listeningHint: 'El micrófono y la transcripción están conectados',
+      reconnectingHint: 'Se perdió la conexión de transcripción - reconectando automáticamente',
+    },
   },
 
   audioGroup: {
@@ -906,6 +919,11 @@ export const es: Translation = {
     redirectingToLogin: 'Redirigiendo al inicio de sesión…',
     authenticating: 'Autenticando…',
     transcriptionHidden: 'La transcripción está oculta',
+    awaitingFirstQuestion: {
+      title: 'Esperando la primera pregunta…',
+      description:
+        'Las sugerencias aparecen aquí en cuanto el entrevistador pregunta algo. Atajos útiles durante la entrevista:',
+    },
   },
 
   documentation: {
@@ -972,6 +990,11 @@ export const es: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: 'Entrevistas en vivo y de práctica ilimitadas',
+        model: 'Nuestro modelo de IA más capaz',
+        noRenewal: 'Prepago - sin renovación automática',
+      },
       currentPlan: 'Tu plan',
       subscribedUntil: (plan: string, date: string) => `${plan}, hasta el ${date}`,
       daysLeft: (days: number) => `${n(days, 'Queda', 'Quedan')} ${days} ${n(days, 'día', 'días')}`,
