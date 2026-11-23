@@ -5,9 +5,9 @@
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Loading } from '@/components/custom/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -96,8 +96,13 @@ export default function PaymentHistoryTab({
       )}
 
       {loading ? (
-        <div className="py-8">
-          <Loading disclaimer={t.payment.history.loading} />
+        <div className="space-y-2">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-xl" />
+          ))}
+          <span className="sr-only" role="status">
+            {t.payment.history.loading}
+          </span>
         </div>
       ) : history.length === 0 && error ? null : history.length === 0 ? (
         <Card>
