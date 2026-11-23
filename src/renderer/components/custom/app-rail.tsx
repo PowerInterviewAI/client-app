@@ -71,19 +71,27 @@ interface RailItemProps {
 }
 
 function RailItem({ icon, label, active, disabled, onClick }: RailItemProps) {
+  const t = useT();
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <RailButton
-          icon={icon}
-          label={label}
-          active={active}
-          disabled={disabled}
-          onClick={onClick}
-        />
+        {/* Wrapped: a disabled button fires no pointer events, so without this the tooltip
+            saying *why* it is disabled would be unreachable in the one state that needs it. */}
+        <span className="inline-flex">
+          <RailButton
+            icon={icon}
+            label={label}
+            active={active}
+            disabled={disabled}
+            onClick={onClick}
+          />
+        </span>
       </TooltipTrigger>
       <TooltipContent side="right">
         <p>{label}</p>
+        {disabled && (
+          <p className="text-xs text-muted-foreground">{t.titlebar.unavailableDuringInterview}</p>
+        )}
       </TooltipContent>
     </Tooltip>
   );

@@ -84,9 +84,11 @@ export default function TitlebarMenu({
   // menu breaking rather than the menu declining to lie.
   const inSetup = location.pathname === '/onboarding' && !(appState?.onboardingCompleted ?? false);
   const email = appState?.accountEmail || config?.email;
-  const initial = (appState?.interviewConfig?.fullName?.trim() || email || '?')
-    .charAt(0)
-    .toUpperCase();
+  // The first code point, not `charAt(0)`: a name that opens on an emoji or any character outside
+  // the BMP would otherwise render half a surrogate pair - a replacement box - in the avatar.
+  const initial = (
+    Array.from(appState?.interviewConfig?.fullName?.trim() || email || '?')[0] ?? '?'
+  ).toUpperCase();
 
   const handleSignOut = async () => {
     // Asked for the same reason Clear, Start, Stop and closing the app ask: signing out drops the

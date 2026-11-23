@@ -35,14 +35,31 @@ function scoreVerdict(t: Translation, score: number): string {
 /**
  * The colour a score is drawn in, banded on the same thresholds as `scoreVerdict` so the colour
  * and the word under the number never disagree.
+ *
+ * Text takes a darker shade in light mode and a lighter one in dark: the 500 shades sit near 2:1
+ * on white (amber worst), well under what body-size text needs. The ring and bars stay at 500 -
+ * they are graphics read alongside the number, not the number itself.
  */
 function scoreTone(score: number): { text: string; stroke: string; bar: string } {
   if (score >= 85)
-    return { text: 'text-emerald-500', stroke: 'stroke-emerald-500', bar: 'bg-emerald-500' };
-  if (score >= 70) return { text: 'text-sky-500', stroke: 'stroke-sky-500', bar: 'bg-sky-500' };
+    return {
+      text: 'text-emerald-700 dark:text-emerald-400',
+      stroke: 'stroke-emerald-500',
+      bar: 'bg-emerald-500',
+    };
+  if (score >= 70)
+    return { text: 'text-sky-700 dark:text-sky-400', stroke: 'stroke-sky-500', bar: 'bg-sky-500' };
   if (score >= 50)
-    return { text: 'text-amber-500', stroke: 'stroke-amber-500', bar: 'bg-amber-500' };
-  return { text: 'text-rose-500', stroke: 'stroke-rose-500', bar: 'bg-rose-500' };
+    return {
+      text: 'text-amber-700 dark:text-amber-400',
+      stroke: 'stroke-amber-500',
+      bar: 'bg-amber-500',
+    };
+  return {
+    text: 'text-rose-700 dark:text-rose-400',
+    stroke: 'stroke-rose-500',
+    bar: 'bg-rose-500',
+  };
 }
 
 /** The overall score as a ring, the number inside it. Decorative - the number is read as text. */
@@ -184,7 +201,11 @@ export function ReportScreen({
               <h2 className="sr-only">{t.mock.report.overallScore}</h2>
               <ScoreRing score={report.overall_score} />
               <div className="min-w-0 flex-1 text-center sm:text-left">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {/* Hidden from assistive tech: the sr-only heading above already says this. */}
+                <p
+                  aria-hidden="true"
+                  className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                >
                   {t.mock.report.overallScore}
                 </p>
                 <p

@@ -905,7 +905,7 @@ export const ja: Translation = {
     awaitingFirstQuestion: {
       title: '最初の質問を待っています…',
       description:
-        '面接官が質問するとすぐにここに提案が表示されます。面接中に便利なショートカット:',
+        '面接官が質問するとすぐにここに提案が表示されます。面接中に便利なショートカット：',
     },
   },
 
