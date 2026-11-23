@@ -112,6 +112,13 @@ export const en = {
 
   configuration: {
     title: 'Configuration',
+    sections: {
+      general: 'General',
+      interview: 'Interview',
+      display: 'Display',
+      window: 'Window & privacy',
+      help: 'Help',
+    },
     setupGuide: {
       title: 'Setup guide',
       description: 'Walk through everything on this page, and your profile, one step at a time.',

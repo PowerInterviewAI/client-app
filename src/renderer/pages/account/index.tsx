@@ -59,8 +59,8 @@ export default function AccountPage() {
     <div className="w-full flex flex-col bg-background">
       <PageHeader title={t.account.title} />
 
-      <div className="flex-1 overflow-auto px-4 py-4 w-full max-w-2xl mx-auto space-y-6">
-        <div className="rounded-lg border p-3">
+      <div className="flex-1 overflow-auto px-6 py-6 w-full max-w-2xl mx-auto space-y-6">
+        <div className="rounded-xl border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t.account.signedInAs}</p>
           {/* The account's own email rather than the remembered credential, which is blank for
               a user who declined "remember me" - see `AppState.accountEmail`. */}
@@ -73,7 +73,7 @@ export default function AccountPage() {
         <ProfileField form={form} />
         <ContextField form={form} />
 
-        <div className="flex items-center justify-between rounded-lg border p-3">
+        <div className="flex items-center justify-between rounded-xl border bg-card p-4">
           <div>
             <p className="text-sm font-medium">{t.account.password.title}</p>
             <p className="text-xs text-muted-foreground">{t.account.password.description}</p>

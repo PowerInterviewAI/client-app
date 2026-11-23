@@ -103,6 +103,13 @@ export const es: Translation = {
 
   configuration: {
     title: 'Configuración',
+    sections: {
+      general: 'General',
+      interview: 'Entrevista',
+      display: 'Pantalla',
+      window: 'Ventana y privacidad',
+      help: 'Ayuda',
+    },
     setupGuide: {
       title: 'Guía de configuración',
       description: 'Recorre todo lo de esta página, y tu perfil, paso a paso.',

@@ -96,6 +96,13 @@ export const zh: Translation = {
 
   configuration: {
     title: '设置',
+    sections: {
+      general: '通用',
+      interview: '面试',
+      display: '显示',
+      window: '窗口与隐私',
+      help: '帮助',
+    },
     setupGuide: {
       title: '设置向导',
       description: '逐步完成本页的所有设置以及你的个人资料。',

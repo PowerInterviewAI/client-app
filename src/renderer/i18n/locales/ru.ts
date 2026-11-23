@@ -123,6 +123,13 @@ export const ru: Translation = {
 
   configuration: {
     title: 'Настройки',
+    sections: {
+      general: 'Общие',
+      interview: 'Собеседование',
+      display: 'Отображение',
+      window: 'Окно и приватность',
+      help: 'Справка',
+    },
     setupGuide: {
       title: 'Руководство по настройке',
       description: 'Пройдите всё на этой странице, а также профиль, шаг за шагом.',

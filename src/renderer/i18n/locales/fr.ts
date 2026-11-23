@@ -106,6 +106,13 @@ export const fr: Translation = {
 
   configuration: {
     title: 'Réglages',
+    sections: {
+      general: 'Général',
+      interview: 'Entretien',
+      display: 'Affichage',
+      window: 'Fenêtre et confidentialité',
+      help: 'Aide',
+    },
     setupGuide: {
       title: 'Guide de configuration',
       description:

@@ -37,7 +37,7 @@ export default function DocumentationPage() {
     <div className="w-full flex flex-col bg-background">
       <PageHeader title={`${APP_NAME} ${version ? `v${version}` : ''}`.trim()} />
 
-      <div className="flex-1 overflow-auto px-4 py-4 w-full max-w-2xl mx-auto">
+      <div className="flex-1 overflow-auto px-6 py-6 w-full max-w-2xl mx-auto">
         <p className="text-sm text-muted-foreground">{t.documentation.intro(APP_NAME)}</p>
         <p className="mt-2 mb-4 text-sm text-muted-foreground">
           {t.documentation.docsLead}

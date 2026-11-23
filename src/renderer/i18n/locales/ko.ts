@@ -100,6 +100,13 @@ export const ko: Translation = {
 
   configuration: {
     title: '설정',
+    sections: {
+      general: '일반',
+      interview: '면접',
+      display: '표시',
+      window: '창 및 개인정보',
+      help: '도움말',
+    },
     setupGuide: {
       title: '설정 가이드',
       description: '이 페이지의 모든 항목과 프로필을 한 단계씩 살펴봅니다.',

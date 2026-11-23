@@ -9,6 +9,7 @@ import { HideTaskbarField } from '@/components/custom/settings/hide-taskbar-fiel
 import { LanguageField } from '@/components/custom/settings/language-field';
 import { MicrophoneField } from '@/components/custom/settings/microphone-field';
 import { MockHintsField } from '@/components/custom/settings/mock-hints-field';
+import { SettingsSection } from '@/components/custom/settings/settings-section';
 import { SuggestionModeField } from '@/components/custom/settings/suggestion-mode-field';
 import { TranscriptPanelField } from '@/components/custom/settings/transcript-panel-field';
 import { UiLanguageField } from '@/components/custom/settings/ui-language-field';
@@ -38,50 +39,60 @@ export default function ConfigurationPage() {
     <div className="w-full flex flex-col bg-background">
       <PageHeader title={t.configuration.title} />
 
-      <div className="flex-1 overflow-auto px-4 py-4 w-full max-w-2xl mx-auto space-y-6">
-        {/* First, and separated from the rest: it is the only control on this page that is not
+      <div className="flex-1 overflow-auto px-6 py-6 w-full max-w-2xl mx-auto space-y-7">
+        {/* First, and in a group of its own: it is the only control on this page that is not
             about how an interview runs, and it is the one someone arrives here looking for when
             the app is in a language they do not read. */}
-        <UiLanguageField />
+        <SettingsSection title={t.configuration.sections.general}>
+          <UiLanguageField />
+        </SettingsSection>
 
-        <div className="border-t" />
+        <SettingsSection title={t.configuration.sections.interview}>
+          <MicrophoneField />
+          <LanguageField />
+          <SuggestionModeField />
+          <MockHintsField />
+        </SettingsSection>
 
-        <MicrophoneField />
-        <LanguageField />
-        <SuggestionModeField />
-        <MockHintsField />
-        <ZoomField />
-        <TranscriptPanelField />
-        <HideTaskbarField />
-        <AllowScreenCaptureField />
+        <SettingsSection title={t.configuration.sections.display}>
+          <ZoomField />
+          <TranscriptPanelField />
+        </SettingsSection>
+
+        <SettingsSection title={t.configuration.sections.window}>
+          <HideTaskbarField />
+          <AllowScreenCaptureField />
+        </SettingsSection>
 
         {/* The wizard is not a one-time thing the user is stuck having skipped. Reachable here
             rather than only on a first launch, which is also what lets it be skippable without
             that being a decision: `/onboarding` renders regardless of the account's flag, and
             finishing it simply records the same flag again. */}
-        <div className="flex items-center justify-between gap-3 border-t pt-4">
-          <div>
-            <p className="text-sm font-medium">{t.configuration.setupGuide.title}</p>
-            <p className="text-xs text-muted-foreground">
-              {t.configuration.setupGuide.description}
-            </p>
+        <SettingsSection title={t.configuration.sections.help}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">{t.configuration.setupGuide.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {t.configuration.setupGuide.description}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate('/onboarding')}>
+              <Wand2 className="h-4 w-4" aria-hidden="true" />
+              {t.configuration.setupGuide.action}
+            </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/onboarding')}>
-            <Wand2 className="h-4 w-4" aria-hidden="true" />
-            {t.configuration.setupGuide.action}
-          </Button>
-        </div>
 
-        <div className="flex items-center justify-between gap-3 border-t pt-4">
-          <div>
-            <p className="text-sm font-medium">{t.configuration.hotkeys.title}</p>
-            <p className="text-xs text-muted-foreground">{t.configuration.hotkeys.description}</p>
+          <div className="flex items-center justify-between gap-3 border-t pt-4">
+            <div>
+              <p className="text-sm font-medium">{t.configuration.hotkeys.title}</p>
+              <p className="text-xs text-muted-foreground">{t.configuration.hotkeys.description}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setHotkeysOpen(true)}>
+              <Keyboard className="h-4 w-4" aria-hidden="true" />
+              {t.common.view}
+            </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setHotkeysOpen(true)}>
-            <Keyboard className="h-4 w-4" aria-hidden="true" />
-            {t.common.view}
-          </Button>
-        </div>
+        </SettingsSection>
       </div>
 
       <HotkeyCheatsheetDialog open={hotkeysOpen} onOpenChange={setHotkeysOpen} />

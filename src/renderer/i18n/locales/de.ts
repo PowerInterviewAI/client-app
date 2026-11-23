@@ -105,6 +105,13 @@ export const de: Translation = {
 
   configuration: {
     title: 'Einstellungen',
+    sections: {
+      general: 'Allgemein',
+      interview: 'Vorstellungsgespräch',
+      display: 'Anzeige',
+      window: 'Fenster & Datenschutz',
+      help: 'Hilfe',
+    },
     setupGuide: {
       title: 'Einrichtungsassistent',
       description: 'Geh alles auf dieser Seite und dein Profil Schritt für Schritt durch.',

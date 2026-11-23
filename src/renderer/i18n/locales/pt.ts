@@ -104,6 +104,13 @@ export const pt: Translation = {
 
   configuration: {
     title: 'Configurações',
+    sections: {
+      general: 'Geral',
+      interview: 'Entrevista',
+      display: 'Exibição',
+      window: 'Janela e privacidade',
+      help: 'Ajuda',
+    },
     setupGuide: {
       title: 'Guia de configuração',
       description: 'Passe por tudo desta página, e pelo seu perfil, uma etapa de cada vez.',

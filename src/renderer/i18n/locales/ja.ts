@@ -100,6 +100,13 @@ export const ja: Translation = {
 
   configuration: {
     title: '設定',
+    sections: {
+      general: '一般',
+      interview: '面接',
+      display: '表示',
+      window: 'ウィンドウとプライバシー',
+      help: 'ヘルプ',
+    },
     setupGuide: {
       title: 'セットアップガイド',
       description: 'このページの設定とプロフィールを、1 ステップずつ確認します。',
