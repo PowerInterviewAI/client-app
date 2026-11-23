@@ -467,6 +467,8 @@ export const en = {
     language: 'App language',
     lightMode: 'Light mode',
     darkMode: 'Dark mode',
+    theme: 'Theme',
+    systemMode: 'Match system',
     signOut: 'Sign out',
   },
 

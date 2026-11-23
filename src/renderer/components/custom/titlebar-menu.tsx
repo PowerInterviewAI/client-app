@@ -5,9 +5,8 @@ import {
   LogOut,
   Mail,
   Menu,
-  Moon,
+  Palette,
   SettingsIcon,
-  Sun,
   UserRound,
 } from 'lucide-react';
 import React from 'react';
@@ -33,24 +32,35 @@ import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useInterviewLock } from '@/hooks/use-interview-lock';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
-import { useThemeStore } from '@/hooks/use-theme-store';
 import { useUiLanguage } from '@/hooks/use-ui-language';
 import { useT } from '@/i18n';
+import { cn } from '@/lib/utils';
 import { UI_LANGUAGES, type UiLanguage } from '@/types/ui-language';
+
+import { ThemeRadioItems } from './theme-menu';
 
 interface TitlebarMenuProps {
   style?: React.CSSProperties;
   /** Closed for the length of an interview - see the trigger's own note in `titlebar.tsx`. */
   disabled?: boolean;
+  /**
+   * `rail` is the account button at the foot of the navigation rail: an avatar trigger, opening
+   * to the right, without the destinations the rail itself already lists.
+   */
+  placement?: 'titlebar' | 'rail';
 }
 
-export default function TitlebarMenu({ style, disabled: closed = false }: TitlebarMenuProps) {
+export default function TitlebarMenu({
+  style,
+  disabled: closed = false,
+  placement = 'titlebar',
+}: TitlebarMenuProps) {
+  const inRail = placement === 'rail';
   const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
   const { appState } = useAppState();
   const { config } = useConfigStore();
-  const { isDark, toggleTheme } = useThemeStore();
   const { uiLanguage, setUiLanguage } = useUiLanguage();
   const { logout } = useAuth();
   const { confirmDiscard } = useSaveHistoryGuard();
@@ -73,6 +83,10 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
   // ordinary page the user chose to open, and taking their navigation away there would be the
   // menu breaking rather than the menu declining to lie.
   const inSetup = location.pathname === '/onboarding' && !(appState?.onboardingCompleted ?? false);
+  const email = appState?.accountEmail || config?.email;
+  const initial = (appState?.interviewConfig?.fullName?.trim() || email || '?')
+    .charAt(0)
+    .toUpperCase();
 
   const handleSignOut = async () => {
     // Asked for the same reason Clear, Start, Stop and closing the app ask: signing out drops the
@@ -99,29 +113,43 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
         <TooltipTrigger asChild>
           <span className="inline-flex" style={style}>
             <DropdownMenuTrigger asChild>
-              <button
-                aria-label={t.titlebar.menu}
-                disabled={closed}
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
-              >
-                <Menu className="h-4 w-4" />
-              </button>
+              {inRail ? (
+                <button
+                  aria-label={t.titlebar.menu}
+                  disabled={closed}
+                  className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary ring-1 ring-primary/25 transition hover:bg-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/60 disabled:pointer-events-none disabled:opacity-40"
+                >
+                  {initial}
+                </button>
+              ) : (
+                <button
+                  aria-label={t.titlebar.menu}
+                  disabled={closed}
+                  className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+                >
+                  <Menu className="h-4 w-4" />
+                </button>
+              )}
             </DropdownMenuTrigger>
           </span>
         </TooltipTrigger>
-        <TooltipContent>
-          <p>{closed ? t.titlebar.unavailableDuringInterview : t.titlebar.menu}</p>
+        <TooltipContent side={inRail ? 'right' : undefined}>
+          <p>{closed ? t.titlebar.unavailableDuringInterview : inRail ? email : t.titlebar.menu}</p>
         </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent align="end" side="bottom">
+      <DropdownMenuContent
+        align="end"
+        side={inRail ? 'right' : 'bottom'}
+        className={cn(inRail && 'min-w-56')}
+      >
         {isLoggedIn && (
           <>
             <DropdownMenuLabel className="flex items-center">
               <Mail className="mr-2 h-4 w-4" />
-              {appState?.accountEmail || config?.email}
+              <span className="truncate">{email}</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {!inSetup && (
+            {!inSetup && !inRail && (
               <>
                 <DropdownMenuItem onClick={() => navigate('/')}>
                   <Home className="mr-2 h-4 w-4" />
@@ -176,15 +204,24 @@ export default function TitlebarMenu({ style, disabled: closed = false }: Titleb
             </DropdownMenuRadioGroup>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-        <DropdownMenuItem onClick={() => toggleTheme()}>
-          {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-          {isDark ? t.titlebarMenu.lightMode : t.titlebarMenu.darkMode}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/documentation')}>
-          <BookOpen className="mr-2 h-4 w-4" />
-          {t.titlebarMenu.documentation}
-        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Palette className="mr-2 h-4 w-4" />
+            {t.titlebarMenu.theme}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <ThemeRadioItems />
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        {!inRail && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/documentation')}>
+              <BookOpen className="mr-2 h-4 w-4" />
+              {t.titlebarMenu.documentation}
+            </DropdownMenuItem>
+          </>
+        )}
 
         {isLoggedIn && (
           <>

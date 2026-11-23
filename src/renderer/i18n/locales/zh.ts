@@ -426,6 +426,8 @@ export const zh: Translation = {
     language: '应用语言',
     lightMode: '浅色模式',
     darkMode: '深色模式',
+    theme: '主题',
+    systemMode: '跟随系统',
     signOut: '退出登录',
   },
 

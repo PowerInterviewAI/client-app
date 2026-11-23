@@ -447,6 +447,8 @@ export const pt: Translation = {
     language: 'Idioma do app',
     lightMode: 'Modo claro',
     darkMode: 'Modo escuro',
+    theme: 'Tema',
+    systemMode: 'Seguir o sistema',
     signOut: 'Sair',
   },
 

@@ -464,6 +464,8 @@ export const de: Translation = {
     language: 'App-Sprache',
     lightMode: 'Heller Modus',
     darkMode: 'Dunkler Modus',
+    theme: 'Erscheinungsbild',
+    systemMode: 'Systemeinstellung',
     signOut: 'Abmelden',
   },
 

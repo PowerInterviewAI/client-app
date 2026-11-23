@@ -451,6 +451,8 @@ export const ja: Translation = {
     language: 'アプリの言語',
     lightMode: 'ライトモード',
     darkMode: 'ダークモード',
+    theme: 'テーマ',
+    systemMode: 'システムに合わせる',
     signOut: 'ログアウト',
   },
 

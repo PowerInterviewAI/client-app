@@ -440,6 +440,8 @@ export const ko: Translation = {
     language: '앱 언어',
     lightMode: '라이트 모드',
     darkMode: '다크 모드',
+    theme: '테마',
+    systemMode: '시스템 설정 따르기',
     signOut: '로그아웃',
   },
 

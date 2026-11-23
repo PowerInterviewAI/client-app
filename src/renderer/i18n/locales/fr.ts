@@ -466,6 +466,8 @@ export const fr: Translation = {
     language: 'Langue de l’application',
     lightMode: 'Mode clair',
     darkMode: 'Mode sombre',
+    theme: 'Thème',
+    systemMode: 'Selon le système',
     signOut: 'Se déconnecter',
   },
 

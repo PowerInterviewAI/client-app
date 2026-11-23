@@ -488,6 +488,8 @@ export const ru: Translation = {
     language: 'Язык приложения',
     lightMode: 'Светлая тема',
     darkMode: 'Тёмная тема',
+    theme: 'Тема',
+    systemMode: 'Как в системе',
     signOut: 'Выйти',
   },
 

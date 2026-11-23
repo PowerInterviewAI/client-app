@@ -460,6 +460,8 @@ export const es: Translation = {
     language: 'Idioma de la aplicación',
     lightMode: 'Modo claro',
     darkMode: 'Modo oscuro',
+    theme: 'Tema',
+    systemMode: 'Según el sistema',
     signOut: 'Cerrar sesión',
   },
 

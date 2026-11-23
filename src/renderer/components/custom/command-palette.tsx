@@ -87,7 +87,7 @@ export function CommandPalette() {
   const { confirmDiscard } = useSaveHistoryGuard();
   const { hintOnly, toggle: toggleSuggestionMode } = useSuggestionMode();
   const { visible: transcriptVisible, toggle: toggleTranscript } = useTranscriptPanel();
-  const { isDark, toggleTheme } = useThemeStore();
+  const { isDark, setPreference } = useThemeStore();
 
   const [isHotkeysOpen, setIsHotkeysOpen] = useState(false);
 
@@ -220,7 +220,7 @@ export function CommandPalette() {
               <Keyboard />
               {t.commandPalette.hotkeys}
             </CommandItem>
-            <CommandItem onSelect={() => run(toggleTheme)}>
+            <CommandItem onSelect={() => run(() => setPreference(isDark ? 'light' : 'dark'))}>
               {isDark ? <Sun /> : <Moon />}
               {isDark ? t.commandPalette.switchToLight : t.commandPalette.switchToDark}
             </CommandItem>
