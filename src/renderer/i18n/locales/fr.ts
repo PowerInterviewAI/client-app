@@ -622,7 +622,7 @@ export const fr: Translation = {
     },
     date: (ms: number) => new Date(ms).toLocaleDateString('fr-FR'),
     dateTime: (ms: number) =>
-      `${new Date(ms).toLocaleDateString('fr-FR')}, ${new Date(ms).toLocaleTimeString('fr-FR').slice(0, 5)}`,
+      `${new Date(ms).toLocaleDateString('fr-FR')}, ${new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}`,
     unlimitedUntil: (date: string) => `Illimité jusqu’au ${date}`,
     endsIn: (days: number) => `Se termine dans ${days} ${n(days, 'jour', 'jours')}`,
     freeLeft: (availableTime: string) => `${availableTime} gratuites`,

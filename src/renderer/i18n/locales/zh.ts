@@ -575,7 +575,7 @@ export const zh: Translation = {
     },
     date: (ms: number) => new Date(ms).toLocaleDateString('zh-CN'),
     dateTime: (ms: number) =>
-      `${new Date(ms).toLocaleDateString('zh-CN')} ${new Date(ms).toLocaleTimeString('zh-CN').slice(0, 5)}`,
+      `${new Date(ms).toLocaleDateString('zh-CN')} ${new Date(ms).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}`,
     unlimitedUntil: (date: string) => `不限时长，至 ${date}`,
     endsIn: (days: number) => `${days} 天后到期`,
     freeLeft: (availableTime: string) => `免费 ${availableTime}`,

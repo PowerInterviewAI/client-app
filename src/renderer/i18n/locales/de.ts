@@ -621,7 +621,7 @@ export const de: Translation = {
     },
     date: (ms: number) => new Date(ms).toLocaleDateString('de-DE'),
     dateTime: (ms: number) =>
-      `${new Date(ms).toLocaleDateString('de-DE')}, ${new Date(ms).toLocaleTimeString('de-DE').slice(0, 5)}`,
+      `${new Date(ms).toLocaleDateString('de-DE')}, ${new Date(ms).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}`,
     unlimitedUntil: (date: string) => `Unbegrenzt bis ${date}`,
     endsIn: (days: number) => `Endet in ${days} ${n(days, 'Tag', 'Tagen')}`,
     freeLeft: (availableTime: string) => `${availableTime} gratis`,

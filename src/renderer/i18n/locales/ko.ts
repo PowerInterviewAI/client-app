@@ -592,12 +592,8 @@ export const ko: Translation = {
       other: '구독 중',
     },
     date: (ms: number) => new Date(ms).toLocaleDateString('ko-KR'),
-    // `ko-KR` puts 오전/오후 before the time, so slicing the formatted string the way the other
-    // locales do would cut it in half. Hours and minutes are composed directly instead.
-    dateTime: (ms: number) => {
-      const d = new Date(ms);
-      return `${d.toLocaleDateString('ko-KR')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    },
+    dateTime: (ms: number) =>
+      `${new Date(ms).toLocaleDateString('ko-KR')} ${new Date(ms).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}`,
     unlimitedUntil: (date: string) => `${date}까지 무제한`,
     endsIn: (days: number) => `${days}일 후 종료`,
     freeLeft: (availableTime: string) => `무료 ${availableTime}`,

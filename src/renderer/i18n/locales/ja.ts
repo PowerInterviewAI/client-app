@@ -604,7 +604,7 @@ export const ja: Translation = {
     },
     date: (ms: number) => new Date(ms).toLocaleDateString('ja-JP'),
     dateTime: (ms: number) =>
-      `${new Date(ms).toLocaleDateString('ja-JP')} ${new Date(ms).toLocaleTimeString('ja-JP').slice(0, 5)}`,
+      `${new Date(ms).toLocaleDateString('ja-JP')} ${new Date(ms).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}`,
     unlimitedUntil: (date: string) => `${date} まで無制限`,
     endsIn: (days: number) => `あと ${days} 日で終了`,
     freeLeft: (availableTime: string) => `無料 ${availableTime}`,

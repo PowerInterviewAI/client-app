@@ -617,7 +617,7 @@ export const es: Translation = {
     },
     date: (ms: number) => new Date(ms).toLocaleDateString('es-ES'),
     dateTime: (ms: number) =>
-      `${new Date(ms).toLocaleDateString('es-ES')}, ${new Date(ms).toLocaleTimeString('es-ES').slice(0, 5)}`,
+      `${new Date(ms).toLocaleDateString('es-ES')}, ${new Date(ms).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}`,
     unlimitedUntil: (date: string) => `Ilimitado hasta el ${date}`,
     endsIn: (days: number) => `Termina en ${days} ${n(days, 'día', 'días')}`,
     freeLeft: (availableTime: string) => `${availableTime} gratis`,

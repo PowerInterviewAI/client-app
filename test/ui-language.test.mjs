@@ -32,6 +32,9 @@ const LATIN_BY_DESIGN = new Set([
   'ja-JP',
   'ko-KR',
   'zh-CN',
+  // `Intl.DateTimeFormat` option values, which are part of the API rather than copy.
+  '2-digit',
+  'h23',
   // Format names. Russian technical writing keeps both, and the file extension is not a word.
   'Markdown',
   'Word',
@@ -290,10 +293,9 @@ export async function run() {
   const mainEnLiterals = new Set(literalsOf(mainBlock('English')));
   for (const [member, code] of Object.entries(UiLanguage)) {
     if (code === 'en') continue;
-    check(
-      `the main-process table has a block for ${code}`,
-      blockStarts.some((b) => b.member === member)
-    );
+    const hasBlock = blockStarts.some((b) => b.member === member);
+    check(`the main-process table has a block for ${code}`, hasBlock);
+    if (!hasBlock) continue;
     const literals = literalsOf(mainBlock(member));
     check(`the main-process ${code} block has strings to check`, literals.length > 10);
     const untranslated = literals.filter((literal) =>

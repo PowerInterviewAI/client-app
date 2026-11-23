@@ -603,7 +603,7 @@ export const pt: Translation = {
     },
     date: (ms: number) => new Date(ms).toLocaleDateString('pt-BR'),
     dateTime: (ms: number) =>
-      `${new Date(ms).toLocaleDateString('pt-BR')}, ${new Date(ms).toLocaleTimeString('pt-BR').slice(0, 5)}`,
+      `${new Date(ms).toLocaleDateString('pt-BR')}, ${new Date(ms).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}`,
     unlimitedUntil: (date: string) => `Ilimitado até ${date}`,
     endsIn: (days: number) => `Termina em ${days} ${n(days, 'dia', 'dias')}`,
     freeLeft: (availableTime: string) => `${availableTime} grátis`,
