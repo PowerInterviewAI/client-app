@@ -48,8 +48,11 @@ export function LanguageField({ description, showVoice = false }: LanguageFieldP
       <div className="flex items-center gap-2">
         {/* A searchable popover rather than a Select: 97 languages are not found by scrolling,
             and a Select runs its own typeahead that would pull focus out of a search box. The
-            trigger keeps the Select's look so the form reads the same as before. */}
-        <Popover open={open} onOpenChange={setOpen}>
+            trigger keeps the Select's look so the form reads the same as before. Modal, as the
+            Select was: the mock setup dialog's scroll lock swallows wheel events outside its own
+            content, and this popover is portalled outside it, so a non-modal list could not be
+            scrolled with the mouse there. Only the most recent lock is active, so this one's wins. */}
+        <Popover modal open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"

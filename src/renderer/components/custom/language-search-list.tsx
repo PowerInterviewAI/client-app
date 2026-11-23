@@ -27,11 +27,15 @@ interface LanguageSearchListProps {
  * is looking for is typed as the start of one of its names, so a match at the start of the code
  * or of any word in either name ranks first, a match anywhere else second, and no match drops the
  * item.
+ *
+ * `toLowerCase`, not `toLocaleLowerCase`: the latter follows the host locale, and on a Turkish or
+ * Azerbaijani system it folds the capital I of "Indonesian" or "Italian" to a dotless `ı` that a
+ * typed `i` never matches.
  */
 function matchLanguage(value: string, search: string, keywords?: string[]): number {
-  const query = search.trim().toLocaleLowerCase();
+  const query = search.trim().toLowerCase();
   if (!query) return 1;
-  const names = [value, ...(keywords ?? [])].map((name) => name.toLocaleLowerCase());
+  const names = [value, ...(keywords ?? [])].map((name) => name.toLowerCase());
   if (names.some((name) => name.split(/[\s()-]+/).some((word) => word.startsWith(query)))) return 1;
   if (names.some((name) => name.includes(query))) return 0.5;
   return 0;
