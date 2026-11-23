@@ -1,22 +1,15 @@
-import { AlertTriangle, Check, Languages, Loader } from 'lucide-react';
-import { useEffect } from 'react';
+import { AlertTriangle, Languages, Loader } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
+import { LanguageSearchList } from '@/components/custom/language-search-list';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import { useInterviewLanguage } from '@/hooks/use-interview-language';
 import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
-import { LANGUAGES } from '@/types/language';
 
 import { BAR_GHOST } from './bar';
 
@@ -46,6 +39,7 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
   const { language, option, switching, reconnectFailed, setLanguage, clearReconnectFailed } =
     useInterviewLanguage();
   const disabled = getDisabled(runningState, false) || switching;
+  const [open, setOpen] = useState(false);
 
   // The half-applied state belongs to the session that produced it. The next start opens both
   // sockets on the stored language, so keeping the warning past a stop would describe something
@@ -59,12 +53,14 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
 
   return (
     <div className="flex items-center">
-      {/* Non-modal for the same reason as the export menu: a modal menu locks body pointer
-          events, and picking an item unmounts the menu before it releases the lock. */}
-      <DropdownMenu modal={false}>
+      {/* A popover rather than a dropdown menu because it holds a search box: a menu runs its own
+          typeahead on every character key and would pull focus out of the input. Non-modal, as
+          the export menu is: a modal layer locks body pointer events, and picking an item
+          unmounts it before it releases the lock. */}
+      <Popover open={open} onOpenChange={setOpen}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
+            <PopoverTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
@@ -95,7 +91,7 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
                 )}
                 <span className="text-[11px] font-medium tracking-wide">{option.short}</span>
               </Button>
-            </DropdownMenuTrigger>
+            </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent>
             <p>{t.languageGroup.tooltip(option.nativeName)}</p>
@@ -108,64 +104,35 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
             </p>
           </TooltipContent>
         </Tooltip>
-        {/* Opens upward: the menu is portalled into the overflow-hidden <main> from main-frame
-            and the control panel is the bottom-most thing in it, so a downward menu is clipped
-            rather than flipped. */}
-        {/* Capped and scrollable because the list is 28 long, not the 6 it was built for. The
-            menu opens upward from the bottom-most control, so an uncapped list is not merely
-            tall - it runs off the top of the window and the first entries become unreachable. */}
-        <DropdownMenuContent
+        {/* Opens upward: the popover is portalled into the overflow-hidden <main> from
+            main-frame and the control panel is the bottom-most thing in it, so a downward list
+            is clipped rather than flipped. Capped because it opens upward from the bottom-most
+            control: an uncapped list of 97 runs off the top of the window. */}
+        <PopoverContent
           align="start"
           side="top"
-          className="flex max-h-[min(60vh,20rem)] w-56 flex-col"
+          className="flex max-h-[min(60vh,20rem)] w-64 flex-col p-0"
         >
-          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+          <div className="px-3 pt-2 pb-1 text-xs text-muted-foreground">
             {t.languageGroup.menuLabel}
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {LANGUAGES.map((item) => {
-              const selected = item.code === language;
-              return (
-                <DropdownMenuItem
-                  key={item.code}
-                  onClick={() => void setLanguage(item.code)}
-                  className="gap-2"
-                  // Radix runs its own typeahead on an open menu, matching a prefix of this. Left
-                  // unset it uses the item's rendered text, which is the two names run together
-                  // ("PolskiPolish"), so only the endonym was ever reachable by typing. The
-                  // English name is the useful half: the endonym column is what the eye scans,
-                  // and a list of 28 wants those to be two access paths rather than one.
-                  textValue={item.name}
-                >
-                  {/* The check occupies its own fixed column rather than being conditionally
-                    rendered, so the labels do not shift by 16px as the selection moves. */}
-                  <Check
-                    className={cn('h-4 w-4 shrink-0', selected ? 'opacity-100' : 'opacity-0')}
-                    aria-hidden="true"
-                  />
-                  <span dir="auto" className={cn('flex-1', selected && 'font-medium')}>
-                    {item.nativeName}
-                  </span>
-                  {/* The English name earns its place for the reverse lookup: a user who has not
-                    yet found their language scans this column, not the endonyms. */}
-                  {item.nativeName !== item.name && (
-                    <span className="text-xs text-muted-foreground">{item.name}</span>
-                  )}
-                </DropdownMenuItem>
-              );
-            })}
           </div>
+          <LanguageSearchList
+            value={language}
+            onSelect={(code) => {
+              setOpen(false);
+              void setLanguage(code);
+            }}
+            className="min-h-0 flex-1 p-1"
+          />
           {running && (
-            <>
-              <DropdownMenuSeparator />
+            <div className="border-t">
               {/* The half-applied case outranks the notice below it. Suggestions have already
                   moved and transcription has not, so the checked item names a language only half
                   the session is in - and the toast that said so is long gone. */}
               {reconnectFailed && !switching ? (
                 <div
                   role="alert"
-                  className="flex items-start gap-1.5 px-2 py-1.5 text-xs text-destructive"
+                  className="flex items-start gap-1.5 px-3 py-1.5 text-xs text-destructive"
                 >
                   <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                   <span>{t.languageGroup.halfApplied}</span>
@@ -173,14 +140,14 @@ export function LanguageGroup({ getDisabled }: LanguageGroupProps) {
               ) : (
                 /* Says what will happen before it happens: a two-second hole in the transcript
                    is alarming if it arrives unannounced mid-question. */
-                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                <div className="px-3 py-1.5 text-xs text-muted-foreground">
                   {t.languageGroup.willReconnect}
                 </div>
               )}
-            </>
+            </div>
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

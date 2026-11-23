@@ -348,7 +348,7 @@ export const en = {
 
   languageField: {
     label: 'Interview language',
-    /** Shown inside each item for a language Deepgram's Aura TTS cannot speak. */
+    /** Shown inside each item for a language Deepgram's Flux TTS cannot speak. */
     textOnly: 'text only',
     reconnectFailed:
       'Suggestions switched language, but transcription is still reconnecting. Stop and start the assistant if it does not come back.',
@@ -542,6 +542,11 @@ export const en = {
     halfApplied:
       'Suggestions moved, transcription did not. It is still retrying - stop and start the assistant if it does not come back.',
     willReconnect: 'Transcription reconnects; the current sentence may be cut short.',
+  },
+
+  languageSearch: {
+    placeholder: 'Search languages…',
+    empty: 'No language matches.',
   },
 
   suggestionMode: {
@@ -940,7 +945,7 @@ export const en = {
       title: 'Interviewing in another language',
       oneSetting:
         "One setting covers the whole session: which speech model transcribes the call, what language suggestions are written in, and the language of the exported report. Set it from the language button on the control bar, from the configuration page, or in the mock interview's setup dialog - they all change the same thing.",
-      supported: (count: number) => `${count} languages are supported: `,
+      supported: (count: number) => `${count} languages are supported:`,
       midInterview:
         'You can change it mid-interview. Suggestions follow immediately, from the next answer onward. Speech recognition takes a moment longer: it reconnects, so the sentence being spoken at that instant may be cut short in the transcript.',
       textOnly:
