@@ -1,4 +1,4 @@
-import { ArrowUp, ImageUp, Loader, PauseCircle, Zap } from 'lucide-react';
+import { ArrowUp, ImageUp, Loader, PauseCircle, ScanText, Zap } from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -7,6 +7,8 @@ import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useT } from '@/i18n';
 import { newestTimestamp, truncateMiddle } from '@/lib/suggestions';
 import { type ActionSuggestion, SuggestionState } from '@/types/suggestion';
+
+import { PanelEmpty } from './panel-empty';
 
 // when a question is too long we truncate it in the middle to keep the UI compact
 const MAX_QUESTION_LENGTH = 256;
@@ -159,11 +161,11 @@ function ActionSuggestionsPanel({
 
   return (
     <Card
-      className="relative flex flex-col w-full h-full bg-card p-0 rounded-md gap-1"
+      className="relative flex flex-col w-full h-full bg-card p-0 rounded-lg gap-0"
       style={style}
     >
       {/* Header */}
-      <div className="px-2 py-1.5 shrink-0 flex items-center justify-between gap-4">
+      <div className="px-3 py-1.5 shrink-0 flex items-center justify-between gap-4 border-b border-border/60">
         <div className="flex items-center gap-2">
           {isRunning && (
             <span
@@ -171,7 +173,9 @@ function ActionSuggestionsPanel({
               aria-hidden="true"
             />
           )}
-          <h3 className="font-semibold text-foreground text-xs">{t.panels.triggeredSuggestions}</h3>
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {t.panels.triggeredSuggestions}
+          </h3>
         </div>
 
         {!isStealth && (
@@ -195,13 +199,7 @@ function ActionSuggestionsPanel({
 
       {/* Scrollable Content */}
       <div ref={containerRef} className="flex-1 overflow-y-auto">
-        {!hasItems && (
-          <div className="flex items-center justify-center h-full text-center p-4">
-            <div>
-              <p className="text-sm text-muted-foreground">{t.panels.noTriggeredSuggestions}</p>
-            </div>
-          </div>
-        )}
+        {!hasItems && <PanelEmpty icon={ScanText} text={t.panels.noTriggeredSuggestions} />}
 
         {hasItems && (
           <div className="px-2 pb-2">
