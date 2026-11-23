@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { useAppRailVisible } from '@/hooks/use-app-rail';
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { MainContainerContext } from '@/hooks/use-main-container';
@@ -11,6 +12,7 @@ import { useSubscriptionExpiryWarning } from '@/hooks/use-subscription-expiry-wa
 import { useUiLanguageSync } from '@/i18n';
 import type { PushNotification } from '@/types/push-notification';
 
+import AppRail from './app-rail';
 import { CommandPalette } from './command-palette';
 import SaveHistoryDialog from './save-history-dialog';
 import Titlebar from './titlebar';
@@ -65,6 +67,8 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
     if (isLoggedIn === false && !onAuthRoute) navigate('/auth/login', { replace: true });
   }, [isLoggedIn, onAuthRoute, navigate]);
 
+  const railVisible = useAppRailVisible();
+
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
   const mainRef = React.useCallback((el: HTMLElement | null) => {
     setContainer(el);
@@ -97,7 +101,16 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
       <main ref={mainRef} className="relative overflow-hidden bg-background">
         <div className="flex flex-col h-dvh">
           <Titlebar />
-          <div className="flex-1 flex flex-col overflow-auto hide-scrollbar">{children}</div>
+          <div className="flex flex-1 min-h-0">
+            {railVisible && <AppRail />}
+            {/* Keyed on the route so each destination plays the enter transition once. */}
+            <div
+              key={railVisible ? pathname : undefined}
+              className={`flex-1 min-w-0 flex flex-col overflow-auto hide-scrollbar${railVisible ? ' view-enter' : ''}`}
+            >
+              {children}
+            </div>
+          </div>
         </div>
         <UpdateNotification />
       </main>

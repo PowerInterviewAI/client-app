@@ -6,6 +6,7 @@ import CreditsDisplay from '@/components/custom/credits-display';
 import TitlebarMenu from '@/components/custom/titlebar-menu';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAppRailVisible } from '@/hooks/use-app-rail';
 import { useAppState } from '@/hooks/use-app-state';
 import { useCommandPaletteStore } from '@/hooks/use-command-palette';
 import { useHideTaskbar } from '@/hooks/use-hide-taskbar';
@@ -61,6 +62,9 @@ export default function Titlebar() {
 
   // No taskbar icon to restore from, and main refuses minimize in this mode too.
   const { enabled: minimizeBlocked } = useHideTaskbar();
+
+  // The rail carries the same menu at its foot, so the titlebar copy would be a duplicate.
+  const railVisible = useAppRailVisible();
 
   if (isStealth) return null;
 
@@ -122,7 +126,7 @@ export default function Titlebar() {
             </TooltipContent>
           </Tooltip>
 
-          <TitlebarMenu style={NO_DRAG} disabled={locked} />
+          {!railVisible && <TitlebarMenu style={NO_DRAG} disabled={locked} />}
 
           {!isMac && (
             <>
