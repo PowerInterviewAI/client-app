@@ -780,6 +780,95 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     captureFailed: '截图失败，请重试。',
     cannotGenerateSuggestion: '助手未运行时无法生成建议',
   },
+
+  [UiLanguage.Japanese]: {
+    placeholderTranscript: 'ここに文字起こしが表示されます',
+    placeholderQuestion: 'ここに面接官の質問が表示されます',
+    placeholderLiveAnswer: 'ここに回答の提案がリアルタイムで表示されます',
+    placeholderActionAnswer: 'ここにオンデマンド提案が表示されます。たとえば、回答の提案、コーディングテストの解答、図の説明などです。',
+
+    sessionExpired: 'セッションの有効期限が切れました。もう一度ログインしてください。',
+
+    authErrors: {
+      sendCodeFailed: '確認コードを送信できませんでした',
+      invalidCode: '確認コードが無効か、有効期限が切れています',
+      signupFailed: '登録に失敗しました',
+      invalidCredentials: 'メールアドレスまたはパスワードが正しくありません',
+      loginFailed: 'ログインに失敗しました',
+      logoutFailed: 'ログアウトに失敗しました',
+      changePasswordFailed: 'パスワードを変更できませんでした',
+      sendResetCodeFailed: 'リセットコードを送信できませんでした',
+      invalidResetCode: 'リセットコードが無効か、有効期限が切れています',
+      resetFailed: 'パスワードの再設定に失敗しました',
+    },
+
+    accountErrors: {
+      fetchFailed: 'アカウントを取得できませんでした',
+      updateFailed: 'アカウントを更新できませんでした',
+      onboardingFailed: 'セットアップを保存できませんでした',
+      migrateFailed: 'ローカルの設定を移行できませんでした',
+      loadConfigFailed: '設定を読み込めませんでした',
+    },
+
+    transportErrors: {
+      timedOut: 'リクエストがタイムアウトしました',
+      networkFailed: 'ネットワークリクエストに失敗しました',
+    },
+
+    paymentErrors: {
+      getPlans: 'プランを取得できませんでした',
+      getCurrencies: '利用できる通貨を取得できませんでした',
+      createPayment: '支払いを作成できませんでした',
+      getStatus: '支払いステータスを取得できませんでした',
+      getHistory: '支払い履歴を取得できませんでした',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: 'リクエストが多すぎます。しばらくしてからもう一度お試しください。',
+      generateFailed: '回答を生成できませんでした。',
+      cannotReachServer: 'サーバーに接続できません。接続を確認してもう一度お試しください。',
+      responseTimedOut: '応答がタイムアウトしました。もう一度お試しください。',
+      emptyResponse: 'モデルから空の応答が返されました。',
+    },
+
+    mockErrors: {
+      liveRunning: '模擬面接を始める前にライブ面接を停止してください。',
+      firstQuestionFailed: '最初の質問を生成できませんでした。もう一度お試しください。',
+      firstQuestionFailedWith: (reason: string) => `最初の質問を生成できませんでした：${reason}`,
+      startFailed: '模擬面接を開始できませんでした',
+      nothingRecorded:
+        '何も録音されないまま面接が終了しました。正しいマイクが選択され、ミュートになっていないか確認してから、もう一度お試しください。',
+      endedBeforeScoring: '採点が終わる前に面接が終了しました。',
+      notEnoughCredits: '無料時間を使い切りました',
+    },
+
+    actionNames: {
+      screenshotCapture: 'スクリーンショットの撮影',
+      captureSuggestion: 'オンデマンド提案の生成',
+    },
+    actionBlocked: (runningAction: string) =>
+      `${runningAction}を実行中です。少し待ってからもう一度お試しください。`,
+
+    stealthSignedOut: 'ステルスモードを使うにはログインが必要です。',
+    stealthDuringMock: '模擬面接中はステルスモードを使用できません。これは練習で、本番の通話ではありません。',
+    stealthNotRunning: 'ステルスモードはライブ面接中のみ使用できます。',
+    opacityStealthOnly: '透明度の切り替えはステルスモードでのみ使用できます。',
+
+    saveTranscriptTitle: '文字起こしを保存',
+    saveMockReportTitle: '模擬面接レポートを保存',
+    saveImageTitle: '画像を保存',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Word 文書',
+    pngFilter: 'PNG 画像',
+
+    actionDuringMock: '模擬面接中はオンデマンド提案を使用できません。',
+    cannotClearImages: 'アシスタントが実行されていないため、画像を消去できません',
+    cannotCaptureScreenshot: 'アシスタントが実行されていないため、スクリーンショットを撮れません',
+    maxCaptures: (max: number) =>
+      `スクリーンショットの上限（${max} 枚）に達しました。画像を消去してからもう一度お試しください。`,
+    captureFailed: 'スクリーンショットを撮れませんでした。もう一度お試しください。',
+    cannotGenerateSuggestion: 'アシスタントが実行されていないため、提案を生成できません',
+  },
 };
 
 /**

@@ -11,6 +11,7 @@ export enum UiLanguage {
   German = 'de',
   French = 'fr',
   Chinese = 'zh',
+  Japanese = 'ja',
 }
 
 export const DEFAULT_UI_LANGUAGE = UiLanguage.English;
@@ -38,6 +39,7 @@ export const UI_LANGUAGES: readonly UiLanguageOption[] = [
   { code: UiLanguage.German, nativeName: 'Deutsch' },
   { code: UiLanguage.French, nativeName: 'Français' },
   { code: UiLanguage.Chinese, nativeName: '中文' },
+  { code: UiLanguage.Japanese, nativeName: '日本語' },
 ];
 
 const BY_CODE = new Map<string, UiLanguageOption>(
