@@ -115,8 +115,8 @@ export default function AppRail() {
 
   const items: { path: string; icon: LucideIcon; label: string }[] = [
     { path: '/', icon: Home, label: t.titlebarMenu.home },
-    { path: '/configuration', icon: SettingsIcon, label: t.titlebarMenu.configuration },
     { path: '/account', icon: UserRound, label: t.titlebarMenu.account },
+    { path: '/configuration', icon: SettingsIcon, label: t.titlebarMenu.configuration },
     { path: '/payment', icon: CreditCard, label: t.home.subscribe },
     { path: '/documentation', icon: BookOpen, label: t.titlebarMenu.documentation },
   ];
