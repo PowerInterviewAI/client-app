@@ -233,21 +233,10 @@ export const de: Translation = {
       unaffordable: 'Nicht genug Gratiszeit übrig. Abonniere, um weitere Interviews zu führen.',
     },
 
-    accountLabel: 'Konto',
-    notSignedIn: 'Nicht angemeldet',
     planLabel: 'Tarif',
     planUnavailable: 'Nicht verfügbar',
     subscribe: 'Abonnement',
 
-    nav: {
-      account: 'Konto',
-      configuration: 'Einstellungen',
-      documentation: 'Dokumentation',
-    },
-
-    signOut: 'Abmelden',
-    signingOut: 'Abmeldung läuft…',
-    signOutBlocked: 'Beende das Interview, bevor du dich abmeldest',
     signOutFailed: 'Abmeldung fehlgeschlagen',
   },
 

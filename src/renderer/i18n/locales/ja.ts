@@ -227,21 +227,10 @@ export const ja: Translation = {
       unaffordable: '無料時間が足りません。面接を続けるにはサブスクリプションに登録してください。',
     },
 
-    accountLabel: 'アカウント',
-    notSignedIn: '未ログイン',
     planLabel: 'プラン',
     planUnavailable: '取得できません',
     subscribe: 'サブスクリプション',
 
-    nav: {
-      account: 'アカウント',
-      configuration: '設定',
-      documentation: 'ヘルプ',
-    },
-
-    signOut: 'ログアウト',
-    signingOut: 'ログアウト中…',
-    signOutBlocked: 'ログアウトする前に面接を停止してください',
     signOutFailed: 'ログアウトに失敗しました',
   },
 

@@ -246,21 +246,10 @@ export const en = {
       unaffordable: 'Not enough free time left. Subscribe to keep interviewing.',
     },
 
-    accountLabel: 'Account',
-    notSignedIn: 'Not signed in',
     planLabel: 'Plan',
     planUnavailable: 'Unavailable',
     subscribe: 'Subscription',
 
-    nav: {
-      account: 'Account',
-      configuration: 'Configuration',
-      documentation: 'Documentation',
-    },
-
-    signOut: 'Sign out',
-    signingOut: 'Signing out…',
-    signOutBlocked: 'Stop the interview before signing out',
     signOutFailed: 'Failed to sign out',
   },
 

@@ -239,21 +239,10 @@ export const fr: Translation = {
         'Il ne vous reste pas assez de temps gratuit. Abonnez-vous pour continuer vos entretiens.',
     },
 
-    accountLabel: 'Compte',
-    notSignedIn: 'Non connecté',
     planLabel: 'Formule',
     planUnavailable: 'Indisponible',
     subscribe: 'Abonnement',
 
-    nav: {
-      account: 'Compte',
-      configuration: 'Réglages',
-      documentation: 'Aide',
-    },
-
-    signOut: 'Se déconnecter',
-    signingOut: 'Déconnexion…',
-    signOutBlocked: 'Arrêtez l’entretien avant de vous déconnecter',
     signOutFailed: 'Échec de la déconnexion',
   },
 

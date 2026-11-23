@@ -220,21 +220,10 @@ export const zh: Translation = {
       unaffordable: '剩余免费时长不足。订阅后可继续面试。',
     },
 
-    accountLabel: '账户',
-    notSignedIn: '未登录',
     planLabel: '套餐',
     planUnavailable: '不可用',
     subscribe: '订阅',
 
-    nav: {
-      account: '账户',
-      configuration: '设置',
-      documentation: '帮助文档',
-    },
-
-    signOut: '退出登录',
-    signingOut: '正在退出…',
-    signOutBlocked: '请先停止面试再退出登录',
     signOutFailed: '退出登录失败',
   },
 

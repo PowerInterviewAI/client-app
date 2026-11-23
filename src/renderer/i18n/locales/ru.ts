@@ -252,21 +252,10 @@ export const ru: Translation = {
         'Недостаточно бесплатного времени. Оформите подписку, чтобы продолжить собеседования.',
     },
 
-    accountLabel: 'Учётная запись',
-    notSignedIn: 'Вход не выполнен',
     planLabel: 'Тариф',
     planUnavailable: 'Нет данных',
     subscribe: 'Подписка',
 
-    nav: {
-      account: 'Учётная запись',
-      configuration: 'Настройки',
-      documentation: 'Документация',
-    },
-
-    signOut: 'Выйти',
-    signingOut: 'Выходим…',
-    signOutBlocked: 'Остановите собеседование, прежде чем выйти',
     signOutFailed: 'Не удалось выйти',
   },
 

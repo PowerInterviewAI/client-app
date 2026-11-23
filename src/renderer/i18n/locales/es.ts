@@ -235,21 +235,10 @@ export const es: Translation = {
         'No te queda suficiente tiempo gratis. Suscríbete para seguir con tus entrevistas.',
     },
 
-    accountLabel: 'Cuenta',
-    notSignedIn: 'Sin sesión iniciada',
     planLabel: 'Plan',
     planUnavailable: 'No disponible',
     subscribe: 'Suscripción',
 
-    nav: {
-      account: 'Cuenta',
-      configuration: 'Configuración',
-      documentation: 'Documentación',
-    },
-
-    signOut: 'Cerrar sesión',
-    signingOut: 'Cerrando sesión…',
-    signOutBlocked: 'Detén la entrevista antes de cerrar sesión',
     signOutFailed: 'No se pudo cerrar sesión',
   },
 

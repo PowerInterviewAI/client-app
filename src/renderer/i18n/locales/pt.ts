@@ -228,21 +228,10 @@ export const pt: Translation = {
       unaffordable: 'Não sobrou tempo grátis suficiente. Assine para continuar suas entrevistas.',
     },
 
-    accountLabel: 'Conta',
-    notSignedIn: 'Sem login',
     planLabel: 'Plano',
     planUnavailable: 'Indisponível',
     subscribe: 'Assinatura',
 
-    nav: {
-      account: 'Conta',
-      configuration: 'Configurações',
-      documentation: 'Documentação',
-    },
-
-    signOut: 'Sair',
-    signingOut: 'Saindo…',
-    signOutBlocked: 'Pare a entrevista antes de sair',
     signOutFailed: 'Não foi possível sair',
   },
 

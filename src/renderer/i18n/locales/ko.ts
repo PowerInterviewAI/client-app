@@ -226,21 +226,10 @@ export const ko: Translation = {
       unaffordable: '무료 시간이 부족합니다. 계속 면접을 보려면 구독하세요.',
     },
 
-    accountLabel: '계정',
-    notSignedIn: '로그인하지 않음',
     planLabel: '요금제',
     planUnavailable: '확인할 수 없음',
     subscribe: '구독',
 
-    nav: {
-      account: '계정',
-      configuration: '설정',
-      documentation: '도움말',
-    },
-
-    signOut: '로그아웃',
-    signingOut: '로그아웃 중…',
-    signOutBlocked: '로그아웃하기 전에 면접을 중지하세요',
     signOutFailed: '로그아웃하지 못했습니다',
   },
 
