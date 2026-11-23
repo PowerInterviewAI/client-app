@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import { useAppRailVisible } from '@/hooks/use-app-rail';
+import { RAIL_ROUTES, useAppRailVisible } from '@/hooks/use-app-rail';
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useHotkeyHelp } from '@/hooks/use-hotkey-help';
@@ -111,9 +111,13 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
           <Titlebar />
           <div className="flex flex-1 min-h-0">
             {railVisible && <AppRail />}
-            {/* Keyed on the route so each destination plays the enter transition once. */}
+            {/* Keyed on the route so each rail destination plays the enter transition once. Never
+                on whether the rail is showing: that flips on the same route - Home as sign-in
+                resolves at launch - and a key change there would remount the page and drop its
+                state. Routes off the rail share one key, so moving between the auth steps does
+                not remount their shared layout either. */}
             <div
-              key={railVisible ? pathname : undefined}
+              key={RAIL_ROUTES.includes(pathname) ? pathname : 'off-rail'}
               className={`flex-1 min-w-0 flex flex-col overflow-auto hide-scrollbar${railVisible ? ' view-enter' : ''}`}
             >
               {children}

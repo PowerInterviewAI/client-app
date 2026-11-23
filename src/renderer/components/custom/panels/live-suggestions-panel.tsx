@@ -261,10 +261,12 @@ function LiveSuggestionsPanel({
                     always on screen, so containment never applies to it. */}
                 {/* The newest card is the one being read mid-answer, so it carries an accent edge
                     and full contrast; older ones step back until hovered. A glance should land on
-                    the current answer without reading which card is on top. */}
+                    the current answer without reading which card is on top. The edge sits inside
+                    the card's own box, never outdented with a negative margin: SuggestionReveal
+                    clips its wrapper while the newest card - the one carrying the edge - expands. */}
                 <div
                   className={cn(
-                    'py-3 pl-2 -ml-2 border-l-2 transition-opacity duration-300 [content-visibility:auto] [contain-intrinsic-size:auto_6rem]',
+                    'py-3 pl-2 border-l-2 transition-opacity duration-300 [content-visibility:auto] [contain-intrinsic-size:auto_6rem]',
                     idx === 0
                       ? 'border-primary'
                       : 'border-transparent opacity-60 hover:opacity-100 focus-within:opacity-100'

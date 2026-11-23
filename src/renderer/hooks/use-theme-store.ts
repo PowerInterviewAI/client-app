@@ -41,6 +41,11 @@ function resolve(preference: ThemePreference): ResolvedTheme {
 const initialPreference = readStoredPreference();
 const initialTheme = resolve(initialPreference);
 
+// Applied at module load, ahead of React's first paint. `index.html` ships with `class="dark"` for
+// the default; a user who chose light would otherwise see one dark frame on every launch before
+// the provider's effect ran.
+document.documentElement.classList.toggle('dark', initialTheme === 'dark');
+
 export const useThemeStore = create<ThemeStore>((set) => ({
   preference: initialPreference,
   theme: initialTheme,

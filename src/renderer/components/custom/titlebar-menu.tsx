@@ -134,7 +134,13 @@ export default function TitlebarMenu({
           </span>
         </TooltipTrigger>
         <TooltipContent side={inRail ? 'right' : undefined}>
-          <p>{closed ? t.titlebar.unavailableDuringInterview : inRail ? email : t.titlebar.menu}</p>
+          <p>
+            {closed
+              ? t.titlebar.unavailableDuringInterview
+              : inRail && email
+                ? email
+                : t.titlebar.menu}
+          </p>
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent

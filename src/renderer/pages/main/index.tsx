@@ -327,11 +327,14 @@ export default function MainPage() {
     return <LoadingPage disclaimer={t.common.loading} />;
   }
 
-  // Running, and nothing real has been written yet: the panels would show the sample placeholder
-  // copy, which on a live session reads as a demo or a fault. `hasHistory` flips on the first real
-  // transcript or suggestion.
+  // Running with nothing in any panel yet - Start's `clearAll()` empties all three arrays - which
+  // otherwise shows an empty transcript dock and nothing else.
+  //
+  // Read off the arrays rather than `hasHistory`: that counts transcripts and live suggestions
+  // only, so a screenshot suggestion requested before anyone has spoken would leave it false and
+  // this screen would hide the one panel with something in it.
   const awaitingFirstQuestion =
-    appState.runningState === RunningState.Running && !appState.hasHistory;
+    appState.runningState === RunningState.Running && !hasTranscripts && !hasSuggestions;
 
   return (
     <div className="flex-1 flex flex-col w-full bg-background p-1 space-y-1">

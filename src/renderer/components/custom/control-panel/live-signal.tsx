@@ -96,7 +96,12 @@ export function LiveSignal() {
               connected ? 'bg-emerald-500' : 'animate-pulse bg-destructive'
             )}
           />
-          <span className="max-w-28 truncate">{label}</span>
+          {/* The bar is full at the 840px minimum width, so "Listening" - the state nobody needs
+              to read - is dropped there and the dot and meter carry it, with the tooltip and the
+              aria-label holding the words. "Reconnecting" always shows: it is the one to notice. */}
+          <span className={cn('max-w-28 truncate', connected && 'hidden min-[1000px]:inline')}>
+            {label}
+          </span>
           {connected && (
             <span aria-hidden="true" className="flex h-3.5 items-end gap-[2px]">
               {Array.from({ length: BAR_COUNT }, (_, i) => (

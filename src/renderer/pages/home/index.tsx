@@ -87,7 +87,10 @@ function LaunchCard({
       >
         {icon}
       </div>
-      <h2 className="mt-4 text-base font-semibold tracking-tight">{title}</h2>
+      {/* Not a heading: the card is a button, whose content is presentational, so a heading
+          inside it is invalid and is not exposed as one anyway. The title and description are
+          read as the button's name. */}
+      <p className="mt-4 text-base font-semibold tracking-tight">{title}</p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{description}</p>
       {!disabled && (
         <ArrowRight

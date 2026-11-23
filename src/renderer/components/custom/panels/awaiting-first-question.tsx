@@ -14,10 +14,10 @@ const TIPS: Hotkey[] = [
 /**
  * What a running session shows before anything has been heard.
  *
- * The panels hold sample placeholder copy until the first real write, which on a running session
- * reads as either a demo or a fault. This says what is actually happening - the app is listening
- * and the answer will appear here - and spends the wait on the four shortcuts that matter most
- * once the interview is under way.
+ * Start empties every panel, so without this the first thing a candidate sees is an empty
+ * transcript dock - which reads the same as a microphone that is not working. This says what is
+ * actually happening - the app is listening and the answer will appear here - and spends the wait
+ * on the four shortcuts that matter most once the interview is under way.
  */
 export function AwaitingFirstQuestion() {
   const t = useT();
@@ -34,9 +34,11 @@ export function AwaitingFirstQuestion() {
             <Radio className="h-5 w-5" aria-hidden="true" />
           </span>
         </div>
-        <h2 className="text-base font-semibold tracking-tight" role="status">
+        {/* A status line rather than a heading: `role="status"` on an h2 would override its
+            heading role anyway, and what this needs is to be announced when it appears. */}
+        <p className="text-base font-semibold tracking-tight" role="status">
           {t.mainRoute.awaitingFirstQuestion.title}
-        </h2>
+        </p>
         <p className="mt-1.5 text-[13px] text-muted-foreground">
           {t.mainRoute.awaitingFirstQuestion.description}
         </p>

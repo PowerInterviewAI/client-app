@@ -15,7 +15,10 @@ export function useAccountForm() {
   const [fullName, setFullName] = useState('');
   const [profileData, setProfileData] = useState('');
   const [context, setContext] = useState('');
-  const [loading, setLoading] = useState(false);
+  // True from the first render, not from the effect that starts the fetch: the fetch always runs
+  // on mount, and a first frame reading "not loading, not loaded" is the load-failed state - which
+  // flashed the wizard's retry prompt and the account page's fields before their skeleton.
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   // Only true once the fetch actually succeeds. A late failure that left this true would let Save
