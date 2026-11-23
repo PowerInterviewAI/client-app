@@ -2,6 +2,7 @@ import { ArrowRight, Clock, Crown, Mic, Radio, Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { AmbientBackground } from '@/components/custom/ambient-background';
 import { MockInterviewSetupDialog } from '@/components/custom/mock-interview-setup-dialog';
 import { useAppState } from '@/hooks/use-app-state';
 import { useCommandPaletteStore } from '@/hooks/use-command-palette';
@@ -65,8 +66,8 @@ function LaunchCard({
       className={cn(
         'group relative flex min-h-44 flex-col overflow-hidden rounded-2xl border p-5 outline-none transition-all duration-200',
         emphasis
-          ? 'border-primary/30 bg-gradient-to-br from-primary/[0.14] via-card to-card'
-          : 'bg-card',
+          ? 'border-primary/30 bg-gradient-to-br from-primary/[0.16] via-card/75 to-card/75 backdrop-blur-xl'
+          : 'bg-card/75 backdrop-blur-xl',
         disabled
           ? 'cursor-not-allowed opacity-55'
           : cn(
@@ -214,92 +215,95 @@ export default function HomePage() {
     // `min-h-full` rather than `h-full` so centring gives way to scrolling once the content is
     // taller than the window, which only happens well past the default zoom. Built to fit
     // MIN_WIDTH x MIN_HEIGHT (840x600) less the titlebar and the rail.
-    <div className="flex-1 overflow-auto">
-      <div className="flex min-h-full items-center justify-center">
-        <div className="w-full max-w-3xl px-8 py-8">
-          <div className="mb-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-            <div className="min-w-0">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {firstName ? t.home.welcome(firstName) : t.home.welcomeAnonymous}
-              </h1>
-              <p className="mt-1.5 text-sm text-muted-foreground">{t.home.subtitle}</p>
+    <div className="relative flex flex-1 flex-col overflow-hidden">
+      <AmbientBackground />
+      <div className="relative flex-1 overflow-auto">
+        <div className="flex min-h-full items-center justify-center">
+          <div className="w-full max-w-3xl px-8 py-8">
+            <div className="mb-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  {firstName ? t.home.welcome(firstName) : t.home.welcomeAnonymous}
+                </h1>
+                <p className="mt-1.5 text-sm text-muted-foreground">{t.home.subtitle}</p>
+              </div>
+
+              {/* The plan as a status chip that is also the way to change it. */}
+              <button
+                type="button"
+                onClick={() => navigate('/payment')}
+                aria-label={`${t.home.planLabel}: ${planText}. ${t.home.subscribe}`}
+                className={cn(
+                  'inline-flex max-w-full items-center gap-2 rounded-full border bg-background/40 px-3 py-1.5 text-xs font-medium backdrop-blur transition-colors',
+                  'hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                  subscribed ? 'border-primary/30 text-primary' : 'text-muted-foreground'
+                )}
+              >
+                {subscribed ? (
+                  <Crown className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                ) : (
+                  <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                )}
+                <span className="truncate tabular-nums">{planText}</span>
+                {!subscribed && (
+                  <>
+                    <span aria-hidden="true" className="h-3 w-px shrink-0 bg-border" />
+                    <span className="shrink-0 text-foreground">{t.home.subscribe}</span>
+                  </>
+                )}
+              </button>
             </div>
 
-            {/* The plan as a status chip that is also the way to change it. */}
+            <div className="grid grid-cols-2 gap-4">
+              <LaunchCard
+                emphasis
+                icon={<Radio className="h-5 w-5" aria-hidden="true" />}
+                title={liveSessionActive ? t.home.live.resumeTitle : t.home.live.title}
+                description={
+                  liveSessionActive
+                    ? t.home.live.running
+                    : mockSessionActive
+                      ? t.home.live.mockRunning
+                      : creditsTooLow
+                        ? t.home.live.unaffordable
+                        : t.home.live.ready
+                }
+                onClick={
+                  !liveSessionActive && creditsTooLow ? () => navigate('/payment') : handleStartLive
+                }
+                disabled={!liveSessionActive && mockSessionActive}
+              />
+              <LaunchCard
+                icon={<Mic className="h-5 w-5" aria-hidden="true" />}
+                title={t.home.mock.title}
+                description={
+                  mockUnsupported
+                    ? t.home.mock.unsupported
+                    : liveSessionActive
+                      ? t.home.mock.liveRunning
+                      : creditsTooLow
+                        ? t.home.mock.unaffordable
+                        : t.home.mock.ready
+                }
+                onClick={() => (creditsTooLow ? navigate('/payment') : setMockSetupOpen(true))}
+                disabled={liveSessionActive || mockUnsupported}
+              />
+            </div>
+
+            {/* The command palette reaches everything on the rail and more, and nothing on screen
+              said it existed. */}
             <button
               type="button"
-              onClick={() => navigate('/payment')}
-              aria-label={`${t.home.planLabel}: ${planText}. ${t.home.subscribe}`}
-              className={cn(
-                'inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                'hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-                subscribed ? 'border-primary/30 text-primary' : 'text-muted-foreground'
-              )}
+              onClick={() => openCommandPalette(true)}
+              className="mx-auto mt-6 flex items-center gap-2 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
-              {subscribed ? (
-                <Crown className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              ) : (
-                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              )}
-              <span className="truncate tabular-nums">{planText}</span>
-              {!subscribed && (
-                <>
-                  <span aria-hidden="true" className="h-3 w-px shrink-0 bg-border" />
-                  <span className="shrink-0 text-foreground">{t.home.subscribe}</span>
-                </>
-              )}
+              <Search className="h-3.5 w-3.5" aria-hidden="true" />
+              {t.titlebar.searchActions}
+              <kbd className="rounded border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-medium text-foreground/80">
+                {isMac ? '⌘K' : 'Ctrl K'}
+              </kbd>
             </button>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <LaunchCard
-              emphasis
-              icon={<Radio className="h-5 w-5" aria-hidden="true" />}
-              title={liveSessionActive ? t.home.live.resumeTitle : t.home.live.title}
-              description={
-                liveSessionActive
-                  ? t.home.live.running
-                  : mockSessionActive
-                    ? t.home.live.mockRunning
-                    : creditsTooLow
-                      ? t.home.live.unaffordable
-                      : t.home.live.ready
-              }
-              onClick={
-                !liveSessionActive && creditsTooLow ? () => navigate('/payment') : handleStartLive
-              }
-              disabled={!liveSessionActive && mockSessionActive}
-            />
-            <LaunchCard
-              icon={<Mic className="h-5 w-5" aria-hidden="true" />}
-              title={t.home.mock.title}
-              description={
-                mockUnsupported
-                  ? t.home.mock.unsupported
-                  : liveSessionActive
-                    ? t.home.mock.liveRunning
-                    : creditsTooLow
-                      ? t.home.mock.unaffordable
-                      : t.home.mock.ready
-              }
-              onClick={() => (creditsTooLow ? navigate('/payment') : setMockSetupOpen(true))}
-              disabled={liveSessionActive || mockUnsupported}
-            />
-          </div>
-
-          {/* The command palette reaches everything on the rail and more, and nothing on screen
-              said it existed. */}
-          <button
-            type="button"
-            onClick={() => openCommandPalette(true)}
-            className="mx-auto mt-6 flex items-center gap-2 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            <Search className="h-3.5 w-3.5" aria-hidden="true" />
-            {t.titlebar.searchActions}
-            <kbd className="rounded border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-medium text-foreground/80">
-              {isMac ? '⌘K' : 'Ctrl K'}
-            </kbd>
-          </button>
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
 import faviconSvg from '/favicon.svg';
+import { AmbientBackground } from '@/components/custom/ambient-background';
 import { LoadingPage } from '@/components/custom/loading';
 import { useAppState } from '@/hooks/use-app-state';
 import { useT } from '@/i18n';
@@ -26,26 +27,24 @@ export default function AuthLayout() {
   }
 
   return (
-    // `min-h-full` centring rather than a fixed-height flex box, so the signup steps - the tallest
-    // card - scroll at the minimum window size instead of being clipped at the top.
-    <div className="relative flex-1 overflow-x-hidden overflow-y-auto bg-background">
-      {/* A soft brand glow behind the card, so the one thing on this screen has somewhere to sit
-          instead of floating on a flat fill. Decorative only. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-0 h-80 w-[36rem] -translate-x-1/2 -translate-y-1/3 rounded-full bg-primary/15 blur-3xl"
-      />
+    // The ambient background sits on a wrapper that does not scroll, so it stays put while the
+    // card scrolls. `min-h-full` centring inside, so the signup steps - the tallest card - scroll
+    // at the minimum window size instead of being clipped at the top.
+    <div className="relative flex flex-1 flex-col overflow-hidden bg-background">
+      <AmbientBackground animated />
 
-      <div className="relative flex min-h-full items-center justify-center">
-        <div className="mx-auto w-full max-w-md px-6 py-8">
-          <div className="mb-6 flex items-center justify-center gap-2.5">
-            <img src={faviconSvg} alt="" className="h-8 w-8" />
-            <span className="text-lg font-semibold tracking-tight">{APP_NAME}</span>
-          </div>
-          {/* The three auth screens each render their own Card; given a little more presence here
-            rather than in three places. */}
-          <div className="[&_[data-slot=card]]:rounded-2xl [&_[data-slot=card]]:shadow-xl [&_[data-slot=card]]:shadow-black/10">
-            <Outlet />
+      <div className="relative flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center">
+          <div className="mx-auto w-full max-w-md px-6 py-8">
+            <div className="mb-6 flex items-center justify-center gap-2.5">
+              <img src={faviconSvg} alt="" className="h-8 w-8" />
+              <span className="text-lg font-semibold tracking-tight">{APP_NAME}</span>
+            </div>
+            {/* The three auth screens each render their own Card; given a little more presence
+                here rather than in three places. Translucent so the background reads through. */}
+            <div className="[&_[data-slot=card]]:rounded-2xl [&_[data-slot=card]]:bg-card/75 [&_[data-slot=card]]:shadow-xl [&_[data-slot=card]]:shadow-black/10 [&_[data-slot=card]]:backdrop-blur-xl">
+              <Outlet />
+            </div>
           </div>
         </div>
       </div>

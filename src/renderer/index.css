@@ -285,3 +285,77 @@
     animation: none;
   }
 }
+
+/* Ambient background (AmbientBackground) ---------------------------------------------
+   Brand orange and one cool violet in opposite corners. Animated on first-impression screens,
+   still (and a little dimmer) elsewhere. Opacity is lower in light mode, where the same colours
+   read much louder against white. */
+.ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  --ambient-opacity: 0.18;
+}
+:root:not(.dark) .ambient {
+  --ambient-opacity: 0.1;
+}
+.ambient-still {
+  --ambient-opacity: 0.14;
+}
+:root:not(.dark) .ambient-still {
+  --ambient-opacity: 0.08;
+}
+.ambient-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  opacity: var(--ambient-opacity);
+  will-change: transform;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+.ambient-still .ambient-blob {
+  animation: none;
+  will-change: auto;
+}
+.ambient-blob-a {
+  width: 26rem;
+  height: 26rem;
+  top: -10rem;
+  left: -6rem;
+  background: var(--primary);
+  animation-name: ambient-drift-a;
+  animation-duration: 16s;
+}
+.ambient-blob-b {
+  width: 24rem;
+  height: 24rem;
+  bottom: -9rem;
+  right: -5rem;
+  background: oklch(0.6 0.19 295);
+  animation-name: ambient-drift-b;
+  animation-duration: 20s;
+}
+@keyframes ambient-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(14rem, 6rem, 0) scale(1.15);
+  }
+}
+@keyframes ambient-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-16rem, -7rem, 0) scale(0.95);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob {
+    animation: none;
+  }
+}
