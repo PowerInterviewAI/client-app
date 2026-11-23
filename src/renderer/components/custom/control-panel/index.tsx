@@ -38,6 +38,7 @@ export default function ControlPanel() {
   const { confirmDiscard } = useSaveHistoryGuard();
   const [permGateOpen, setPermGateOpen] = useState(false);
   const [headphoneNoticeOpen, setHeadphoneNoticeOpen] = useState(false);
+  const [returnHomePending, setReturnHomePending] = useState(false);
 
   const { devices: audioInputDevices, ready: audioDevicesReady } = useAudioInputDevices();
 
@@ -153,7 +154,10 @@ export default function ControlPanel() {
         message: t.controlPanel.checks.configUnavailable,
         // Nothing else re-pulls after a failed startup fetch, so "try again" has to actually
         // retry: without this the same toast repeats forever however often Start is pressed.
-        onFail: () => void getElectron()?.account?.refresh(),
+        onFail: () => {
+          void getElectron()?.account?.refresh();
+          navigate('/');
+        },
       },
       {
         ok: !!appState?.interviewConfig?.fullName,
@@ -175,10 +179,13 @@ export default function ControlPanel() {
       },
     ];
 
+    // A refused start goes home unless the check names a better place: this console carries no
+    // Start of its own, so staying here leaves the user on an inert bar.
     for (const { ok, message, onFail } of checks) {
       if (!ok) {
         toast.error(message);
-        onFail?.();
+        if (onFail) onFail();
+        else navigate('/');
         return false;
       }
     }
@@ -190,6 +197,7 @@ export default function ControlPanel() {
         description: t.creditGate.tooLowHint,
         action: { label: t.creditGate.subscribe, onClick: () => navigate('/payment') },
       });
+      navigate('/');
       return false;
     }
     return true;
@@ -205,8 +213,16 @@ export default function ControlPanel() {
       // land here as an unhandled rejection.
       console.error('Failed to start assistant:', error);
       toast.error(error instanceof Error ? error.message : t.controlPanel.startFailed);
+      setReturnHomePending(true);
     }
   };
+
+  // Deferred until this side sees Idle. startAssistant writes it to main, and it arrives here over
+  // a coalesced broadcast; navigating before then is refused by the interview lock, which still
+  // reads the session as Starting.
+  useEffect(() => {
+    if (returnHomePending && runningState === RunningState.Idle) navigate('/');
+  }, [returnHomePending, runningState, navigate]);
 
   // Everything after the headphone notice. Split out so the notice can hand the start back once
   // the user acknowledges it, without duplicating what follows.
