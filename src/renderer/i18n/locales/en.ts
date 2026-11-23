@@ -4,7 +4,7 @@
  * `Translation` below is `typeof en`, so a locale file is an object literal assigned to that
  * type: a key Russian is missing, or one it spells differently, is a build error rather than a
  * string that renders as a key at runtime. That is the whole reason this is a typed object
- * instead of i18next - for two locales with no lazy loading and no namespacing, a runtime
+ * instead of i18next - for a handful of locales with no lazy loading and no namespacing, a runtime
  * lookup buys nothing and costs a silent fallback on the one screen nobody checked.
  *
  * Strings that take a value are functions rather than templates with placeholders, which keeps

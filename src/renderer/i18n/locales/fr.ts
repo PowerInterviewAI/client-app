@@ -38,12 +38,14 @@ export const fr: Translation = {
       uiLanguage: {
         label: 'Langue de l’application',
         title: 'Dans quelle langue voulez-vous l’application ?',
-        description: 'Choisissez celle que vous lisez le plus facilement. La suite de la configuration la suivra.',
+        description:
+          'Choisissez celle que vous lisez le plus facilement. La suite de la configuration la suivra.',
       },
       profile: {
         label: 'Profil',
         title: 'Présentez-vous',
-        description: 'Les suggestions s’appuient sur votre expérience, ce champ est donc obligatoire.',
+        description:
+          'Les suggestions s’appuient sur votre expérience, ce champ est donc obligatoire.',
       },
       context: {
         label: 'Contexte du poste',
@@ -106,7 +108,8 @@ export const fr: Translation = {
     title: 'Réglages',
     setupGuide: {
       title: 'Guide de configuration',
-      description: 'Parcourez tout ce qui se trouve sur cette page, ainsi que votre profil, étape par étape.',
+      description:
+        'Parcourez tout ce qui se trouve sur cette page, ainsi que votre profil, étape par étape.',
       action: 'Lancer la configuration',
     },
     hotkeys: {
@@ -161,7 +164,8 @@ export const fr: Translation = {
 
     reset: {
       title: 'Réinitialiser le mot de passe',
-      description: (appName: string) => `Définissez un nouveau mot de passe pour votre compte ${appName}`,
+      description: (appName: string) =>
+        `Définissez un nouveau mot de passe pour votre compte ${appName}`,
       sendResetCode: 'Envoyer le code',
       sending: 'Envoi…',
       backToSignIn: 'Retour à la connexion',
@@ -202,14 +206,19 @@ export const fr: Translation = {
   home: {
     welcome: (firstName: string) => `Bon retour, ${firstName}`,
     welcomeAnonymous: 'Bon retour',
-    subtitle: 'Entraînez-vous face à un recruteur IA, ou recevez de l’aide en direct pendant un vrai appel.',
+    subtitle:
+      'Entraînez-vous face à un recruteur IA, ou recevez de l’aide en direct pendant un vrai appel.',
 
     mock: {
       title: 'Démarrer un entretien d’entraînement',
-      ready: 'L’IA pose les questions, vous répondez à voix haute, et vous recevez un rapport noté à la fin.',
-      unsupported: 'Pas encore disponible sur ce serveur. Mettez l’application à jour ou réessayez plus tard.',
-      liveRunning: 'Arrêtez d’abord l’assistant en direct : les deux ne peuvent pas partager votre micro.',
-      unaffordable: 'Il ne vous reste pas assez de temps gratuit. Abonnez-vous pour continuer à vous entraîner.',
+      ready:
+        'L’IA pose les questions, vous répondez à voix haute, et vous recevez un rapport noté à la fin.',
+      unsupported:
+        'Pas encore disponible sur ce serveur. Mettez l’application à jour ou réessayez plus tard.',
+      liveRunning:
+        'Arrêtez d’abord l’assistant en direct : les deux ne peuvent pas partager votre micro.',
+      unaffordable:
+        'Il ne vous reste pas assez de temps gratuit. Abonnez-vous pour continuer à vous entraîner.',
     },
 
     live: {
@@ -217,8 +226,10 @@ export const fr: Translation = {
       resumeTitle: 'Revenir à votre entretien',
       ready: 'Transcrit votre véritable entretien et suggère des réponses en temps réel.',
       running: 'Votre assistant en direct est déjà lancé.',
-      mockRunning: 'Terminez d’abord l’entretien d’entraînement : les deux ne peuvent pas partager votre micro.',
-      unaffordable: 'Il ne vous reste pas assez de temps gratuit. Abonnez-vous pour continuer vos entretiens.',
+      mockRunning:
+        'Terminez d’abord l’entretien d’entraînement : les deux ne peuvent pas partager votre micro.',
+      unaffordable:
+        'Il ne vous reste pas assez de temps gratuit. Abonnez-vous pour continuer vos entretiens.',
     },
 
     accountLabel: 'Compte',
@@ -247,7 +258,8 @@ export const fr: Translation = {
       description: 'Modifiez le mot de passe de votre compte',
       action: 'Modifier le mot de passe',
     },
-    loadFailed: 'Impossible de charger vos informations enregistrées. Reconnectez-vous avant de modifier.',
+    loadFailed:
+      'Impossible de charger vos informations enregistrées. Reconnectez-vous avant de modifier.',
     save: 'Enregistrer les modifications',
     saving: 'Enregistrement…',
     saved: 'Informations du compte enregistrées',
@@ -328,7 +340,8 @@ export const fr: Translation = {
   },
   mockHintsField: {
     label: 'Afficher des indices pendant les entretiens d’entraînement',
-    description: 'Affiche la réponse de l’assistant à côté de chaque question, pour la comparer à la vôtre.',
+    description:
+      'Affiche la réponse de l’assistant à côté de chaque question, pour la comparer à la vôtre.',
   },
 
   languageField: {
@@ -359,7 +372,8 @@ export const fr: Translation = {
 
   hotkeys: {
     dialogTitle: 'Raccourcis clavier',
-    dialogDescription: 'Tout ce que vous pouvez faire sans toucher l’application pendant un entretien.',
+    dialogDescription:
+      'Tout ce que vous pouvez faire sans toucher l’application pendant un entretien.',
 
     groups: {
       general: 'Général',
@@ -369,7 +383,10 @@ export const fr: Translation = {
     },
 
     keys: {
-      StopAll: { title: 'Tout arrêter', description: 'Arrête l’assistant et quitte le mode furtif' },
+      StopAll: {
+        title: 'Tout arrêter',
+        description: 'Arrête l’assistant et quitte le mode furtif',
+      },
       ToggleStealth: {
         title: 'Mode furtif',
         description:
@@ -389,7 +406,10 @@ export const fr: Translation = {
         title: 'Placer la fenêtre',
         description: 'Place la fenêtre dans un coin, sur un bord ou au centre',
       },
-      MoveWin: { title: 'Déplacer la fenêtre', description: 'Déplace la fenêtre dans la direction indiquée' },
+      MoveWin: {
+        title: 'Déplacer la fenêtre',
+        description: 'Déplace la fenêtre dans la direction indiquée',
+      },
       ResizeWin: {
         title: 'Redimensionner la fenêtre',
         description: 'Redimensionne la fenêtre dans la direction indiquée',
@@ -489,15 +509,15 @@ export const fr: Translation = {
       nameMissing: 'Le nom complet n’est pas renseigné',
       profileMissing: 'Les données du profil ne sont pas renseignées',
       noMicrophone: 'Aucun micro détecté. Branchez-en un et réessayez.',
-      deviceNotFound: (deviceName: string) => `Périphérique d’entrée audio « ${deviceName} » introuvable`,
+      deviceNotFound: (deviceName: string) =>
+        `Périphérique d’entrée audio « ${deviceName} » introuvable`,
     },
     startFailed: 'Impossible de démarrer l’assistant',
   },
 
   audioGroup: {
     options: 'Options audio',
-    optionsSwapFailed:
-      'Options audio : impossible de changer de micro, le précédent reste utilisé',
+    optionsSwapFailed: 'Options audio : impossible de changer de micro, le précédent reste utilisé',
     optionsDeviceNotFound: 'Options audio : le micro choisi est introuvable',
     dialogTitle: 'Options audio',
     dialogDescription: 'Choisissez le micro physique que vous utilisez.',
@@ -546,7 +566,8 @@ export const fr: Translation = {
     stealthMode: 'Mode furtif',
     stealthUnavailable:
       'Disponible une fois l’entretien en direct lancé : il n’y a encore rien à masquer.',
-    stealthAvailable: 'Masque l’application des captures d’écran. Le même raccourci la fait revenir.',
+    stealthAvailable:
+      'Masque l’application des captures d’écran. Le même raccourci la fait revenir.',
     captureScreenshot: 'Prendre une capture d’écran',
     captureScreenshotTooltip: 'Capture d’écran',
     captureFailed: 'Impossible de prendre la capture d’écran',
@@ -712,7 +733,8 @@ export const fr: Translation = {
         discard: 'Fermer sans enregistrer',
       },
       update: {
-        title: 'Enregistrer le rapport de l’entretien d’entraînement avant d’installer la mise à jour ?',
+        title:
+          'Enregistrer le rapport de l’entretien d’entraînement avant d’installer la mise à jour ?',
         body: 'L’application redémarre, et ce rapport et vos réponses seront perdus.',
         discard: 'Installer sans enregistrer',
       },
@@ -757,7 +779,8 @@ export const fr: Translation = {
     screenNeedsRelaunch: 'Autorisé : redémarrez l’application avant de commencer pour l’appliquer',
     screenGranted: 'Accès autorisé',
     screenNotDetermined: 'Sera demandé au début de l’enregistrement',
-    screenBlocked: 'Activez-le dans Réglages Système, puis redémarrez l’application pour l’appliquer',
+    screenBlocked:
+      'Activez-le dans Réglages Système, puis redémarrez l’application pour l’appliquer',
     restartApp: 'Redémarrer l’application',
     checking: 'Vérification…',
     checkAgain: 'Vérifier à nouveau',
@@ -789,7 +812,8 @@ export const fr: Translation = {
     downloadProgress: (transferredMb: string, totalMb: string) =>
       `${transferredMb} Mo / ${totalMb} Mo`,
     downloaded: (version: string) => `Mise à jour téléchargée : v${version}`,
-    downloadedDescriptionMac: 'Cliquez pour ouvrir le programme d’installation, puis glissez-le dans Applications.',
+    downloadedDescriptionMac:
+      'Cliquez pour ouvrir le programme d’installation, puis glissez-le dans Applications.',
     downloadedDescription: 'Cliquez pour redémarrer et installer la mise à jour.',
     openInstaller: 'Ouvrir le programme d’installation',
     restartNow: 'Redémarrer maintenant',
@@ -798,7 +822,8 @@ export const fr: Translation = {
   mock: {
     setup: {
       title: 'Entretien d’entraînement',
-      description: 'L’IA pose les questions, vous répondez à voix haute. Rien n’est enregistré sauf si vous l’exportez.',
+      description:
+        'L’IA pose les questions, vous répondez à voix haute. Rien n’est enregistré sauf si vous l’exportez.',
       start: 'Démarrer l’entretien d’entraînement',
       starting: 'Démarrage…',
       seniority: 'Niveau',
@@ -832,7 +857,8 @@ export const fr: Translation = {
       unlimited: 'Illimité avec votre abonnement.',
       covers: (minutes: number) =>
         `Votre temps gratuit couvre environ ${minutes} ${n(minutes, 'minute', 'minutes')}.`,
-      endsEarly: 'La séance s’arrête quand votre temps gratuit est épuisé, et vous recevez quand même votre rapport.',
+      endsEarly:
+        'La séance s’arrête quand votre temps gratuit est épuisé, et vous recevez quand même votre rapport.',
     },
 
     session: {
@@ -843,7 +869,8 @@ export const fr: Translation = {
       scoring: 'Notation de l’entretien…',
       stopping: 'Fin de l’entretien…',
       speaking: 'Le recruteur parle. Votre micro est coupé pendant la question.',
-      readThenReady: 'Lisez la question. Votre réponse est enregistrée à partir du moment où vous êtes prêt.',
+      readThenReady:
+        'Lisez la question. Votre réponse est enregistrée à partir du moment où vous êtes prêt.',
       listening: 'À l’écoute…',
       ready: 'Je suis prêt',
       doneAnswering: 'J’ai terminé',
@@ -896,7 +923,8 @@ export const fr: Translation = {
       `${appName} est un assistant IA qui améliore vos entretiens grâce à des suggestions en temps réel et à des recommandations de code à partir de l’écran.`,
     docsLead: 'Pour la documentation complète, rendez-vous sur ',
     docsLinkText: 'powerinterviewai.com/docs',
-    docsTrailing: '. Appuyez sur Cmd/Ctrl+K n’importe où dans l’application pour rechercher une action.',
+    docsTrailing:
+      '. Appuyez sur Cmd/Ctrl+K n’importe où dans l’application pour rechercher une action.',
 
     lostWindow: {
       title: 'Fenêtre perdue ?',
@@ -959,7 +987,8 @@ export const fr: Translation = {
       subscribedUntil: (plan: string, date: string) => `${plan}, jusqu’au ${date}`,
       daysLeft: (days: number) => `${days} ${n(days, 'jour restant', 'jours restants')}`,
       freePlan: 'Formule gratuite',
-      freeLeft: (duration: string) => `Il vous reste ${duration} d’entretiens avec le modèle gratuit.`,
+      freeLeft: (duration: string) =>
+        `Il vous reste ${duration} d’entretiens avec le modèle gratuit.`,
       freeUsedUp: 'Plus de temps gratuit. Abonnez-vous pour continuer vos entretiens.',
       duration: (hours: number, minutes: number) => {
         const parts: string[] = [];
@@ -975,13 +1004,13 @@ export const fr: Translation = {
         yearly: 'Entretiens illimités avec le modèle SOTA pendant un an',
       },
       perMonth: ' / mois',
-      billedAs: (price: number, months: number) =>
-        `${price} $ payés une fois, pour ${months} mois`,
+      billedAs: (price: number, months: number) => `${price} $ payés une fois, pour ${months} mois`,
       save: (percent: number) => `Économisez ${percent} %`,
       prepaid: 'Payé une fois en crypto. Un pass ne se renouvelle jamais tout seul.',
       refundPrompt: 'Besoin d’un remboursement ?',
       refundContact: 'Contacter le support',
-      extends: 'Votre abonnement est actif : un nouveau pass ajoute sa durée après la date de fin actuelle.',
+      extends:
+        'Votre abonnement est actif : un nouveau pass ajoute sa durée après la date de fin actuelle.',
       selected: 'Sélectionnée',
       buy: 'Choisir',
       detailsTitle: 'Détails du paiement',
@@ -1091,15 +1120,18 @@ export const fr: Translation = {
   settingsToasts: {
     saveMicrophoneFailed: 'Impossible d’enregistrer le micro choisi',
     microphoneSwapFailed: 'Enregistré, mais l’entretien utilise toujours le micro précédent',
-    microphoneSwapFailedHint: 'Vérifiez que l’appareil est branché, puis arrêtez et relancez l’assistant.',
+    microphoneSwapFailedHint:
+      'Vérifiez que l’appareil est branché, puis arrêtez et relancez l’assistant.',
     saveLanguageFailed: 'Impossible d’enregistrer la langue de l’entretien',
-    languageHalfApplied: 'Les suggestions ont changé de langue ; la transcription se reconnecte encore',
+    languageHalfApplied:
+      'Les suggestions ont changé de langue ; la transcription se reconnecte encore',
     languageHalfAppliedHint:
       'Elle continue d’essayer. Arrêtez puis relancez l’assistant si elle ne revient pas.',
     saveSuggestionModeFailed: 'Impossible d’enregistrer le mode de suggestion',
     saveTranscriptPanelFailed: 'Impossible d’enregistrer le réglage du panneau de transcription',
     saveMockHintsFailed: 'Impossible d’enregistrer le réglage des suggestions en direct',
-    saveHideTaskbarFailed: 'Impossible d’enregistrer le réglage de la barre des tâches. Veuillez réessayer.',
+    saveHideTaskbarFailed:
+      'Impossible d’enregistrer le réglage de la barre des tâches. Veuillez réessayer.',
     saveAllowScreenCaptureFailed:
       'Impossible d’enregistrer le réglage de capture d’écran. Veuillez réessayer.',
     saveUiLanguageFailed: 'Impossible d’enregistrer la langue de l’application',
@@ -1108,7 +1140,8 @@ export const fr: Translation = {
   assistant: {
     mockRunning: 'Arrêtez l’entretien d’entraînement avant de lancer une séance en direct.',
     stoppedUncleanly: 'L’assistant s’est arrêté, mais tout ne s’est pas fermé proprement',
-    stoppedUncleanlyHint: 'Redémarrez l’application si des transcriptions ou des suggestions continuent d’arriver.',
+    stoppedUncleanlyHint:
+      'Redémarrez l’application si des transcriptions ou des suggestions continuent d’arriver.',
     startFailed: 'Impossible de démarrer l’assistant',
     stopFailed: 'Impossible d’arrêter l’assistant',
     screenCaptureTimedOut: 'La capture d’écran a pris trop de temps. Veuillez réessayer.',

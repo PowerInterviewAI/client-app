@@ -48,7 +48,8 @@ export const de: Translation = {
       context: {
         label: 'Stellenkontext',
         title: 'Wofür ist das Interview?',
-        description: 'Optional. Füge die Stellenbeschreibung ein, damit die Antworten zur Rolle passen.',
+        description:
+          'Optional. Füge die Stellenbeschreibung ein, damit die Antworten zur Rolle passen.',
       },
       language: {
         label: 'Sprache',
@@ -181,7 +182,8 @@ export const de: Translation = {
       sendFailed: 'Der Code konnte nicht gesendet werden. Bitte versuche es erneut.',
       verifyFailed: 'Der Code konnte nicht bestätigt werden.',
       succeeded: 'Passwort zurückgesetzt. Bitte melde dich mit dem neuen Passwort an.',
-      failed: 'Zurücksetzen fehlgeschlagen. Der Code ist vielleicht abgelaufen - fordere einen neuen an.',
+      failed:
+        'Zurücksetzen fehlgeschlagen. Der Code ist vielleicht abgelaufen - fordere einen neuen an.',
     },
 
     passwordsDoNotMatch: 'Die Passwörter stimmen nicht überein',
@@ -207,8 +209,10 @@ export const de: Translation = {
     mock: {
       title: 'Probeinterview starten',
       ready: 'Die KI fragt, du antwortest laut und bekommst am Ende einen bewerteten Bericht.',
-      unsupported: 'Auf diesem Server noch nicht verfügbar. Aktualisiere die App oder versuche es später.',
-      liveRunning: 'Beende zuerst den Live-Assistenten - beide können sich das Mikrofon nicht teilen.',
+      unsupported:
+        'Auf diesem Server noch nicht verfügbar. Aktualisiere die App oder versuche es später.',
+      liveRunning:
+        'Beende zuerst den Live-Assistenten - beide können sich das Mikrofon nicht teilen.',
       unaffordable: 'Nicht genug Gratiszeit übrig. Abonniere, um weiter zu üben.',
     },
 
@@ -217,7 +221,8 @@ export const de: Translation = {
       resumeTitle: 'Zurück zu deinem Interview',
       ready: 'Transkribiert dein echtes Interview und schlägt dabei Antworten vor.',
       running: 'Dein Live-Assistent läuft bereits.',
-      mockRunning: 'Beende zuerst das Probeinterview - beide können sich das Mikrofon nicht teilen.',
+      mockRunning:
+        'Beende zuerst das Probeinterview - beide können sich das Mikrofon nicht teilen.',
       unaffordable: 'Nicht genug Gratiszeit übrig. Abonniere, um weitere Interviews zu führen.',
     },
 
@@ -247,7 +252,8 @@ export const de: Translation = {
       description: 'Ändere das Passwort deines Kontos',
       action: 'Passwort ändern',
     },
-    loadFailed: 'Deine gespeicherten Daten konnten nicht geladen werden. Verbinde dich neu, bevor du sie bearbeitest.',
+    loadFailed:
+      'Deine gespeicherten Daten konnten nicht geladen werden. Verbinde dich neu, bevor du sie bearbeitest.',
     save: 'Änderungen speichern',
     saving: 'Wird gespeichert…',
     saved: 'Kontodaten gespeichert',
@@ -265,8 +271,7 @@ export const de: Translation = {
       'Füge die Stellenbeschreibung, die Anforderungen der Rolle oder alles andere zum Interview ein, auf das du dich vorbereitest.',
     limitReached: (max: number) =>
       `Zeichenlimit erreicht (${max.toLocaleString('de-DE')}). Weiterer Text wurde nicht übernommen.`,
-    charactersLeft: (remaining: number) =>
-      `Noch ${remaining.toLocaleString('de-DE')} Zeichen`,
+    charactersLeft: (remaining: number) => `Noch ${remaining.toLocaleString('de-DE')} Zeichen`,
   },
 
   microphoneField: {
@@ -297,7 +302,8 @@ export const de: Translation = {
     hintOnly: 'Nur Stichpunkte',
     hintOnlyDescription: 'Eine Überschrift und Stichworte zum schnellen Erfassen. Empfohlen.',
     fullSentences: 'Ganze Sätze',
-    fullSentencesDescription: 'Die vollständige Antwort, so ausformuliert, wie du sie sagen würdest.',
+    fullSentencesDescription:
+      'Die vollständige Antwort, so ausformuliert, wie du sie sagen würdest.',
     switchHint: (combo: string) =>
       `Im Interview über die Steuerleiste oder mit ${combo} umschaltbar.`,
   },
@@ -369,13 +375,19 @@ export const de: Translation = {
     },
 
     keys: {
-      StopAll: { title: 'Alles stoppen', description: 'Stoppt den Assistenten und beendet den Tarnmodus' },
+      StopAll: {
+        title: 'Alles stoppen',
+        description: 'Stoppt den Assistenten und beendet den Tarnmodus',
+      },
       ToggleStealth: {
         title: 'Tarnmodus',
         description:
           'Verbirgt die App während eines Live-Interviews vor der Bildschirmaufnahme. Dieselben Tasten holen sie zurück.',
       },
-      Opacity: { title: 'Deckkraft', description: 'Schaltet die Deckkraft des Fensters im Tarnmodus um' },
+      Opacity: {
+        title: 'Deckkraft',
+        description: 'Schaltet die Deckkraft des Fensters im Tarnmodus um',
+      },
       ToggleTranscript: {
         title: 'Transkript ein/aus',
         description: 'Blendet den Transkript-Bereich ein oder aus - auch im Tarnmodus',
@@ -389,7 +401,10 @@ export const de: Translation = {
         title: 'Fenster platzieren',
         description: 'Setzt das Fenster in eine Ecke, an eine Seite oder in die Mitte',
       },
-      MoveWin: { title: 'Fenster verschieben', description: 'Verschiebt das Fenster in die gewählte Richtung' },
+      MoveWin: {
+        title: 'Fenster verschieben',
+        description: 'Verschiebt das Fenster in die gewählte Richtung',
+      },
       ResizeWin: {
         title: 'Fenstergröße ändern',
         description: 'Ändert die Fenstergröße in die gewählte Richtung',
@@ -410,7 +425,10 @@ export const de: Translation = {
         title: 'Bildschirm aufnehmen',
         description: 'Macht einen Screenshot für Vorschläge auf Abruf',
       },
-      ClearCaptures: { title: 'Aufnahmen löschen', description: 'Löscht die aufgenommenen Screenshots' },
+      ClearCaptures: {
+        title: 'Aufnahmen löschen',
+        description: 'Löscht die aufgenommenen Screenshots',
+      },
       TriggerWithoutCaptures: {
         title: 'Ohne Aufnahmen abrufen',
         description: 'Erzeugt einen Vorschlag ohne Screenshots',
@@ -520,7 +538,8 @@ export const de: Translation = {
     menuLabel: 'Interviewsprache',
     halfApplied:
       'Die Vorschläge haben gewechselt, die Transkription nicht. Sie versucht es weiter - beende und starte den Assistenten, falls sie nicht zurückkommt.',
-    willReconnect: 'Die Transkription verbindet sich neu; der aktuelle Satz kann abgeschnitten werden.',
+    willReconnect:
+      'Die Transkription verbindet sich neu; der aktuelle Satz kann abgeschnitten werden.',
   },
 
   languageSearch: {
@@ -546,7 +565,8 @@ export const de: Translation = {
     stealthMode: 'Tarnmodus',
     stealthUnavailable:
       'Verfügbar, sobald das Live-Interview läuft - noch gibt es nichts zu verbergen.',
-    stealthAvailable: 'Verbirgt die App vor der Bildschirmaufnahme. Dasselbe Kürzel holt sie zurück.',
+    stealthAvailable:
+      'Verbirgt die App vor der Bildschirmaufnahme. Dasselbe Kürzel holt sie zurück.',
     captureScreenshot: 'Screenshot aufnehmen',
     captureScreenshotTooltip: 'Screenshot aufnehmen',
     captureFailed: 'Screenshot konnte nicht aufgenommen werden',
@@ -789,7 +809,8 @@ export const de: Translation = {
     downloadProgress: (transferredMb: string, totalMb: string) =>
       `${transferredMb} MB / ${totalMb} MB`,
     downloaded: (version: string) => `Update geladen: v${version}`,
-    downloadedDescriptionMac: 'Klicke, um das Installationsprogramm zu öffnen, und zieh es in Programme.',
+    downloadedDescriptionMac:
+      'Klicke, um das Installationsprogramm zu öffnen, und zieh es in Programme.',
     downloadedDescription: 'Klicke, um neu zu starten und das Update zu installieren.',
     openInstaller: 'Installationsprogramm öffnen',
     restartNow: 'Jetzt neu starten',
@@ -798,7 +819,8 @@ export const de: Translation = {
   mock: {
     setup: {
       title: 'Probeinterview',
-      description: 'Die KI fragt, du antwortest laut. Nichts wird gespeichert, außer du exportierst es.',
+      description:
+        'Die KI fragt, du antwortest laut. Nichts wird gespeichert, außer du exportierst es.',
       start: 'Probeinterview starten',
       starting: 'Wird gestartet…',
       seniority: 'Erfahrungsstufe',
@@ -832,7 +854,8 @@ export const de: Translation = {
       unlimited: 'Unbegrenzt mit deinem Abonnement.',
       covers: (minutes: number) =>
         `Deine Gratiszeit reicht für etwa ${minutes} ${n(minutes, 'Minute', 'Minuten')}.`,
-      endsEarly: 'Die Sitzung endet, wenn deine Gratiszeit aufgebraucht ist - deinen Bericht bekommst du trotzdem.',
+      endsEarly:
+        'Die Sitzung endet, wenn deine Gratiszeit aufgebraucht ist - deinen Bericht bekommst du trotzdem.',
     },
 
     session: {
@@ -843,7 +866,8 @@ export const de: Translation = {
       scoring: 'Das Interview wird bewertet…',
       stopping: 'Das Interview wird beendet…',
       speaking: 'Der Interviewer spricht. Dein Mikrofon ist aus, solange die Frage läuft.',
-      readThenReady: 'Lies die Frage. Deine Antwort wird ab dem Moment aufgenommen, in dem du bereit bist.',
+      readThenReady:
+        'Lies die Frage. Deine Antwort wird ab dem Moment aufgenommen, in dem du bereit bist.',
       listening: 'Hört zu…',
       ready: 'Ich bin bereit',
       doneAnswering: 'Antwort fertig',
@@ -981,7 +1005,8 @@ export const de: Translation = {
       prepaid: 'Einmalig in Krypto bezahlt. Ein Pass verlängert sich nie von selbst.',
       refundPrompt: 'Erstattung nötig?',
       refundContact: 'Support kontaktieren',
-      extends: 'Dein Abonnement ist aktiv: Ein neuer Pass hängt seine Laufzeit an das aktuelle Enddatum an.',
+      extends:
+        'Dein Abonnement ist aktiv: Ein neuer Pass hängt seine Laufzeit an das aktuelle Enddatum an.',
       selected: 'Ausgewählt',
       buy: 'Wählen',
       detailsTitle: 'Zahlungsdetails',
@@ -1091,15 +1116,19 @@ export const de: Translation = {
   settingsToasts: {
     saveMicrophoneFailed: 'Das gewählte Mikrofon konnte nicht gespeichert werden',
     microphoneSwapFailed: 'Gespeichert, aber das Interview nutzt weiter das bisherige Mikrofon',
-    microphoneSwapFailedHint: 'Prüfe, ob das Gerät angeschlossen ist, dann beende und starte den Assistenten.',
+    microphoneSwapFailedHint:
+      'Prüfe, ob das Gerät angeschlossen ist, dann beende und starte den Assistenten.',
     saveLanguageFailed: 'Die Interviewsprache konnte nicht gespeichert werden',
-    languageHalfApplied: 'Die Vorschläge haben die Sprache gewechselt; die Transkription verbindet sich noch neu',
+    languageHalfApplied:
+      'Die Vorschläge haben die Sprache gewechselt; die Transkription verbindet sich noch neu',
     languageHalfAppliedHint:
       'Sie versucht es weiter. Beende und starte den Assistenten, falls sie nicht zurückkommt.',
     saveSuggestionModeFailed: 'Der Vorschlagsmodus konnte nicht gespeichert werden',
-    saveTranscriptPanelFailed: 'Die Einstellung des Transkript-Bereichs konnte nicht gespeichert werden',
+    saveTranscriptPanelFailed:
+      'Die Einstellung des Transkript-Bereichs konnte nicht gespeichert werden',
     saveMockHintsFailed: 'Die Einstellung der Live-Vorschläge konnte nicht gespeichert werden',
-    saveHideTaskbarFailed: 'Die Taskleisten-Einstellung konnte nicht gespeichert werden. Bitte versuche es erneut.',
+    saveHideTaskbarFailed:
+      'Die Taskleisten-Einstellung konnte nicht gespeichert werden. Bitte versuche es erneut.',
     saveAllowScreenCaptureFailed:
       'Die Einstellung zur Bildschirmaufnahme konnte nicht gespeichert werden. Bitte versuche es erneut.',
     saveUiLanguageFailed: 'Die App-Sprache konnte nicht gespeichert werden',
@@ -1108,10 +1137,12 @@ export const de: Translation = {
   assistant: {
     mockRunning: 'Beende das Probeinterview, bevor du eine Live-Sitzung startest.',
     stoppedUncleanly: 'Der Assistent wurde gestoppt, aber nicht alles wurde sauber beendet',
-    stoppedUncleanlyHint: 'Starte die App neu, falls weiter Transkripte oder Vorschläge eintreffen.',
+    stoppedUncleanlyHint:
+      'Starte die App neu, falls weiter Transkripte oder Vorschläge eintreffen.',
     startFailed: 'Assistent konnte nicht gestartet werden',
     stopFailed: 'Assistent konnte nicht gestoppt werden',
-    screenCaptureTimedOut: 'Die Bildschirmaufnahme hat zu lange gedauert. Bitte versuche es erneut.',
+    screenCaptureTimedOut:
+      'Die Bildschirmaufnahme hat zu lange gedauert. Bitte versuche es erneut.',
   },
 
   mockStartChecks: {

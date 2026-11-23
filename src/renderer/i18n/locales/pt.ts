@@ -37,12 +37,14 @@ export const pt: Translation = {
       uiLanguage: {
         label: 'Idioma do app',
         title: 'Em que idioma você quer o app?',
-        description: 'Escolha o que você lê com mais facilidade. O resto da configuração segue ele.',
+        description:
+          'Escolha o que você lê com mais facilidade. O resto da configuração segue ele.',
       },
       profile: {
         label: 'Perfil',
         title: 'Conte quem você é',
-        description: 'As sugestões são escritas a partir da sua experiência, então isto é obrigatório.',
+        description:
+          'As sugestões são escritas a partir da sua experiência, então isto é obrigatório.',
       },
       context: {
         label: 'Contexto da vaga',
@@ -279,9 +281,9 @@ export const pt: Translation = {
     notConnected: (deviceName: string) =>
       `“${deviceName}” não está mais conectado. Escolha outro microfone.`,
     saySomething: 'Fale algo: a barra deve se mexer enquanto você fala.',
-    runningHint: 'A entrevista está usando este microfone. O teste fica disponível quando ela parar.',
-    testHint:
-      'Teste antes da entrevista: um microfone mudo parece exatamente uma sala silenciosa.',
+    runningHint:
+      'A entrevista está usando este microfone. O teste fica disponível quando ela parar.',
+    testHint: 'Teste antes da entrevista: um microfone mudo parece exatamente uma sala silenciosa.',
   },
 
   micLevelMeter: {
@@ -326,7 +328,8 @@ export const pt: Translation = {
   },
   mockHintsField: {
     label: 'Mostrar dicas nas entrevistas simuladas',
-    description: 'Mostra a resposta do assistente ao lado de cada pergunta, para comparar com a sua.',
+    description:
+      'Mostra a resposta do assistente ao lado de cada pergunta, para comparar com a sua.',
   },
 
   languageField: {
@@ -648,7 +651,8 @@ export const pt: Translation = {
     saveAsWord: 'Salvar como Word',
     saveAsMarkdown: 'Salvar como Markdown',
     formatHintLive: 'Word para compartilhar ou imprimir, Markdown para guardar como texto simples.',
-    formatHintMock: 'Word para compartilhar ou imprimir, Markdown para guardar junto com suas notas.',
+    formatHintMock:
+      'Word para compartilhar ou imprimir, Markdown para guardar junto com suas notas.',
     exportFailed: 'Não foi possível exportar a entrevista',
 
     live: {
@@ -797,7 +801,8 @@ export const pt: Translation = {
   mock: {
     setup: {
       title: 'Entrevista simulada',
-      description: 'A IA pergunta, você responde em voz alta. Nada é salvo, a menos que você exporte.',
+      description:
+        'A IA pergunta, você responde em voz alta. Nada é salvo, a menos que você exporte.',
       start: 'Iniciar entrevista simulada',
       starting: 'Iniciando…',
       seniority: 'Senioridade',
@@ -841,8 +846,10 @@ export const pt: Translation = {
       evaluating: 'Pensando…',
       scoring: 'Avaliando a entrevista…',
       stopping: 'Encerrando a entrevista…',
-      speaking: 'O entrevistador está falando. Seu microfone fica desligado enquanto a pergunta toca.',
-      readThenReady: 'Leia a pergunta. Sua resposta é gravada a partir de quando você estiver pronto.',
+      speaking:
+        'O entrevistador está falando. Seu microfone fica desligado enquanto a pergunta toca.',
+      readThenReady:
+        'Leia a pergunta. Sua resposta é gravada a partir de quando você estiver pronto.',
       listening: 'Ouvindo…',
       ready: 'Estou pronto',
       doneAnswering: 'Terminei',
@@ -980,7 +987,8 @@ export const pt: Translation = {
       prepaid: 'Pago uma vez em cripto. Um passe nunca se renova sozinho.',
       refundPrompt: 'Precisa de reembolso?',
       refundContact: 'Fale com o suporte',
-      extends: 'Sua assinatura está ativa: um novo passe soma o tempo dele depois da data de término atual.',
+      extends:
+        'Sua assinatura está ativa: um novo passe soma o tempo dele depois da data de término atual.',
       selected: 'Selecionado',
       buy: 'Escolher',
       detailsTitle: 'Detalhes do pagamento',

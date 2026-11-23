@@ -284,14 +284,15 @@ The trigger shows the code (`EN`, `ES`) next to the icon for the same reason the
 
 `uiLanguage` ([src/main/types/ui-language.ts](src/main/types/ui-language.ts), mirrored in
 [src/renderer/types/ui-language.ts](src/renderer/types/ui-language.ts) the way `Language` is) is
-the language the app's buttons, headings, dialogs and toasts are written in. English and Russian
-today. It is **not** `language`: see the note at the end of **Interview language** for why neither
+the language the app's buttons, headings, dialogs and toasts are written in: English, German,
+Spanish, French, Portuguese (written as Brazilian), Russian, Japanese, Korean and Simplified
+Chinese. It is **not** `language`: see the note at the end of **Interview language** for why neither
 is ever derived from the other.
 
 **A typed dictionary, not i18next.** `src/renderer/i18n/locales/en.ts` is the source of truth and
 exports `Translation = typeof en`; every other locale is an object literal assigned to that type,
 so a key Russian is missing - or spells differently - fails the build. i18next's answer for a
-missing key is to render the key, which for two locales with no lazy loading and no namespacing is
+missing key is to render the key, which for a handful of locales with no lazy loading and no namespacing is
 the only thing its runtime would have bought. A language belongs in the enum once it has a file in
 `locales`, not before: offering one without that file is offering a UI that falls back to English
 everywhere it matters.
@@ -334,13 +335,33 @@ message.
 
 `test/ui-language.test.mjs` covers what the types cannot: an unknown stored code (which would reach
 the lookup and come back `undefined` - an app with no text in it), the two enums drifting, and a
-Russian string that is still its English original. That last one type-checks perfectly, ships, and
-is otherwise only ever caught by a Russian speaker reading the screen; the check is Latin letters
-with no Cyrillic in the same string, with an allowlist whose every entry is a written-out claim
-that one string is correct in Latin script (`Markdown`, `Pro`, `Junior`, a domain).
+string that is still its English original. That last one type-checks perfectly, ships, and is
+otherwise only ever caught by a native speaker reading the screen, so it runs for **every** locale,
+in the main-process table as well as the renderer, and how it decides depends on the script:
 
-Russian copy uses hyphens where Russian typography would use `—`, because this repository's writing
-rules forbid generating em-dashes and the English source uses hyphens in the same positions.
+- **Russian, Japanese, Korean, Chinese** (`NATIVE_SCRIPT`): Latin letters with none of the locale's
+  own script in the same string. `LATIN_BY_DESIGN` is the allowlist, and every entry is a
+  written-out claim that one string is correct in Latin script (`Markdown`, `Junior`, a domain, a
+  BCP-47 tag).
+- **German, Spanish, French, Portuguese**: a script check cannot see these, so a string identical
+  to an English one is flagged instead. `SAME_AS_ENGLISH` lists, per locale, the words that are
+  spelled the same and genuinely belong to that language (French `Transcription`, Spanish `Plan`).
+
+**Adding a language** is a locale file typed `Translation`, its row in `UI_LANGUAGES`, the member in
+both enums, the entry in `TRANSLATIONS`, and a block in `ui-strings.ts` - the compiler names every
+one that is missing. The picker lists English first (the fallback) and the rest alphabetically by
+endonym, which is the conventional order for a language picker: a user who cannot read the current
+language scans for the one name they recognise. `htmlLangFor` gives Chinese the document `lang`
+`zh-CN`, because a bare `zh` lets Windows draw Han characters with Japanese glyph shapes. Two fixed
+slots - the running-state badge and the Stop button - are checked per locale by character count,
+and German is the locale that tests them.
+
+Every locale uses hyphens where its own typography would use `—`, because this repository's writing
+rules forbid generating em-dashes and the English source uses hyphens in the same positions. French
+uses the typographic apostrophe `’`, which is correct French and keeps every string single-quoted -
+the untranslated-copy check reads single-quoted and template literals only.
+
+The new locales were written by Claude and want a native-speaker pass before they are relied on.
 
 ### Headphones
 

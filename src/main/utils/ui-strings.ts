@@ -373,7 +373,8 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     suggestionErrors: {
       tooManyRequests: 'Demasiadas solicitudes. Inténtalo más tarde.',
       generateFailed: 'No se pudo generar la respuesta.',
-      cannotReachServer: 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.',
+      cannotReachServer:
+        'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.',
       responseTimedOut: 'La respuesta tardó demasiado. Inténtalo de nuevo.',
       emptyResponse: 'El modelo devolvió una respuesta vacía.',
     },
@@ -410,13 +411,15 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     wordFilter: 'Documento de Word',
     pngFilter: 'Imagen PNG',
 
-    actionDuringMock: 'Las sugerencias a petición no están disponibles durante una entrevista de práctica.',
+    actionDuringMock:
+      'Las sugerencias a petición no están disponibles durante una entrevista de práctica.',
     cannotClearImages: 'No se pueden borrar las imágenes si el asistente no está en marcha',
     cannotCaptureScreenshot: 'No se puede hacer una captura si el asistente no está en marcha',
     maxCaptures: (max: number) =>
       `Se alcanzó el máximo de ${max} capturas. Borra las imágenes e inténtalo de nuevo.`,
     captureFailed: 'No se pudo hacer la captura de pantalla. Inténtalo de nuevo.',
-    cannotGenerateSuggestion: 'No se puede generar una sugerencia si el asistente no está en marcha',
+    cannotGenerateSuggestion:
+      'No se puede generar una sugerencia si el asistente no está en marcha',
   },
 
   [UiLanguage.Portuguese]: {
@@ -465,7 +468,8 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     suggestionErrors: {
       tooManyRequests: 'Solicitações demais. Tente mais tarde.',
       generateFailed: 'Não foi possível gerar a resposta.',
-      cannotReachServer: 'Não foi possível acessar o servidor. Verifique sua conexão e tente de novo.',
+      cannotReachServer:
+        'Não foi possível acessar o servidor. Verifique sua conexão e tente de novo.',
       responseTimedOut: 'A resposta demorou demais. Tente de novo.',
       emptyResponse: 'O modelo devolveu uma resposta vazia.',
     },
@@ -686,13 +690,16 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     wordFilter: 'Document Word',
     pngFilter: 'Image PNG',
 
-    actionDuringMock: 'Les suggestions à la demande sont indisponibles pendant un entretien d’entraînement.',
+    actionDuringMock:
+      'Les suggestions à la demande sont indisponibles pendant un entretien d’entraînement.',
     cannotClearImages: 'Impossible d’effacer les images tant que l’assistant n’est pas lancé',
-    cannotCaptureScreenshot: 'Impossible de prendre une capture tant que l’assistant n’est pas lancé',
+    cannotCaptureScreenshot:
+      'Impossible de prendre une capture tant que l’assistant n’est pas lancé',
     maxCaptures: (max: number) =>
       `Limite de ${max} captures atteinte. Effacez les images et réessayez.`,
     captureFailed: 'Échec de la capture d’écran. Veuillez réessayer.',
-    cannotGenerateSuggestion: 'Impossible de générer une suggestion tant que l’assistant n’est pas lancé',
+    cannotGenerateSuggestion:
+      'Impossible de générer une suggestion tant que l’assistant n’est pas lancé',
   },
 
   [UiLanguage.Chinese]: {
@@ -750,7 +757,8 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       firstQuestionFailed: '生成第一道题失败，请重试。',
       firstQuestionFailedWith: (reason: string) => `无法生成第一道题：${reason}`,
       startFailed: '启动模拟面试失败',
-      nothingRecorded: '面试结束时没有录到任何内容。请检查是否选择了正确的麦克风且未静音，然后重试。',
+      nothingRecorded:
+        '面试结束时没有录到任何内容。请检查是否选择了正确的麦克风且未静音，然后重试。',
       endedBeforeScoring: '面试在评分完成前就结束了。',
       notEnoughCredits: '免费时长已用完',
     },
@@ -785,7 +793,8 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     placeholderTranscript: 'ここに文字起こしが表示されます',
     placeholderQuestion: 'ここに面接官の質問が表示されます',
     placeholderLiveAnswer: 'ここに回答の提案がリアルタイムで表示されます',
-    placeholderActionAnswer: 'ここにオンデマンド提案が表示されます。たとえば、回答の提案、コーディングテストの解答、図の説明などです。',
+    placeholderActionAnswer:
+      'ここにオンデマンド提案が表示されます。たとえば、回答の提案、コーディングテストの解答、図の説明などです。',
 
     sessionExpired: 'セッションの有効期限が切れました。もう一度ログインしてください。',
 
@@ -850,7 +859,8 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       `${runningAction}を実行中です。少し待ってからもう一度お試しください。`,
 
     stealthSignedOut: 'ステルスモードを使うにはログインが必要です。',
-    stealthDuringMock: '模擬面接中はステルスモードを使用できません。これは練習で、本番の通話ではありません。',
+    stealthDuringMock:
+      '模擬面接中はステルスモードを使用できません。これは練習で、本番の通話ではありません。',
     stealthNotRunning: 'ステルスモードはライブ面接中のみ使用できます。',
     opacityStealthOnly: '透明度の切り替えはステルスモードでのみ使用できます。',
 
@@ -868,6 +878,97 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       `スクリーンショットの上限（${max} 枚）に達しました。画像を消去してからもう一度お試しください。`,
     captureFailed: 'スクリーンショットを撮れませんでした。もう一度お試しください。',
     cannotGenerateSuggestion: 'アシスタントが実行されていないため、提案を生成できません',
+  },
+
+  [UiLanguage.Korean]: {
+    placeholderTranscript: '여기에 전사가 표시됩니다',
+    placeholderQuestion: '여기에 면접관의 질문이 표시됩니다',
+    placeholderLiveAnswer: '여기에 추천 답변이 실시간으로 표시됩니다',
+    placeholderActionAnswer:
+      '여기에 요청형 제안이 표시됩니다. 예를 들어 답변 제안, 코딩 테스트 풀이, 다이어그램 설명 등이 있습니다.',
+
+    sessionExpired: '세션이 만료되었습니다. 다시 로그인하세요.',
+
+    authErrors: {
+      sendCodeFailed: '인증 코드를 보내지 못했습니다',
+      invalidCode: '인증 코드가 올바르지 않거나 만료되었습니다',
+      signupFailed: '가입하지 못했습니다',
+      invalidCredentials: '이메일 또는 비밀번호가 올바르지 않습니다',
+      loginFailed: '로그인하지 못했습니다',
+      logoutFailed: '로그아웃하지 못했습니다',
+      changePasswordFailed: '비밀번호를 변경하지 못했습니다',
+      sendResetCodeFailed: '비밀번호 재설정 코드를 보내지 못했습니다',
+      invalidResetCode: '재설정 코드가 올바르지 않거나 만료되었습니다',
+      resetFailed: '비밀번호를 재설정하지 못했습니다',
+    },
+
+    accountErrors: {
+      fetchFailed: '계정을 가져오지 못했습니다',
+      updateFailed: '계정을 업데이트하지 못했습니다',
+      onboardingFailed: '설정을 저장하지 못했습니다',
+      migrateFailed: '로컬 설정을 옮기지 못했습니다',
+      loadConfigFailed: '설정을 불러오지 못했습니다',
+    },
+
+    transportErrors: {
+      timedOut: '요청 시간이 초과되었습니다',
+      networkFailed: '네트워크 요청에 실패했습니다',
+    },
+
+    paymentErrors: {
+      getPlans: '요금제를 가져오지 못했습니다',
+      getCurrencies: '사용 가능한 통화를 가져오지 못했습니다',
+      createPayment: '결제를 생성하지 못했습니다',
+      getStatus: '결제 상태를 가져오지 못했습니다',
+      getHistory: '결제 내역을 가져오지 못했습니다',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: '요청이 너무 많습니다. 잠시 후 다시 시도하세요.',
+      generateFailed: '답변을 생성하지 못했습니다.',
+      cannotReachServer: '서버에 연결할 수 없습니다. 연결을 확인하고 다시 시도하세요.',
+      responseTimedOut: '응답 시간이 초과되었습니다. 다시 시도하세요.',
+      emptyResponse: '모델이 빈 응답을 반환했습니다.',
+    },
+
+    mockErrors: {
+      liveRunning: '모의 면접을 시작하기 전에 실시간 면접을 중지하세요.',
+      firstQuestionFailed: '첫 질문을 생성하지 못했습니다. 다시 시도하세요.',
+      firstQuestionFailedWith: (reason: string) => `첫 질문을 생성하지 못했습니다: ${reason}`,
+      startFailed: '모의 면접을 시작하지 못했습니다',
+      nothingRecorded:
+        '아무것도 녹음되지 않은 채 면접이 끝났습니다. 올바른 마이크가 선택되어 있고 음소거되지 않았는지 확인한 뒤 다시 시도하세요.',
+      endedBeforeScoring: '채점이 끝나기 전에 면접이 종료되었습니다.',
+      notEnoughCredits: '무료 시간을 모두 썼습니다',
+    },
+
+    actionNames: {
+      screenshotCapture: '스크린샷 촬영',
+      captureSuggestion: '요청형 제안 생성',
+    },
+    actionBlocked: (runningAction: string) =>
+      `${runningAction}이(가) 진행 중입니다. 잠시 후 다시 시도하세요.`,
+
+    stealthSignedOut: '스텔스 모드를 사용하려면 로그인해야 합니다.',
+    stealthDuringMock:
+      '모의 면접 중에는 스텔스 모드가 꺼집니다. 실제 통화가 아니라 연습이기 때문입니다.',
+    stealthNotRunning: '스텔스 모드는 실시간 면접 중에만 사용할 수 있습니다.',
+    opacityStealthOnly: '투명도 전환은 스텔스 모드에서만 사용할 수 있습니다.',
+
+    saveTranscriptTitle: '전사 저장',
+    saveMockReportTitle: '모의 면접 리포트 저장',
+    saveImageTitle: '이미지 저장',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Word 문서',
+    pngFilter: 'PNG 이미지',
+
+    actionDuringMock: '모의 면접 중에는 요청형 제안을 사용할 수 없습니다.',
+    cannotClearImages: '어시스턴트가 실행 중이 아니어서 이미지를 지울 수 없습니다',
+    cannotCaptureScreenshot: '어시스턴트가 실행 중이 아니어서 스크린샷을 찍을 수 없습니다',
+    maxCaptures: (max: number) =>
+      `스크린샷 최대 개수(${max}개)에 도달했습니다. 이미지를 지운 뒤 다시 시도하세요.`,
+    captureFailed: '스크린샷을 찍지 못했습니다. 다시 시도하세요.',
+    cannotGenerateSuggestion: '어시스턴트가 실행 중이 아니어서 제안을 생성할 수 없습니다',
   },
 };
 

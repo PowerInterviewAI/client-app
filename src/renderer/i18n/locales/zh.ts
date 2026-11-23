@@ -54,7 +54,8 @@ export const zh: Translation = {
       microphone: {
         label: '麦克风',
         title: '选择麦克风',
-        description: '选择你要使用的麦克风并测试一下。请佩戴耳机 - 使用扬声器时应用可能会停止回答。',
+        description:
+          '选择你要使用的麦克风并测试一下。请佩戴耳机 - 使用扬声器时应用可能会停止回答。',
       },
       mode: {
         label: '建议',
@@ -362,7 +363,8 @@ export const zh: Translation = {
       },
       ToggleSuggestionMode: {
         title: '仅要点 / 完整句子',
-        description: '在仅要点（一行标题加关键词，一眼看完）和完整句子之间切换建议样式。隐身模式下同样可用。',
+        description:
+          '在仅要点（一行标题加关键词，一眼看完）和完整句子之间切换建议样式。隐身模式下同样可用。',
       },
       PlaceWin: {
         title: '放置窗口',
@@ -705,7 +707,8 @@ export const zh: Translation = {
     title: '必须佩戴耳机',
     description: '开始前请戴上耳机。面试官的声音只能传到你的耳朵里 - 绝不能从扬声器放出来。',
     liveSpeakers: '使用扬声器时，麦克风听到面试官的声音和你一样清楚。',
-    liveConsequence: '应用会把对方的问题当成你说的话，从而不再回答它 - 而且不会有任何报错告诉你原因。',
+    liveConsequence:
+      '应用会把对方的问题当成你说的话，从而不再回答它 - 而且不会有任何报错告诉你原因。',
     mockSpeakers: '使用扬声器时，刚听到的问题可能会以回声的形式混进你回答的开头。',
     mockConsequence: '面试官说话时麦克风是静音的，但之后房间里的混响仍可能被识别成零散的词语。',
     proceed: '我已戴好耳机',
@@ -1021,7 +1024,8 @@ export const zh: Translation = {
       receivedTitle: '已收到付款',
       receivedBody: '你的付款正在网络上确认。无需再次支付，订阅将自动生效。',
       partialTitle: '已收到部分付款',
-      partialBody: '我们正在为剩余金额准备新的地址，它会显示在这里并通过邮件发送给你。请勿再向之前的地址付款。',
+      partialBody:
+        '我们正在为剩余金额准备新的地址，它会显示在这里并通过邮件发送给你。请勿再向之前的地址付款。',
       created: '创建时间：',
       updated: '更新时间：',
       addressCopied: '支付地址已复制到剪贴板',

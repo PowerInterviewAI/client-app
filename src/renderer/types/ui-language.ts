@@ -7,11 +7,14 @@ export enum UiLanguage {
   English = 'en',
   Russian = 'ru',
   Spanish = 'es',
+  /** Written as Brazilian Portuguese. */
   Portuguese = 'pt',
   German = 'de',
   French = 'fr',
+  /** Simplified Chinese, for Mainland China. */
   Chinese = 'zh',
   Japanese = 'ja',
+  Korean = 'ko',
 }
 
 export const DEFAULT_UI_LANGUAGE = UiLanguage.English;
@@ -30,16 +33,24 @@ export interface UiLanguageOption {
   nativeName: string;
 }
 
-/** English first, as the language the app falls back to; the rest follow in enum order. */
+/**
+ * English first, as the language the app falls back to; the rest alphabetical by endonym.
+ *
+ * Alphabetical by the name a language calls itself is the conventional order for a language
+ * picker, and the one that serves the person reading it: someone whose app is in a language they
+ * cannot read scans for the one name they recognise, and an order by popularity or market size
+ * means nothing to them. Code-point order puts Latin scripts first, then Cyrillic, then CJK.
+ */
 export const UI_LANGUAGES: readonly UiLanguageOption[] = [
   { code: UiLanguage.English, nativeName: 'English' },
-  { code: UiLanguage.Russian, nativeName: 'Русский' },
-  { code: UiLanguage.Spanish, nativeName: 'Español' },
-  { code: UiLanguage.Portuguese, nativeName: 'Português (Brasil)' },
   { code: UiLanguage.German, nativeName: 'Deutsch' },
+  { code: UiLanguage.Spanish, nativeName: 'Español' },
   { code: UiLanguage.French, nativeName: 'Français' },
-  { code: UiLanguage.Chinese, nativeName: '中文' },
+  { code: UiLanguage.Portuguese, nativeName: 'Português (Brasil)' },
+  { code: UiLanguage.Russian, nativeName: 'Русский' },
   { code: UiLanguage.Japanese, nativeName: '日本語' },
+  { code: UiLanguage.Korean, nativeName: '한국어' },
+  { code: UiLanguage.Chinese, nativeName: '中文' },
 ];
 
 const BY_CODE = new Map<string, UiLanguageOption>(

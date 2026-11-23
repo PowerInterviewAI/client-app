@@ -36,12 +36,14 @@ export const es: Translation = {
       uiLanguage: {
         label: 'Idioma de la aplicación',
         title: '¿En qué idioma quieres la aplicación?',
-        description: 'Elige el que leas con más facilidad. El resto de la configuración lo seguirá.',
+        description:
+          'Elige el que leas con más facilidad. El resto de la configuración lo seguirá.',
       },
       profile: {
         label: 'Perfil',
         title: 'Cuéntanos quién eres',
-        description: 'Las sugerencias se escriben a partir de tu experiencia, así que es obligatorio.',
+        description:
+          'Las sugerencias se escriben a partir de tu experiencia, así que es obligatorio.',
       },
       context: {
         label: 'Contexto del puesto',
@@ -170,7 +172,8 @@ export const es: Translation = {
       resendCode: 'Reenviar código',
       codeResent: 'Código reenviado.',
       resendFailed: 'No se pudo reenviar el código.',
-      signsYouOut: 'Al definir una nueva contraseña se cerrará tu sesión en todos los dispositivos.',
+      signsYouOut:
+        'Al definir una nueva contraseña se cerrará tu sesión en todos los dispositivos.',
       setNewPassword: 'Guardar nueva contraseña',
       saving: 'Guardando…',
       done: 'Contraseña restablecida',
@@ -178,7 +181,8 @@ export const es: Translation = {
       sendFailed: 'No se pudo enviar el código. Inténtalo de nuevo.',
       verifyFailed: 'No se pudo verificar el código.',
       succeeded: 'Contraseña restablecida. Inicia sesión con la nueva contraseña.',
-      failed: 'No se pudo restablecer la contraseña. El código puede haber caducado: pide uno nuevo.',
+      failed:
+        'No se pudo restablecer la contraseña. El código puede haber caducado: pide uno nuevo.',
     },
 
     passwordsDoNotMatch: 'Las contraseñas no coinciden',
@@ -199,13 +203,17 @@ export const es: Translation = {
   home: {
     welcome: (firstName: string) => `Hola de nuevo, ${firstName}`,
     welcomeAnonymous: 'Hola de nuevo',
-    subtitle: 'Practica con un entrevistador de IA o recibe ayuda en directo durante una llamada real.',
+    subtitle:
+      'Practica con un entrevistador de IA o recibe ayuda en directo durante una llamada real.',
 
     mock: {
       title: 'Iniciar entrevista de práctica',
-      ready: 'La IA pregunta, tú respondes en voz alta y al final recibes un informe con puntuación.',
-      unsupported: 'Aún no está disponible en este servidor. Actualiza la aplicación o vuelve a intentarlo más tarde.',
-      liveRunning: 'Detén primero el asistente en directo: los dos no pueden compartir el micrófono.',
+      ready:
+        'La IA pregunta, tú respondes en voz alta y al final recibes un informe con puntuación.',
+      unsupported:
+        'Aún no está disponible en este servidor. Actualiza la aplicación o vuelve a intentarlo más tarde.',
+      liveRunning:
+        'Detén primero el asistente en directo: los dos no pueden compartir el micrófono.',
       unaffordable: 'No te queda suficiente tiempo gratis. Suscríbete para seguir practicando.',
     },
 
@@ -214,8 +222,10 @@ export const es: Translation = {
       resumeTitle: 'Volver a tu entrevista',
       ready: 'Transcribe tu entrevista real y sugiere respuestas en el momento.',
       running: 'Tu asistente en directo ya está en marcha.',
-      mockRunning: 'Termina primero la entrevista de práctica: las dos no pueden compartir el micrófono.',
-      unaffordable: 'No te queda suficiente tiempo gratis. Suscríbete para seguir con tus entrevistas.',
+      mockRunning:
+        'Termina primero la entrevista de práctica: las dos no pueden compartir el micrófono.',
+      unaffordable:
+        'No te queda suficiente tiempo gratis. Suscríbete para seguir con tus entrevistas.',
     },
 
     accountLabel: 'Cuenta',
@@ -325,7 +335,8 @@ export const es: Translation = {
   },
   mockHintsField: {
     label: 'Mostrar pistas en las entrevistas de práctica',
-    description: 'Muestra la respuesta del asistente junto a cada pregunta, para compararla con la tuya.',
+    description:
+      'Muestra la respuesta del asistente junto a cada pregunta, para compararla con la tuya.',
   },
 
   languageField: {
@@ -366,13 +377,19 @@ export const es: Translation = {
     },
 
     keys: {
-      StopAll: { title: 'Detener todo', description: 'Detiene el asistente y sale del modo sigiloso' },
+      StopAll: {
+        title: 'Detener todo',
+        description: 'Detiene el asistente y sale del modo sigiloso',
+      },
       ToggleStealth: {
         title: 'Modo sigiloso',
         description:
           'Oculta la aplicación de la captura de pantalla durante una entrevista. Las mismas teclas la vuelven a mostrar.',
       },
-      Opacity: { title: 'Opacidad', description: 'Cambia la opacidad de la ventana en modo sigiloso' },
+      Opacity: {
+        title: 'Opacidad',
+        description: 'Cambia la opacidad de la ventana en modo sigiloso',
+      },
       ToggleTranscript: {
         title: 'Mostrar transcripción',
         description: 'Muestra u oculta el panel de transcripción; también en modo sigiloso',
@@ -544,7 +561,8 @@ export const es: Translation = {
     stealthMode: 'Modo sigiloso',
     stealthUnavailable:
       'Disponible cuando la entrevista en directo esté en marcha: todavía no hay nada que ocultar.',
-    stealthAvailable: 'Oculta la aplicación de la captura de pantalla. El mismo atajo la vuelve a mostrar.',
+    stealthAvailable:
+      'Oculta la aplicación de la captura de pantalla. El mismo atajo la vuelve a mostrar.',
     captureScreenshot: 'Hacer captura de pantalla',
     captureScreenshotTooltip: 'Capturar pantalla',
     captureFailed: 'No se pudo hacer la captura de pantalla',
@@ -710,7 +728,8 @@ export const es: Translation = {
         discard: 'Cerrar sin guardar',
       },
       update: {
-        title: '¿Guardar el informe de la entrevista de práctica antes de instalar la actualización?',
+        title:
+          '¿Guardar el informe de la entrevista de práctica antes de instalar la actualización?',
         body: 'La aplicación se reinicia y se perderán este informe y tus respuestas.',
         discard: 'Instalar sin guardar',
       },
@@ -796,7 +815,8 @@ export const es: Translation = {
   mock: {
     setup: {
       title: 'Entrevista de práctica',
-      description: 'La IA pregunta y tú respondes en voz alta. No se guarda nada salvo que lo exportes.',
+      description:
+        'La IA pregunta y tú respondes en voz alta. No se guarda nada salvo que lo exportes.',
       start: 'Iniciar entrevista de práctica',
       starting: 'Iniciando…',
       seniority: 'Nivel',
@@ -830,7 +850,8 @@ export const es: Translation = {
       unlimited: 'Ilimitado con tu suscripción.',
       covers: (minutes: number) =>
         `Tu tiempo gratis cubre unos ${minutes} ${n(minutes, 'minuto', 'minutos')}.`,
-      endsEarly: 'La sesión termina cuando se acaba tu tiempo gratis, y aun así recibes tu informe.',
+      endsEarly:
+        'La sesión termina cuando se acaba tu tiempo gratis, y aun así recibes tu informe.',
     },
 
     session: {
@@ -957,7 +978,8 @@ export const es: Translation = {
       subscribedUntil: (plan: string, date: string) => `${plan}, hasta el ${date}`,
       daysLeft: (days: number) => `${n(days, 'Queda', 'Quedan')} ${days} ${n(days, 'día', 'días')}`,
       freePlan: 'Plan gratuito',
-      freeLeft: (duration: string) => `Te quedan ${duration} de entrevistas con el modelo gratuito.`,
+      freeLeft: (duration: string) =>
+        `Te quedan ${duration} de entrevistas con el modelo gratuito.`,
       freeUsedUp: 'No te queda tiempo gratis. Suscríbete para seguir con tus entrevistas.',
       duration: (hours: number, minutes: number) => {
         const parts: string[] = [];
@@ -1093,12 +1115,14 @@ export const es: Translation = {
     microphoneSwapFailedHint:
       'Comprueba que el dispositivo está conectado y luego detén e inicia el asistente.',
     saveLanguageFailed: 'No se pudo guardar el idioma de la entrevista',
-    languageHalfApplied: 'Las sugerencias cambiaron de idioma; la transcripción sigue reconectándose',
+    languageHalfApplied:
+      'Las sugerencias cambiaron de idioma; la transcripción sigue reconectándose',
     languageHalfAppliedHint: 'Sigue reintentando. Detén e inicia el asistente si no vuelve.',
     saveSuggestionModeFailed: 'No se pudo guardar el modo de sugerencias',
     saveTranscriptPanelFailed: 'No se pudo guardar el ajuste del panel de transcripción',
     saveMockHintsFailed: 'No se pudo guardar el ajuste de sugerencias en directo',
-    saveHideTaskbarFailed: 'No se pudo guardar el ajuste de la barra de tareas. Inténtalo de nuevo.',
+    saveHideTaskbarFailed:
+      'No se pudo guardar el ajuste de la barra de tareas. Inténtalo de nuevo.',
     saveAllowScreenCaptureFailed:
       'No se pudo guardar el ajuste de captura de pantalla. Inténtalo de nuevo.',
     saveUiLanguageFailed: 'No se pudo guardar el idioma de la aplicación',
@@ -1107,7 +1131,8 @@ export const es: Translation = {
   assistant: {
     mockRunning: 'Detén la entrevista de práctica antes de iniciar una sesión en directo.',
     stoppedUncleanly: 'El asistente se detuvo, pero no todo se cerró correctamente',
-    stoppedUncleanlyHint: 'Reinicia la aplicación si siguen llegando transcripciones o sugerencias.',
+    stoppedUncleanlyHint:
+      'Reinicia la aplicación si siguen llegando transcripciones o sugerencias.',
     startFailed: 'No se pudo iniciar el asistente',
     stopFailed: 'No se pudo detener el asistente',
     screenCaptureTimedOut: 'La captura de pantalla tardó demasiado. Inténtalo de nuevo.',
@@ -1133,8 +1158,7 @@ export const es: Translation = {
   },
 
   subscriptionExpiry: {
-    endingSoon: (days: number) =>
-      `Tu suscripción termina en ${days} ${n(days, 'día', 'días')}`,
+    endingSoon: (days: number) => `Tu suscripción termina en ${days} ${n(days, 'día', 'días')}`,
     endingSoonHint:
       'Compra otro pase para seguir con entrevistas ilimitadas. Su tiempo se añade después de la fecha de fin actual.',
     ended: 'Tu suscripción ha terminado',

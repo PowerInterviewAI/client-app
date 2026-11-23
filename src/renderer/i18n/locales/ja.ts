@@ -35,7 +35,8 @@ export const ja: Translation = {
       uiLanguage: {
         label: 'アプリの言語',
         title: 'アプリをどの言語で表示しますか？',
-        description: 'いちばん読みやすい言語を選んでください。以降のセットアップもその言語で進みます。',
+        description:
+          'いちばん読みやすい言語を選んでください。以降のセットアップもその言語で進みます。',
       },
       profile: {
         label: 'プロフィール',
@@ -82,14 +83,17 @@ export const ja: Translation = {
     },
 
     loadingAccount: 'アカウントを読み込んでいます…',
-    accountUnreachable: 'アカウントに接続できません。接続が戻るまで、ここに入力した内容は保存できません。',
+    accountUnreachable:
+      'アカウントに接続できません。接続が戻るまで、ここに入力した内容は保存できません。',
 
     skip: '今はスキップ',
     skipTooltip: 'セットアップは後で設定画面からもう一度実行できます',
 
     allSet: '準備完了です',
-    profileNotSavedOnSkip: 'セットアップをスキップしましたが、プロフィールは保存されていません。アカウント画面から再度お試しください。',
-    completionNotRecorded: 'セットアップをスキップしましたが、その記録に失敗しました。もう一度表示されることがあります。',
+    profileNotSavedOnSkip:
+      'セットアップをスキップしましたが、プロフィールは保存されていません。アカウント画面から再度お試しください。',
+    completionNotRecorded:
+      'セットアップをスキップしましたが、その記録に失敗しました。もう一度表示されることがあります。',
     saveProfileFailed: 'プロフィールを保存できませんでした',
     finishFailed: 'セットアップを保存できませんでした。接続を確認してもう一度お試しください。',
   },
@@ -173,7 +177,8 @@ export const ja: Translation = {
       sendFailed: 'リセットコードを送信できませんでした。もう一度お試しください。',
       verifyFailed: 'リセットコードを確認できませんでした。',
       succeeded: 'パスワードを再設定しました。新しいパスワードでログインしてください。',
-      failed: 'パスワードの再設定に失敗しました。コードの有効期限が切れている可能性があります - 新しいコードを取得してください。',
+      failed:
+        'パスワードの再設定に失敗しました。コードの有効期限が切れている可能性があります - 新しいコードを取得してください。',
     },
 
     passwordsDoNotMatch: 'パスワードが一致しません',
@@ -199,8 +204,10 @@ export const ja: Translation = {
     mock: {
       title: '模擬面接を開始',
       ready: 'AI が質問し、あなたが声に出して答えます。最後に採点付きのレポートが届きます。',
-      unsupported: 'このサーバーではまだ利用できません。アプリを更新するか、後でもう一度お試しください。',
-      liveRunning: '先にライブアシスタントを停止してください - マイクを同時に使うことはできません。',
+      unsupported:
+        'このサーバーではまだ利用できません。アプリを更新するか、後でもう一度お試しください。',
+      liveRunning:
+        '先にライブアシスタントを停止してください - マイクを同時に使うことはできません。',
       unaffordable: '無料時間が足りません。練習を続けるにはサブスクリプションに登録してください。',
     },
 
@@ -253,7 +260,8 @@ export const ja: Translation = {
     profilePlaceholder:
       '履歴書・職務経歴書、LinkedIn のプロフィール、または簡単な自己紹介を貼り付けてください。提案はこれをもとに作成されるので、詳しいほどあなたらしい回答になります。',
     context: '背景情報',
-    contextPlaceholder: '求人票、ポジションの要件など、準備中の面接に関する情報を貼り付けてください。',
+    contextPlaceholder:
+      '求人票、ポジションの要件など、準備中の面接に関する情報を貼り付けてください。',
     limitReached: (max: number) =>
       `文字数の上限（${max.toLocaleString('ja-JP')} 文字）に達しました。超えた分は追加されていません。`,
     charactersLeft: (remaining: number) => `残り ${remaining.toLocaleString('ja-JP')} 文字`,
@@ -266,11 +274,14 @@ export const ja: Translation = {
     lookingPlaceholder: 'マイクを探しています…',
     test: 'テスト',
     stopTest: 'テストを停止',
-    openFailed: 'このマイクを開けませんでした。接続されているか、他のアプリが使用していないか確認してください。',
-    notConnected: (deviceName: string) => `「${deviceName}」は接続されていません。別のマイクを選んでください。`,
+    openFailed:
+      'このマイクを開けませんでした。接続されているか、他のアプリが使用していないか確認してください。',
+    notConnected: (deviceName: string) =>
+      `「${deviceName}」は接続されていません。別のマイクを選んでください。`,
     saySomething: '何か話してみてください - 話している間バーが動けば正常です。',
     runningHint: '面接でこのマイクを使用中です。終了後にテストできます。',
-    testHint: '面接の前にテストしてください - 音を拾わないマイクは、静かな部屋とまったく同じに見えます。',
+    testHint:
+      '面接の前にテストしてください - 音を拾わないマイクは、静かな部屋とまったく同じに見えます。',
   },
 
   micLevelMeter: {
@@ -298,7 +309,8 @@ export const ja: Translation = {
 
   transcriptPanelField: {
     label: '文字起こしパネルを表示',
-    description: (combo: string) => `提案の下にリアルタイムの文字起こしを表示します。${combo} で切り替えます。`,
+    description: (combo: string) =>
+      `提案の下にリアルタイムの文字起こしを表示します。${combo} で切り替えます。`,
   },
 
   hideTaskbarField: {
@@ -308,7 +320,8 @@ export const ja: Translation = {
   },
   allowScreenCaptureField: {
     label: '画面キャプチャを許可',
-    description: '画面共有や録画でアプリのウィンドウが映るようにします。ステルスモードでは常に隠れます。',
+    description:
+      '画面共有や録画でアプリのウィンドウが映るようにします。ステルスモードでは常に隠れます。',
   },
   mockHintsField: {
     label: '模擬面接でヒントを表示',
@@ -321,7 +334,8 @@ export const ja: Translation = {
     reconnectFailed:
       '提案の言語は切り替わりましたが、文字起こしはまだ再接続中です。戻らない場合はアシスタントを停止して再開してください。',
     description: '文字起こしの言語と、提案が返ってくる言語です。',
-    noVoiceNotice: '面接官は質問を読み上げずに文字で表示します。回答は引き続き声に出して行い、採点方法は変わりません。',
+    noVoiceNotice:
+      '面接官は質問を読み上げずに文字で表示します。回答は引き続き声に出して行い、採点方法は変わりません。',
   },
 
   changePassword: {
@@ -352,12 +366,18 @@ export const ja: Translation = {
     },
 
     keys: {
-      StopAll: { title: 'すべて停止', description: 'アシスタントを停止し、ステルスモードを終了します' },
+      StopAll: {
+        title: 'すべて停止',
+        description: 'アシスタントを停止し、ステルスモードを終了します',
+      },
       ToggleStealth: {
         title: 'ステルス切り替え',
         description: 'ライブ面接中、画面キャプチャからアプリを隠します。同じキーで元に戻ります。',
       },
-      Opacity: { title: '透明度の切り替え', description: 'ステルスモードでウィンドウの透明度を切り替えます' },
+      Opacity: {
+        title: '透明度の切り替え',
+        description: 'ステルスモードでウィンドウの透明度を切り替えます',
+      },
       ToggleTranscript: {
         title: '文字起こしの切り替え',
         description: '文字起こしパネルを表示・非表示にします - ステルスモードでも使えます',
@@ -392,14 +412,18 @@ export const ja: Translation = {
         title: '画面をキャプチャ',
         description: 'オンデマンド提案用にスクリーンショットを撮ります',
       },
-      ClearCaptures: { title: 'キャプチャを消去', description: '撮影したスクリーンショットを消去します' },
+      ClearCaptures: {
+        title: 'キャプチャを消去',
+        description: '撮影したスクリーンショットを消去します',
+      },
       TriggerWithoutCaptures: {
         title: 'キャプチャなしで生成',
         description: 'スクリーンショットを使わずに提案を生成します',
       },
       TriggerWithCaptures: {
         title: 'キャプチャ付きで生成',
-        description: 'スクリーンショットを参照して提案を生成します。キャプチャがない場合は、先に 1 枚撮影を試みます。',
+        description:
+          'スクリーンショットを参照して提案を生成します。キャプチャがない場合は、先に 1 枚撮影を試みます。',
       },
     },
   },
@@ -465,7 +489,8 @@ export const ja: Translation = {
     stopTransientHint: 'セッションの実行中に使用できます',
 
     checks: {
-      configUnavailable: '保存済みの設定を読み込めませんでした。再接続しています - 少し待ってからもう一度お試しください。',
+      configUnavailable:
+        '保存済みの設定を読み込めませんでした。再接続しています - 少し待ってからもう一度お試しください。',
       nameMissing: 'フルネームが設定されていません',
       profileMissing: 'プロフィールが設定されていません',
       noMicrophone: 'マイクが見つかりません。接続してからもう一度お試しください。',
@@ -540,7 +565,8 @@ export const ja: Translation = {
     exportInterview: '面接をエクスポート',
     exportTheInterview: 'この面接をエクスポート',
     nothingToExport: 'エクスポートできるものはまだありません',
-    nothingToExportDescription: '先に面接を行ってから、文字起こしと提案をエクスポートしてください。',
+    nothingToExportDescription:
+      '先に面接を行ってから、文字起こしと提案をエクスポートしてください。',
     exportFailed: '面接をエクスポートできませんでした',
     exportDocx: 'Word 文書 (.docx)',
     exportMarkdown: 'Markdown (.md)',
@@ -708,11 +734,15 @@ export const ja: Translation = {
 
   headphoneNotice: {
     title: 'ヘッドホンが必要です',
-    description: '始める前に装着してください。面接官の声はあなたの耳にだけ届くようにし、スピーカーからは絶対に流さないでください。',
+    description:
+      '始める前に装着してください。面接官の声はあなたの耳にだけ届くようにし、スピーカーからは絶対に流さないでください。',
     liveSpeakers: 'スピーカーを使うと、マイクがあなたと同じくらいはっきり面接官の声を拾います。',
-    liveConsequence: 'するとアプリは相手の質問をあなたの発言と判断し、その質問に答えなくなります - 理由を示すエラーも一切出ません。',
-    mockSpeakers: 'スピーカーを使うと、直前に聞いた質問が回答の冒頭にこだまとして入ることがあります。',
-    mockConsequence: '面接官が話している間はマイクがミュートされますが、その後の部屋の残響が余計な言葉として入り込むことがあります。',
+    liveConsequence:
+      'するとアプリは相手の質問をあなたの発言と判断し、その質問に答えなくなります - 理由を示すエラーも一切出ません。',
+    mockSpeakers:
+      'スピーカーを使うと、直前に聞いた質問が回答の冒頭にこだまとして入ることがあります。',
+    mockConsequence:
+      '面接官が話している間はマイクがミュートされますが、その後の部屋の残響が余計な言葉として入り込むことがあります。',
     proceed: 'ヘッドホンを装着しました',
   },
 
@@ -762,7 +792,8 @@ export const ja: Translation = {
     downloadProgress: (transferredMb: string, totalMb: string) =>
       `${transferredMb} MB / ${totalMb} MB`,
     downloaded: (version: string) => `アップデートをダウンロードしました：v${version}`,
-    downloadedDescriptionMac: 'クリックしてインストーラを開き、「アプリケーション」にドラッグしてください。',
+    downloadedDescriptionMac:
+      'クリックしてインストーラを開き、「アプリケーション」にドラッグしてください。',
     downloadedDescription: 'クリックすると再起動してアップデートをインストールします。',
     openInstaller: 'インストーラを開く',
     restartNow: '今すぐ再起動',
@@ -771,7 +802,8 @@ export const ja: Translation = {
   mock: {
     setup: {
       title: '模擬面接',
-      description: 'AI が質問し、あなたが声に出して答えます。エクスポートしない限り何も保存されません。',
+      description:
+        'AI が質問し、あなたが声に出して答えます。エクスポートしない限り何も保存されません。',
       start: '模擬面接を開始',
       starting: '開始しています…',
       seniority: 'レベル',
@@ -930,7 +962,8 @@ export const ja: Translation = {
       daysLeft: (days: number) => `残り ${days} 日`,
       freePlan: '無料プラン',
       freeLeft: (duration: string) => `無料モデルでの面接は残り ${duration} です。`,
-      freeUsedUp: '無料時間を使い切りました。面接を続けるにはサブスクリプションに登録してください。',
+      freeUsedUp:
+        '無料時間を使い切りました。面接を続けるにはサブスクリプションに登録してください。',
       duration: (hours: number, minutes: number) => {
         const parts: string[] = [];
         if (hours) parts.push(`${hours} 時間`);
@@ -1024,9 +1057,11 @@ export const ja: Translation = {
       refundedTitle: '返金済み',
       refundedBody: 'この支払いは返金されました。ご不明な点はサポートまでお問い合わせください。',
       receivedTitle: '入金を確認しました',
-      receivedBody: 'ネットワーク上で入金を確認中です。追加の支払いは不要で、サブスクリプションは自動で反映されます。',
+      receivedBody:
+        'ネットワーク上で入金を確認中です。追加の支払いは不要で、サブスクリプションは自動で反映されます。',
       partialTitle: '一部の入金を確認しました',
-      partialBody: '残額用の新しいアドレスを準備しています。ここに表示され、メールでもお送りします。以前のアドレスには送金しないでください。',
+      partialBody:
+        '残額用の新しいアドレスを準備しています。ここに表示され、メールでもお送りします。以前のアドレスには送金しないでください。',
       created: '作成日時：',
       updated: '更新日時：',
       addressCopied: '支払いアドレスをコピーしました',
@@ -1058,15 +1093,18 @@ export const ja: Translation = {
   settingsToasts: {
     saveMicrophoneFailed: '選択したマイクを保存できませんでした',
     microphoneSwapFailed: '保存しましたが、面接では以前のマイクを使用中です',
-    microphoneSwapFailedHint: 'デバイスが接続されているか確認し、アシスタントを停止して再開してください。',
+    microphoneSwapFailedHint:
+      'デバイスが接続されているか確認し、アシスタントを停止して再開してください。',
     saveLanguageFailed: '面接の言語を保存できませんでした',
     languageHalfApplied: '提案の言語は切り替わりました。文字起こしはまだ再接続中です',
-    languageHalfAppliedHint: '再試行を続けています。戻らない場合はアシスタントを停止して再開してください。',
+    languageHalfAppliedHint:
+      '再試行を続けています。戻らない場合はアシスタントを停止して再開してください。',
     saveSuggestionModeFailed: '提案モードを保存できませんでした',
     saveTranscriptPanelFailed: '文字起こしパネルの設定を保存できませんでした',
     saveMockHintsFailed: 'ライブ提案の設定を保存できませんでした',
     saveHideTaskbarFailed: 'タスクバーの設定を保存できませんでした。もう一度お試しください。',
-    saveAllowScreenCaptureFailed: '画面キャプチャの設定を保存できませんでした。もう一度お試しください。',
+    saveAllowScreenCaptureFailed:
+      '画面キャプチャの設定を保存できませんでした。もう一度お試しください。',
     saveUiLanguageFailed: 'アプリの言語を保存できませんでした',
   },
 
@@ -1092,13 +1130,15 @@ export const ja: Translation = {
     replacedHint: '1 つのアカウントで同時に行える面接は 1 つだけです。',
     lowBalance: (minutes: number) => `無料時間は残り約 ${minutes} 分です`,
     lowBalanceHint: '無料時間がなくなるとセッションは終了します。',
-    tooLowHint: 'セッションには 1 分以上必要です。サブスクリプションに登録すると最先端モデルで面接し放題です。',
+    tooLowHint:
+      'セッションには 1 分以上必要です。サブスクリプションに登録すると最先端モデルで面接し放題です。',
     subscribe: 'プランを見る',
   },
 
   subscriptionExpiry: {
     endingSoon: (days: number) => `サブスクリプションはあと ${days} 日で終了します`,
-    endingSoonHint: '面接し放題を続けるには、別のパスを購入してください。期間は現在の終了日のあとに追加されます。',
+    endingSoonHint:
+      '面接し放題を続けるには、別のパスを購入してください。期間は現在の終了日のあとに追加されます。',
     ended: 'サブスクリプションが終了しました',
     endedHint: '今後の面接は、無料モデルで無料時間を使用します。',
   },
