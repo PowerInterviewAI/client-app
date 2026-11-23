@@ -2,9 +2,6 @@
 
 ## What's Changed
 
-### Fixes
-* When an interview cannot start, for example because no microphone is connected or the selected one is missing, the app now shows the reason and returns to the home screen instead of leaving you on an interview screen with no way to start
-
 ---
 
 ## Having trouble to install?
