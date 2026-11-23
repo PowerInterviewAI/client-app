@@ -34,8 +34,9 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <div>
       {children}
-      {/* Toaster adapts to theme */}
-      <Toaster richColors position="top-center" theme={theme} />
+      {/* Top-right, clear of the titlebar: the bottom edge belongs to the live console's control
+          bar, and top-centre sat over the middle of whatever the user was reading. */}
+      <Toaster position="top-right" offset={{ top: 44, right: 12 }} theme={theme} />
     </div>
   );
 }
