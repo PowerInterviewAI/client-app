@@ -172,8 +172,7 @@ export default function SubscriptionTab({
                 <Skeleton className="h-5 w-20" />
                 <Skeleton className="h-3 w-32" />
                 <Skeleton className="h-8 w-24" />
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-4/5" />
+                <Skeleton className="h-3 w-28" />
                 <Skeleton className="h-8 w-full" />
               </div>
             ))}
@@ -184,6 +183,22 @@ export default function SubscriptionTab({
         </div>
       ) : (
         <>
+          {/* Said once, above the cards, rather than repeated inside each one: every plan buys the
+              same thing for a different length of time, so the cards carry only what differs -
+              price, total and saving - and the eye goes straight to that. */}
+          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
+            {[
+              t.payment.buy.features.unlimited,
+              t.payment.buy.features.model,
+              t.payment.buy.features.noRenewal,
+            ].map((feature) => (
+              <li key={feature} className="flex items-center gap-1.5 text-xs">
+                <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+
           <div className="mx-auto grid gap-2 md:grid-cols-3">
             {plans.map((plan) => {
               const isPopular = plan.popular;
@@ -239,24 +254,6 @@ export default function SubscriptionTab({
                     <p className="mt-1 text-xs text-muted-foreground">
                       {t.payment.buy.billedAs(plan.priceUsd, plan.months)}
                     </p>
-                    {/* Every plan buys the same thing for a different length of time, so the list
-                        is identical across cards - it answers "what do I get" without making the
-                        user find the answer somewhere else. */}
-                    <ul className="mt-3 space-y-1.5">
-                      {[
-                        t.payment.buy.features.unlimited,
-                        t.payment.buy.features.model,
-                        t.payment.buy.features.noRenewal,
-                      ].map((feature) => (
-                        <li key={feature} className="flex items-start gap-2 text-xs">
-                          <Check
-                            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary"
-                            aria-hidden="true"
-                          />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </CardHeader>
 
                   <CardContent className="flex-1 px-4 pt-0">
