@@ -694,6 +694,92 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     captureFailed: 'Échec de la capture d’écran. Veuillez réessayer.',
     cannotGenerateSuggestion: 'Impossible de générer une suggestion tant que l’assistant n’est pas lancé',
   },
+
+  [UiLanguage.Chinese]: {
+    placeholderTranscript: '转录内容将显示在这里',
+    placeholderQuestion: '面试官的问题将显示在这里',
+    placeholderLiveAnswer: '建议的回答将在这里实时显示',
+    placeholderActionAnswer: '按需建议将显示在这里，例如回答建议、编程题解答、图表说明等。',
+
+    sessionExpired: '会话已过期，请重新登录。',
+
+    authErrors: {
+      sendCodeFailed: '验证码发送失败',
+      invalidCode: '验证码无效或已过期',
+      signupFailed: '注册失败',
+      invalidCredentials: '邮箱或密码错误',
+      loginFailed: '登录失败',
+      logoutFailed: '退出登录失败',
+      changePasswordFailed: '修改密码失败',
+      sendResetCodeFailed: '重置码发送失败',
+      invalidResetCode: '重置码无效或已过期',
+      resetFailed: '密码重置失败',
+    },
+
+    accountErrors: {
+      fetchFailed: '获取账户失败',
+      updateFailed: '更新账户失败',
+      onboardingFailed: '保存设置失败',
+      migrateFailed: '迁移本地设置失败',
+      loadConfigFailed: '加载设置失败',
+    },
+
+    transportErrors: {
+      timedOut: '请求超时',
+      networkFailed: '网络请求失败',
+    },
+
+    paymentErrors: {
+      getPlans: '获取套餐失败',
+      getCurrencies: '获取可用币种失败',
+      createPayment: '创建支付失败',
+      getStatus: '获取支付状态失败',
+      getHistory: '获取支付记录失败',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: '请求过于频繁，请稍后再试。',
+      generateFailed: '生成回答失败。',
+      cannotReachServer: '无法连接服务器。请检查网络连接后重试。',
+      responseTimedOut: '响应超时，请重试。',
+      emptyResponse: '模型返回了空回答。',
+    },
+
+    mockErrors: {
+      liveRunning: '请先停止实时面试，再开始模拟面试。',
+      firstQuestionFailed: '生成第一道题失败，请重试。',
+      firstQuestionFailedWith: (reason: string) => `无法生成第一道题：${reason}`,
+      startFailed: '启动模拟面试失败',
+      nothingRecorded: '面试结束时没有录到任何内容。请检查是否选择了正确的麦克风且未静音，然后重试。',
+      endedBeforeScoring: '面试在评分完成前就结束了。',
+      notEnoughCredits: '免费时长已用完',
+    },
+
+    actionNames: {
+      screenshotCapture: '截图',
+      captureSuggestion: '按需建议生成',
+    },
+    actionBlocked: (runningAction: string) => `${runningAction}正在进行中，请稍后再试。`,
+
+    stealthSignedOut: '需要登录才能使用隐身模式。',
+    stealthDuringMock: '模拟面试期间隐身模式不可用。这是练习，不是真实通话。',
+    stealthNotRunning: '隐身模式仅在实时面试期间可用。',
+    opacityStealthOnly: '仅在隐身模式下可以切换透明度。',
+
+    saveTranscriptTitle: '保存转录',
+    saveMockReportTitle: '保存模拟面试报告',
+    saveImageTitle: '保存图片',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Word 文档',
+    pngFilter: 'PNG 图片',
+
+    actionDuringMock: '模拟面试期间无法使用按需建议。',
+    cannotClearImages: '助手未运行时无法清除图片',
+    cannotCaptureScreenshot: '助手未运行时无法截图',
+    maxCaptures: (max: number) => `已达到 ${max} 张截图的上限。请清除图片后重试。`,
+    captureFailed: '截图失败，请重试。',
+    cannotGenerateSuggestion: '助手未运行时无法生成建议',
+  },
 };
 
 /**

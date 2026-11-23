@@ -29,7 +29,6 @@ const LATIN_BY_DESIGN = new Set([
   // The BCP-47 tags handed to `toLocaleString`, which is how each locale formats its numbers
   // and dates.
   'ru-RU',
-  'uk-UA',
   'ja-JP',
   'ko-KR',
   'zh-CN',
@@ -67,7 +66,6 @@ const LATIN_BY_DESIGN = new Set([
  */
 const NATIVE_SCRIPT = {
   ru: /\p{Script=Cyrillic}/u,
-  uk: /\p{Script=Cyrillic}/u,
   ja: /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u,
   ko: /\p{Script=Hangul}/u,
   zh: /\p{Script=Han}/u,
