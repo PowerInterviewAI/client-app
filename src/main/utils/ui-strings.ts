@@ -418,6 +418,98 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     captureFailed: 'No se pudo hacer la captura de pantalla. Inténtalo de nuevo.',
     cannotGenerateSuggestion: 'No se puede generar una sugerencia si el asistente no está en marcha',
   },
+
+  [UiLanguage.Portuguese]: {
+    placeholderTranscript: 'A transcrição vai aparecer aqui',
+    placeholderQuestion: 'As perguntas do entrevistador vão aparecer aqui',
+    placeholderLiveAnswer: 'As respostas sugeridas vão aparecer aqui em tempo real',
+    placeholderActionAnswer:
+      'As sugestões sob demanda vão aparecer aqui. Por exemplo, uma sugestão de resposta, a solução de um teste de código, a descrição de um diagrama etc.',
+
+    sessionExpired: 'Sua sessão expirou. Entre de novo.',
+
+    authErrors: {
+      sendCodeFailed: 'Não foi possível enviar o código de verificação',
+      invalidCode: 'Código de verificação inválido ou expirado',
+      signupFailed: 'Não foi possível concluir o cadastro',
+      invalidCredentials: 'E-mail ou senha incorretos',
+      loginFailed: 'Não foi possível entrar',
+      logoutFailed: 'Não foi possível sair',
+      changePasswordFailed: 'Não foi possível alterar a senha',
+      sendResetCodeFailed: 'Não foi possível enviar o código de redefinição',
+      invalidResetCode: 'Código de redefinição inválido ou expirado',
+      resetFailed: 'Não foi possível redefinir a senha',
+    },
+
+    accountErrors: {
+      fetchFailed: 'Não foi possível obter a conta',
+      updateFailed: 'Não foi possível atualizar a conta',
+      onboardingFailed: 'Não foi possível salvar a configuração',
+      migrateFailed: 'Não foi possível migrar a configuração local',
+      loadConfigFailed: 'Não foi possível carregar a configuração',
+    },
+
+    transportErrors: {
+      timedOut: 'A solicitação demorou demais',
+      networkFailed: 'A solicitação de rede falhou',
+    },
+
+    paymentErrors: {
+      getPlans: 'Não foi possível obter os planos',
+      getCurrencies: 'Não foi possível obter as moedas disponíveis',
+      createPayment: 'Não foi possível criar o pagamento',
+      getStatus: 'Não foi possível obter a situação do pagamento',
+      getHistory: 'Não foi possível obter o histórico de pagamentos',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: 'Solicitações demais. Tente mais tarde.',
+      generateFailed: 'Não foi possível gerar a resposta.',
+      cannotReachServer: 'Não foi possível acessar o servidor. Verifique sua conexão e tente de novo.',
+      responseTimedOut: 'A resposta demorou demais. Tente de novo.',
+      emptyResponse: 'O modelo devolveu uma resposta vazia.',
+    },
+
+    mockErrors: {
+      liveRunning: 'Pare a entrevista ao vivo antes de começar uma simulada.',
+      firstQuestionFailed: 'Não foi possível gerar a primeira pergunta. Tente de novo.',
+      firstQuestionFailedWith: (reason: string) =>
+        `Não foi possível gerar a primeira pergunta: ${reason}`,
+      startFailed: 'Não foi possível iniciar a entrevista simulada',
+      nothingRecorded:
+        'A entrevista terminou sem nada gravado. Verifique se o microfone certo está selecionado e se não está mudo, e tente de novo.',
+      endedBeforeScoring: 'A entrevista foi encerrada antes de terminar a avaliação.',
+      notEnoughCredits: 'Seu tempo grátis acabou',
+    },
+
+    actionNames: {
+      screenshotCapture: 'A captura de tela',
+      captureSuggestion: 'A geração de sugestão sob demanda',
+    },
+    actionBlocked: (runningAction: string) =>
+      `${runningAction} ainda está em andamento. Tente de novo daqui a pouco.`,
+
+    stealthSignedOut: 'Você precisa entrar para usar o modo furtivo.',
+    stealthDuringMock:
+      'O modo furtivo fica desligado durante a entrevista simulada. Isto é treino, não uma chamada real.',
+    stealthNotRunning: 'O modo furtivo só está disponível durante uma entrevista ao vivo.',
+    opacityStealthOnly: 'A opacidade só pode ser alternada no modo furtivo.',
+
+    saveTranscriptTitle: 'Salvar transcrição',
+    saveMockReportTitle: 'Salvar relatório da entrevista simulada',
+    saveImageTitle: 'Salvar imagem',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Documento do Word',
+    pngFilter: 'Imagem PNG',
+
+    actionDuringMock: 'As sugestões sob demanda ficam indisponíveis durante a entrevista simulada.',
+    cannotClearImages: 'Não é possível apagar as imagens com o assistente parado',
+    cannotCaptureScreenshot: 'Não é possível tirar captura de tela com o assistente parado',
+    maxCaptures: (max: number) =>
+      `Limite de ${max} capturas atingido. Apague as imagens e tente de novo.`,
+    captureFailed: 'Não foi possível tirar a captura de tela. Tente de novo.',
+    cannotGenerateSuggestion: 'Não é possível gerar sugestão com o assistente parado',
+  },
 };
 
 /**

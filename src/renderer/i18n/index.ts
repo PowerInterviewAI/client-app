@@ -5,6 +5,7 @@ import { DEFAULT_UI_LANGUAGE, resolveUiLanguage, UiLanguage } from '@/types/ui-l
 
 import { en, type Translation } from './locales/en';
 import { ru } from './locales/ru';
+import { pt } from './locales/pt';
 import { es } from './locales/es';
 
 export type { Translation };
@@ -13,6 +14,7 @@ const TRANSLATIONS: Record<UiLanguage, Translation> = {
   [UiLanguage.English]: en,
   [UiLanguage.Russian]: ru,
   [UiLanguage.Spanish]: es,
+  [UiLanguage.Portuguese]: pt,
 };
 
 /** The dictionary for a code, for the few callers that have one in hand rather than a hook. */
