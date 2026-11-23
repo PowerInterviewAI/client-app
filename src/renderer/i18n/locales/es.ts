@@ -273,7 +273,7 @@ export const es: Translation = {
     limitReached: (max: number) =>
       `Límite de caracteres alcanzado (${max.toLocaleString('es-ES')}). El texto sobrante no se añadió.`,
     charactersLeft: (remaining: number) =>
-      `Quedan ${remaining.toLocaleString('es-ES')} ${n(remaining, 'carácter', 'caracteres')}`,
+      `${n(remaining, 'Queda', 'Quedan')} ${remaining.toLocaleString('es-ES')} ${n(remaining, 'carácter', 'caracteres')}`,
   },
 
   microphoneField: {
