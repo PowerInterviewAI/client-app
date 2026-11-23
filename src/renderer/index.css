@@ -56,8 +56,12 @@
 :root {
   /* Neutral surfaces, brand orange as the only accent. The light primary is the burnt end of the
      brand hue because white text on the display orange is 2.4:1; dark takes the bright end with a
-     near-black label. --accent is the shadcn hover surface, not a brand colour. */
-  --background: oklch(0.985 0.001 286);
+     near-black label. --accent is the shadcn hover surface, not a brand colour.
+
+     Contrast: muted text is dark enough for small copy (about 6:1 on the page), borders and input
+     outlines are a step darker than the shadcn defaults so a field reads as a field without its
+     focus ring, and the page sits a shade below white so cards separate without a heavy shadow. */
+  --background: oklch(0.975 0.002 286);
   --foreground: oklch(0.21 0.006 286);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.21 0.006 286);
@@ -68,13 +72,13 @@
   --secondary: oklch(0.967 0.001 286);
   --secondary-foreground: oklch(0.21 0.006 286);
   --muted: oklch(0.967 0.001 286);
-  --muted-foreground: oklch(0.5 0.014 286);
-  --accent: oklch(0.955 0.002 286);
+  --muted-foreground: oklch(0.46 0.014 286);
+  --accent: oklch(0.945 0.003 286);
   --accent-foreground: oklch(0.21 0.006 286);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.55 0.23 27.325);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.92 0.004 286);
-  --input: oklch(0.92 0.004 286);
+  --border: oklch(0.9 0.005 286);
+  --input: oklch(0.86 0.006 286);
   --ring: oklch(0.56 0.144 51.2);
   --chart-1: #eb6834;
   --chart-2: #1baf7a;
@@ -82,13 +86,13 @@
   --chart-4: #4a3aa7;
   --chart-5: #e34948;
   --radius: 0.5rem;
-  --sidebar: oklch(0.975 0.001 286);
+  --sidebar: oklch(0.96 0.003 286);
   --sidebar-foreground: oklch(0.21 0.006 286);
   --sidebar-primary: oklch(0.56 0.144 51.2);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.955 0.002 286);
+  --sidebar-accent: oklch(0.92 0.004 286);
   --sidebar-accent-foreground: oklch(0.21 0.006 286);
-  --sidebar-border: oklch(0.92 0.004 286);
+  --sidebar-border: oklch(0.9 0.005 286);
   --sidebar-ring: oklch(0.56 0.144 51.2);
 }
 
