@@ -1,4 +1,4 @@
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, AudioLines } from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Speaker, type Transcript } from '@/types/transcript';
 
 import { Button } from '../../ui/button';
 import { Switch } from '../../ui/switch';
+import { PanelEmpty } from './panel-empty';
 
 // Every entry is from the same session, so the date carries no information and its width is
 // what would push the speaker onto a line of its own.
@@ -80,8 +81,8 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
   }, [transcripts, autoScroll]);
 
   return (
-    <Card className="relative flex flex-col w-full h-full bg-card p-0 rounded-md gap-1">
-      <div className="px-2 py-1.5 shrink-0 flex items-center justify-between gap-4">
+    <Card className="relative flex flex-col w-full h-full bg-card p-0 rounded-lg gap-0">
+      <div className="px-3 py-1.5 shrink-0 flex items-center justify-between gap-4 border-b border-border/60">
         <div className="flex items-center gap-2">
           {isRunning && (
             <span
@@ -89,7 +90,9 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
               aria-hidden="true"
             />
           )}
-          <h3 className="font-semibold text-foreground text-xs">{t.panels.transcription}</h3>
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {t.panels.transcription}
+          </h3>
         </div>
 
         {!isStealth && (
@@ -113,9 +116,7 @@ function TranscriptPanel({ transcripts, isRunning = false }: TranscriptPanelProp
 
       <div ref={containerRef} className="flex-1 overflow-y-auto">
         {transcripts.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-center p-4">
-            <p className="text-sm text-muted-foreground">{t.panels.noTranscripts}</p>
-          </div>
+          <PanelEmpty icon={AudioLines} text={t.panels.noTranscripts} />
         ) : (
           <>
             <div className="divide-y divide-border/50 px-2 py-1">

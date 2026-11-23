@@ -112,6 +112,13 @@ export const en = {
 
   configuration: {
     title: 'Configuration',
+    sections: {
+      general: 'General',
+      interview: 'Interview',
+      display: 'Display',
+      window: 'Window & privacy',
+      help: 'Help',
+    },
     setupGuide: {
       title: 'Setup guide',
       description: 'Walk through everything on this page, and your profile, one step at a time.',
@@ -239,26 +246,20 @@ export const en = {
       unaffordable: 'Not enough free time left. Subscribe to keep interviewing.',
     },
 
-    accountLabel: 'Account',
-    notSignedIn: 'Not signed in',
     planLabel: 'Plan',
     planUnavailable: 'Unavailable',
     subscribe: 'Subscription',
 
-    nav: {
-      account: 'Account',
-      configuration: 'Configuration',
-      documentation: 'Documentation',
-    },
-
-    signOut: 'Sign out',
-    signingOut: 'Signing out…',
-    signOutBlocked: 'Stop the interview before signing out',
     signOutFailed: 'Failed to sign out',
   },
 
   account: {
     title: 'Account',
+    completeness: {
+      title: (done: number, total: number) => `Profile ${done} of ${total} complete`,
+      complete: 'Profile complete',
+      hint: 'Suggestions are written from your profile and the role. The more you add, the more they sound like you.',
+    },
     signedInAs: 'Signed in as',
     password: {
       title: 'Password',
@@ -467,6 +468,8 @@ export const en = {
     language: 'App language',
     lightMode: 'Light mode',
     darkMode: 'Dark mode',
+    theme: 'Theme',
+    systemMode: 'Match system',
     signOut: 'Sign out',
   },
 
@@ -514,6 +517,14 @@ export const en = {
       deviceNotFound: (deviceName: string) => `Audio input device "${deviceName}" is not found`,
     },
     startFailed: 'Failed to start assistant',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: 'Listening',
+      reconnecting: 'Reconnecting…',
+      listeningHint: 'Microphone and transcription are connected',
+      reconnectingHint: 'Transcription connection dropped - reconnecting automatically',
+    },
   },
 
   audioGroup: {
@@ -926,6 +937,11 @@ export const en = {
     redirectingToLogin: 'Redirecting to login…',
     authenticating: 'Authenticating…',
     transcriptionHidden: 'Transcription is hidden',
+    awaitingFirstQuestion: {
+      title: 'Listening for the first question…',
+      description:
+        'Suggestions appear here as soon as the interviewer asks something. Shortcuts that help mid-interview:',
+    },
   },
 
   documentation: {
@@ -996,6 +1012,11 @@ export const en = {
     },
 
     buy: {
+      features: {
+        unlimited: 'Unlimited live and mock interviews',
+        model: 'Our most capable AI model',
+        noRenewal: 'Prepaid - no auto-renewal',
+      },
       currentPlan: 'Your plan',
       subscribedUntil: (plan: string, date: string) => `${plan}, until ${date}`,
       daysLeft: (days: number) => `${days} ${days === 1 ? 'day' : 'days'} left`,

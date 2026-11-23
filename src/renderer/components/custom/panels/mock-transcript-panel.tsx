@@ -198,8 +198,8 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
   }, [turns, autoScroll, scrollToEnd]);
 
   return (
-    <Card className="relative flex flex-col w-full h-full bg-card p-0 rounded-md gap-1">
-      <div className="px-2 py-1.5 shrink-0 flex items-center justify-between gap-4">
+    <Card className="relative flex flex-col w-full h-full bg-card p-0 rounded-lg gap-0">
+      <div className="px-3 py-1.5 shrink-0 flex items-center justify-between gap-4 border-b border-border/60">
         <div className="flex items-center gap-2">
           {isRunning && (
             <span
@@ -207,7 +207,9 @@ function MockTranscriptPanel({ session }: MockTranscriptPanelProps) {
               aria-hidden="true"
             />
           )}
-          <h3 className="font-semibold text-foreground text-xs">{t.panels.mockInterview}</h3>
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {t.panels.mockInterview}
+          </h3>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {totalQuestions > 0 && (

@@ -1,12 +1,13 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'highlight.js/styles/github.css';
+@import '@fontsource-variable/inter';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
@@ -55,8 +56,12 @@
 :root {
   /* Neutral surfaces, brand orange as the only accent. The light primary is the burnt end of the
      brand hue because white text on the display orange is 2.4:1; dark takes the bright end with a
-     near-black label. --accent is the shadcn hover surface, not a brand colour. */
-  --background: oklch(0.985 0.001 286);
+     near-black label. --accent is the shadcn hover surface, not a brand colour.
+
+     Contrast: muted text is dark enough for small copy (about 6:1 on the page), borders and input
+     outlines are a step darker than the shadcn defaults so a field reads as a field without its
+     focus ring, and the page sits a shade below white so cards separate without a heavy shadow. */
+  --background: oklch(0.975 0.002 286);
   --foreground: oklch(0.21 0.006 286);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.21 0.006 286);
@@ -67,13 +72,13 @@
   --secondary: oklch(0.967 0.001 286);
   --secondary-foreground: oklch(0.21 0.006 286);
   --muted: oklch(0.967 0.001 286);
-  --muted-foreground: oklch(0.5 0.014 286);
-  --accent: oklch(0.955 0.002 286);
+  --muted-foreground: oklch(0.46 0.014 286);
+  --accent: oklch(0.945 0.003 286);
   --accent-foreground: oklch(0.21 0.006 286);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.55 0.23 27.325);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.92 0.004 286);
-  --input: oklch(0.92 0.004 286);
+  --border: oklch(0.9 0.005 286);
+  --input: oklch(0.86 0.006 286);
   --ring: oklch(0.56 0.144 51.2);
   --chart-1: #eb6834;
   --chart-2: #1baf7a;
@@ -81,13 +86,13 @@
   --chart-4: #4a3aa7;
   --chart-5: #e34948;
   --radius: 0.5rem;
-  --sidebar: oklch(0.975 0.001 286);
+  --sidebar: oklch(0.96 0.003 286);
   --sidebar-foreground: oklch(0.21 0.006 286);
   --sidebar-primary: oklch(0.56 0.144 51.2);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.955 0.002 286);
+  --sidebar-accent: oklch(0.92 0.004 286);
   --sidebar-accent-foreground: oklch(0.21 0.006 286);
-  --sidebar-border: oklch(0.92 0.004 286);
+  --sidebar-border: oklch(0.9 0.005 286);
   --sidebar-ring: oklch(0.56 0.144 51.2);
 }
 
@@ -139,37 +144,40 @@
 }
 
 .dark {
-  --background: oklch(0.155 0.004 286);
-  --foreground: oklch(0.97 0.002 286);
-  --card: oklch(0.195 0.005 286);
-  --card-foreground: oklch(0.97 0.002 286);
-  --popover: oklch(0.215 0.005 286);
-  --popover-foreground: oklch(0.97 0.002 286);
+  /* Raycast/Linear-style dark: a near-black base and three clear elevation steps (card,
+     popover, hover) rather than borders doing all the separating. Borders are translucent so
+     they read the same on every surface they sit on. */
+  --background: oklch(0.145 0.004 286);
+  --foreground: oklch(0.965 0.002 286);
+  --card: oklch(0.183 0.005 286);
+  --card-foreground: oklch(0.965 0.002 286);
+  --popover: oklch(0.205 0.006 286);
+  --popover-foreground: oklch(0.965 0.002 286);
   --primary: oklch(0.762 0.162 60.9);
   --primary-foreground: oklch(0.18 0.02 60);
-  --secondary: oklch(0.26 0.006 286);
-  --secondary-foreground: oklch(0.97 0.002 286);
-  --muted: oklch(0.26 0.006 286);
-  --muted-foreground: oklch(0.71 0.013 286);
-  --accent: oklch(0.28 0.006 286);
-  --accent-foreground: oklch(0.97 0.002 286);
-  --destructive: oklch(0.55 0.22 27);
+  --secondary: oklch(0.235 0.006 286);
+  --secondary-foreground: oklch(0.965 0.002 286);
+  --muted: oklch(0.235 0.006 286);
+  --muted-foreground: oklch(0.68 0.013 286);
+  --accent: oklch(0.255 0.007 286);
+  --accent-foreground: oklch(0.965 0.002 286);
+  --destructive: oklch(0.58 0.21 27);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.29 0.006 286);
-  --input: oklch(0.29 0.006 286);
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(1 0 0 / 0.11);
   --ring: oklch(0.762 0.162 60.9);
   --chart-1: #d95926;
   --chart-2: #199e70;
   --chart-3: #256abf;
   --chart-4: #9085e9;
   --chart-5: #e66767;
-  --sidebar: oklch(0.175 0.004 286);
-  --sidebar-foreground: oklch(0.97 0.002 286);
+  --sidebar: oklch(0.13 0.004 286);
+  --sidebar-foreground: oklch(0.965 0.002 286);
   --sidebar-primary: oklch(0.762 0.162 60.9);
   --sidebar-primary-foreground: oklch(0.18 0.02 60);
-  --sidebar-accent: oklch(0.28 0.006 286);
-  --sidebar-accent-foreground: oklch(0.97 0.002 286);
-  --sidebar-border: oklch(0.29 0.006 286);
+  --sidebar-accent: oklch(0.235 0.006 286);
+  --sidebar-accent-foreground: oklch(0.965 0.002 286);
+  --sidebar-border: oklch(1 0 0 / 0.07);
   --sidebar-ring: oklch(0.762 0.162 60.9);
 }
 
@@ -183,6 +191,11 @@
   #root {
     background: transparent !important;
     @apply text-foreground;
+  }
+
+  body {
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
   }
 
   pre,
@@ -254,4 +267,99 @@
 }
 .dark {
   scrollbar-color: rgba(255, 255, 255, 0.08) rgba(255, 255, 255, 0.02);
+}
+
+/* Route content fades in rather than snapping, so moving between rail destinations reads as one
+   app changing view instead of a page reload. */
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.view-enter {
+  animation: view-enter 180ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .view-enter {
+    animation: none;
+  }
+}
+
+/* Ambient background (AmbientBackground) ---------------------------------------------
+   Brand orange and one cool violet in opposite corners. Animated on first-impression screens,
+   still (and a little dimmer) elsewhere. Opacity is lower in light mode, where the same colours
+   read much louder against white. */
+.ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  --ambient-opacity: 0.18;
+}
+:root:not(.dark) .ambient {
+  --ambient-opacity: 0.1;
+}
+.ambient-still {
+  --ambient-opacity: 0.14;
+}
+:root:not(.dark) .ambient-still {
+  --ambient-opacity: 0.08;
+}
+.ambient-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  opacity: var(--ambient-opacity);
+  will-change: transform;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+.ambient-still .ambient-blob {
+  animation: none;
+  will-change: auto;
+}
+.ambient-blob-a {
+  width: 26rem;
+  height: 26rem;
+  top: -10rem;
+  left: -6rem;
+  background: var(--primary);
+  animation-name: ambient-drift-a;
+  animation-duration: 16s;
+}
+.ambient-blob-b {
+  width: 24rem;
+  height: 24rem;
+  bottom: -9rem;
+  right: -5rem;
+  background: oklch(0.6 0.19 295);
+  animation-name: ambient-drift-b;
+  animation-duration: 20s;
+}
+@keyframes ambient-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(14rem, 6rem, 0) scale(1.15);
+  }
+}
+@keyframes ambient-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-16rem, -7rem, 0) scale(0.95);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob {
+    animation: none;
+  }
 }

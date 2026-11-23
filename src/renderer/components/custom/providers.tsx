@@ -1,51 +1,42 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
-import { useThemeStore } from '@/hooks/use-theme-store';
+import { THEME_STORAGE_KEY, useThemeStore } from '@/hooks/use-theme-store';
 
 import { Toaster } from '../ui/sonner';
 // Note: `useAppState` is now a standalone hook; no provider is needed.
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { theme, setTheme } = useThemeStore();
-  const [initialized, setInitialized] = useState(false);
+  const preference = useThemeStore((s) => s.preference);
+  const theme = useThemeStore((s) => s.theme);
+  const setSystemTheme = useThemeStore((s) => s.setSystemTheme);
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    const initialTheme = stored === 'dark' || (!stored && prefersDark) ? 'dark' : 'light';
-
-    if (initialTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-
-    // Queue state updates to avoid cascading renders
-    Promise.resolve().then(() => {
-      setTheme(initialTheme);
-      setInitialized(true);
-    });
-  }, [setTheme]);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
   useEffect(() => {
-    if (!initialized) return;
-
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, preference);
+    } catch {
+      // Storage unavailable - the choice lasts for this session only.
     }
-  }, [theme, initialized]);
+  }, [preference]);
+
+  // Live, so `system` follows the OS switching to dark at sunset without a relaunch.
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (e: MediaQueryListEvent) => setSystemTheme(e.matches ? 'dark' : 'light');
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }, [setSystemTheme]);
 
   return (
     <div>
       {children}
-      {/* Toaster adapts to theme */}
-      <Toaster richColors position="top-center" theme={theme} />
+      {/* Top-right, clear of the titlebar: the bottom edge belongs to the live console's control
+          bar, and top-centre sat over the middle of whatever the user was reading. */}
+      <Toaster position="top-right" offset={{ top: 44, right: 12 }} theme={theme} />
     </div>
   );
 }

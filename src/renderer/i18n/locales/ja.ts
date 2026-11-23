@@ -100,6 +100,13 @@ export const ja: Translation = {
 
   configuration: {
     title: '設定',
+    sections: {
+      general: '一般',
+      interview: '面接',
+      display: '表示',
+      window: 'ウィンドウとプライバシー',
+      help: 'ヘルプ',
+    },
     setupGuide: {
       title: 'セットアップガイド',
       description: 'このページの設定とプロフィールを、1 ステップずつ確認します。',
@@ -220,26 +227,20 @@ export const ja: Translation = {
       unaffordable: '無料時間が足りません。面接を続けるにはサブスクリプションに登録してください。',
     },
 
-    accountLabel: 'アカウント',
-    notSignedIn: '未ログイン',
     planLabel: 'プラン',
     planUnavailable: '取得できません',
     subscribe: 'サブスクリプション',
 
-    nav: {
-      account: 'アカウント',
-      configuration: '設定',
-      documentation: 'ヘルプ',
-    },
-
-    signOut: 'ログアウト',
-    signingOut: 'ログアウト中…',
-    signOutBlocked: 'ログアウトする前に面接を停止してください',
     signOutFailed: 'ログアウトに失敗しました',
   },
 
   account: {
     title: 'アカウント',
+    completeness: {
+      title: (done: number, total: number) => `プロフィール入力 ${done}/${total}`,
+      complete: 'プロフィール入力完了',
+      hint: '提案はプロフィールと応募職種をもとに作成されます。詳しく書くほど、あなたらしい回答になります。',
+    },
     signedInAs: 'ログイン中のアカウント',
     password: {
       title: 'パスワード',
@@ -451,6 +452,8 @@ export const ja: Translation = {
     language: 'アプリの言語',
     lightMode: 'ライトモード',
     darkMode: 'ダークモード',
+    theme: 'テーマ',
+    systemMode: 'システムに合わせる',
     signOut: 'ログアウト',
   },
 
@@ -497,6 +500,14 @@ export const ja: Translation = {
       deviceNotFound: (deviceName: string) => `音声入力デバイス「${deviceName}」が見つかりません`,
     },
     startFailed: 'アシスタントを開始できませんでした',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: '聞き取り中',
+      reconnecting: '再接続中…',
+      listeningHint: 'マイクと文字起こしは接続されています',
+      reconnectingHint: '文字起こしの接続が切れました - 自動で再接続しています',
+    },
   },
 
   audioGroup: {
@@ -891,6 +902,11 @@ export const ja: Translation = {
     redirectingToLogin: 'ログイン画面に移動しています…',
     authenticating: '認証しています…',
     transcriptionHidden: '文字起こしは非表示です',
+    awaitingFirstQuestion: {
+      title: '最初の質問を待っています…',
+      description:
+        '面接官が質問するとすぐにここに提案が表示されます。面接中に便利なショートカット：',
+    },
   },
 
   documentation: {
@@ -957,6 +973,11 @@ export const ja: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: 'ライブ面接と模擬面接が無制限',
+        model: '最も高性能なAIモデル',
+        noRenewal: 'プリペイド - 自動更新なし',
+      },
       currentPlan: '現在のプラン',
       subscribedUntil: (plan: string, date: string) => `${plan}（${date} まで）`,
       daysLeft: (days: number) => `残り ${days} 日`,

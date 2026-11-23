@@ -245,8 +245,12 @@ export default function OnboardingPage() {
             {STEP_IDS.map((id, i) => (
               <div
                 key={id}
-                className={`h-1 flex-1 rounded-full ${
-                  i < stepIndex ? 'bg-primary' : i === stepIndex ? 'bg-primary/50' : 'bg-muted'
+                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                  i < stepIndex
+                    ? 'bg-primary'
+                    : i === stepIndex
+                      ? 'bg-primary/60 ring-1 ring-primary/40'
+                      : 'bg-muted'
                 }`}
               />
             ))}
@@ -256,7 +260,11 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <h1 ref={headingRef} tabIndex={-1} className="text-xl font-semibold outline-none">
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-2xl font-semibold tracking-tight outline-none"
+        >
           {copy.title}
         </h1>
         {/* Steps whose field carries its own helper line have no subtitle, or the step would say
@@ -269,7 +277,7 @@ export default function OnboardingPage() {
 
         {/* Floored rather than left to the content, so the footer does not jump up the screen
             between a step with two textareas and a step with one checkbox. */}
-        <div className="min-h-64 space-y-5">
+        <div className="min-h-64 space-y-5 rounded-2xl border bg-card p-5">
           {step === 'uiLanguage' && <UiLanguageField />}
           {step === 'profile' && (
             <>

@@ -105,6 +105,13 @@ export const de: Translation = {
 
   configuration: {
     title: 'Einstellungen',
+    sections: {
+      general: 'Allgemein',
+      interview: 'Vorstellungsgespräch',
+      display: 'Anzeige',
+      window: 'Fenster & Datenschutz',
+      help: 'Hilfe',
+    },
     setupGuide: {
       title: 'Einrichtungsassistent',
       description: 'Geh alles auf dieser Seite und dein Profil Schritt für Schritt durch.',
@@ -226,26 +233,20 @@ export const de: Translation = {
       unaffordable: 'Nicht genug Gratiszeit übrig. Abonniere, um weitere Interviews zu führen.',
     },
 
-    accountLabel: 'Konto',
-    notSignedIn: 'Nicht angemeldet',
     planLabel: 'Tarif',
     planUnavailable: 'Nicht verfügbar',
     subscribe: 'Abonnement',
 
-    nav: {
-      account: 'Konto',
-      configuration: 'Einstellungen',
-      documentation: 'Dokumentation',
-    },
-
-    signOut: 'Abmelden',
-    signingOut: 'Abmeldung läuft…',
-    signOutBlocked: 'Beende das Interview, bevor du dich abmeldest',
     signOutFailed: 'Abmeldung fehlgeschlagen',
   },
 
   account: {
     title: 'Konto',
+    completeness: {
+      title: (done: number, total: number) => `Profil: ${done} von ${total} ausgefüllt`,
+      complete: 'Profil vollständig',
+      hint: 'Vorschläge basieren auf deinem Profil und der Stelle. Je mehr du angibst, desto mehr klingen sie nach dir.',
+    },
     signedInAs: 'Angemeldet als',
     password: {
       title: 'Passwort',
@@ -464,6 +465,8 @@ export const de: Translation = {
     language: 'App-Sprache',
     lightMode: 'Heller Modus',
     darkMode: 'Dunkler Modus',
+    theme: 'Erscheinungsbild',
+    systemMode: 'Systemeinstellung',
     signOut: 'Abmelden',
   },
 
@@ -510,6 +513,15 @@ export const de: Translation = {
       deviceNotFound: (deviceName: string) => `Audio-Eingabegerät „${deviceName}“ nicht gefunden`,
     },
     startFailed: 'Assistent konnte nicht gestartet werden',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: 'Hört zu',
+      reconnecting: 'Verbindung wird wiederhergestellt…',
+      listeningHint: 'Mikrofon und Transkription sind verbunden',
+      reconnectingHint:
+        'Transkriptionsverbindung unterbrochen - wird automatisch wiederhergestellt',
+    },
   },
 
   audioGroup: {
@@ -913,6 +925,11 @@ export const de: Translation = {
     redirectingToLogin: 'Weiterleitung zur Anmeldung…',
     authenticating: 'Anmeldung wird geprüft…',
     transcriptionHidden: 'Die Transkription ist ausgeblendet',
+    awaitingFirstQuestion: {
+      title: 'Warte auf die erste Frage…',
+      description:
+        'Vorschläge erscheinen hier, sobald der Interviewer etwas fragt. Hilfreiche Tastenkürzel während des Gesprächs:',
+    },
   },
 
   documentation: {
@@ -979,6 +996,11 @@ export const de: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: 'Unbegrenzte Live- und Übungsinterviews',
+        model: 'Unser leistungsstärkstes KI-Modell',
+        noRenewal: 'Vorausbezahlt - keine automatische Verlängerung',
+      },
       currentPlan: 'Dein Tarif',
       subscribedUntil: (plan: string, date: string) => `${plan}, bis ${date}`,
       daysLeft: (days: number) => `Noch ${days} ${n(days, 'Tag', 'Tage')}`,

@@ -2,7 +2,6 @@ import { Check, Search } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import ExternalLink from '@/components/custom/external-link';
-import { Loading } from '@/components/custom/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useNow } from '@/hooks/use-now';
 import { usePayment } from '@/hooks/use-payment';
 import { useT } from '@/i18n';
@@ -163,11 +163,46 @@ export default function SubscriptionTab({
       )}
 
       {loading && plans.length === 0 ? (
-        <div className="py-6">
-          <Loading disclaimer={t.payment.buy.loadingPlans} />
+        // Three plan-shaped placeholders, so the grid does not jump when the plans arrive. The
+        // status line keeps the wording for screen readers.
+        <div className="space-y-3">
+          <div className="grid gap-2 md:grid-cols-3" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="space-y-3 rounded-xl border bg-card p-4">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-8 w-full" />
+              </div>
+            ))}
+          </div>
+          <span className="sr-only" role="status">
+            {t.payment.buy.loadingPlans}
+          </span>
         </div>
       ) : (
         <>
+          {/* Said once, above the cards, rather than repeated inside each one: every plan buys the
+              same thing for a different length of time, so the cards carry only what differs -
+              price, total and saving - and the eye goes straight to that. Only with plans to show:
+              when they failed to load, a list of what "every plan" includes above an empty grid
+              advertises something the screen cannot sell. */}
+          {plans.length > 0 && (
+            <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
+              {[
+                t.payment.buy.features.unlimited,
+                t.payment.buy.features.model,
+                t.payment.buy.features.noRenewal,
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-1.5 text-xs">
+                  <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
           <div className="mx-auto grid gap-2 md:grid-cols-3">
             {plans.map((plan) => {
               const isPopular = plan.popular;
@@ -183,7 +218,7 @@ export default function SubscriptionTab({
                   className={cn(
                     'relative flex flex-col gap-3 py-4 transition-all duration-150',
                     isPopular
-                      ? 'border-primary shadow-lg hover:shadow-xl'
+                      ? 'border-primary/60 bg-gradient-to-b from-primary/[0.10] to-card shadow-lg hover:shadow-xl'
                       : 'shadow-sm hover:shadow-lg',
                     isSelected
                       ? 'ring-2 ring-primary bg-primary/5 shadow-xl -translate-y-0.5'
@@ -208,7 +243,9 @@ export default function SubscriptionTab({
                     <CardTitle className="text-lg">{planName}</CardTitle>
                     <CardDescription className="text-xs">{planDescription}</CardDescription>
                     <div className="mt-2">
-                      <span className="text-2xl font-bold">${plan.pricePerMonthUsd}</span>
+                      <span className="text-3xl font-bold tracking-tight tabular-nums">
+                        ${plan.pricePerMonthUsd}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {t.payment.buy.perMonth}
                       </span>

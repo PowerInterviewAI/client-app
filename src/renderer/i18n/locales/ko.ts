@@ -100,6 +100,13 @@ export const ko: Translation = {
 
   configuration: {
     title: '설정',
+    sections: {
+      general: '일반',
+      interview: '면접',
+      display: '표시',
+      window: '창 및 개인정보',
+      help: '도움말',
+    },
     setupGuide: {
       title: '설정 가이드',
       description: '이 페이지의 모든 항목과 프로필을 한 단계씩 살펴봅니다.',
@@ -219,26 +226,20 @@ export const ko: Translation = {
       unaffordable: '무료 시간이 부족합니다. 계속 면접을 보려면 구독하세요.',
     },
 
-    accountLabel: '계정',
-    notSignedIn: '로그인하지 않음',
     planLabel: '요금제',
     planUnavailable: '확인할 수 없음',
     subscribe: '구독',
 
-    nav: {
-      account: '계정',
-      configuration: '설정',
-      documentation: '도움말',
-    },
-
-    signOut: '로그아웃',
-    signingOut: '로그아웃 중…',
-    signOutBlocked: '로그아웃하기 전에 면접을 중지하세요',
     signOutFailed: '로그아웃하지 못했습니다',
   },
 
   account: {
     title: '계정',
+    completeness: {
+      title: (done: number, total: number) => `프로필 ${done}/${total} 완료`,
+      complete: '프로필 작성 완료',
+      hint: '제안은 프로필과 지원 직무를 바탕으로 작성됩니다. 많이 입력할수록 더 나다운 답변이 됩니다.',
+    },
     signedInAs: '로그인 계정',
     password: {
       title: '비밀번호',
@@ -440,6 +441,8 @@ export const ko: Translation = {
     language: '앱 언어',
     lightMode: '라이트 모드',
     darkMode: '다크 모드',
+    theme: '테마',
+    systemMode: '시스템 설정 따르기',
     signOut: '로그아웃',
   },
 
@@ -487,6 +490,14 @@ export const ko: Translation = {
         `오디오 입력 장치 “${deviceName}”을(를) 찾을 수 없습니다`,
     },
     startFailed: '어시스턴트를 시작하지 못했습니다',
+
+    /** The live connection and microphone indicator on the control bar. */
+    signal: {
+      listening: '듣는 중',
+      reconnecting: '다시 연결 중…',
+      listeningHint: '마이크와 전사가 연결되어 있습니다',
+      reconnectingHint: '전사 연결이 끊어졌습니다 - 자동으로 다시 연결하는 중',
+    },
   },
 
   audioGroup: {
@@ -878,6 +889,10 @@ export const ko: Translation = {
     redirectingToLogin: '로그인 화면으로 이동하는 중…',
     authenticating: '인증하는 중…',
     transcriptionHidden: '전사가 숨겨져 있습니다',
+    awaitingFirstQuestion: {
+      title: '첫 질문을 기다리는 중…',
+      description: '면접관이 질문하면 바로 여기에 제안이 표시됩니다. 면접 중 유용한 단축키:',
+    },
   },
 
   documentation: {
@@ -944,6 +959,11 @@ export const ko: Translation = {
     },
 
     buy: {
+      features: {
+        unlimited: '라이브 및 모의 면접 무제한',
+        model: '가장 뛰어난 AI 모델',
+        noRenewal: '선불 - 자동 갱신 없음',
+      },
       currentPlan: '내 요금제',
       subscribedUntil: (plan: string, date: string) => `${plan}, ${date}까지`,
       daysLeft: (days: number) => `${days}일 남음`,

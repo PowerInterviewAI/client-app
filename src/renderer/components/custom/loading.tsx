@@ -9,14 +9,15 @@ interface LoadingProps {
 
 export function LoadingPage({ disclaimer }: LoadingProps) {
   return (
-    <div className="flex justify-center items-center h-screen w-full bg-background ">
-      <div className="flex flex-col items-center">
-        <div className="flex gap-2 items-center">
-          <img src={logoSvg} alt="" width={32} height={32} className="mx-auto" />
-          <p className="text-2xl font-bold">{APP_NAME}</p>
+    // `flex-1` rather than `h-screen`: this renders under the titlebar, and a full viewport height
+    // below it overflowed by exactly the titlebar's height.
+    <div className="flex w-full flex-1 items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-5">
+        <div className="flex items-center gap-2.5">
+          <img src={logoSvg} alt="" width={32} height={32} />
+          <p className="text-xl font-semibold tracking-tight">{APP_NAME}</p>
         </div>
-        <p className="animate-pulse text-sm mt-4">{disclaimer}</p>
-        <Loader className="w-4 h-4 animate-spin" />
+        <Loading disclaimer={disclaimer} />
       </div>
     </div>
   );
@@ -24,9 +25,9 @@ export function LoadingPage({ disclaimer }: LoadingProps) {
 
 export function Loading({ disclaimer }: LoadingProps) {
   return (
-    <div className="flex flex-col items-center">
-      <p className="animate-pulse text-sm mt-4">{disclaimer}</p>
-      <Loader className="w-4 h-4 animate-spin" />
+    <div role="status" className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+      <Loader className="h-4 w-4 animate-spin" aria-hidden="true" />
+      <span>{disclaimer}</span>
     </div>
   );
 }

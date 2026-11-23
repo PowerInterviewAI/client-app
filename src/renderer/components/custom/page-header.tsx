@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
+import { useAppRailVisible } from '@/hooks/use-app-rail';
 import { useT } from '@/i18n';
 
 interface PageHeaderProps {
@@ -27,6 +28,8 @@ export default function PageHeader({ title, fallback = '/', children }: PageHead
   const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
+  // On a rail route the rail is the navigation; Back would be a second, less predictable one.
+  const railVisible = useAppRailVisible();
 
   const handleBack = () => {
     if (location.key === 'default') navigate(fallback, { replace: true });
@@ -34,18 +37,20 @@ export default function PageHeader({ title, fallback = '/', children }: PageHead
   };
 
   return (
-    <div className="sticky top-0 z-10 border-b bg-background px-4 py-2">
+    <div className="sticky top-0 z-10 border-b bg-background/85 px-5 py-2.5 backdrop-blur">
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={handleBack}
-          className="flex items-center shrink-0"
-          aria-label={t.common.back}
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        </Button>
-        <h1 className="text-sm font-semibold shrink-0">{title}</h1>
+        {!railVisible && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleBack}
+            className="flex items-center shrink-0"
+            aria-label={t.common.back}
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        )}
+        <h1 className="text-[15px] font-semibold tracking-tight shrink-0">{title}</h1>
         {children}
       </div>
     </div>

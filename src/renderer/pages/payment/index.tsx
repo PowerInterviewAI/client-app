@@ -71,7 +71,7 @@ export default function PaymentPage() {
       </PageHeader>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden px-4 py-3 w-full max-w-3xl mx-auto">
+      <div className="flex-1 overflow-hidden px-6 py-5 w-full max-w-3xl mx-auto">
         <TabsContent value="buy" className="flex-1 mt-0">
           <SubscriptionTab
             credits={freeCredits}

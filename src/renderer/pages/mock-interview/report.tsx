@@ -1,4 +1,4 @@
-import { FileText, Hash, Loader } from 'lucide-react';
+import { CircleCheck, FileText, Hash, Loader, Target } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -11,11 +11,10 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { type Translation, useT } from '@/i18n';
+import { cn } from '@/lib/utils';
 import type { MockInterviewSessionState } from '@/types/mock-interview';
 
 interface ReportScreenProps {
@@ -31,6 +30,71 @@ function scoreVerdict(t: Translation, score: number): string {
   if (score >= 70) return t.mock.report.verdictStrong;
   if (score >= 50) return t.mock.report.verdictDeveloping;
   return t.mock.report.verdictNeedsWork;
+}
+
+/**
+ * The colour a score is drawn in, banded on the same thresholds as `scoreVerdict` so the colour
+ * and the word under the number never disagree.
+ *
+ * Text takes a darker shade in light mode and a lighter one in dark: the 500 shades sit near 2:1
+ * on white (amber worst), well under what body-size text needs. The ring and bars stay at 500 -
+ * they are graphics read alongside the number, not the number itself.
+ */
+function scoreTone(score: number): { text: string; stroke: string; bar: string } {
+  if (score >= 85)
+    return {
+      text: 'text-emerald-700 dark:text-emerald-400',
+      stroke: 'stroke-emerald-500',
+      bar: 'bg-emerald-500',
+    };
+  if (score >= 70)
+    return { text: 'text-sky-700 dark:text-sky-400', stroke: 'stroke-sky-500', bar: 'bg-sky-500' };
+  if (score >= 50)
+    return {
+      text: 'text-amber-700 dark:text-amber-400',
+      stroke: 'stroke-amber-500',
+      bar: 'bg-amber-500',
+    };
+  return {
+    text: 'text-rose-700 dark:text-rose-400',
+    stroke: 'stroke-rose-500',
+    bar: 'bg-rose-500',
+  };
+}
+
+/** The overall score as a ring, the number inside it. Decorative - the number is read as text. */
+function ScoreRing({ score }: { score: number }) {
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.max(0, Math.min(100, score));
+  const tone = scoreTone(clamped);
+
+  return (
+    <div className="relative h-32 w-32 shrink-0">
+      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden="true">
+        <circle cx="60" cy="60" r={radius} fill="none" strokeWidth="10" className="stroke-muted" />
+        <circle
+          cx="60"
+          cy="60"
+          r={radius}
+          fill="none"
+          strokeWidth="10"
+          strokeLinecap="round"
+          className={cn(tone.stroke, 'transition-[stroke-dashoffset] duration-700 ease-out')}
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference * (1 - clamped / 100)}
+        />
+      </svg>
+      <span
+        className={cn(
+          'absolute inset-0 flex items-center justify-center text-4xl font-semibold tabular-nums',
+          tone.text
+        )}
+      >
+        {score}
+      </span>
+    </div>
+  );
 }
 
 export function ReportScreen({
@@ -129,20 +193,45 @@ export function ReportScreen({
         )}
 
         {report && (
-          <Card>
-            <CardHeader className="items-center text-center">
+          <Card className="py-5">
+            <CardContent className="flex flex-col items-center gap-6 sm:flex-row">
               {/* The number and verdict below read as two unrelated lines to a screen reader
-                  without this - visually the "82" is self-evidently a score because of its
-                  size and position, which carries no meaning once read aloud in sequence. */}
+                  without this - visually the "82" is self-evidently a score because of its size
+                  and position, which carries no meaning once read aloud in sequence. */}
               <h2 className="sr-only">{t.mock.report.overallScore}</h2>
-              <p className="text-5xl font-semibold tabular-nums">{report.overall_score}</p>
-              <p className="text-sm text-muted-foreground">
-                {scoreVerdict(t, report.overall_score)}
-              </p>
-              <div className="w-full pt-2">
-                <Progress value={report.overall_score} />
+              <ScoreRing score={report.overall_score} />
+              <div className="min-w-0 flex-1 text-center sm:text-left">
+                {/* Hidden from assistive tech: the sr-only heading above already says this. */}
+                <p
+                  aria-hidden="true"
+                  className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                >
+                  {t.mock.report.overallScore}
+                </p>
+                <p
+                  className={cn(
+                    'mt-1 text-2xl font-semibold tracking-tight',
+                    scoreTone(report.overall_score).text
+                  )}
+                >
+                  {scoreVerdict(t, report.overall_score)}
+                </p>
+                {/* One bar per question, so the shape of the interview - a strong start that
+                    tailed off, one weak answer among good ones - is visible before reading any. */}
+                {report.questions.length > 0 && (
+                  <div className="mt-4 flex h-10 items-end gap-1" aria-hidden="true">
+                    {report.questions.map((q, i) => (
+                      <div
+                        key={i}
+                        title={`${i + 1}. ${q.score}`}
+                        className={cn('flex-1 rounded-sm', scoreTone(q.score).bar)}
+                        style={{ height: `${Math.max(8, q.score)}%` }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            </CardHeader>
+            </CardContent>
           </Card>
         )}
 
@@ -150,7 +239,10 @@ export function ReportScreen({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Card>
               <CardHeader>
-                <h2 className="leading-none font-semibold text-sm">{t.mock.report.strengths}</h2>
+                <h2 className="flex items-center gap-2 leading-none font-semibold text-sm">
+                  <CircleCheck className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                  {t.mock.report.strengths}
+                </h2>
               </CardHeader>
               <CardContent>
                 {report.strengths.length > 0 ? (
@@ -168,7 +260,10 @@ export function ReportScreen({
             </Card>
             <Card>
               <CardHeader>
-                <h2 className="leading-none font-semibold text-sm">{t.mock.report.gaps}</h2>
+                <h2 className="flex items-center gap-2 leading-none font-semibold text-sm">
+                  <Target className="h-4 w-4 text-amber-500" aria-hidden="true" />
+                  {t.mock.report.gaps}
+                </h2>
               </CardHeader>
               <CardContent>
                 {report.gaps.length > 0 ? (
@@ -202,7 +297,30 @@ export function ReportScreen({
                         <span dir="auto" className="line-clamp-1 flex-1 text-left">
                           {entry.question}
                         </span>
-                        {scored && <Badge variant="secondary">{scored.score}</Badge>}
+                        {scored && (
+                          <span className="flex shrink-0 items-center gap-2">
+                            <span
+                              className="h-1.5 w-16 overflow-hidden rounded-full bg-muted"
+                              aria-hidden="true"
+                            >
+                              <span
+                                className={cn(
+                                  'block h-full rounded-full',
+                                  scoreTone(scored.score).bar
+                                )}
+                                style={{ width: `${Math.max(0, Math.min(100, scored.score))}%` }}
+                              />
+                            </span>
+                            <span
+                              className={cn(
+                                'w-7 text-right text-sm font-semibold tabular-nums',
+                                scoreTone(scored.score).text
+                              )}
+                            >
+                              {scored.score}
+                            </span>
+                          </span>
+                        )}
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3">

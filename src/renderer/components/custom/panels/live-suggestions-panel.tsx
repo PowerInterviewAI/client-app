@@ -1,4 +1,4 @@
-import { ArrowUp, Loader, PauseCircle, Zap } from 'lucide-react';
+import { ArrowUp, Loader, PauseCircle, Sparkles, Zap } from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useConfigStore } from '@/hooks/use-config-store';
@@ -14,12 +14,14 @@ import {
   truncateMiddle,
   withHardBreaks,
 } from '@/lib/suggestions';
+import { cn } from '@/lib/utils';
 import { SuggestionMode } from '@/types/llm';
 import { type LiveSuggestion, SuggestionState } from '@/types/suggestion';
 
 import { Button } from '../../ui/button';
 import { Switch } from '../../ui/switch';
 import { SafeMarkdown } from '../safe-markdown';
+import { PanelEmpty } from './panel-empty';
 import SuggestionReveal from './suggestion-reveal';
 
 /**
@@ -205,11 +207,11 @@ function LiveSuggestionsPanel({
 
   return (
     <Card
-      className="relative flex flex-col w-full h-full bg-card p-0 rounded-md gap-1"
+      className="relative flex flex-col w-full h-full bg-card p-0 rounded-lg gap-0"
       style={style}
     >
       {/* Header */}
-      <div className="px-2 py-1.5 shrink-0 flex items-center justify-between gap-4">
+      <div className="px-3 py-1.5 shrink-0 flex items-center justify-between gap-4 border-b border-border/60">
         <div className="flex items-center gap-2">
           {isRunning && (
             <span
@@ -217,7 +219,9 @@ function LiveSuggestionsPanel({
               aria-hidden="true"
             />
           )}
-          <h3 className="font-semibold text-foreground text-xs">{t.panels.liveSuggestions}</h3>
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {t.panels.liveSuggestions}
+          </h3>
         </div>
 
         {!isStealth && (
@@ -241,13 +245,7 @@ function LiveSuggestionsPanel({
 
       {/* Scrollable Content */}
       <div ref={containerRef} className="flex-1 overflow-y-auto">
-        {!hasItems && (
-          <div className="flex items-center justify-center h-full text-center p-4">
-            <div>
-              <p className="text-sm text-muted-foreground">{t.panels.noSuggestions}</p>
-            </div>
-          </div>
-        )}
+        {!hasItems && <PanelEmpty icon={Sparkles} text={t.panels.noSuggestions} />}
 
         {hasItems && (
           <div className="px-2 pb-2">
@@ -261,7 +259,19 @@ function LiveSuggestionsPanel({
                     rather than on SuggestionReveal's wrapper, which is an animating grid that
                     size containment would fight. The newest card - the streaming one - is
                     always on screen, so containment never applies to it. */}
-                <div className="py-3 [content-visibility:auto] [contain-intrinsic-size:auto_6rem]">
+                {/* The newest card is the one being read mid-answer, so it carries an accent edge
+                    and full contrast; older ones step back until hovered. A glance should land on
+                    the current answer without reading which card is on top. The edge sits inside
+                    the card's own box, never outdented with a negative margin: SuggestionReveal
+                    clips its wrapper while the newest card - the one carrying the edge - expands. */}
+                <div
+                  className={cn(
+                    'py-3 pl-2 border-l-2 transition-opacity duration-300 [content-visibility:auto] [contain-intrinsic-size:auto_6rem]',
+                    idx === 0
+                      ? 'border-primary'
+                      : 'border-transparent opacity-60 hover:opacity-100 focus-within:opacity-100'
+                  )}
+                >
                   {/* The question is what says which turn this answer belongs to, and on an answer
                       taller than the panel it used to scroll away and leave the reader holding an
                       answer with no question. Pinned for as long as its own card is in view - the
@@ -284,7 +294,10 @@ function LiveSuggestionsPanel({
                         token would widen the card past the panel instead of wrapping */}
                     <div
                       dir="auto"
-                      className="min-w-0 flex-1 text-xs text-muted-foreground wrap-break-word line-clamp-2"
+                      className={cn(
+                        'min-w-0 flex-1 text-xs wrap-break-word line-clamp-2',
+                        idx === 0 ? 'font-medium text-foreground/85' : 'text-muted-foreground'
+                      )}
                       title={s.last_question}
                     >
                       {truncateMiddle(s.last_question, MAX_QUESTION_LENGTH)}

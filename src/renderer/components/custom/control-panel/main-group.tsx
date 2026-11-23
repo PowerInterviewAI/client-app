@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppState } from '@/hooks/use-app-state';
 import { useT } from '@/i18n';
+import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 
@@ -78,7 +79,7 @@ export function MainGroup({ onStop }: MainGroupProps) {
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{t.controlPanel.stopTooltip}</p>
+        <p>{t.common.withCombo(t.controlPanel.stopTooltip, HOTKEYS[Hotkey.StopAll].combo)}</p>
         {isRunning ? (
           <p className="text-xs text-muted-foreground">{t.controlPanel.stopRunningHint}</p>
         ) : (

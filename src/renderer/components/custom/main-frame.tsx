@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { RAIL_ROUTES, useAppRailVisible } from '@/hooks/use-app-rail';
 import { useAppState } from '@/hooks/use-app-state';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useHotkeyHelp } from '@/hooks/use-hotkey-help';
 import { MainContainerContext } from '@/hooks/use-main-container';
 import { useOnboardingDismissed } from '@/hooks/use-onboarding-dismissed';
 import usePointerLockGuard from '@/hooks/use-pointer-lock-guard';
@@ -11,13 +13,17 @@ import { useSubscriptionExpiryWarning } from '@/hooks/use-subscription-expiry-wa
 import { useUiLanguageSync } from '@/i18n';
 import type { PushNotification } from '@/types/push-notification';
 
+import AppRail from './app-rail';
 import { CommandPalette } from './command-palette';
+import { HotkeyCheatsheetDialog } from './hotkey-cheatsheet';
 import SaveHistoryDialog from './save-history-dialog';
 import Titlebar from './titlebar';
 import { UpdateNotification } from './update-notification';
 
 export default function MainFrame({ children }: { children: React.ReactNode }) {
   usePointerLockGuard();
+
+  const [hotkeyHelpOpen, setHotkeyHelpOpen] = useHotkeyHelp();
 
   // Mirrors the chosen UI language onto `document.lang` and into the paint-time cache the next
   // launch reads before the config store has answered. Here rather than in a provider because
@@ -65,6 +71,8 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
     if (isLoggedIn === false && !onAuthRoute) navigate('/auth/login', { replace: true });
   }, [isLoggedIn, onAuthRoute, navigate]);
 
+  const railVisible = useAppRailVisible();
+
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
   const mainRef = React.useCallback((el: HTMLElement | null) => {
     setContainer(el);
@@ -79,11 +87,15 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
         const msg = notification.message;
         const type = notification.type;
 
-        if (type === 'error') toast.error(msg);
-        else if (type === 'info') toast.info(msg);
-        else if (type === 'success') toast.success(msg);
-        else if (type === 'warning') toast.warning(msg);
-        else toast(msg);
+        // Keyed by the message, so the same notice raised twice - both ASR channels reporting the
+        // same failure, a hotkey pressed repeatedly - replaces the toast on screen rather than
+        // stacking copies of it.
+        const options = { id: `push:${type}:${msg}` };
+        if (type === 'error') toast.error(msg, options);
+        else if (type === 'info') toast.info(msg, options);
+        else if (type === 'success') toast.success(msg, options);
+        else if (type === 'warning') toast.warning(msg, options);
+        else toast(msg, options);
       } catch (e) {
         console.warn('push notification handler error', e);
       }
@@ -97,7 +109,20 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
       <main ref={mainRef} className="relative overflow-hidden bg-background">
         <div className="flex flex-col h-dvh">
           <Titlebar />
-          <div className="flex-1 flex flex-col overflow-auto hide-scrollbar">{children}</div>
+          <div className="flex flex-1 min-h-0">
+            {railVisible && <AppRail />}
+            {/* Keyed on the route so each rail destination plays the enter transition once. Never
+                on whether the rail is showing: that flips on the same route - Home as sign-in
+                resolves at launch - and a key change there would remount the page and drop its
+                state. Routes off the rail share one key, so moving between the auth steps does
+                not remount their shared layout either. */}
+            <div
+              key={RAIL_ROUTES.includes(pathname) ? pathname : 'off-rail'}
+              className={`flex-1 min-w-0 flex flex-col overflow-auto hide-scrollbar${railVisible ? ' view-enter' : ''}`}
+            >
+              {children}
+            </div>
+          </div>
         </div>
         <UpdateNotification />
       </main>
@@ -108,6 +133,7 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
       {/* Mounted once at the app shell so Cmd/Ctrl+K and the titlebar button work from any
           route, not just /main. */}
       <CommandPalette />
+      <HotkeyCheatsheetDialog open={hotkeyHelpOpen} onOpenChange={setHotkeyHelpOpen} />
     </MainContainerContext.Provider>
   );
 }

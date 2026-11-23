@@ -1,17 +1,15 @@
-import { BookOpen, CreditCard, LogOut, Mic, Play, SettingsIcon, UserRound } from 'lucide-react';
+import { ArrowRight, Clock, Crown, Mic, Radio, Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 
+import { AmbientBackground } from '@/components/custom/ambient-background';
 import { MockInterviewSetupDialog } from '@/components/custom/mock-interview-setup-dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppState } from '@/hooks/use-app-state';
-import useAuth from '@/hooks/use-auth';
+import { useCommandPaletteStore } from '@/hooks/use-command-palette';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useNow } from '@/hooks/use-now';
-import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useT } from '@/i18n';
+import { isMac } from '@/lib/consts';
 import { canStartSession } from '@/lib/credit-gate';
 import {
   freeTimeLabel,
@@ -31,6 +29,8 @@ interface LaunchCardProps {
   description: string;
   onClick: () => void;
   disabled?: boolean;
+  /** The recommended path gets the accent treatment; the other stays quiet beside it. */
+  emphasis?: boolean;
 }
 
 /**
@@ -38,18 +38,20 @@ interface LaunchCardProps {
  * the whole point of this screen, and a title alone does not say which one a first-time user
  * wants - the description under it does.
  *
- * The icon sits above the title rather than beside it, and the pair share a row rather than
- * stacking. Side by side each card is about half as wide, which is where a description that used
- * to be one line becomes three; taking the 40px icon out of that width is what pays for them, and
- * it is the same trade the whole screen is making - see the page's own note.
- *
  * `disabled` is a real removal from the tab order and not just a grey fill: the one case that
  * uses it - a mock interview while the live assistant runs - is refused by the main process
  * anyway, so leaving it clickable would route the user to a screen that only reports an error.
  */
-function LaunchCard({ icon, title, description, onClick, disabled = false }: LaunchCardProps) {
+function LaunchCard({
+  icon,
+  title,
+  description,
+  onClick,
+  disabled = false,
+  emphasis = false,
+}: LaunchCardProps) {
   return (
-    <Card
+    <div
       role="button"
       aria-disabled={disabled || undefined}
       tabIndex={disabled ? -1 : 0}
@@ -62,41 +64,60 @@ function LaunchCard({ icon, title, description, onClick, disabled = false }: Lau
         }
       }}
       className={cn(
-        'gap-3 py-4',
+        'group relative flex min-h-44 flex-col overflow-hidden rounded-2xl border p-5 outline-none transition-all duration-200',
+        emphasis
+          ? 'border-primary/30 bg-gradient-to-br from-primary/[0.16] via-card/75 to-card/75 backdrop-blur-xl'
+          : 'bg-card/75 backdrop-blur-xl',
         disabled
-          ? 'cursor-not-allowed opacity-60 outline-none'
-          : 'cursor-pointer outline-none transition-colors hover:border-primary focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50'
+          ? 'cursor-not-allowed opacity-55'
+          : cn(
+              'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20',
+              'focus-visible:ring-[3px] focus-visible:ring-ring/50',
+              emphasis ? 'hover:border-primary/60' : 'hover:border-foreground/20'
+            )
       )}
     >
-      <CardHeader className="gap-1.5 px-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
-            {icon}
-          </div>
-          <CardTitle className="truncate text-sm">{title}</CardTitle>
-        </div>
-        <CardDescription className="text-xs">{description}</CardDescription>
-      </CardHeader>
-    </Card>
+      <div
+        className={cn(
+          'flex h-10 w-10 items-center justify-center rounded-xl',
+          emphasis
+            ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
+            : 'bg-secondary text-foreground ring-1 ring-border'
+        )}
+      >
+        {icon}
+      </div>
+      {/* Not a heading: the card is a button, whose content is presentational, so a heading
+          inside it is invalid and is not exposed as one anyway. The title and description are
+          read as the button's name. */}
+      <p className="mt-4 text-base font-semibold tracking-tight">{title}</p>
+      <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{description}</p>
+      {!disabled && (
+        <ArrowRight
+          aria-hidden="true"
+          className={cn(
+            'absolute right-5 top-5 h-4 w-4 transition-all duration-200',
+            '-translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
+            'group-focus-visible:translate-x-0 group-focus-visible:opacity-100',
+            emphasis ? 'text-primary' : 'text-muted-foreground'
+          )}
+        />
+      )}
+    </div>
   );
 }
 
 /**
- * The app's front door: the two things you can start, the places you can go, and the way out.
+ * The app's front door: the two things you can start, and the plan that pays for them.
  *
- * `/` used to redirect straight into the control console, which is dense, unlabelled and assumes
- * you already know what the app does. Everything reachable from here is named in the words a
- * candidate would use, not the ones the codebase uses.
+ * Account, Configuration, Documentation and signing out live on the navigation rail beside this
+ * screen, so what is left here is only the choice it exists for.
  *
- * Both launch buttons start a session; neither implements starting one. Live hands off to
- * `/main`, which owns the whole start sequence - the microphone checks, the headphone notice, the
- * macOS permission gate and the save-history guard - and mock hands off to `/mock-interview` with
- * the setup this page's dialog collected. Duplicating either flow here is how the two would
- * drift apart.
- *
- * This is now the only place either kind of session begins. The control bar used to carry a split
- * Start button of its own, which meant two screens answering the same question and a stored
- * preference deciding which one a button meant.
+ * Both launch cards start a session; neither implements starting one. Live hands off to `/main`,
+ * which owns the whole start sequence - the microphone checks, the headphone notice, the macOS
+ * permission gate and the save-history guard - and mock hands off to `/mock-interview` with the
+ * setup this page's dialog collected. Duplicating either flow here is how the two would drift
+ * apart.
  */
 export default function HomePage() {
   const t = useT();
@@ -104,24 +125,16 @@ export default function HomePage() {
   const location = useLocation();
   const { appState, runningState } = useAppState();
   const { config, isLoading: configLoading } = useConfigStore();
-  const { logout } = useAuth();
-  const { confirmDiscard } = useSaveHistoryGuard();
+  const openCommandPalette = useCommandPaletteStore((s) => s.setOpen);
 
   // The live assistant and a mock interview are mutually exclusive - both want the microphone and
   // an ASR socket, and the main process refuses the second one. Said here rather than left to
   // that refusal, so the card names the state instead of routing the user to an error.
   const liveSessionActive = runningState !== RunningState.Idle;
 
-  // The other half of the same exclusion. The mock card names an active live session; without
-  // this the live card said nothing about an active mock one, and clicking it routed the
-  // candidate to `/main` for a start `startAssistant` refuses - an error toast on a screen they
-  // had no reason to be sent to. Reachable while a mock session is winding down: leaving that
-  // route ends the session, and it stays active through `Stopping`/`Scoring`.
+  // The other half of the same exclusion. Reachable while a mock session is winding down: leaving
+  // that route ends the session, and it stays active through `Stopping`/`Scoring`.
   const mockSessionActive = isMockInterviewSessionActive(appState?.mockInterview ?? null);
-
-  // Signing out tears down the token a mock session's next request needs, and a mock session
-  // deliberately leaves `runningState` on Idle - so the live check alone does not cover it.
-  const anySessionActive = liveSessionActive || mockSessionActive;
 
   // A released client can outrun the backend deployment that adds the feature. Only an explicit
   // `false` closes the card: `null` means the probe has not answered yet, and treating that as
@@ -138,7 +151,6 @@ export default function HomePage() {
   );
 
   const [mockSetupOpen, setMockSetupOpen] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
 
   // "Practise again" on the mock report has nowhere of its own to configure the next session, so
   // it comes back here with a flag rather than making the candidate find the card again. Guarded
@@ -150,19 +162,14 @@ export default function HomePage() {
     if (!navState?.openMockSetup) return;
     if (consumedNavKey.current === location.key) return;
 
-    // Consumed before the check below, not after: the flag is spent either way, so that clearing
+    // Consumed before the checks below, not after: the flag is spent either way, so that clearing
     // the router state cannot leave a stale request to reopen this dialog on a later Back.
     consumedNavKey.current = location.key;
     navigate(location.pathname, { replace: true, state: null });
 
-    // Not reachable through the UI - every surface that sets this flag is either inside a
-    // finished mock session or hidden while the assistant runs - but opening a setup dialog for
-    // a session the main process would refuse is a bad enough failure to be worth one line.
     if (liveSessionActive) return;
-
-    // The same reasoning for a backend that cannot serve the session at all. Reachable in a way
-    // the live check is not: "Practise again" sits on a report the candidate is still reading
-    // when the backend is rolled back under them.
+    // "Practise again" sits on a report the candidate is still reading when the backend can be
+    // rolled back under them.
     if (mockUnsupported) return;
     setMockSetupOpen(true);
     // Both guards are read at the moment the request arrives and are not triggers for it.
@@ -184,14 +191,15 @@ export default function HomePage() {
   // appState starts null before the first IPC round-trip resolves, and the config arrives over a
   // second one - both need to settle before "no data" is trustworthy.
   const accountReady = !configLoading && config !== undefined && appState !== null;
+  const subscribed = isSubscriptionActive(subscription, now);
   const firstName =
     appState?.interviewConfig?.fullName?.trim().split(' ')[0] || email?.split('@')[0];
+  const planText = accountReady ? (planSummary ?? t.home.planUnavailable) : t.common.loading;
 
   const handleStartLive = () => {
     // `/main`'s control panel runs the start sequence on arrival. Handed through router state
     // rather than started here so there is exactly one implementation of it. Already running,
-    // this is just the way back to the interview - the flag would be ignored, but not sending it
-    // is what keeps the card's label honest.
+    // this is just the way back to the interview.
     if (liveSessionActive) navigate('/main');
     else navigate('/main', { state: { autoStartLive: true } });
   };
@@ -201,165 +209,103 @@ export default function HomePage() {
   // `useMockInterview()` instance is ever mounted at once - starting it from this page as well
   // would leave two instances reacting to the same `Speaking` transition for the moment before
   // the route swap finishes, which is what plays the question's audio twice.
-  const handleSignOut = async () => {
-    // Signing out drops the interview from memory and nothing has written it to disk unless it
-    // was exported, so it asks first - the same guard Clear, Start, Stop and closing the app use.
-    if (!(await confirmDiscard('signout'))) return;
-
-    setSigningOut(true);
-    try {
-      await logout();
-    } catch (err) {
-      // Read off the caught error rather than the hook's `error` state - `logout` sets it and
-      // throws in the same tick, so this closure's copy is still last render's value.
-      console.error('Sign out failed:', err);
-      toast.error(err instanceof Error ? err.message : t.home.signOutFailed);
-      setSigningOut(false);
-      return;
-    }
-    // No `setSigningOut(false)` on success: signing out redirects to the login screen and this
-    // page unmounts, and clearing the flag first would flash "Sign out" back for a frame.
-  };
-
   const handleMockInterviewStart = async (setup: MockInterviewSetup) => {
     setMockSetupOpen(false);
     navigate('/mock-interview', { state: { pendingSetup: setup } });
   };
 
   return (
-    // Centred both ways, not just horizontally. `mx-auto` alone left the column pinned to the
-    // top of a window that is usually much taller than it, so the whole screen sat in the upper
-    // third with an empty half below it. The inner wrapper is `min-h-full` rather than `h-full`
-    // so that centring gives way to scrolling once the content is taller than the window - which
-    // at the sizes below only happens well past the default zoom, and clipping the sign-out row
-    // instead would be worse than a scrollbar nobody normally sees.
-    //
-    // **The layout is built to fit the smallest window the app allows**, which is MIN_WIDTH x
-    // MIN_HEIGHT (840x600) from `main/consts.ts`, less the 36px titlebar. It did not: a single
-    // narrow column of full-width rows ran about 580px against 564px of room, so the front door
-    // opened on a scrollbar and a sign-out button below the fold. Nothing here was removed to
-    // fix that - the screen is the same six things - they are laid out across the width the
-    // window already has instead of down a column half of it wide. The two launch cards share a
-    // row, the account strip carries Subscription on its own line rather than above one, and the
-    // three navigations are one row of three. Vertical rhythm went from 8/6-step gaps to 4, and
-    // the outer padding from py-10 to py-6.
-    <div className="flex-1 overflow-auto">
-      <div className="flex min-h-full items-center justify-center">
-        <div className="w-full max-w-3xl px-6 py-6">
-          <div className="mb-5">
-            <h1 className="text-xl font-semibold">
-              {firstName ? t.home.welcome(firstName) : t.home.welcomeAnonymous}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">{t.home.subtitle}</p>
-          </div>
+    // `min-h-full` rather than `h-full` so centring gives way to scrolling once the content is
+    // taller than the window, which only happens well past the default zoom. Built to fit
+    // MIN_WIDTH x MIN_HEIGHT (840x600) less the titlebar and the rail.
+    <div className="relative flex flex-1 flex-col overflow-hidden">
+      <AmbientBackground />
+      <div className="relative flex-1 overflow-auto">
+        <div className="flex min-h-full items-center justify-center">
+          <div className="w-full max-w-3xl px-8 py-8">
+            <div className="mb-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  {firstName ? t.home.welcome(firstName) : t.home.welcomeAnonymous}
+                </h1>
+                <p className="mt-1.5 text-sm text-muted-foreground">{t.home.subtitle}</p>
+              </div>
 
-          <div className="mb-4 grid grid-cols-2 gap-3">
-            <LaunchCard
-              icon={<Mic className="h-4 w-4" aria-hidden="true" />}
-              title={t.home.mock.title}
-              description={
-                mockUnsupported
-                  ? t.home.mock.unsupported
-                  : liveSessionActive
-                    ? t.home.mock.liveRunning
-                    : creditsTooLow
-                      ? t.home.mock.unaffordable
-                      : t.home.mock.ready
-              }
-              onClick={() => (creditsTooLow ? navigate('/payment') : setMockSetupOpen(true))}
-              disabled={liveSessionActive || mockUnsupported}
-            />
-            <LaunchCard
-              icon={<Play className="h-4 w-4" aria-hidden="true" />}
-              title={liveSessionActive ? t.home.live.resumeTitle : t.home.live.title}
-              description={
-                liveSessionActive
-                  ? t.home.live.running
-                  : mockSessionActive
-                    ? t.home.live.mockRunning
-                    : creditsTooLow
-                      ? t.home.live.unaffordable
-                      : t.home.live.ready
-              }
-              onClick={
-                !liveSessionActive && creditsTooLow ? () => navigate('/payment') : handleStartLive
-              }
-              disabled={!liveSessionActive && mockSessionActive}
-            />
-          </div>
-
-          {/* A bordered strip rather than a Card: the same rule around the same content, without
-              the 48px of vertical padding a Card carries for content that is one line tall. */}
-          <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border bg-card px-4 py-3">
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{t.home.accountLabel}</p>
-              <p className="truncate text-sm font-medium">
-                {accountReady ? (email ?? t.home.notSignedIn) : t.common.loading}
-              </p>
+              {/* The plan as a status chip that is also the way to change it. */}
+              <button
+                type="button"
+                onClick={() => navigate('/payment')}
+                aria-label={`${t.home.planLabel}: ${planText}. ${t.home.subscribe}`}
+                className={cn(
+                  'inline-flex max-w-full items-center gap-2 rounded-full border bg-background/40 px-3 py-1.5 text-xs font-medium backdrop-blur transition-colors',
+                  'hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                  subscribed ? 'border-primary/30 text-primary' : 'text-muted-foreground'
+                )}
+              >
+                {subscribed ? (
+                  <Crown className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                ) : (
+                  <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                )}
+                <span className="truncate tabular-nums">{planText}</span>
+                {!subscribed && (
+                  <>
+                    <span aria-hidden="true" className="h-3 w-px shrink-0 bg-border" />
+                    <span className="shrink-0 text-foreground">{t.home.subscribe}</span>
+                  </>
+                )}
+              </button>
             </div>
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{t.home.planLabel}</p>
-              <p className="text-sm font-medium">
-                {accountReady ? (planSummary ?? t.home.planUnavailable) : t.common.loading}
-              </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <LaunchCard
+                emphasis
+                icon={<Radio className="h-5 w-5" aria-hidden="true" />}
+                title={liveSessionActive ? t.home.live.resumeTitle : t.home.live.title}
+                description={
+                  liveSessionActive
+                    ? t.home.live.running
+                    : mockSessionActive
+                      ? t.home.live.mockRunning
+                      : creditsTooLow
+                        ? t.home.live.unaffordable
+                        : t.home.live.ready
+                }
+                onClick={
+                  !liveSessionActive && creditsTooLow ? () => navigate('/payment') : handleStartLive
+                }
+                disabled={!liveSessionActive && mockSessionActive}
+              />
+              <LaunchCard
+                icon={<Mic className="h-5 w-5" aria-hidden="true" />}
+                title={t.home.mock.title}
+                description={
+                  mockUnsupported
+                    ? t.home.mock.unsupported
+                    : liveSessionActive
+                      ? t.home.mock.liveRunning
+                      : creditsTooLow
+                        ? t.home.mock.unaffordable
+                        : t.home.mock.ready
+                }
+                onClick={() => (creditsTooLow ? navigate('/payment') : setMockSetupOpen(true))}
+                disabled={liveSessionActive || mockUnsupported}
+              />
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-auto"
-              onClick={() => navigate('/payment')}
-            >
-              <CreditCard className="h-4 w-4" aria-hidden="true" />
-              {t.home.subscribe}
-            </Button>
-          </div>
 
-          {/* Documentation joins the other two navigations rather than sitting on a row of its
-              own under them - it is the same kind of thing, and the row it used to share with
-              Sign out made a destination and the way out of the app look like a pair. */}
-          <div className="mb-3 grid grid-cols-3 gap-3">
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() => navigate('/account')}
+            {/* The command palette reaches everything on the rail and more, and nothing on screen
+              said it existed. */}
+            <button
+              type="button"
+              onClick={() => openCommandPalette(true)}
+              className="mx-auto mt-6 flex items-center gap-2 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
-              <UserRound className="h-4 w-4" aria-hidden="true" />
-              {t.home.nav.account}
-            </Button>
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() => navigate('/configuration')}
-            >
-              <SettingsIcon className="h-4 w-4" aria-hidden="true" />
-              {t.home.nav.configuration}
-            </Button>
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() => navigate('/documentation')}
-            >
-              <BookOpen className="h-4 w-4" aria-hidden="true" />
-              {t.home.nav.documentation}
-            </Button>
-          </div>
-
-          {/* Signing out was only ever in the titlebar menu and the command palette, which is a
-              strange place for the one action that ends everything else on this screen. Refused
-              while a session is running, for the same reason the titlebar menu refuses it: it
-              tears down the credentials the running assistant is streaming on. */}
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground"
-              disabled={anySessionActive || signingOut}
-              title={anySessionActive ? t.home.signOutBlocked : undefined}
-              onClick={() => void handleSignOut()}
-            >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-              {signingOut ? t.home.signingOut : t.home.signOut}
-            </Button>
+              <Search className="h-3.5 w-3.5" aria-hidden="true" />
+              {t.titlebar.searchActions}
+              <kbd className="rounded border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-medium text-foreground/80">
+                {isMac ? '⌘K' : 'Ctrl K'}
+              </kbd>
+            </button>
           </div>
         </div>
       </div>
@@ -373,7 +319,7 @@ export default function HomePage() {
   );
 }
 
-/** The account strip's plan line: the active plan and its end date, or the free time left. */
+/** The plan chip's text: the active plan and its end date, or the free time left. */
 function describePlan(
   t: ReturnType<typeof useT>,
   subscription: SubscriptionSummary,
