@@ -138,7 +138,7 @@ class MockInterviewService {
    *
    * A voiced question has a natural boundary: the microphone is gated shut for the whole of the
    * interviewer's speech, so nothing can be transcribed into the answer until the question is
-   * over. A language with no Aura voice has no such boundary - `installQuestion` goes straight to
+   * over. A language with no Flux voice has no such boundary - `installQuestion` goes straight to
    * `Listening` with the question on screen as text and the microphone already open - so
    * everything said, coughed or overheard while the candidate is *reading* landed in the answer,
    * and `MOCK_ANSWER_SILENCE_MS` could then submit it eight seconds later without a word of it
@@ -461,7 +461,7 @@ class MockInterviewService {
 
   /**
    * Synthesize a question's first sentence ahead of putting the question on screen, so the two
-   * start together. A no-op for a question with no chunks - a language with no Aura voice.
+   * start together. A no-op for a question with no chunks - a language with no Flux voice.
    *
    * Never throws and never rejects, because it runs inside `generateNextQuestion`'s retry loop,
    * where a throw would be read as the *question* having failed and would bill a second one.
@@ -499,7 +499,7 @@ class MockInterviewService {
     if (timer) clearTimeout(timer);
   }
 
-  /** One chunk's audio, by index into the current question's `chunks`. Null if Aura has no voice. */
+  /** One chunk's audio, by index into the current question's `chunks`. Null if Flux has no voice. */
   async synthesizeChunk(index: number): Promise<ArrayBuffer | null> {
     const chunk = this.session.currentQuestion?.chunks[index];
     if (!chunk) return null;

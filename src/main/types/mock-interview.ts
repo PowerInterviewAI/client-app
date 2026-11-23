@@ -46,7 +46,7 @@ export enum MockTurnAction {
  * The session lifecycle. Mirrors `RunningState`'s invariant: every non-terminal state must be
  * reachable from `Idle` and must be able to reach `Idle` or `Finished` however it fails.
  *
- * `Speaking` is skipped entirely for a language with no Aura voice (or when synthesis fails for a
+ * `Speaking` is skipped entirely for a language with no Flux voice (or when synthesis fails for a
  * voiced one) - the session goes straight from `Generating` to `Listening`, with the renderer's
  * `I'm ready` control standing in for the audio's `ended` event.
  */
@@ -159,7 +159,7 @@ export interface MockAnswer {
 export interface MockCurrentQuestion {
   text: string;
   kind: MockQuestionKind;
-  /** False when the language has no Aura voice, or synthesis failed for one that does. */
+  /** False when the language has no Flux voice, or synthesis failed for one that does. */
   hasAudio: boolean;
   /** True once this question has had at least one follow-up. */
   isFollowUp: boolean;
