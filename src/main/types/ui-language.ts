@@ -19,6 +19,7 @@ export enum UiLanguage {
   Russian = 'ru',
   Spanish = 'es',
   Portuguese = 'pt',
+  German = 'de',
 }
 
 export const DEFAULT_UI_LANGUAGE = UiLanguage.English;

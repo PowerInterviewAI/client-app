@@ -510,6 +510,98 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     captureFailed: 'Não foi possível tirar a captura de tela. Tente de novo.',
     cannotGenerateSuggestion: 'Não é possível gerar sugestão com o assistente parado',
   },
+
+  [UiLanguage.German]: {
+    placeholderTranscript: 'Hier erscheint das Transkript',
+    placeholderQuestion: 'Hier erscheinen die Fragen des Interviewers',
+    placeholderLiveAnswer: 'Hier erscheinen Antwortvorschläge in Echtzeit',
+    placeholderActionAnswer:
+      'Hier erscheinen Vorschläge auf Abruf. Zum Beispiel ein Antwortvorschlag, die Lösung einer Programmieraufgabe, Beschreibungen von Diagrammen usw.',
+
+    sessionExpired: 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.',
+
+    authErrors: {
+      sendCodeFailed: 'Bestätigungscode konnte nicht gesendet werden',
+      invalidCode: 'Ungültiger oder abgelaufener Bestätigungscode',
+      signupFailed: 'Registrierung fehlgeschlagen',
+      invalidCredentials: 'E-Mail oder Passwort ist falsch',
+      loginFailed: 'Anmeldung fehlgeschlagen',
+      logoutFailed: 'Abmeldung fehlgeschlagen',
+      changePasswordFailed: 'Passwort konnte nicht geändert werden',
+      sendResetCodeFailed: 'Code zum Zurücksetzen konnte nicht gesendet werden',
+      invalidResetCode: 'Ungültiger oder abgelaufener Code zum Zurücksetzen',
+      resetFailed: 'Zurücksetzen des Passworts fehlgeschlagen',
+    },
+
+    accountErrors: {
+      fetchFailed: 'Konto konnte nicht abgerufen werden',
+      updateFailed: 'Konto konnte nicht aktualisiert werden',
+      onboardingFailed: 'Deine Einrichtung konnte nicht gespeichert werden',
+      migrateFailed: 'Lokale Einstellungen konnten nicht übernommen werden',
+      loadConfigFailed: 'Einstellungen konnten nicht geladen werden',
+    },
+
+    transportErrors: {
+      timedOut: 'Die Anfrage hat zu lange gedauert',
+      networkFailed: 'Netzwerkanfrage fehlgeschlagen',
+    },
+
+    paymentErrors: {
+      getPlans: 'Tarife konnten nicht abgerufen werden',
+      getCurrencies: 'Verfügbare Währungen konnten nicht abgerufen werden',
+      createPayment: 'Zahlung konnte nicht erstellt werden',
+      getStatus: 'Zahlungsstatus konnte nicht abgerufen werden',
+      getHistory: 'Zahlungsverlauf konnte nicht abgerufen werden',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: 'Zu viele Anfragen. Bitte versuche es später erneut.',
+      generateFailed: 'Antwort konnte nicht erzeugt werden.',
+      cannotReachServer: 'Server nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.',
+      responseTimedOut: 'Die Antwort hat zu lange gedauert. Bitte versuche es erneut.',
+      emptyResponse: 'Das Modell hat eine leere Antwort geliefert.',
+    },
+
+    mockErrors: {
+      liveRunning: 'Beende das Live-Interview, bevor du ein Probeinterview startest.',
+      firstQuestionFailed: 'Die erste Frage konnte nicht erzeugt werden. Bitte versuche es erneut.',
+      firstQuestionFailedWith: (reason: string) =>
+        `Die erste Frage konnte nicht erzeugt werden: ${reason}`,
+      startFailed: 'Probeinterview konnte nicht gestartet werden',
+      nothingRecorded:
+        'Das Interview wurde ohne Aufnahme beendet. Prüfe, ob das richtige Mikrofon gewählt und nicht stummgeschaltet ist, und versuche es erneut.',
+      endedBeforeScoring: 'Das Interview wurde beendet, bevor die Bewertung fertig war.',
+      notEnoughCredits: 'Gratiszeit aufgebraucht',
+    },
+
+    actionNames: {
+      screenshotCapture: 'Die Bildschirmaufnahme',
+      captureSuggestion: 'Das Erzeugen eines Vorschlags auf Abruf',
+    },
+    actionBlocked: (runningAction: string) =>
+      `${runningAction} läuft noch. Versuche es gleich noch einmal.`,
+
+    stealthSignedOut: 'Für den Tarnmodus musst du angemeldet sein.',
+    stealthDuringMock:
+      'Im Probeinterview ist der Tarnmodus aus. Das ist Übung, kein echtes Gespräch.',
+    stealthNotRunning: 'Der Tarnmodus ist nur während eines Live-Interviews verfügbar.',
+    opacityStealthOnly: 'Die Deckkraft lässt sich nur im Tarnmodus umschalten.',
+
+    saveTranscriptTitle: 'Transkript speichern',
+    saveMockReportTitle: 'Bericht zum Probeinterview speichern',
+    saveImageTitle: 'Bild speichern',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Word-Dokument',
+    pngFilter: 'PNG-Bild',
+
+    actionDuringMock: 'Vorschläge auf Abruf sind im Probeinterview nicht verfügbar.',
+    cannotClearImages: 'Bilder können nur gelöscht werden, wenn der Assistent läuft',
+    cannotCaptureScreenshot: 'Screenshots sind nur möglich, wenn der Assistent läuft',
+    maxCaptures: (max: number) =>
+      `Maximal ${max} Screenshots erreicht. Lösche die Bilder und versuche es erneut.`,
+    captureFailed: 'Screenshot fehlgeschlagen. Bitte versuche es erneut.',
+    cannotGenerateSuggestion: 'Vorschläge sind nur möglich, wenn der Assistent läuft',
+  },
 };
 
 /**

@@ -8,6 +8,7 @@ export enum UiLanguage {
   Russian = 'ru',
   Spanish = 'es',
   Portuguese = 'pt',
+  German = 'de',
 }
 
 export const DEFAULT_UI_LANGUAGE = UiLanguage.English;
@@ -32,6 +33,7 @@ export const UI_LANGUAGES: readonly UiLanguageOption[] = [
   { code: UiLanguage.Russian, nativeName: 'Русский' },
   { code: UiLanguage.Spanish, nativeName: 'Español' },
   { code: UiLanguage.Portuguese, nativeName: 'Português (Brasil)' },
+  { code: UiLanguage.German, nativeName: 'Deutsch' },
 ];
 
 const BY_CODE = new Map<string, UiLanguageOption>(
