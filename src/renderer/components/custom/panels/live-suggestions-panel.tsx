@@ -14,6 +14,7 @@ import {
   truncateMiddle,
   withHardBreaks,
 } from '@/lib/suggestions';
+import { cn } from '@/lib/utils';
 import { SuggestionMode } from '@/types/llm';
 import { type LiveSuggestion, SuggestionState } from '@/types/suggestion';
 
@@ -258,7 +259,17 @@ function LiveSuggestionsPanel({
                     rather than on SuggestionReveal's wrapper, which is an animating grid that
                     size containment would fight. The newest card - the streaming one - is
                     always on screen, so containment never applies to it. */}
-                <div className="py-3 [content-visibility:auto] [contain-intrinsic-size:auto_6rem]">
+                {/* The newest card is the one being read mid-answer, so it carries an accent edge
+                    and full contrast; older ones step back until hovered. A glance should land on
+                    the current answer without reading which card is on top. */}
+                <div
+                  className={cn(
+                    'py-3 pl-2 -ml-2 border-l-2 transition-opacity duration-300 [content-visibility:auto] [contain-intrinsic-size:auto_6rem]',
+                    idx === 0
+                      ? 'border-primary'
+                      : 'border-transparent opacity-60 hover:opacity-100 focus-within:opacity-100'
+                  )}
+                >
                   {/* The question is what says which turn this answer belongs to, and on an answer
                       taller than the panel it used to scroll away and leave the reader holding an
                       answer with no question. Pinned for as long as its own card is in view - the
@@ -281,7 +292,10 @@ function LiveSuggestionsPanel({
                         token would widen the card past the panel instead of wrapping */}
                     <div
                       dir="auto"
-                      className="min-w-0 flex-1 text-xs text-muted-foreground wrap-break-word line-clamp-2"
+                      className={cn(
+                        'min-w-0 flex-1 text-xs wrap-break-word line-clamp-2',
+                        idx === 0 ? 'font-medium text-foreground/85' : 'text-muted-foreground'
+                      )}
                       title={s.last_question}
                     >
                       {truncateMiddle(s.last_question, MAX_QUESTION_LENGTH)}

@@ -22,6 +22,7 @@ import PermissionGateDialog from '../permission-gate-dialog';
 import ZoomControl from '../zoom-control';
 import { AudioGroup } from './audio-group';
 import { LanguageGroup } from './language-group';
+import { LiveSignal } from './live-signal';
 import { MainGroup } from './main-group';
 import { SuggestionModeGroup } from './suggestion-mode-group';
 import { ToolsGroup } from './tools-group';
@@ -344,7 +345,10 @@ export default function ControlPanel() {
           <ToolsGroup getDisabled={getDisabled} />
         </div>
 
-        <div className="ml-auto">
+        {/* Status, then view: whether the session can hear sits beside zoom at the right edge,
+            apart from the controls, because it is something to glance at rather than press. */}
+        <div className="ml-auto flex items-center gap-2">
+          <LiveSignal />
           <ZoomControl />
         </div>
       </div>

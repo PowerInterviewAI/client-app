@@ -216,6 +216,11 @@ export class AudioWsStream {
     return this.replacedByNewer;
   }
 
+  /** Whether this channel's socket is open right now. Read-only: polled by the control bar. */
+  get connected(): boolean {
+    return this.ws?.readyState === WebSocket.OPEN;
+  }
+
   async start() {
     this.stopping = false;
     this.outOfCredits = false;
@@ -655,6 +660,19 @@ class LiveTranscriptionService {
   onOutOfCredits(listener: () => void): () => void {
     this.outOfCreditsListeners.add(listener);
     return () => this.outOfCreditsListeners.delete(listener);
+  }
+
+  /** The microphone stream currently feeding ch_1, or null when stopped. Read-only. */
+  getMicStream(): MediaStream | null {
+    return this.micStream;
+  }
+
+  /**
+   * Whether both channels' sockets are open. False while stopped, and briefly false during a
+   * language switch or a reconnect - which is exactly what the control bar's indicator reports.
+   */
+  isConnected(): boolean {
+    return this.running && this.channels.length > 0 && this.channels.every((c) => c.connected);
   }
 
   /** Whether the session ended because a newer interview on this account replaced it. */

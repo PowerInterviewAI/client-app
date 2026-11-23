@@ -5,6 +5,7 @@ import ConnectingNotice from '@/components/custom/connecting-notice';
 import ControlPanel from '@/components/custom/control-panel';
 import { LoadingPage } from '@/components/custom/loading';
 import ActionSuggestionsPanel from '@/components/custom/panels/action-suggestions-panel';
+import { AwaitingFirstQuestion } from '@/components/custom/panels/awaiting-first-question';
 import DockResizeHandle from '@/components/custom/panels/dock-resize-handle';
 import LiveSuggestionsPanel from '@/components/custom/panels/live-suggestions-panel';
 import TranscriptPanel from '@/components/custom/panels/transcript-panel';
@@ -326,13 +327,21 @@ export default function MainPage() {
     return <LoadingPage disclaimer={t.common.loading} />;
   }
 
+  // Running, and nothing real has been written yet: the panels would show the sample placeholder
+  // copy, which on a live session reads as a demo or a fault. `hasHistory` flips on the first real
+  // transcript or suggestion.
+  const awaitingFirstQuestion =
+    appState.runningState === RunningState.Running && !appState.hasHistory;
+
   return (
     <div className="flex-1 flex flex-col w-full bg-background p-1 space-y-1">
       {appState.isBackendLive === false && <ConnectingNotice />}
 
       <div className="flex-1 flex flex-col overflow-y-hidden gap-1">
+        {awaitingFirstQuestion && <AwaitingFirstQuestion />}
+
         {/* Top: Suggestions, side by side */}
-        {hasSuggestions && (
+        {!awaitingFirstQuestion && hasSuggestions && (
           <div className="flex-1 min-h-0 flex gap-1">
             {hasLiveSuggestions && (
               <div className="flex-1 min-w-0">
@@ -360,7 +369,7 @@ export default function MainPage() {
           !appState?.subscribed &&
           !trialNoticeClosed && <TrialUserNotice onClick={() => setTrialNoticeClosed(true)} />}
 
-        {!hasSuggestions && !showTranscriptDock && (
+        {!awaitingFirstQuestion && !hasSuggestions && !showTranscriptDock && (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-sm text-muted-foreground">{t.mainRoute.transcriptionHidden}</p>
           </div>
@@ -369,7 +378,7 @@ export default function MainPage() {
         {/* Bottom dock: Transcription, spanning the full width. The handle only appears when the
             dock shares the area with suggestions - docked alone it already fills it, so there is
             nothing to trade height against. */}
-        {showTranscriptDock && (
+        {!awaitingFirstQuestion && showTranscriptDock && (
           <>
             {hasSuggestions && (
               <DockResizeHandle
