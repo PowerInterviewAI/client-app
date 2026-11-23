@@ -213,6 +213,27 @@ jobs:
 
           sed "s/VERSION_PLACEHOLDER/${VERSION}/g" .github/release_notes_template.md > release_notes.md
 
+          # Installers only: the update metadata already carries its own sha512 for each file.
+          (
+            cd release-artifacts
+            find . -maxdepth 1 -type f \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' \) \
+              -printf '%f\n' | LC_ALL=C sort | xargs -r -d '\n' sha256sum > SHA256SUMS.txt
+          )
+          if [ ! -s release-artifacts/SHA256SUMS.txt ]; then
+            echo "No installers to checksum" >&2
+            exit 1
+          fi
+          {
+            echo
+            echo "## SHA-256 checksums"
+            echo
+            echo '```'
+            cat release-artifacts/SHA256SUMS.txt
+            echo '```'
+            echo
+            echo "Verify a download with \`Get-FileHash <file>\` in PowerShell (Windows) or \`shasum -a 256 <file>\` (macOS). The same list is attached as \`SHA256SUMS.txt\`."
+          } >> release_notes.md
+
           gh release create "$TAG" \
             --title "Release ${TAG}" \
             --notes-file release_notes.md
@@ -222,6 +243,7 @@ jobs:
           done < <(
             find release-artifacts -type f \
               \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' \
-                 -o -name '*.yml' -o -name '*.yaml' -o -name '*.blockmap' \) \
+                 -o -name '*.yml' -o -name '*.yaml' -o -name '*.blockmap' \
+                 -o -name 'SHA256SUMS.txt' \) \
               -print0
           )
