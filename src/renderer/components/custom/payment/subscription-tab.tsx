@@ -185,19 +185,23 @@ export default function SubscriptionTab({
         <>
           {/* Said once, above the cards, rather than repeated inside each one: every plan buys the
               same thing for a different length of time, so the cards carry only what differs -
-              price, total and saving - and the eye goes straight to that. */}
-          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
-            {[
-              t.payment.buy.features.unlimited,
-              t.payment.buy.features.model,
-              t.payment.buy.features.noRenewal,
-            ].map((feature) => (
-              <li key={feature} className="flex items-center gap-1.5 text-xs">
-                <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
+              price, total and saving - and the eye goes straight to that. Only with plans to show:
+              when they failed to load, a list of what "every plan" includes above an empty grid
+              advertises something the screen cannot sell. */}
+          {plans.length > 0 && (
+            <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
+              {[
+                t.payment.buy.features.unlimited,
+                t.payment.buy.features.model,
+                t.payment.buy.features.noRenewal,
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-1.5 text-xs">
+                  <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <div className="mx-auto grid gap-2 md:grid-cols-3">
             {plans.map((plan) => {
