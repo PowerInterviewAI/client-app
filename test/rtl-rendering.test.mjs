@@ -78,7 +78,7 @@ export async function run() {
     );
   }
 
-  // The documentation page lists all 28 endonyms in one paragraph, and Arabic and Hebrew are
+  // The documentation page lists every endonym, and Arabic and Hebrew are
   // adjacent in it. Joined into a single string they are two RTL runs with one neutral between
   // them, which the bidi algorithm resolves right-to-left as well and lays out as a single run -
   // so the last two languages in the list print in the opposite order to every other pair. Each
@@ -89,7 +89,7 @@ export async function run() {
 
   // The picker's own endonyms are already one per menu item, so they need direction but not
   // isolation - a block boundary isolates by itself.
-  const picker = read('../src/renderer/components/custom/control-panel/language-group.tsx');
+  const picker = read('../src/renderer/components/custom/language-search-list.tsx');
   check('the picker resolves each endonym separately', /<span dir="auto"/.test(picker));
 
   return failures;
