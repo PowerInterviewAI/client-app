@@ -37,6 +37,13 @@ export const MOCK_STREAM_CHANNELS = 1;
  */
 export const WS_CLOSE_INSUFFICIENT_CREDITS = 4402;
 
+/**
+ * The close code for an interview replaced by a newer one on the same account. Mirrors
+ * `WS_CLOSE_SESSION_REPLACED` in the backend. Ends the session the way running out of credits
+ * does, and for the same reason: a reconnect is refused.
+ */
+export const WS_CLOSE_SESSION_REPLACED = 4409;
+
 /** Which kind of interview a socket belongs to. The backend uses it for the ledger only. */
 export type SessionKind = 'live' | 'mock';
 
@@ -46,8 +53,9 @@ export type SessionKind = 'live' | 'mock';
  * reported through `onOutOfCredits` instead, with its own toast.
  */
 export class OutOfCreditsError extends Error {
-  constructor() {
-    super(currentTranslation().creditGate.tooLow);
+  constructor(replaced = false) {
+    const { tooLow, replaced: replacedMessage } = currentTranslation().creditGate;
+    super(replaced ? replacedMessage : tooLow);
     this.name = 'OutOfCreditsError';
   }
 }
@@ -178,6 +186,10 @@ export class AudioWsStream {
   // balance is what is missing, and every retry would be refused the same way.
   private outOfCredits = false;
 
+  // Which of the two closes set `outOfCredits`: a newer interview took over, rather than the
+  // balance running out.
+  private replacedByNewer = false;
+
   private readonly channels: number;
   private readonly kind: SessionKind;
   private readonly clientSessionId: string | undefined;
@@ -200,9 +212,14 @@ export class AudioWsStream {
     this.onOutOfCredits = options.onOutOfCredits;
   }
 
+  get replaced(): boolean {
+    return this.replacedByNewer;
+  }
+
   async start() {
     this.stopping = false;
     this.outOfCredits = false;
+    this.replacedByNewer = false;
     await this.connectWithRetry();
 
     this.ctx = new AudioContext();
@@ -248,7 +265,7 @@ export class AudioWsStream {
     // accepts before it checks) and was closed straight after. Thrown rather than reported
     // through `onOutOfCredits`, because the caller is still inside its start sequence and that is
     // where a start that cannot happen belongs.
-    if (this.outOfCredits) throw new OutOfCreditsError();
+    if (this.outOfCredits) throw new OutOfCreditsError(this.replacedByNewer);
 
     this.active = true;
   }
@@ -401,7 +418,7 @@ export class AudioWsStream {
       if (this.stopping) {
         throw new Error(`WebSocket connection stopped for ${this.channel}`);
       }
-      if (this.outOfCredits) throw new OutOfCreditsError();
+      if (this.outOfCredits) throw new OutOfCreditsError(this.replacedByNewer);
       // Checked before the socket is built rather than only after. The next line assigns
       // `this.ws`, so a superseded loop waking from its backoff would otherwise overwrite the
       // socket the newer switch has already opened and leave that one unreferenced.
@@ -490,10 +507,12 @@ export class AudioWsStream {
       // socket it refuses for credits, so the open normally arrives first and the handler bound
       // in `bindWebSocketHandlers` sees the code; this covers a close that beats it.
       ws.onclose = (event) => {
-        if (settled || event.code !== WS_CLOSE_INSUFFICIENT_CREDITS) return;
+        const replaced = event.code === WS_CLOSE_SESSION_REPLACED;
+        if (settled || (event.code !== WS_CLOSE_INSUFFICIENT_CREDITS && !replaced)) return;
         settled = true;
         window.clearTimeout(timeoutId);
-        reject(new OutOfCreditsError());
+        this.replacedByNewer = replaced;
+        reject(new OutOfCreditsError(replaced));
       };
     });
   }
@@ -528,7 +547,11 @@ export class AudioWsStream {
       // socket refused for credits closes inside that window, and `start()` reads this flag to
       // throw. If this close is lost on the network it arrives as a 1006 instead, the reconnect
       // below is refused with this code, and the session ends here one round trip later.
-      if (event.code === WS_CLOSE_INSUFFICIENT_CREDITS) {
+      if (
+        event.code === WS_CLOSE_INSUFFICIENT_CREDITS ||
+        event.code === WS_CLOSE_SESSION_REPLACED
+      ) {
+        this.replacedByNewer = event.code === WS_CLOSE_SESSION_REPLACED;
         this.handleOutOfCredits();
         return;
       }
@@ -632,6 +655,11 @@ class LiveTranscriptionService {
   onOutOfCredits(listener: () => void): () => void {
     this.outOfCreditsListeners.add(listener);
     return () => this.outOfCreditsListeners.delete(listener);
+  }
+
+  /** Whether the session ended because a newer interview on this account replaced it. */
+  wasReplaced(): boolean {
+    return this.channels.some((channel) => channel.replaced);
   }
 
   private reportOutOfCredits(): void {

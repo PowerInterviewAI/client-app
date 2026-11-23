@@ -34,6 +34,11 @@ class MockTranscriptionService {
     return () => this.outOfCreditsListeners.delete(listener);
   }
 
+  /** Whether the session ended because a newer interview on this account replaced it. */
+  wasReplaced(): boolean {
+    return this.channel?.replaced === true;
+  }
+
   async start(
     audioInputDeviceName: string,
     sessionToken: string,

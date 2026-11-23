@@ -6,7 +6,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { useAudioInputDevices } from '@/hooks/use-audio-devices';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useT } from '@/i18n';
-import { canStartSession, minimumStartCredits } from '@/lib/credit-gate';
+import { canStartSession } from '@/lib/credit-gate';
 import { getElectron } from '@/lib/utils';
 import type { MockInterviewSetup } from '@/types/mock-interview';
 import { MockDifficulty, MockSeniority } from '@/types/mock-interview';
@@ -39,6 +39,7 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
 
   const credits = appState?.credits;
   const creditsPerMinute = appState?.creditsPerMinute;
+  const subscribed = appState?.subscribed === true;
 
   const selectedAudioInputDeviceName = config?.audioInputDeviceName ?? '';
   const noAudioInputDevices = audioDevicesReady && audioInputDevices.length === 0;
@@ -73,12 +74,12 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
       return false;
     }
     // Last of the checks, and the only one with somewhere to send the user. Any length may be
-    // chosen: the session is billed by the minute and ends at zero with its report, so the
-    // setup screen says how far the balance goes rather than refusing a length.
-    if (!canStartSession(credits, creditsPerMinute)) {
+    // chosen: a free session spends free time by the minute and ends at zero with its report, so
+    // the setup screen says how far that goes rather than refusing a length.
+    if (!canStartSession(credits, creditsPerMinute, subscribed)) {
       toast.error(t.creditGate.tooLow, {
-        description: t.creditGate.tooLowHint(minimumStartCredits(creditsPerMinute), credits ?? 0),
-        action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
+        description: t.creditGate.tooLowHint,
+        action: { label: t.creditGate.subscribe, onClick: () => navigate('/payment') },
       });
       return false;
     }
@@ -120,6 +121,7 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
     setQuestionCount,
     credits,
     creditsPerMinute,
+    subscribed,
     starting,
     headphoneNoticeOpen,
     setHeadphoneNoticeOpen,

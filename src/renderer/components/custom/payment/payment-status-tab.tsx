@@ -95,10 +95,26 @@ interface PaymentStatusTabProps {
   initialPaymentId?: string;
 }
 
+const TERMINAL_STATUSES: readonly PaymentStatus[] = [
+  PaymentStatus.Finished,
+  PaymentStatus.Failed,
+  PaymentStatus.Expired,
+  PaymentStatus.Refunded,
+];
+
+// The money has arrived, so an address and amount on screen would invite paying a second time.
+const FUNDS_RECEIVED_STATUSES: readonly PaymentStatus[] = [
+  PaymentStatus.Confirming,
+  PaymentStatus.Confirmed,
+  PaymentStatus.Sending,
+];
+
 export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatusTabProps) {
   const t = useT();
   const { getPaymentStatus } = usePayment();
   const [paymentId, setPaymentId] = useState(initialPaymentId);
+  // What is polled. Separate from the input, so a half-typed id is never sent to the backend.
+  const [watchedId, setWatchedId] = useState(initialPaymentId);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatusResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -186,35 +202,51 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
   }, [paymentStatus?.order_id, t]);
 
   const paymentStatusRef = React.useRef<PaymentStatusResponse | null>(null);
+  // The id on screen, and the one asked for last: a poll of the old payment that answers after
+  // the user asked for another must not put the old one back.
+  const watchedIdRef = useRef(initialPaymentId);
+  const requestedIdRef = useRef(initialPaymentId);
 
   const handleCheckStatus = useCallback(
-    async (id?: string, silent = false) => {
-      const checkId = id || paymentId;
+    async (checkId: string, silent = false) => {
       if (!checkId) return;
 
-      if (!silent) setLoading(true);
-      if (silent) setRefreshing(true);
-      setError(null);
+      if (silent) {
+        setRefreshing(true);
+      } else {
+        requestedIdRef.current = checkId;
+        setLoading(true);
+        setError(null);
+      }
       try {
         const status = await getPaymentStatus(checkId);
+        if (checkId !== requestedIdRef.current) return;
         if (status) {
+          watchedIdRef.current = checkId;
+          setError(null);
+          setWatchedId(checkId);
           // only update state if the object really changed
           const prev = paymentStatusRef.current;
           if (JSON.stringify(prev) !== JSON.stringify(status)) {
             setPaymentStatus(status);
             paymentStatusRef.current = status;
           }
-        } else {
+        } else if (!silent) {
+          // A background check that fails says nothing: the payment on screen is still valid.
+          requestedIdRef.current = watchedIdRef.current;
           setError(t.payment.status.notFound);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : t.payment.status.fetchFailed);
+        if (!silent) {
+          requestedIdRef.current = watchedIdRef.current;
+          setError(err instanceof Error ? err.message : t.payment.status.fetchFailed);
+        }
       } finally {
         if (!silent) setLoading(false);
         if (silent) setRefreshing(false);
       }
     },
-    [paymentId, getPaymentStatus, t]
+    [getPaymentStatus, t]
   );
 
   type CopyField = 'address' | 'amount' | 'currency';
@@ -273,34 +305,40 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
 
   // Auto-check if initialPaymentId changes
   useEffect(() => {
-    if (initialPaymentId) {
-      setPaymentId(initialPaymentId);
-      setTimeout(() => {
-        handleCheckStatus(initialPaymentId);
-      }, 100);
-    }
+    if (!initialPaymentId) return;
+    setPaymentId(initialPaymentId);
+    const timer = window.setTimeout(() => handleCheckStatus(initialPaymentId), 100);
+    return () => window.clearTimeout(timer);
   }, [initialPaymentId, handleCheckStatus]);
+
+  const isTerminal =
+    paymentStatus !== null && TERMINAL_STATUSES.includes(paymentStatus.payment_status);
+  const fundsReceived =
+    paymentStatus !== null && FUNDS_RECEIVED_STATUSES.includes(paymentStatus.payment_status);
+  const closedNotice =
+    paymentStatus?.payment_status === PaymentStatus.Expired
+      ? { title: t.payment.status.expiredTitle, body: t.payment.status.expiredBody }
+      : paymentStatus?.payment_status === PaymentStatus.Refunded
+        ? { title: t.payment.status.refundedTitle, body: t.payment.status.refundedBody }
+        : paymentStatus?.payment_status === PaymentStatus.Failed
+          ? { title: t.payment.status.failedTitle, body: t.payment.status.failedBody }
+          : null;
 
   // poll for status every 5 seconds while we have an ID and the payment
   // hasn't reached a terminal state. this keeps the UI up‑to‑date without
   // requiring manual clicks.
   useEffect(() => {
     let interval: number | null = null;
-    const isTerminal =
-      paymentStatus !== null &&
-      [PaymentStatus.Finished, PaymentStatus.Failed, PaymentStatus.Expired].includes(
-        paymentStatus.payment_status
-      );
 
     // only poll when there's an ID and the payment hasn't reached a final state
-    if (paymentId && !isTerminal) {
-      interval = window.setInterval(() => handleCheckStatus(undefined, true), 5000);
+    if (watchedId && !isTerminal) {
+      interval = window.setInterval(() => handleCheckStatus(watchedId, true), 5000);
     }
 
     return () => {
       if (interval !== null) window.clearInterval(interval);
     };
-  }, [paymentId, paymentStatus, handleCheckStatus]);
+  }, [watchedId, isTerminal, handleCheckStatus]);
 
   return (
     <div className="space-y-4">
@@ -318,7 +356,7 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               className="max-w-40"
               maxLength={100}
             />
-            <Button onClick={() => handleCheckStatus()} disabled={!paymentId || loading}>
+            <Button onClick={() => handleCheckStatus(paymentId)} disabled={!paymentId || loading}>
               {loading ? t.payment.status.checking : t.payment.status.check}
             </Button>
           </div>
@@ -385,9 +423,33 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               )}
             </div>
 
-            {paymentStatus.payment_status !== PaymentStatus.Finished &&
-              paymentStatus.payment_status !== PaymentStatus.Failed &&
-              paymentStatus.payment_status !== PaymentStatus.Expired && (
+            {/* A top-up to the original address is not matched to the order, so its QR and
+                address must not stay on screen once a payment is partial. */}
+            {paymentStatus.payment_status === PaymentStatus.PartiallyPaid && (
+              <div className="bg-yellow-50 dark:bg-yellow-950 p-4 rounded-lg">
+                <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+                  {t.payment.status.partialTitle}
+                </p>
+                <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+                  {t.payment.status.partialBody}
+                </p>
+              </div>
+            )}
+
+            {fundsReceived && (
+              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  {t.payment.status.receivedTitle}
+                </p>
+                <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+                  {t.payment.status.receivedBody}
+                </p>
+              </div>
+            )}
+
+            {!isTerminal &&
+              !fundsReceived &&
+              paymentStatus.payment_status !== PaymentStatus.PartiallyPaid && (
                 <>
                   <div className="border-t pt-4">
                     <p className="text-sm font-medium mb-3">{t.payment.status.paymentMethods}</p>
@@ -489,19 +551,12 @@ export default function PaymentStatusTab({ initialPaymentId = '' }: PaymentStatu
               </div>
             )}
 
-            {(paymentStatus.payment_status === PaymentStatus.Failed ||
-              paymentStatus.payment_status === PaymentStatus.Expired) && (
+            {closedNotice && (
               <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg">
                 <p className="text-sm font-medium text-red-900 dark:text-red-100">
-                  {paymentStatus.payment_status === PaymentStatus.Expired
-                    ? t.payment.status.expiredTitle
-                    : t.payment.status.failedTitle}
+                  {closedNotice.title}
                 </p>
-                <p className="text-sm text-red-800 dark:text-red-200 mt-1">
-                  {paymentStatus.payment_status === PaymentStatus.Expired
-                    ? t.payment.status.expiredBody
-                    : t.payment.status.failedBody}
-                </p>
+                <p className="text-sm text-red-800 dark:text-red-200 mt-1">{closedNotice.body}</p>
               </div>
             )}
 

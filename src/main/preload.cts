@@ -88,7 +88,6 @@ const electronApi = {
     create: (data: Record<string, unknown>) => ipcRenderer.invoke('payment:create', data),
     getStatus: (paymentId: string) => ipcRenderer.invoke('payment:get-status', paymentId),
     getHistory: () => ipcRenderer.invoke('payment:get-history'),
-    getCredits: () => ipcRenderer.invoke('payment:get-credits'),
   },
 
   appState: {

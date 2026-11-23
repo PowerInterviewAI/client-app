@@ -77,13 +77,7 @@ export interface UiStrings {
 
   /** Same shape again for the payment service, whose every path sets its own message. */
   paymentErrors: Record<
-    | 'getPlans'
-    | 'getCurrencies'
-    | 'createPayment'
-    | 'getStatus'
-    | 'getHistory'
-    | 'getCredits'
-    | 'pollingTimeout',
+    'getPlans' | 'getCurrencies' | 'createPayment' | 'getStatus' | 'getHistory',
     string
   >;
 
@@ -190,8 +184,6 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       createPayment: 'Failed to create payment',
       getStatus: 'Failed to get payment status',
       getHistory: 'Failed to get payment history',
-      getCredits: 'Failed to get credits',
-      pollingTimeout: 'Payment polling timeout',
     },
 
     suggestionErrors: {
@@ -211,7 +203,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       nothingRecorded:
         'The interview ended with nothing recorded. Check that the right microphone is selected and that it is not muted, then try again.',
       endedBeforeScoring: 'The interview was ended before scoring finished.',
-      notEnoughCredits: 'Not enough credits',
+      notEnoughCredits: 'Out of free time',
     },
 
     actionNames: {
@@ -284,8 +276,6 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       createPayment: 'Не удалось создать платёж',
       getStatus: 'Не удалось получить статус платежа',
       getHistory: 'Не удалось получить историю платежей',
-      getCredits: 'Не удалось получить баланс кредитов',
-      pollingTimeout: 'Платёж не подтвердился вовремя',
     },
 
     suggestionErrors: {
@@ -305,7 +295,7 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
       nothingRecorded:
         'Собеседование закончилось, и ничего не записано. Проверьте, что выбран нужный микрофон и он не выключен, затем попробуйте снова.',
       endedBeforeScoring: 'Собеседование завершили до того, как закончилась оценка.',
-      notEnoughCredits: 'Недостаточно кредитов',
+      notEnoughCredits: 'Бесплатное время закончилось',
     },
 
     actionNames: {

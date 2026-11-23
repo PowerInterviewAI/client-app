@@ -19,4 +19,12 @@ export interface ClientPingResponse {
    * fallback that case reads as.
    */
   credits_per_minute?: number;
+  /**
+   * The subscription fields. Absent from a backend that predates subscriptions; see `balanceState`
+   * for how `credits` and `free_credits` are told apart.
+   */
+  free_credits?: number;
+  subscribed?: boolean;
+  subscription_expires_at?: number | null;
+  subscription_plan?: string | null;
 }

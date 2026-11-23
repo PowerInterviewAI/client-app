@@ -14,22 +14,32 @@ export enum PaymentStatus {
   Expired = 'expired',
 }
 
-export enum CreditPlan {
+/**
+ * What a payment buys. Monthly, quarterly and yearly are the passes on sale; the credit packs
+ * are only here because orders placed before subscriptions carry them.
+ */
+export enum PaymentPlan {
+  Monthly = 'monthly',
+  Quarterly = 'quarterly',
+  Yearly = 'yearly',
   Starter = 'starter',
   Pro = 'pro',
   Enterprise = 'enterprise',
 }
 
-export interface CreditPlanInfo {
-  plan: CreditPlan;
-  credits: number;
+/** A subscription pass, from `GET /api/payment/subscription-plans`. */
+export interface SubscriptionPlanInfo {
+  plan: PaymentPlan;
   priceUsd: number;
-  popular?: boolean;
-  description?: string;
+  /** How many calendar months of subscription the pass adds. */
+  months: number;
+  /** The price per month, for display: $180 for a year is $15 a month. */
+  pricePerMonthUsd: number;
+  popular: boolean;
 }
 
 export interface CreatePaymentRequest {
-  plan: CreditPlan;
+  plan: PaymentPlan;
   pay_currency?: string;
 }
 
@@ -73,8 +83,14 @@ export interface AvailableCurrency {
 export interface PaymentHistory {
   payment_id: string | null;
   order_id: string;
-  plan: CreditPlan;
+  plan: PaymentPlan;
   credits_amount: number;
+  /** Calendar months a pass buys. */
+  months_amount?: number;
+  /** What the order actually granted once applied, overpay bonus included. */
+  days_granted?: number | null;
+  /** Set on a follow-up payment for the remainder of a partially paid order. */
+  root_payment_id?: string | null;
   price_amount: number;
   pay_address: string | null;
   pay_amount: number | null;

@@ -99,10 +99,14 @@ export function useMockInterview() {
 
   const endForCredits = useCallback(() => {
     const t = currentTranslation();
-    toast.error(t.creditGate.outOfCredits, {
-      description: t.creditGate.outOfCreditsHint,
-      action: { label: t.creditGate.buyCredits, onClick: () => navigate('/payment') },
-    });
+    if (mockTranscriptionService.wasReplaced()) {
+      toast.error(t.creditGate.replaced, { description: t.creditGate.replacedHint });
+    } else {
+      toast.error(t.creditGate.outOfCredits, {
+        description: t.creditGate.outOfCreditsHint,
+        action: { label: t.creditGate.subscribe, onClick: () => navigate('/payment') },
+      });
+    }
     void window.electronAPI?.mockInterview.endSession();
   }, [navigate]);
 

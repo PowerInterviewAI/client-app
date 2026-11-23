@@ -7,8 +7,9 @@ import { useSuggestionMode } from '@/hooks/use-suggestion-mode';
 import { useTranscriptPanel } from '@/hooks/use-transcript-panel';
 import { useT } from '@/i18n';
 import { Hotkey, HOTKEYS } from '@/lib/hotkeys';
+import type { SubscriptionSummary } from '@/lib/subscription';
 import { cn } from '@/lib/utils';
-import { RunningState, UserRole } from '@/types/app-state';
+import { RunningState } from '@/types/app-state';
 
 import { HotkeyCheatsheetDialog } from './hotkey-cheatsheet';
 import { RunningIndicator } from './running-indicator';
@@ -35,8 +36,8 @@ function useHotkeyCheatsheetShortcut(onOpen: () => void) {
 interface StatusPanelProps {
   runningState: RunningState;
   credits: number;
+  subscription: SubscriptionSummary;
   llmModel: string;
-  userRole?: UserRole;
   creditsPerMinute?: number;
 }
 
@@ -52,7 +53,7 @@ export default function StatusPanel({
   runningState,
   llmModel,
   credits,
-  userRole,
+  subscription,
   creditsPerMinute,
 }: StatusPanelProps) {
   const t = useT();
@@ -67,8 +68,8 @@ export default function StatusPanel({
       <RunningIndicator runningState={runningState} />
       <CreditsDisplay
         credits={credits}
+        subscription={subscription}
         llmModel={llmModel}
-        userRole={userRole}
         creditsPerMinute={creditsPerMinute}
         className="ml-2"
       />

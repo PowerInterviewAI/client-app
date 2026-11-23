@@ -1,5 +1,6 @@
 import { AuthApi } from '../api/auth.js';
 import { configStore } from '../store/config.store.js';
+import { CLEARED_BALANCE } from '../utils/balance.js';
 import { uiStrings } from '../utils/ui-strings.js';
 import { accountService } from './account.service.js';
 import { appStateService } from './app-state.service.js';
@@ -121,7 +122,7 @@ export class AuthService {
         configStore.updateConfig({ sessionToken: response.data?.session_token });
 
         // update app state to logged in
-        appStateService.updateState({ isLoggedIn: true });
+        appStateService.updateState({ isLoggedIn: true, ...CLEARED_BALANCE });
 
         // pull this account's synced config (full name, profile, context) from the backend.
         // Cleared first so a failed pull leaves the config unloaded rather than whatever
@@ -163,7 +164,7 @@ export class AuthService {
       disableStealth();
       // clear session token and update app state
       configStore.updateConfig({ sessionToken: '' });
-      appStateService.updateState({ isLoggedIn: false });
+      appStateService.updateState({ isLoggedIn: false, ...CLEARED_BALANCE });
       accountService.clearState();
 
       // The interview goes with the session it belonged to. The transcript, the suggestions and

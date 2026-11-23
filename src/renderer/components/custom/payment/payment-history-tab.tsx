@@ -50,15 +50,20 @@ export default function PaymentHistoryTab({
     async (silent = false) => {
       if (!silent) setLoading(true);
       if (silent) setRefreshing(true);
-      setError(null);
       try {
         const result = await getPaymentHistory();
+        if (result === null) {
+          // A failed background poll keeps the list on screen and says nothing.
+          if (!silent) setError(t.payment.history.loadFailed);
+          return;
+        }
+        setError(null);
         // only update state when new data differs from the current list
         if (JSON.stringify(result) !== JSON.stringify(historyRef.current)) {
           setHistory(result);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : t.payment.history.loadFailed);
+        if (!silent) setError(err instanceof Error ? err.message : t.payment.history.loadFailed);
       } finally {
         if (!silent) setLoading(false);
         if (silent) setRefreshing(false);
@@ -94,7 +99,7 @@ export default function PaymentHistoryTab({
         <div className="py-8">
           <Loading disclaimer={t.payment.history.loading} />
         </div>
-      ) : history.length === 0 ? (
+      ) : history.length === 0 && error ? null : history.length === 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>{t.payment.history.emptyTitle}</CardTitle>
@@ -102,7 +107,7 @@ export default function PaymentHistoryTab({
           </CardHeader>
           <CardContent>
             <Button onClick={onSwitchToBuy} className="w-full">
-              {t.payment.history.buyCredits}
+              {t.payment.history.subscribe}
             </Button>
           </CardContent>
         </Card>
@@ -124,7 +129,7 @@ export default function PaymentHistoryTab({
               <TableRow>
                 <TableHead>{t.payment.history.columns.created}</TableHead>
                 <TableHead>{t.payment.history.columns.paymentId}</TableHead>
-                <TableHead>{t.payment.history.columns.credits}</TableHead>
+                <TableHead>{t.payment.history.columns.purchase}</TableHead>
                 <TableHead>{t.payment.history.columns.amount}</TableHead>
                 <TableHead>{t.payment.history.columns.status}</TableHead>
                 <TableHead>{t.payment.history.columns.action}</TableHead>
@@ -132,14 +137,20 @@ export default function PaymentHistoryTab({
             </TableHeader>
             <TableBody>
               {history.slice(0, 30).map((payment) => (
-                <TableRow key={payment.payment_id}>
+                <TableRow key={payment.payment_id ?? payment.order_id}>
                   <TableCell className="text-sm">
                     {new Date(payment.created_at).toLocaleDateString()}{' '}
                     {new Date(payment.created_at).toLocaleTimeString()}
                   </TableCell>
                   <TableCell className="text-sm font-mono">{payment.payment_id}</TableCell>
                   <TableCell className="text-sm font-medium">
-                    {payment.credits_amount.toLocaleString()}
+                    {payment.root_payment_id
+                      ? t.payment.history.remainder
+                      : t.payment.history.grant(
+                          payment.months_amount ?? 0,
+                          payment.days_granted ?? 0,
+                          payment.credits_amount
+                        )}
                   </TableCell>
                   <TableCell className="text-sm">
                     {payment.pay_amount && payment.pay_currency
@@ -161,6 +172,7 @@ export default function PaymentHistoryTab({
                     <Button
                       size="sm"
                       variant="outline"
+                      disabled={!payment.payment_id}
                       onClick={() => onViewPayment(payment.payment_id ?? '')}
                     >
                       {t.payment.history.view}

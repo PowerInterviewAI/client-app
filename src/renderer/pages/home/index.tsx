@@ -9,9 +9,17 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { useAppState } from '@/hooks/use-app-state';
 import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
+import { useNow } from '@/hooks/use-now';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
 import { useT } from '@/i18n';
-import { canStartSession, minimumStartCredits } from '@/lib/credit-gate';
+import { canStartSession } from '@/lib/credit-gate';
+import {
+  freeTimeLabel,
+  isSubscriptionActive,
+  planKey,
+  subscriptionOf,
+  type SubscriptionSummary,
+} from '@/lib/subscription';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 import type { MockInterviewSetup } from '@/types/mock-interview';
@@ -120,11 +128,14 @@ export default function HomePage() {
   // unavailable would grey the card out for the first seconds of every launch.
   const mockUnsupported = appState?.mockInterviewSupported === false;
 
-  // Both kinds of interview are billed by the minute at the same rate, so one rule decides
-  // whether either card may start a session: at least a minute of credit. A card that cannot
-  // start says so and goes to the payment page instead of into a start that would be refused.
-  const creditsTooLow = !canStartSession(appState?.credits, appState?.creditsPerMinute);
-  const minimumCredits = minimumStartCredits(appState?.creditsPerMinute);
+  // One rule decides whether either card may start a session: subscribed, or at least a minute of
+  // the free hour left. A card that cannot start says so and goes to the subscription page instead
+  // of into a start that would be refused.
+  const creditsTooLow = !canStartSession(
+    appState?.credits,
+    appState?.creditsPerMinute,
+    appState?.subscribed
+  );
 
   const [mockSetupOpen, setMockSetupOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -161,7 +172,15 @@ export default function HomePage() {
   // The account's own email, not the remembered credential: `config.email` is blank whenever the
   // user declined "remember me", which would report a signed-in user as not signed in.
   const email = appState?.accountEmail || config?.email;
-  const credits = appState?.credits;
+  const subscription = subscriptionOf(appState);
+  const now = useNow();
+  const planSummary = describePlan(
+    t,
+    subscription,
+    appState?.credits,
+    appState?.creditsPerMinute,
+    now
+  );
   // appState starts null before the first IPC round-trip resolves, and the config arrives over a
   // second one - both need to settle before "no data" is trustworthy.
   const accountReady = !configLoading && config !== undefined && appState !== null;
@@ -221,7 +240,7 @@ export default function HomePage() {
     // opened on a scrollbar and a sign-out button below the fold. Nothing here was removed to
     // fix that - the screen is the same six things - they are laid out across the width the
     // window already has instead of down a column half of it wide. The two launch cards share a
-    // row, the account strip carries Buy Credits on its own line rather than above one, and the
+    // row, the account strip carries Subscription on its own line rather than above one, and the
     // three navigations are one row of three. Vertical rhythm went from 8/6-step gaps to 4, and
     // the outer padding from py-10 to py-6.
     <div className="flex-1 overflow-auto">
@@ -244,7 +263,7 @@ export default function HomePage() {
                   : liveSessionActive
                     ? t.home.mock.liveRunning
                     : creditsTooLow
-                      ? t.home.mock.unaffordable(minimumCredits)
+                      ? t.home.mock.unaffordable
                       : t.home.mock.ready
               }
               onClick={() => (creditsTooLow ? navigate('/payment') : setMockSetupOpen(true))}
@@ -259,7 +278,7 @@ export default function HomePage() {
                   : mockSessionActive
                     ? t.home.live.mockRunning
                     : creditsTooLow
-                      ? t.home.live.unaffordable(minimumCredits)
+                      ? t.home.live.unaffordable
                       : t.home.live.ready
               }
               onClick={
@@ -279,9 +298,9 @@ export default function HomePage() {
               </p>
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{t.home.creditsLabel}</p>
+              <p className="text-xs text-muted-foreground">{t.home.planLabel}</p>
               <p className="text-sm font-medium">
-                {accountReady ? (credits ?? t.home.creditsUnavailable) : t.common.loading}
+                {accountReady ? (planSummary ?? t.home.planUnavailable) : t.common.loading}
               </p>
             </div>
             <Button
@@ -291,7 +310,7 @@ export default function HomePage() {
               onClick={() => navigate('/payment')}
             >
               <CreditCard className="h-4 w-4" aria-hidden="true" />
-              {t.home.buyCredits}
+              {t.home.subscribe}
             </Button>
           </div>
 
@@ -352,4 +371,22 @@ export default function HomePage() {
       />
     </div>
   );
+}
+
+/** The account strip's plan line: the active plan and its end date, or the free time left. */
+function describePlan(
+  t: ReturnType<typeof useT>,
+  subscription: SubscriptionSummary,
+  credits: number | undefined,
+  creditsPerMinute: number | undefined,
+  now: number
+): string | undefined {
+  if (isSubscriptionActive(subscription, now) && subscription.expiresAt !== null) {
+    return t.payment.buy.subscribedUntil(
+      t.creditsDisplay.planNames[planKey(subscription.plan)],
+      t.creditsDisplay.dateTime(subscription.expiresAt)
+    );
+  }
+  if (credits === undefined) return undefined;
+  return freeTimeLabel(t, credits, creditsPerMinute);
 }

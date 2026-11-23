@@ -49,6 +49,10 @@ export async function run(userDataDir) {
       gate.canStartSession(undefined, 10)
     );
 
+    check('a subscriber may start with no free time left', gate.canStartSession(0, 10, true));
+    check('and before the ping has said how much', gate.canStartSession(undefined, 10, true));
+    check('not subscribed is the free-hour rule', !gate.canStartSession(0, 10, false));
+
     check('minutes covered rounds down', gate.minutesCovered(25, 10) === 2);
     check('and is never negative', gate.minutesCovered(-5, 10) === 0);
     check('the minimum is one minute of the served rate', gate.minimumStartCredits(12) === 12);

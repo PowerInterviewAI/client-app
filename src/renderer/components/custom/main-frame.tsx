@@ -7,6 +7,7 @@ import { useConfigStore } from '@/hooks/use-config-store';
 import { MainContainerContext } from '@/hooks/use-main-container';
 import { useOnboardingDismissed } from '@/hooks/use-onboarding-dismissed';
 import usePointerLockGuard from '@/hooks/use-pointer-lock-guard';
+import { useSubscriptionExpiryWarning } from '@/hooks/use-subscription-expiry-warning';
 import { useUiLanguageSync } from '@/i18n';
 import type { PushNotification } from '@/types/push-notification';
 
@@ -23,6 +24,9 @@ export default function MainFrame({ children }: { children: React.ReactNode }) {
   // the strings themselves need no context - `useT` reads the config store directly - and this
   // is the one component mounted for every route.
   useUiLanguageSync();
+
+  // Here for the same reason: an expiring subscription is worth saying on whatever screen is up.
+  useSubscriptionExpiryWarning();
 
   // Loaded here rather than per page. Routes reached directly - a reload on `/configuration`, the
   // onboarding gate on `/` - all read the config, and every one of them holding its own fetch is

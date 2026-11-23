@@ -71,7 +71,7 @@ export async function run() {
   const start = methodBody(live, 'async start() {');
   check(
     'start() throws for a socket refused while it was building the graph',
-    /if \(this\.outOfCredits\) throw new OutOfCreditsError\(\)/.test(start)
+    /if \(this\.outOfCredits\) throw new OutOfCreditsError\(this\.replacedByNewer\)/.test(start)
   );
 
   const handle = methodBody(live, 'private handleOutOfCredits(');
