@@ -2,6 +2,19 @@
 
 ## What's Changed
 
+### 97 interview languages
+* Interviews now run in 97 languages, up from 28 - every language the speech model transcribes, including Cantonese and Traditional Chinese (Taiwan) as languages of their own
+* One setting still covers the whole session: transcription, suggestions and the exported report all follow it, and it can be changed mid-interview
+* Right-to-left languages such as Persian, Urdu, Pashto and Kurdish (Sorani) display right-to-left in the transcript and suggestions
+* Exported reports use translated headings in most of the new languages
+
+### Mock interviews speak 44 languages
+* The mock interviewer now asks its questions out loud in 44 languages, up from 7, with a new, more natural voice
+* In the other languages it writes its questions on screen instead; answering and scoring work the same way
+
+### Find your language faster
+* The language button on the control bar and the language setting (configuration, first-run setup and mock interview setup) now have a search box. Type an English name, the language's own name, or its code
+
 ---
 
 ## Having trouble to install?
