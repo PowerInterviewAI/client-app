@@ -90,7 +90,7 @@ export async function run() {
   // The picker's own endonyms are already one per menu item, so they need direction but not
   // isolation - a block boundary isolates by itself.
   const picker = read('../src/renderer/components/custom/language-search-list.tsx');
-  check('the picker resolves each endonym separately', /<span dir="auto"/.test(picker));
+  check('the picker resolves each endonym separately', /<span\s+dir="auto"/.test(picker));
 
   return failures;
 }
