@@ -326,6 +326,98 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     captureFailed: 'Не удалось сделать снимок экрана. Попробуйте ещё раз.',
     cannotGenerateSuggestion: 'Нельзя создать подсказку, пока ассистент не запущен',
   },
+
+  [UiLanguage.Spanish]: {
+    placeholderTranscript: 'Aquí aparecerá la transcripción',
+    placeholderQuestion: 'Aquí aparecerán las preguntas del entrevistador',
+    placeholderLiveAnswer: 'Aquí aparecerán las respuestas sugeridas en tiempo real',
+    placeholderActionAnswer:
+      'Aquí aparecerán las sugerencias a petición. Por ejemplo, una respuesta sugerida, la solución de una prueba de código, la descripción de un diagrama, etc.',
+
+    sessionExpired: 'Tu sesión ha caducado. Vuelve a iniciar sesión.',
+
+    authErrors: {
+      sendCodeFailed: 'No se pudo enviar el código de verificación',
+      invalidCode: 'Código de verificación no válido o caducado',
+      signupFailed: 'No se pudo completar el registro',
+      invalidCredentials: 'Correo o contraseña incorrectos',
+      loginFailed: 'No se pudo iniciar sesión',
+      logoutFailed: 'No se pudo cerrar sesión',
+      changePasswordFailed: 'No se pudo cambiar la contraseña',
+      sendResetCodeFailed: 'No se pudo enviar el código de restablecimiento',
+      invalidResetCode: 'Código de restablecimiento no válido o caducado',
+      resetFailed: 'No se pudo restablecer la contraseña',
+    },
+
+    accountErrors: {
+      fetchFailed: 'No se pudo obtener la cuenta',
+      updateFailed: 'No se pudo actualizar la cuenta',
+      onboardingFailed: 'No se pudo guardar la configuración',
+      migrateFailed: 'No se pudo migrar la configuración local',
+      loadConfigFailed: 'No se pudo cargar la configuración',
+    },
+
+    transportErrors: {
+      timedOut: 'La solicitud tardó demasiado',
+      networkFailed: 'La solicitud de red falló',
+    },
+
+    paymentErrors: {
+      getPlans: 'No se pudieron obtener los planes',
+      getCurrencies: 'No se pudieron obtener las monedas disponibles',
+      createPayment: 'No se pudo crear el pago',
+      getStatus: 'No se pudo obtener el estado del pago',
+      getHistory: 'No se pudo obtener el historial de pagos',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: 'Demasiadas solicitudes. Inténtalo más tarde.',
+      generateFailed: 'No se pudo generar la respuesta.',
+      cannotReachServer: 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.',
+      responseTimedOut: 'La respuesta tardó demasiado. Inténtalo de nuevo.',
+      emptyResponse: 'El modelo devolvió una respuesta vacía.',
+    },
+
+    mockErrors: {
+      liveRunning: 'Detén la entrevista en directo antes de empezar una de práctica.',
+      firstQuestionFailed: 'No se pudo generar la primera pregunta. Inténtalo de nuevo.',
+      firstQuestionFailedWith: (reason: string) =>
+        `No se pudo generar la primera pregunta: ${reason}`,
+      startFailed: 'No se pudo iniciar la entrevista de práctica',
+      nothingRecorded:
+        'La entrevista terminó sin nada grabado. Comprueba que está seleccionado el micrófono correcto y que no está silenciado, y vuelve a intentarlo.',
+      endedBeforeScoring: 'La entrevista terminó antes de completar la puntuación.',
+      notEnoughCredits: 'Sin tiempo gratis',
+    },
+
+    actionNames: {
+      screenshotCapture: 'La captura de pantalla',
+      captureSuggestion: 'La generación de sugerencias a petición',
+    },
+    actionBlocked: (runningAction: string) =>
+      `${runningAction} sigue en curso. Inténtalo de nuevo en un momento.`,
+
+    stealthSignedOut: 'Debes iniciar sesión para usar el modo sigiloso.',
+    stealthDuringMock:
+      'El modo sigiloso está desactivado durante una entrevista de práctica. Esto es práctica, no una llamada real.',
+    stealthNotRunning: 'El modo sigiloso solo está disponible durante una entrevista en directo.',
+    opacityStealthOnly: 'La opacidad solo se puede cambiar en modo sigiloso.',
+
+    saveTranscriptTitle: 'Guardar transcripción',
+    saveMockReportTitle: 'Guardar informe de la entrevista de práctica',
+    saveImageTitle: 'Guardar imagen',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Documento de Word',
+    pngFilter: 'Imagen PNG',
+
+    actionDuringMock: 'Las sugerencias a petición no están disponibles durante una entrevista de práctica.',
+    cannotClearImages: 'No se pueden borrar las imágenes si el asistente no está en marcha',
+    cannotCaptureScreenshot: 'No se puede hacer una captura si el asistente no está en marcha',
+    maxCaptures: (max: number) =>
+      `Se alcanzó el máximo de ${max} capturas. Borra las imágenes e inténtalo de nuevo.`,
+    captureFailed: 'No se pudo hacer la captura de pantalla. Inténtalo de nuevo.',
+    cannotGenerateSuggestion: 'No se puede generar una sugerencia si el asistente no está en marcha',
+  },
 };
 
 /**

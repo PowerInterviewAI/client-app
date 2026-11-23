@@ -15,10 +15,8 @@
  */
 import { codeOnly, createChecker, loadMain, loadMainAs, readSource } from './helpers.mjs';
 
-const CYRILLIC = /\p{Script=Cyrillic}/u;
-
 /**
- * Strings in `ru.ts` that hold Latin letters on purpose.
+ * Strings in a non-Latin locale that hold Latin letters on purpose.
  *
  * Deliberately a list rather than a rule. Every entry is a claim that one specific string is
  * correct in Latin script, which is occasionally true - a brand name, a file format, an import
@@ -28,8 +26,13 @@ const CYRILLIC = /\p{Script=Cyrillic}/u;
 const LATIN_BY_DESIGN = new Set([
   // The import specifier the locale's type comes from.
   './en',
-  // The BCP-47 tag handed to `toLocaleString`, which is how a Russian locale groups thousands.
+  // The BCP-47 tags handed to `toLocaleString`, which is how each locale formats its numbers
+  // and dates.
   'ru-RU',
+  'uk-UA',
+  'ja-JP',
+  'ko-KR',
+  'zh-CN',
   // Format names. Russian technical writing keeps both, and the file extension is not a word.
   'Markdown',
   'Word',
@@ -41,6 +44,9 @@ const LATIN_BY_DESIGN = new Set([
   'Middle',
   'Senior',
   'Staff+',
+  // Unit symbols around two interpolated numbers, the same in every Latin-script locale and
+  // written in Latin by convention in the CJK ones.
+  ' MB /  MB',
   // A domain.
   'powerinterviewai.com/docs',
   // Purchasable SKUs. `Pro` in particular is a plan a user has bought by that name, so the
@@ -49,6 +55,63 @@ const LATIN_BY_DESIGN = new Set([
   'Pro',
   'Enterprise',
 ]);
+
+/**
+ * The script a locale's own words are written in, for the locales that are not written in Latin.
+ *
+ * For these the test is "Latin letters and none of the locale's own script in the same string": a
+ * literal with no letters at all - a separator, a template that is only its interpolations - has
+ * nothing to translate, and flagging those would train whoever hits it to widen the allowlist
+ * rather than read it. Japanese counts kana and kanji, since a short Japanese label can be all
+ * kanji; Korean counts Hangul alone.
+ */
+const NATIVE_SCRIPT = {
+  ru: /\p{Script=Cyrillic}/u,
+  uk: /\p{Script=Cyrillic}/u,
+  ja: /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u,
+  ko: /\p{Script=Hangul}/u,
+  zh: /\p{Script=Han}/u,
+};
+
+/**
+ * Words that are spelled the same in a Latin-script locale as in English and are correct there.
+ *
+ * A Latin-script locale cannot be checked by script, so it is checked against the English source
+ * instead: a string identical to an English one is flagged. These are the exceptions, per locale,
+ * and every one is a claim that the word really is that language's own - Spanish and Portuguese
+ * write "Plan" and "Status" too, German uses "Start". Listed by hand for the same reason as
+ * `LATIN_BY_DESIGN`.
+ */
+const SAME_AS_ENGLISH = {
+  // `min` is the Spanish abbreviation for minutes as well.
+  es: new Set(['Plan', 'General', ' min']),
+};
+
+/**
+ * The string literals in a TypeScript source, as written, minus keys and interpolations.
+ *
+ * A quoted property name is a key, not copy: `'mock-done'` is quoted only because of the hyphen,
+ * and it has to match `en.ts` exactly rather than being translated. `${...}` holds an identifier,
+ * not copy: `withCombo` is `` `${label} (${combo})` `` in every locale and correctly has no words of
+ * its own.
+ */
+function literalsOf(source) {
+  const code = codeOnly(source);
+  return [
+    ...code.matchAll(/'(?:[^'\\\n]|\\.)*'(\s*:)?/g),
+    ...code.matchAll(/`(?:[^`\\]|\\.)*`(\s*:)?/g),
+  ]
+    .filter((m) => m[1] === undefined)
+    .map((m) => m[0].slice(1, -1))
+    .map((literal) => literal.replace(/\$\{[^}]*\}/g, ''));
+}
+
+function isUntranslated(code, literal, englishLiterals) {
+  if (!/\p{Script=Latin}/u.test(literal) || LATIN_BY_DESIGN.has(literal)) return false;
+  const native = NATIVE_SCRIPT[code];
+  if (native) return !native.test(literal);
+  return englishLiterals.has(literal) && !SAME_AS_ENGLISH[code]?.has(literal);
+}
 
 export async function run() {
   const { check, failures } = createChecker('ui-language');
@@ -123,42 +186,24 @@ export async function run() {
     check(`a locale file exists for ${code}`, present);
   }
 
-  // The check a type cannot make. Every sentence the Russian locale ships has to have been
-  // translated, and an untranslated one is indistinguishable from a translated one to the
-  // compiler: both are `string`.
-  //
-  // The test is Latin letters with no Cyrillic anywhere in the same string, rather than "no
-  // Cyrillic": a literal with no letters at all - a separator, a template that is nothing but
-  // its own interpolations - has nothing in it to translate, and flagging those would train
-  // whoever hits it to widen the allowlist rather than read it.
-  const ruSource = codeOnly(
-    readSource(new URL('../src/renderer/i18n/locales/ru.ts', import.meta.url))
+  // The check a type cannot make. Every sentence a locale ships has to have been translated, and
+  // an untranslated one is indistinguishable from a translated one to the compiler: both are
+  // `string`. Run for every locale, because the next one is the one nobody reads.
+  const enLiterals = new Set(
+    literalsOf(readSource(new URL('../src/renderer/i18n/locales/en.ts', import.meta.url)))
   );
-  const literals = [
-    ...ruSource.matchAll(/'(?:[^'\\\n]|\\.)*'(\s*:)?/g),
-    ...ruSource.matchAll(/`(?:[^`\\]|\\.)*`(\s*:)?/g),
-  ]
-    // A quoted property name is a key, not copy. `'mock-done'` is quoted only because of the
-    // hyphen, and it has to match `en.ts` exactly rather than being translated.
-    .filter((m) => m[1] === undefined)
-    .map((m) => m[0].slice(1, -1))
-    // `${...}` holds an identifier, not copy. `withCombo` is `` `${label} (${combo})` `` in both
-    // locales and correctly has no words of its own; left in, those two parameter names would
-    // read as untranslated English.
-    .map((literal) => literal.replace(/\$\{[^}]*\}/g, ''));
-
-  check('the Russian locale has strings to check', literals.length > 100);
-
-  const untranslated = literals.filter(
-    (literal) =>
-      /\p{Script=Latin}/u.test(literal) &&
-      !/\p{Script=Cyrillic}/u.test(literal) &&
-      !LATIN_BY_DESIGN.has(literal)
-  );
-  check(
-    `every Russian string is in Russian${untranslated.length ? ` (left in English: ${untranslated.map((s) => JSON.stringify(s)).join(', ')})` : ''}`,
-    untranslated.length === 0
-  );
+  for (const code of Object.values(UiLanguage)) {
+    if (code === 'en') continue;
+    const literals = literalsOf(
+      readSource(new URL(`../src/renderer/i18n/locales/${code}.ts`, import.meta.url))
+    );
+    check(`the ${code} locale has strings to check`, literals.length > 100);
+    const untranslated = literals.filter((literal) => isUntranslated(code, literal, enLiterals));
+    check(
+      `every ${code} string is translated${untranslated.length ? ` (left in English: ${untranslated.map((s) => JSON.stringify(s)).join(', ')})` : ''}`,
+      untranslated.length === 0
+    );
+  }
 
   // Interpolated values surviving translation is pinned by the compiler rather than here.
   // `noUnusedParameters` is on in tsconfig.app.json, so a locale that takes `(email: string)`
@@ -221,32 +266,36 @@ export async function run() {
   // Main has its own share of the chrome - the placeholder panel copy it seeds, and the push
   // notifications it raises as toasts from paths the renderer cannot see. `UiStrings` makes a
   // missing key a build error and `Record<UiLanguage, UiStrings>` makes a missing language one,
-  // so what is left is the same thing the renderer locale's check covers: a Russian entry that
-  // is still its English original.
-  const mainSource = codeOnly(
-    readSource(new URL('../src/main/utils/ui-strings.ts', import.meta.url))
-  );
-  const russianBlock = mainSource.slice(mainSource.indexOf('[UiLanguage.Russian]:'));
-  const mainLiterals = [
-    ...russianBlock.matchAll(/'(?:[^'\\\n]|\\.)*'(\s*:)?/g),
-    ...russianBlock.matchAll(/`(?:[^`\\]|\\.)*`(\s*:)?/g),
-  ]
-    .filter((m) => m[1] === undefined)
-    .map((m) => m[0].slice(1, -1))
-    .map((literal) => literal.replace(/\$\{[^}]*\}/g, ''));
-
-  check('the main-process table has strings to check', mainLiterals.length > 10);
-
-  const mainUntranslated = mainLiterals.filter(
-    (literal) =>
-      /\p{Script=Latin}/u.test(literal) &&
-      !/\p{Script=Cyrillic}/u.test(literal) &&
-      !LATIN_BY_DESIGN.has(literal)
-  );
-  check(
-    `every Russian main-process string is in Russian${mainUntranslated.length ? ` (left in English: ${mainUntranslated.map((s) => JSON.stringify(s)).join(', ')})` : ''}`,
-    mainUntranslated.length === 0
-  );
+  // so what is left is the same thing the renderer locales' check covers: an entry that is still
+  // its English original. Each language's block runs from its own key to the next one.
+  const mainSource = readSource(new URL('../src/main/utils/ui-strings.ts', import.meta.url));
+  const blockStarts = [...codeOnly(mainSource).matchAll(/\[UiLanguage\.(\w+)\]: \{/g)].map((m) => ({
+    member: m[1],
+    index: m.index,
+  }));
+  const mainBlock = (member) => {
+    const source = codeOnly(mainSource);
+    const at = blockStarts.findIndex((block) => block.member === member);
+    const next = blockStarts[at + 1]?.index ?? source.indexOf('\nexport function uiStrings');
+    return source.slice(blockStarts[at].index, next);
+  };
+  const mainEnLiterals = new Set(literalsOf(mainBlock('English')));
+  for (const [member, code] of Object.entries(UiLanguage)) {
+    if (code === 'en') continue;
+    check(
+      `the main-process table has a block for ${code}`,
+      blockStarts.some((b) => b.member === member)
+    );
+    const literals = literalsOf(mainBlock(member));
+    check(`the main-process ${code} block has strings to check`, literals.length > 10);
+    const untranslated = literals.filter((literal) =>
+      isUntranslated(code, literal, mainEnLiterals)
+    );
+    check(
+      `every ${code} main-process string is translated${untranslated.length ? ` (left in English: ${untranslated.map((s) => JSON.stringify(s)).join(', ')})` : ''}`,
+      untranslated.length === 0
+    );
+  }
 
   // `uiStrings()` reads the store per call rather than capturing once, because the paths it
   // serves - a health-check poll, a global hotkey handler - outlive any one setting.

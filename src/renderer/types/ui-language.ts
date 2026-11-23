@@ -6,6 +6,7 @@
 export enum UiLanguage {
   English = 'en',
   Russian = 'ru',
+  Spanish = 'es',
 }
 
 export const DEFAULT_UI_LANGUAGE = UiLanguage.English;
@@ -28,6 +29,7 @@ export interface UiLanguageOption {
 export const UI_LANGUAGES: readonly UiLanguageOption[] = [
   { code: UiLanguage.English, nativeName: 'English' },
   { code: UiLanguage.Russian, nativeName: 'Русский' },
+  { code: UiLanguage.Spanish, nativeName: 'Español' },
 ];
 
 const BY_CODE = new Map<string, UiLanguageOption>(
