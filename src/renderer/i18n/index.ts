@@ -3,14 +3,45 @@ import { useEffect } from 'react';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { DEFAULT_UI_LANGUAGE, resolveUiLanguage, UiLanguage } from '@/types/ui-language';
 
+import { de } from './locales/de';
 import { en, type Translation } from './locales/en';
+import { es } from './locales/es';
+import { fr } from './locales/fr';
+import { ja } from './locales/ja';
+import { ko } from './locales/ko';
+import { pt } from './locales/pt';
 import { ru } from './locales/ru';
+import { zh } from './locales/zh';
 
 export type { Translation };
+
+/**
+ * The `lang` the document gets, where it is not simply the code.
+ *
+ * `lang` picks the fallback font, and the app's font stack is system fonts. Han characters are
+ * shared by Chinese and Japanese but drawn differently, and a bare `zh` leaves the choice to the
+ * platform - which on Windows can mean Japanese glyph shapes in a Chinese interface. `zh-CN` asks
+ * for Simplified Chinese ones.
+ */
+const HTML_LANG: Partial<Record<UiLanguage, string>> = {
+  [UiLanguage.Chinese]: 'zh-CN',
+};
+
+/** The document `lang` for a UI language. */
+export function htmlLangFor(code: UiLanguage): string {
+  return HTML_LANG[code] ?? code;
+}
 
 const TRANSLATIONS: Record<UiLanguage, Translation> = {
   [UiLanguage.English]: en,
   [UiLanguage.Russian]: ru,
+  [UiLanguage.Spanish]: es,
+  [UiLanguage.Portuguese]: pt,
+  [UiLanguage.German]: de,
+  [UiLanguage.French]: fr,
+  [UiLanguage.Chinese]: zh,
+  [UiLanguage.Japanese]: ja,
+  [UiLanguage.Korean]: ko,
 };
 
 /** The dictionary for a code, for the few callers that have one in hand rather than a hook. */
@@ -48,7 +79,7 @@ let paintTimeLanguage = readCache();
 // in an effect after the first paint. `lang` picks the font fallback, so setting it later means
 // the first frames are laid out with the wrong one and then reflow.
 try {
-  document.documentElement.lang = paintTimeLanguage;
+  document.documentElement.lang = htmlLangFor(paintTimeLanguage);
 } catch {
   // No document in a non-browser context. Nothing to do and nothing to report.
 }
@@ -105,7 +136,7 @@ export function useUiLanguageSync(): void {
   const code = useUiLanguageCode();
 
   useEffect(() => {
-    document.documentElement.lang = code;
+    document.documentElement.lang = htmlLangFor(code);
     paintTimeLanguage = code;
     try {
       localStorage.setItem(CACHE_KEY, code);

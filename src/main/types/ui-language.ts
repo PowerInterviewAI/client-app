@@ -17,6 +17,15 @@
 export enum UiLanguage {
   English = 'en',
   Russian = 'ru',
+  Spanish = 'es',
+  /** Written as Brazilian Portuguese. */
+  Portuguese = 'pt',
+  German = 'de',
+  French = 'fr',
+  /** Simplified Chinese, for Mainland China. */
+  Chinese = 'zh',
+  Japanese = 'ja',
+  Korean = 'ko',
 }
 
 export const DEFAULT_UI_LANGUAGE = UiLanguage.English;
