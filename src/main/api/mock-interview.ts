@@ -72,7 +72,7 @@ export class MockInterviewApi extends ApiClient {
   /**
    * Synthesize speech for one question chunk.
    *
-   * Resolves to `null` for a language with no Aura voice (a `204`, not an error) - the caller
+   * Resolves to `null` for a language with no Flux voice (a `204`, not an error) - the caller
    * falls back to text-only for that question rather than treating it as a failure.
    */
   async speak(data: SpeakRequest): Promise<ArrayBuffer | null> {

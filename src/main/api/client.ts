@@ -128,7 +128,7 @@ export class ApiClient {
    *
    * `request<T>` always calls `response.json()`, which a binary body cannot satisfy - this is
    * the mock interview's `/speak` proxy, which answers audio bytes or a bare `204 No Content`.
-   * That 204 is a normal result (the language has no Aura voice), not an error, so it resolves
+   * That 204 is a normal result (the language has no Flux voice), not an error, so it resolves
    * to `null` rather than throwing - the caller falls back to a text-only question either way.
    */
   async postArrayBuffer(
