@@ -602,6 +602,98 @@ const STRINGS: Record<UiLanguage, UiStrings> = {
     captureFailed: 'Screenshot fehlgeschlagen. Bitte versuche es erneut.',
     cannotGenerateSuggestion: 'Vorschläge sind nur möglich, wenn der Assistent läuft',
   },
+
+  [UiLanguage.French]: {
+    placeholderTranscript: 'La transcription apparaîtra ici',
+    placeholderQuestion: 'Les questions du recruteur apparaîtront ici',
+    placeholderLiveAnswer: 'Les réponses suggérées apparaîtront ici en temps réel',
+    placeholderActionAnswer:
+      'Les suggestions à la demande apparaîtront ici. Par exemple, une proposition de réponse, la solution d’un test de code, la description d’un schéma, etc.',
+
+    sessionExpired: 'Votre session a expiré. Veuillez vous reconnecter.',
+
+    authErrors: {
+      sendCodeFailed: 'Impossible d’envoyer le code de vérification',
+      invalidCode: 'Code de vérification invalide ou expiré',
+      signupFailed: 'Échec de l’inscription',
+      invalidCredentials: 'Adresse e-mail ou mot de passe incorrect',
+      loginFailed: 'Échec de la connexion',
+      logoutFailed: 'Échec de la déconnexion',
+      changePasswordFailed: 'Impossible de modifier le mot de passe',
+      sendResetCodeFailed: 'Impossible d’envoyer le code de réinitialisation',
+      invalidResetCode: 'Code de réinitialisation invalide ou expiré',
+      resetFailed: 'Échec de la réinitialisation du mot de passe',
+    },
+
+    accountErrors: {
+      fetchFailed: 'Impossible de récupérer le compte',
+      updateFailed: 'Impossible de mettre à jour le compte',
+      onboardingFailed: 'Impossible d’enregistrer votre configuration',
+      migrateFailed: 'Impossible de migrer la configuration locale',
+      loadConfigFailed: 'Impossible de charger la configuration',
+    },
+
+    transportErrors: {
+      timedOut: 'La requête a expiré',
+      networkFailed: 'La requête réseau a échoué',
+    },
+
+    paymentErrors: {
+      getPlans: 'Impossible d’obtenir les formules',
+      getCurrencies: 'Impossible d’obtenir les devises disponibles',
+      createPayment: 'Impossible de créer le paiement',
+      getStatus: 'Impossible d’obtenir le statut du paiement',
+      getHistory: 'Impossible d’obtenir l’historique des paiements',
+    },
+
+    suggestionErrors: {
+      tooManyRequests: 'Trop de requêtes. Veuillez réessayer plus tard.',
+      generateFailed: 'Impossible de générer la réponse.',
+      cannotReachServer: 'Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.',
+      responseTimedOut: 'La réponse a pris trop de temps. Veuillez réessayer.',
+      emptyResponse: 'Le modèle a renvoyé une réponse vide.',
+    },
+
+    mockErrors: {
+      liveRunning: 'Arrêtez l’entretien en direct avant de démarrer un entretien d’entraînement.',
+      firstQuestionFailed: 'Impossible de générer la première question. Veuillez réessayer.',
+      firstQuestionFailedWith: (reason: string) =>
+        `Impossible de générer la première question : ${reason}`,
+      startFailed: 'Impossible de démarrer l’entretien d’entraînement',
+      nothingRecorded:
+        'L’entretien s’est terminé sans aucun enregistrement. Vérifiez que le bon micro est sélectionné et qu’il n’est pas coupé, puis réessayez.',
+      endedBeforeScoring: 'L’entretien a été arrêté avant la fin de la notation.',
+      notEnoughCredits: 'Temps gratuit épuisé',
+    },
+
+    actionNames: {
+      screenshotCapture: 'La capture d’écran',
+      captureSuggestion: 'La génération d’une suggestion à la demande',
+    },
+    actionBlocked: (runningAction: string) =>
+      `${runningAction} est en cours. Réessayez un peu plus tard.`,
+
+    stealthSignedOut: 'Vous devez être connecté pour utiliser le mode furtif.',
+    stealthDuringMock:
+      'Le mode furtif est désactivé pendant un entretien d’entraînement. C’est un entraînement, pas un vrai appel.',
+    stealthNotRunning: 'Le mode furtif n’est disponible que pendant un entretien en direct.',
+    opacityStealthOnly: 'L’opacité ne peut être modifiée qu’en mode furtif.',
+
+    saveTranscriptTitle: 'Enregistrer la transcription',
+    saveMockReportTitle: 'Enregistrer le rapport de l’entretien d’entraînement',
+    saveImageTitle: 'Enregistrer l’image',
+    markdownFilter: 'Markdown',
+    wordFilter: 'Document Word',
+    pngFilter: 'Image PNG',
+
+    actionDuringMock: 'Les suggestions à la demande sont indisponibles pendant un entretien d’entraînement.',
+    cannotClearImages: 'Impossible d’effacer les images tant que l’assistant n’est pas lancé',
+    cannotCaptureScreenshot: 'Impossible de prendre une capture tant que l’assistant n’est pas lancé',
+    maxCaptures: (max: number) =>
+      `Limite de ${max} captures atteinte. Effacez les images et réessayez.`,
+    captureFailed: 'Échec de la capture d’écran. Veuillez réessayer.',
+    cannotGenerateSuggestion: 'Impossible de générer une suggestion tant que l’assistant n’est pas lancé',
+  },
 };
 
 /**

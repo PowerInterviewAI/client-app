@@ -86,6 +86,15 @@ const SAME_AS_ENGLISH = {
   // `min` is the Spanish abbreviation for minutes as well.
   es: new Set(['Plan', 'General', ' min']),
   pt: new Set([' min']),
+  fr: new Set([
+    'Suggestions',
+    'Transcription',
+    'Standard',
+    'Excellent',
+    'Action',
+    'minutes',
+    ' min',
+  ]),
 };
 
 /**
