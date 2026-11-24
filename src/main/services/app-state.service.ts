@@ -163,6 +163,7 @@ export class AppStateService {
         // needs the trim at all, to keep whitespace from reading as a set profile.
         hasProfileData:
           interviewConfig.profileData.length > 0 && interviewConfig.profileData.trim() !== '',
+        hasContextData: interviewConfig.context.length > 0 && interviewConfig.context.trim() !== '',
       },
     };
   }

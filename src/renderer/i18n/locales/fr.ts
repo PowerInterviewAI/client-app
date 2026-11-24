@@ -248,16 +248,12 @@ export const fr: Translation = {
 
   account: {
     title: 'Compte',
-    completeness: {
-      title: (done: number, total: number) => `Profil complété : ${done} sur ${total}`,
-      complete: 'Profil complet',
-      hint: 'Les suggestions s’appuient sur votre profil et le poste. Plus vous en dites, plus elles vous ressemblent.',
-    },
     signedInAs: 'Connecté en tant que',
     password: {
       title: 'Mot de passe',
       description: 'Modifiez le mot de passe de votre compte',
       action: 'Modifier le mot de passe',
+      codeSent: (email: string) => `Nous avons envoyé un code à ${email}. Collez-le ci-dessous.`,
     },
     loadFailed:
       'Impossible de charger vos informations enregistrées. Reconnectez-vous avant de modifier.',
@@ -271,9 +267,11 @@ export const fr: Translation = {
     fullName: 'Nom complet',
     fullNamePlaceholder: 'Le nom que vous utilisez pendant l’entretien',
     profile: 'Profil',
+    profileKinds: 'CV, profil LinkedIn, etc.',
     profilePlaceholder:
       'Collez votre CV, votre profil LinkedIn ou une courte biographie. Les suggestions s’en inspirent : plus il y a de détails, plus les réponses vous ressemblent.',
     context: 'Contexte',
+    contextKinds: 'offre d’emploi, historique des échanges, lettre de motivation, etc.',
     contextPlaceholder:
       'Collez l’offre d’emploi, les exigences du poste ou toute autre information sur l’entretien que vous préparez.',
     limitReached: (max: number) =>
@@ -368,7 +366,6 @@ export const fr: Translation = {
     submitting: 'Modification…',
     mismatch: 'Les nouveaux mots de passe ne correspondent pas.',
     succeeded: 'Mot de passe modifié',
-    failed: 'Impossible de modifier le mot de passe',
   },
 
   hotkeys: {
@@ -774,6 +771,21 @@ export const fr: Translation = {
     mockConsequence:
       'Votre micro est coupé pendant que le recruteur parle, mais la réverbération de la pièce peut encore se glisser ensuite sous forme de mots parasites.',
     proceed: 'J’ai mis mon casque',
+  },
+
+  contextReminder: {
+    title: 'Aucun contexte d’entretien',
+    description:
+      'Les suggestions seront rédigées à partir de votre profil seul, sans connaître le poste visé.',
+    hint: 'Ajoutez l’offre d’emploi, des notes des tours précédents, une lettre de motivation ou tout autre élément sur cet entretien pour des réponses adaptées.',
+    edit: 'Ajouter un contexte',
+    proceed: 'Démarrer quand même',
+    setTitle: 'Votre contexte est-il à jour ?',
+    setDescription:
+      'Les suggestions s’appuient sur le contexte enregistré dans votre compte. S’il décrit encore un entretien précédent, les réponses viseront le mauvais poste.',
+    review: 'Vérifier le contexte',
+    confirm: 'Il est à jour',
+    notSet: 'Non renseigné',
   },
 
   permissionGate: {

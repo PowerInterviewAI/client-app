@@ -244,16 +244,12 @@ export const es: Translation = {
 
   account: {
     title: 'Cuenta',
-    completeness: {
-      title: (done: number, total: number) => `Perfil completado: ${done} de ${total}`,
-      complete: 'Perfil completo',
-      hint: 'Las sugerencias se escriben a partir de tu perfil y del puesto. Cuanto más añadas, más sonarán como tú.',
-    },
     signedInAs: 'Sesión iniciada como',
     password: {
       title: 'Contraseña',
       description: 'Cambia la contraseña de tu cuenta',
       action: 'Cambiar contraseña',
+      codeSent: (email: string) => `Enviamos un código a ${email}. Pégalo abajo.`,
     },
     loadFailed: 'No se pudieron cargar tus datos guardados. Vuelve a conectarte antes de editar.',
     save: 'Guardar cambios',
@@ -266,9 +262,12 @@ export const es: Translation = {
     fullName: 'Nombre completo',
     fullNamePlaceholder: 'El nombre que usas en la entrevista',
     profile: 'Perfil',
+    profileKinds: 'CV, currículum, LinkedIn, etc.',
     profilePlaceholder:
       'Pega tu CV, tu perfil de LinkedIn o una breve biografía. Las sugerencias se escriben a partir de esto, así que cuanto más detalle, más se parecerán a ti.',
     context: 'Contexto',
+    contextKinds:
+      'descripción del puesto, historial de conversaciones, carta de presentación, etc.',
     contextPlaceholder:
       'Pega la descripción del puesto, los requisitos del rol o cualquier otra cosa sobre la entrevista que preparas.',
     limitReached: (max: number) =>
@@ -363,7 +362,6 @@ export const es: Translation = {
     submitting: 'Cambiando…',
     mismatch: 'Las nuevas contraseñas no coinciden.',
     succeeded: 'Contraseña cambiada correctamente',
-    failed: 'No se pudo cambiar la contraseña',
   },
 
   hotkeys: {
@@ -769,6 +767,21 @@ export const es: Translation = {
     mockConsequence:
       'Tu micrófono se silencia mientras habla el entrevistador, pero la reverberación de la sala puede colarse después como palabras sueltas.',
     proceed: 'Ya tengo los auriculares puestos',
+  },
+
+  contextReminder: {
+    title: 'No has añadido contexto de la entrevista',
+    description:
+      'Las sugerencias se basarán solo en tu perfil, sin conocer el puesto al que aspiras.',
+    hint: 'Añade la descripción del puesto, notas de rondas anteriores, una carta de presentación o cualquier otro dato de esta entrevista para recibir respuestas adaptadas.',
+    edit: 'Añadir contexto',
+    proceed: 'Empezar igualmente',
+    setTitle: '¿Tu contexto está actualizado?',
+    setDescription:
+      'Las sugerencias se adaptan al contexto guardado en tu cuenta. Si aún describe una entrevista anterior, las respuestas apuntarán al puesto equivocado.',
+    review: 'Revisar contexto',
+    confirm: 'Está actualizado',
+    notSet: 'Sin definir',
   },
 
   permissionGate: {

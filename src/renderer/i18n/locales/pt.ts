@@ -237,16 +237,12 @@ export const pt: Translation = {
 
   account: {
     title: 'Conta',
-    completeness: {
-      title: (done: number, total: number) => `Perfil ${done} de ${total} preenchido`,
-      complete: 'Perfil completo',
-      hint: 'As sugestões são escritas a partir do seu perfil e da vaga. Quanto mais você adicionar, mais elas soarão como você.',
-    },
     signedInAs: 'Conectado como',
     password: {
       title: 'Senha',
       description: 'Altere a senha da sua conta',
       action: 'Alterar senha',
+      codeSent: (email: string) => `Enviamos um código para ${email}. Cole-o abaixo.`,
     },
     loadFailed: 'Não foi possível carregar seus dados salvos. Reconecte antes de editar.',
     save: 'Salvar alterações',
@@ -259,9 +255,11 @@ export const pt: Translation = {
     fullName: 'Nome completo',
     fullNamePlaceholder: 'O nome que você usa na entrevista',
     profile: 'Perfil',
+    profileKinds: 'currículo, LinkedIn etc.',
     profilePlaceholder:
       'Cole seu currículo, seu perfil do LinkedIn ou uma breve biografia. As sugestões são escritas a partir disso, então quanto mais detalhes, mais as respostas soam como você.',
     context: 'Contexto',
+    contextKinds: 'descrição da vaga, histórico de conversas, carta de apresentação etc.',
     contextPlaceholder:
       'Cole a descrição da vaga, os requisitos do cargo ou qualquer outra coisa sobre a entrevista que você está preparando.',
     limitReached: (max: number) =>
@@ -356,7 +354,6 @@ export const pt: Translation = {
     submitting: 'Alterando…',
     mismatch: 'As novas senhas não coincidem.',
     succeeded: 'Senha alterada com sucesso',
-    failed: 'Não foi possível alterar a senha',
   },
 
   hotkeys: {
@@ -755,6 +752,21 @@ export const pt: Translation = {
     mockConsequence:
       'Seu microfone fica mudo enquanto o entrevistador fala, mas o eco da sala depois disso ainda pode entrar como palavras soltas.',
     proceed: 'Estou de fones',
+  },
+
+  contextReminder: {
+    title: 'Nenhum contexto da entrevista',
+    description:
+      'As sugestões serão escritas só a partir do seu perfil, sem saber a vaga para a qual você está concorrendo.',
+    hint: 'Adicione a descrição da vaga, anotações de etapas anteriores, uma carta de apresentação ou qualquer outra informação sobre esta entrevista para respostas sob medida.',
+    edit: 'Adicionar contexto',
+    proceed: 'Começar assim mesmo',
+    setTitle: 'Seu contexto está atualizado?',
+    setDescription:
+      'As sugestões seguem o contexto salvo na sua conta. Se ele ainda descreve uma entrevista anterior, as respostas serão escritas para a vaga errada.',
+    review: 'Revisar contexto',
+    confirm: 'Está atualizado',
+    notSet: 'Não definido',
   },
 
   permissionGate: {

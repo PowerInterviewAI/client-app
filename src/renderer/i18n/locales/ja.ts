@@ -236,16 +236,13 @@ export const ja: Translation = {
 
   account: {
     title: 'アカウント',
-    completeness: {
-      title: (done: number, total: number) => `プロフィール入力 ${done}/${total}`,
-      complete: 'プロフィール入力完了',
-      hint: '提案はプロフィールと応募職種をもとに作成されます。詳しく書くほど、あなたらしい回答になります。',
-    },
     signedInAs: 'ログイン中のアカウント',
     password: {
       title: 'パスワード',
       description: 'アカウントのパスワードを変更します',
       action: 'パスワードを変更',
+      codeSent: (email: string) =>
+        `${email} にリセットコードを送信しました。下に貼り付けてください。`,
     },
     loadFailed: '保存済みの情報を読み込めませんでした。編集する前に再接続してください。',
     save: '変更を保存',
@@ -258,9 +255,11 @@ export const ja: Translation = {
     fullName: 'フルネーム',
     fullNamePlaceholder: '面接で名乗る名前',
     profile: 'プロフィール',
+    profileKinds: '履歴書、職務経歴書、LinkedIn など',
     profilePlaceholder:
       '履歴書・職務経歴書、LinkedIn のプロフィール、または簡単な自己紹介を貼り付けてください。提案はこれをもとに作成されるので、詳しいほどあなたらしい回答になります。',
     context: '背景情報',
+    contextKinds: '求人票、これまでのやり取り、カバーレターなど',
     contextPlaceholder:
       '求人票、ポジションの要件など、準備中の面接に関する情報を貼り付けてください。',
     limitReached: (max: number) =>
@@ -352,7 +351,6 @@ export const ja: Translation = {
     submitting: '変更中…',
     mismatch: '新しいパスワードが一致しません。',
     succeeded: 'パスワードを変更しました',
-    failed: 'パスワードを変更できませんでした',
   },
 
   hotkeys: {
@@ -755,6 +753,20 @@ export const ja: Translation = {
     mockConsequence:
       '面接官が話している間はマイクがミュートされますが、その後の部屋の残響が余計な言葉として入り込むことがあります。',
     proceed: 'ヘッドホンを装着しました',
+  },
+
+  contextReminder: {
+    title: '面接のコンテキストが未設定です',
+    description: '応募する職種がわからないまま、プロフィールだけを元に提案が作成されます。',
+    hint: '求人票、これまでの面接のメモ、カバーレターなど、この面接に関する情報を追加すると、より的確な回答になります。',
+    edit: 'コンテキストを追加',
+    proceed: 'このまま開始',
+    setTitle: 'コンテキストは最新ですか？',
+    setDescription:
+      '提案はアカウントに保存されたコンテキストに合わせて作成されます。以前の面接の内容のままだと、別の職種向けの回答になります。',
+    review: 'コンテキストを確認',
+    confirm: '最新です',
+    notSet: '未設定',
   },
 
   permissionGate: {

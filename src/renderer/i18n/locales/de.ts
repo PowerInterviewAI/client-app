@@ -242,16 +242,12 @@ export const de: Translation = {
 
   account: {
     title: 'Konto',
-    completeness: {
-      title: (done: number, total: number) => `Profil: ${done} von ${total} ausgefüllt`,
-      complete: 'Profil vollständig',
-      hint: 'Vorschläge basieren auf deinem Profil und der Stelle. Je mehr du angibst, desto mehr klingen sie nach dir.',
-    },
     signedInAs: 'Angemeldet als',
     password: {
       title: 'Passwort',
       description: 'Ändere das Passwort deines Kontos',
       action: 'Passwort ändern',
+      codeSent: (email: string) => `Wir haben einen Code an ${email} gesendet. Füge ihn unten ein.`,
     },
     loadFailed:
       'Deine gespeicherten Daten konnten nicht geladen werden. Verbinde dich neu, bevor du sie bearbeitest.',
@@ -265,9 +261,11 @@ export const de: Translation = {
     fullName: 'Vollständiger Name',
     fullNamePlaceholder: 'Der Name, unter dem du im Interview auftrittst',
     profile: 'Profil',
+    profileKinds: 'Lebenslauf, LinkedIn-Profil usw.',
     profilePlaceholder:
       'Füge deinen Lebenslauf, dein LinkedIn-Profil oder eine kurze Vorstellung ein. Die Vorschläge entstehen daraus - je mehr Details, desto mehr klingen die Antworten nach dir.',
     context: 'Kontext',
+    contextKinds: 'Stellenbeschreibung, Gesprächsverlauf, Anschreiben usw.',
     contextPlaceholder:
       'Füge die Stellenbeschreibung, die Anforderungen der Rolle oder alles andere zum Interview ein, auf das du dich vorbereitest.',
     limitReached: (max: number) =>
@@ -361,7 +359,6 @@ export const de: Translation = {
     submitting: 'Wird geändert…',
     mismatch: 'Die neuen Passwörter stimmen nicht überein.',
     succeeded: 'Passwort erfolgreich geändert',
-    failed: 'Passwort konnte nicht geändert werden',
   },
 
   hotkeys: {
@@ -773,6 +770,21 @@ export const de: Translation = {
     mockConsequence:
       'Dein Mikrofon ist stumm, solange der Interviewer spricht, aber der Nachhall im Raum kann danach noch als einzelne Wörter durchrutschen.',
     proceed: 'Meine Kopfhörer sind auf',
+  },
+
+  contextReminder: {
+    title: 'Kein Interviewkontext hinterlegt',
+    description:
+      'Vorschläge entstehen dann nur aus deinem Profil, ohne die Stelle zu kennen, für die du dich bewirbst.',
+    hint: 'Füge die Stellenbeschreibung, Notizen aus früheren Runden, ein Anschreiben oder andere Infos zu diesem Interview hinzu, damit die Antworten darauf zugeschnitten sind.',
+    edit: 'Kontext hinzufügen',
+    proceed: 'Trotzdem starten',
+    setTitle: 'Ist dein Kontext aktuell?',
+    setDescription:
+      'Vorschläge richten sich nach dem Kontext in deinem Konto. Beschreibt er noch ein früheres Interview, passen die Antworten zur falschen Stelle.',
+    review: 'Kontext prüfen',
+    confirm: 'Er ist aktuell',
+    notSet: 'Nicht hinterlegt',
   },
 
   permissionGate: {

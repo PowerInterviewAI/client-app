@@ -191,8 +191,10 @@ export function CommandPalette() {
                 {t.commandPalette.startMock}
               </CommandItem>
             )}
+            {/* Through home, like the mock entry: the context confirmation is asked there,
+                before anything navigates to `/main`. */}
             <CommandItem
-              onSelect={() => run(() => navigate('/main', { state: { autoStartLive: true } }))}
+              onSelect={() => run(() => navigate('/', { state: { openLiveStart: true } }))}
             >
               <Play />
               {t.commandPalette.startLive}

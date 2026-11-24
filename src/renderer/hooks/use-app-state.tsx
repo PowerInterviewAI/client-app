@@ -45,7 +45,7 @@ class AppStateManager {
       userRole: raw.userRole,
       providedLLMModel: raw.providedLLMModel,
       creditsPerMinute: raw.creditsPerMinute,
-      interviewConfig: raw.interviewConfig ?? { fullName: '', hasProfileData: false },
+      interviewConfig: raw.interviewConfig ?? { fullName: '', hasProfileData: false, hasContextData: false },
       interviewConfigLoaded: raw.interviewConfigLoaded ?? false,
       // Defaults false, which is the safe direction: a main process that does not send it offers
       // the wizard rather than silently retiring it.

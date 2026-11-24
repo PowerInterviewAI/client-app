@@ -255,16 +255,12 @@ export const en = {
 
   account: {
     title: 'Account',
-    completeness: {
-      title: (done: number, total: number) => `Profile ${done} of ${total} complete`,
-      complete: 'Profile complete',
-      hint: 'Suggestions are written from your profile and the role. The more you add, the more they sound like you.',
-    },
     signedInAs: 'Signed in as',
     password: {
       title: 'Password',
       description: 'Change your account password',
       action: 'Change Password',
+      codeSent: (email: string) => `We sent a reset code to ${email}. Paste it below.`,
     },
     loadFailed: 'Could not load your saved details. Reconnect before editing.',
     save: 'Save Changes',
@@ -277,9 +273,11 @@ export const en = {
     fullName: 'Full name',
     fullNamePlaceholder: 'The name you go by in the interview',
     profile: 'Profile',
+    profileKinds: 'CV, resume, LinkedIn, etc.',
     profilePlaceholder:
       'Paste your CV/resume, LinkedIn profile, or a short bio. Suggestions are written from this, so more detail means answers that sound like you.',
     context: 'Context',
+    contextKinds: 'job description, conversation history, cover letter, etc.',
     contextPlaceholder:
       'Paste the job description, the role requirements, or anything else about the interview you are preparing for.',
     limitReached: (max: number) =>
@@ -371,7 +369,6 @@ export const en = {
     submitting: 'Changing…',
     mismatch: 'The new passwords do not match.',
     succeeded: 'Password changed successfully',
-    failed: 'Failed to change password',
   },
 
   hotkeys: {
@@ -783,6 +780,21 @@ export const en = {
     mockConsequence:
       'Your mic is muted while the interviewer speaks, but room reverb after it stops can still slip in as stray words.',
     proceed: 'My headphones are on',
+  },
+
+  contextReminder: {
+    title: 'No interview context set',
+    description:
+      'Suggestions will be written from your profile alone, without knowing the role you are interviewing for.',
+    hint: 'Add the job description, notes from earlier rounds, a cover letter, or anything else about this interview for answers tailored to it.',
+    edit: 'Add context',
+    proceed: 'Start anyway',
+    setTitle: 'Is your context up to date?',
+    setDescription:
+      'Suggestions are tailored to the context saved on your account. If it still describes an earlier interview, answers will be written for the wrong role.',
+    review: 'Review context',
+    confirm: 'It is up to date',
+    notSet: 'Not set',
   },
 
   permissionGate: {

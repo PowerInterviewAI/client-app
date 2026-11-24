@@ -229,16 +229,12 @@ export const zh: Translation = {
 
   account: {
     title: '账户',
-    completeness: {
-      title: (done: number, total: number) => `资料完成度 ${done}/${total}`,
-      complete: '资料已完善',
-      hint: '建议根据你的资料和应聘职位生成。填写得越详细，回答就越像你。',
-    },
     signedInAs: '当前登录',
     password: {
       title: '密码',
       description: '修改你的账户密码',
       action: '修改密码',
+      codeSent: (email: string) => `我们已向 ${email} 发送了重置码，请粘贴到下方。`,
     },
     loadFailed: '无法加载已保存的资料。请重新连接后再编辑。',
     save: '保存更改',
@@ -251,9 +247,11 @@ export const zh: Translation = {
     fullName: '全名',
     fullNamePlaceholder: '你在面试中使用的名字',
     profile: '个人资料',
+    profileKinds: '简历、LinkedIn 等',
     profilePlaceholder:
       '粘贴你的简历、领英资料或简短的个人介绍。建议内容据此生成，细节越多，回答就越像你本人。',
     context: '背景信息',
+    contextKinds: '职位描述、沟通记录、求职信等',
     contextPlaceholder: '粘贴职位描述、岗位要求，或与你准备的面试相关的任何信息。',
     limitReached: (max: number) =>
       `已达到字数上限（${max.toLocaleString('zh-CN')}），超出的文字未添加。`,
@@ -337,7 +335,6 @@ export const zh: Translation = {
     submitting: '修改中…',
     mismatch: '两次输入的新密码不一致。',
     succeeded: '密码修改成功',
-    failed: '修改密码失败',
   },
 
   hotkeys: {
@@ -723,6 +720,20 @@ export const zh: Translation = {
     mockSpeakers: '使用扬声器时，刚听到的问题可能会以回声的形式混进你回答的开头。',
     mockConsequence: '面试官说话时麦克风是静音的，但之后房间里的混响仍可能被识别成零散的词语。',
     proceed: '我已戴好耳机',
+  },
+
+  contextReminder: {
+    title: '尚未设置面试背景',
+    description: '建议将仅根据你的个人资料生成，而不了解你应聘的职位。',
+    hint: '添加职位描述、之前轮次的笔记、求职信或与本次面试相关的其他信息，以获得更有针对性的回答。',
+    edit: '添加背景',
+    proceed: '仍然开始',
+    setTitle: '面试背景是最新的吗？',
+    setDescription:
+      '建议会根据账户中保存的背景生成。如果它仍是上一场面试的内容，回答将针对错误的职位。',
+    review: '检查背景',
+    confirm: '已是最新',
+    notSet: '未设置',
   },
 
   permissionGate: {

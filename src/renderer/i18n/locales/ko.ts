@@ -235,16 +235,12 @@ export const ko: Translation = {
 
   account: {
     title: '계정',
-    completeness: {
-      title: (done: number, total: number) => `프로필 ${done}/${total} 완료`,
-      complete: '프로필 작성 완료',
-      hint: '제안은 프로필과 지원 직무를 바탕으로 작성됩니다. 많이 입력할수록 더 나다운 답변이 됩니다.',
-    },
     signedInAs: '로그인 계정',
     password: {
       title: '비밀번호',
       description: '계정 비밀번호를 변경합니다',
       action: '비밀번호 변경',
+      codeSent: (email: string) => `${email}(으)로 재설정 코드를 보냈습니다. 아래에 붙여넣으세요.`,
     },
     loadFailed: '저장된 정보를 불러오지 못했습니다. 수정하기 전에 다시 연결하세요.',
     save: '변경 사항 저장',
@@ -257,9 +253,11 @@ export const ko: Translation = {
     fullName: '이름',
     fullNamePlaceholder: '면접에서 사용하는 이름',
     profile: '프로필',
+    profileKinds: '이력서, 경력기술서, LinkedIn 등',
     profilePlaceholder:
       '이력서, 링크드인 프로필 또는 짧은 자기소개를 붙여 넣으세요. 제안은 이 내용을 바탕으로 작성되므로 자세할수록 회원님다운 답변이 나옵니다.',
     context: '배경 정보',
+    contextKinds: '채용 공고, 대화 기록, 자기소개서 등',
     contextPlaceholder: '채용 공고, 직무 요건 등 준비 중인 면접에 관한 내용을 붙여 넣으세요.',
     limitReached: (max: number) =>
       `글자 수 제한(${max.toLocaleString('ko-KR')}자)에 도달했습니다. 초과한 내용은 추가되지 않았습니다.`,
@@ -347,7 +345,6 @@ export const ko: Translation = {
     submitting: '변경 중…',
     mismatch: '새 비밀번호가 일치하지 않습니다.',
     succeeded: '비밀번호를 변경했습니다',
-    failed: '비밀번호를 변경하지 못했습니다',
   },
 
   hotkeys: {
@@ -743,6 +740,20 @@ export const ko: Translation = {
     mockConsequence:
       '면접관이 말하는 동안은 마이크가 음소거되지만, 그 뒤 방 안의 울림이 엉뚱한 단어로 섞여 들어갈 수 있습니다.',
     proceed: '헤드폰을 착용했습니다',
+  },
+
+  contextReminder: {
+    title: '면접 컨텍스트가 설정되지 않았습니다',
+    description: '지원하는 직무를 모른 채 프로필만으로 제안이 작성됩니다.',
+    hint: '채용 공고, 이전 면접 메모, 자기소개서 등 이번 면접에 관한 정보를 추가하면 더 잘 맞는 답변을 받을 수 있습니다.',
+    edit: '컨텍스트 추가',
+    proceed: '그냥 시작',
+    setTitle: '컨텍스트가 최신인가요?',
+    setDescription:
+      '제안은 계정에 저장된 컨텍스트에 맞춰 작성됩니다. 이전 면접 내용이 그대로라면 다른 직무에 맞는 답변이 나옵니다.',
+    review: '컨텍스트 확인',
+    confirm: '최신입니다',
+    notSet: '설정 안 됨',
   },
 
   permissionGate: {
