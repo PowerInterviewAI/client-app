@@ -189,13 +189,13 @@ export default function SubscriptionTab({
               when they failed to load, a list of what "every plan" includes above an empty grid
               advertises something the screen cannot sell. */}
           {plans.length > 0 && (
-            <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
+            <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 pt-1 pb-4">
               {[
                 t.payment.buy.features.unlimited,
                 t.payment.buy.features.model,
                 t.payment.buy.features.noRenewal,
               ].map((feature) => (
-                <li key={feature} className="flex items-center gap-1.5 text-xs">
+                <li key={feature} className="flex items-center gap-2 text-xs">
                   <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
                   <span>{feature}</span>
                 </li>
