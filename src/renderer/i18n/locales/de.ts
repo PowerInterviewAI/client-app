@@ -252,6 +252,7 @@ export const de: Translation = {
       title: 'Passwort',
       description: 'Ändere das Passwort deines Kontos',
       action: 'Passwort ändern',
+      codeSent: (email: string) => `Wir haben einen Code an ${email} gesendet. Füge ihn unten ein.`,
     },
     loadFailed:
       'Deine gespeicherten Daten konnten nicht geladen werden. Verbinde dich neu, bevor du sie bearbeitest.',
@@ -363,7 +364,6 @@ export const de: Translation = {
     submitting: 'Wird geändert…',
     mismatch: 'Die neuen Passwörter stimmen nicht überein.',
     succeeded: 'Passwort erfolgreich geändert',
-    failed: 'Passwort konnte nicht geändert werden',
   },
 
   hotkeys: {

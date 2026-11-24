@@ -245,6 +245,7 @@ export const ko: Translation = {
       title: '비밀번호',
       description: '계정 비밀번호를 변경합니다',
       action: '비밀번호 변경',
+      codeSent: (email: string) => `${email}(으)로 재설정 코드를 보냈습니다. 아래에 붙여넣으세요.`,
     },
     loadFailed: '저장된 정보를 불러오지 못했습니다. 수정하기 전에 다시 연결하세요.',
     save: '변경 사항 저장',
@@ -349,7 +350,6 @@ export const ko: Translation = {
     submitting: '변경 중…',
     mismatch: '새 비밀번호가 일치하지 않습니다.',
     succeeded: '비밀번호를 변경했습니다',
-    failed: '비밀번호를 변경하지 못했습니다',
   },
 
   hotkeys: {

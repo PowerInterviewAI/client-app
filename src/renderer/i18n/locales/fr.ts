@@ -258,6 +258,7 @@ export const fr: Translation = {
       title: 'Mot de passe',
       description: 'Modifiez le mot de passe de votre compte',
       action: 'Modifier le mot de passe',
+      codeSent: (email: string) => `Nous avons envoyé un code à ${email}. Collez-le ci-dessous.`,
     },
     loadFailed:
       'Impossible de charger vos informations enregistrées. Reconnectez-vous avant de modifier.',
@@ -370,7 +371,6 @@ export const fr: Translation = {
     submitting: 'Modification…',
     mismatch: 'Les nouveaux mots de passe ne correspondent pas.',
     succeeded: 'Mot de passe modifié',
-    failed: 'Impossible de modifier le mot de passe',
   },
 
   hotkeys: {

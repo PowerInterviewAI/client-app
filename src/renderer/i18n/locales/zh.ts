@@ -239,6 +239,7 @@ export const zh: Translation = {
       title: '密码',
       description: '修改你的账户密码',
       action: '修改密码',
+      codeSent: (email: string) => `我们已向 ${email} 发送了重置码，请粘贴到下方。`,
     },
     loadFailed: '无法加载已保存的资料。请重新连接后再编辑。',
     save: '保存更改',
@@ -339,7 +340,6 @@ export const zh: Translation = {
     submitting: '修改中…',
     mismatch: '两次输入的新密码不一致。',
     succeeded: '密码修改成功',
-    failed: '修改密码失败',
   },
 
   hotkeys: {

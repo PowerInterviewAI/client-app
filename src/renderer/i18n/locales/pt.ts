@@ -247,6 +247,7 @@ export const pt: Translation = {
       title: 'Senha',
       description: 'Altere a senha da sua conta',
       action: 'Alterar senha',
+      codeSent: (email: string) => `Enviamos um código para ${email}. Cole-o abaixo.`,
     },
     loadFailed: 'Não foi possível carregar seus dados salvos. Reconecte antes de editar.',
     save: 'Salvar alterações',
@@ -358,7 +359,6 @@ export const pt: Translation = {
     submitting: 'Alterando…',
     mismatch: 'As novas senhas não coincidem.',
     succeeded: 'Senha alterada com sucesso',
-    failed: 'Não foi possível alterar a senha',
   },
 
   hotkeys: {

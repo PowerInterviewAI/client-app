@@ -265,6 +265,7 @@ export const en = {
       title: 'Password',
       description: 'Change your account password',
       action: 'Change Password',
+      codeSent: (email: string) => `We sent a reset code to ${email}. Paste it below.`,
     },
     loadFailed: 'Could not load your saved details. Reconnect before editing.',
     save: 'Save Changes',
@@ -373,7 +374,6 @@ export const en = {
     submitting: 'Changing…',
     mismatch: 'The new passwords do not match.',
     succeeded: 'Password changed successfully',
-    failed: 'Failed to change password',
   },
 
   hotkeys: {

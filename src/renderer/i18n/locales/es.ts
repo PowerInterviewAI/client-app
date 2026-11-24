@@ -254,6 +254,7 @@ export const es: Translation = {
       title: 'Contraseña',
       description: 'Cambia la contraseña de tu cuenta',
       action: 'Cambiar contraseña',
+      codeSent: (email: string) => `Enviamos un código a ${email}. Pégalo abajo.`,
     },
     loadFailed: 'No se pudieron cargar tus datos guardados. Vuelve a conectarte antes de editar.',
     save: 'Guardar cambios',
@@ -366,7 +367,6 @@ export const es: Translation = {
     submitting: 'Cambiando…',
     mismatch: 'Las nuevas contraseñas no coinciden.',
     succeeded: 'Contraseña cambiada correctamente',
-    failed: 'No se pudo cambiar la contraseña',
   },
 
   hotkeys: {

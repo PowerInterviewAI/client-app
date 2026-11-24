@@ -1,9 +1,8 @@
 import { Check } from 'lucide-react';
-import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { ChangePasswordDialog } from '@/components/custom/change-password-dialog';
 import PageHeader from '@/components/custom/page-header';
+import { PasswordSection } from '@/components/custom/settings/password-section';
 import {
   ContextField,
   FullNameField,
@@ -13,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAccountForm } from '@/hooks/use-account-form';
 import { useAppState } from '@/hooks/use-app-state';
-import useAuth from '@/hooks/use-auth';
 import { useConfigStore } from '@/hooks/use-config-store';
 import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
@@ -31,10 +29,7 @@ export default function AccountPage() {
   const t = useT();
   const { config } = useConfigStore();
   const { appState } = useAppState();
-  const { changePassword, loading: authLoading, error: authError, setError } = useAuth();
   const form = useAccountForm();
-
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const handleSave = async () => {
     try {
@@ -46,31 +41,27 @@ export default function AccountPage() {
     }
   };
 
-  const handleChangePassword = async (
-    currentPassword: string,
-    newPassword: string
-  ): Promise<boolean> => {
-    try {
-      return await changePassword(currentPassword, newPassword);
-    } catch (err) {
-      console.error('Password change failed:', err);
-      return false;
-    }
-  };
-
   return (
     <div className="w-full flex flex-col bg-background">
       <PageHeader title={t.account.title} />
 
       <div className="flex-1 overflow-auto px-6 py-6 w-full max-w-2xl mx-auto space-y-6">
-        <div className="rounded-xl border bg-card p-4">
-          <p className="text-xs text-muted-foreground">{t.account.signedInAs}</p>
-          {/* The account's own email rather than the remembered credential, which is blank for
-              a user who declined "remember me" - see `AppState.accountEmail`. */}
-          <p className="truncate text-sm font-medium">
-            {appState?.accountEmail || config?.email || t.common.loading}
-          </p>
-        </div>
+        {/* Sign-in identity and password together, ahead of the profile. The password used to
+            sit between the profile fields and their Save button, which read as though Save
+            covered it - it does not, the section changes it on its own. */}
+        <section className="rounded-xl border bg-card">
+          <div className="p-4">
+            <p className="text-xs text-muted-foreground">{t.account.signedInAs}</p>
+            {/* The account's own email rather than the remembered credential, which is blank for
+                a user who declined "remember me" - see `AppState.accountEmail`. */}
+            <p className="truncate text-sm font-medium">
+              {appState?.accountEmail || config?.email || t.common.loading}
+            </p>
+          </div>
+          <div className="border-t">
+            <PasswordSection email={appState?.accountEmail || config?.email || ''} />
+          </div>
+        </section>
 
         {form.loading ? (
           // Shaped like the three fields it stands in for, so nothing jumps when they arrive.
@@ -97,23 +88,6 @@ export default function AccountPage() {
           </>
         )}
 
-        <div className="flex items-center justify-between rounded-xl border bg-card p-4">
-          <div>
-            <p className="text-sm font-medium">{t.account.password.title}</p>
-            <p className="text-xs text-muted-foreground">{t.account.password.description}</p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setError(null);
-              setIsChangePasswordOpen(true);
-            }}
-          >
-            {t.account.password.action}
-          </Button>
-        </div>
-
         <div className="flex items-center justify-end gap-2 border-t pt-3">
           {form.loading && (
             <p className="mr-auto text-xs text-muted-foreground">{t.common.loading}</p>
@@ -130,14 +104,6 @@ export default function AccountPage() {
           </Button>
         </div>
       </div>
-
-      <ChangePasswordDialog
-        open={isChangePasswordOpen}
-        onOpenChange={setIsChangePasswordOpen}
-        onChangePassword={handleChangePassword}
-        loading={authLoading}
-        error={authError}
-      />
     </div>
   );
 }

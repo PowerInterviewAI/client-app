@@ -271,6 +271,7 @@ export const ru: Translation = {
       title: 'Пароль',
       description: 'Смена пароля учётной записи',
       action: 'Изменить пароль',
+      codeSent: (email: string) => `Мы отправили код на ${email}. Вставьте его ниже.`,
     },
     loadFailed:
       'Не удалось загрузить сохранённые данные. Восстановите соединение, прежде чем вносить изменения.',
@@ -389,7 +390,6 @@ export const ru: Translation = {
     submitting: 'Меняем…',
     mismatch: 'Новые пароли не совпадают.',
     succeeded: 'Пароль изменён',
-    failed: 'Не удалось изменить пароль',
   },
 
   hotkeys: {

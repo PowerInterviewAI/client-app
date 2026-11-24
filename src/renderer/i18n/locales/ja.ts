@@ -246,6 +246,8 @@ export const ja: Translation = {
       title: 'パスワード',
       description: 'アカウントのパスワードを変更します',
       action: 'パスワードを変更',
+      codeSent: (email: string) =>
+        `${email} にリセットコードを送信しました。下に貼り付けてください。`,
     },
     loadFailed: '保存済みの情報を読み込めませんでした。編集する前に再接続してください。',
     save: '変更を保存',
@@ -354,7 +356,6 @@ export const ja: Translation = {
     submitting: '変更中…',
     mismatch: '新しいパスワードが一致しません。',
     succeeded: 'パスワードを変更しました',
-    failed: 'パスワードを変更できませんでした',
   },
 
   hotkeys: {
