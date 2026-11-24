@@ -131,7 +131,7 @@ export default function ContextReminderDialog({
         </DialogHeader>
 
         {!previewFailed && (
-          <dl className="space-y-2.5 rounded-md border bg-muted/40 p-3 text-sm">
+          <dl className="space-y-2.5 rounded-xl bg-muted p-3.5 text-sm dark:bg-white/[0.05]">
             <PreviewRow
               label={t.profileFields.fullName}
               value={preview?.fullName}

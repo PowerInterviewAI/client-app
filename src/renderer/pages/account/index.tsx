@@ -45,78 +45,76 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="flex w-full flex-1 flex-col overflow-hidden bg-background">
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <PageHeader title={t.account.title} />
+    // Scrolled by the route container, like Configuration, so the scrollbar stays hidden and
+    // the header stays sticky.
+    <div className="w-full flex flex-col bg-background">
+      <PageHeader title={t.account.title} />
 
-        <div className="flex-1 overflow-auto">
-          <div className="mx-auto w-full max-w-2xl space-y-5 px-6 py-6">
-            {/* Sign-in identity and password together, ahead of the profile. The password used
+      <div className="mx-auto w-full max-w-2xl space-y-5 px-6 py-6">
+        {/* Sign-in identity and password together, ahead of the profile. The password used
                 to sit between the profile fields and their Save button, which read as though
                 Save covered it - it does not, the section changes it on its own. */}
-            <section className="surface overflow-hidden rounded-2xl">
-              <div className="flex items-center gap-4 p-5">
-                <Avatar name={displayName} email={email} />
-                <div className="min-w-0">
-                  <p className="truncate text-base font-semibold tracking-tight">
-                    {displayName || email || t.common.loading}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {displayName ? email : t.account.signedInAs}
-                  </p>
-                </div>
-              </div>
-              <div className="border-t border-border/60">
-                <PasswordSection email={email} />
-              </div>
-            </section>
-
-            <section className="surface overflow-hidden rounded-2xl">
-              <div className="space-y-5 p-5">
-                {form.loading ? (
-                  // Shaped like the three fields it stands in for, so nothing jumps when they
-                  // arrive.
-                  <>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-9 w-full rounded-xl" />
-                    </div>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-20" />
-                      <Skeleton className="h-32 w-full rounded-xl" />
-                    </div>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-20" />
-                      <Skeleton className="h-24 w-full rounded-xl" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <FullNameField form={form} />
-                    <ProfileField form={form} />
-                    <ContextField form={form} />
-                  </>
-                )}
-              </div>
-
-              <div className="flex items-center justify-end gap-3 border-t border-border/60 px-5 py-3">
-                {form.loading && (
-                  <p className="mr-auto text-xs text-muted-foreground">{t.common.loading}</p>
-                )}
-                {!form.loading && !form.loaded && (
-                  <p className="mr-auto text-xs text-destructive">{t.account.loadFailed}</p>
-                )}
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={form.saving || form.loading || !form.loaded || !form.isComplete}
-                >
-                  {form.saving ? t.account.saving : t.account.save}
-                </Button>
-              </div>
-            </section>
+        <section className="surface overflow-hidden rounded-2xl">
+          <div className="flex items-center gap-4 p-5">
+            <Avatar name={displayName} email={email} />
+            <div className="min-w-0">
+              <p className="truncate text-base font-semibold tracking-tight">
+                {displayName || email || t.common.loading}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {displayName ? email : t.account.signedInAs}
+              </p>
+            </div>
           </div>
-        </div>
+          <div className="border-t border-border/60">
+            <PasswordSection email={email} />
+          </div>
+        </section>
+
+        <section className="surface overflow-hidden rounded-2xl">
+          <div className="space-y-5 p-5">
+            {form.loading ? (
+              // Shaped like the three fields it stands in for, so nothing jumps when they
+              // arrive.
+              <>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-9 w-full rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-32 w-full rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-24 w-full rounded-xl" />
+                </div>
+              </>
+            ) : (
+              <>
+                <FullNameField form={form} />
+                <ProfileField form={form} />
+                <ContextField form={form} />
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center justify-end gap-3 border-t border-border/60 px-5 py-3">
+            {form.loading && (
+              <p className="mr-auto text-xs text-muted-foreground">{t.common.loading}</p>
+            )}
+            {!form.loading && !form.loaded && (
+              <p className="mr-auto text-xs text-destructive">{t.account.loadFailed}</p>
+            )}
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={form.saving || form.loading || !form.loaded || !form.isComplete}
+            >
+              {form.saving ? t.account.saving : t.account.save}
+            </Button>
+          </div>
+        </section>
       </div>
     </div>
   );

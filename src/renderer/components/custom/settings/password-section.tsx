@@ -29,6 +29,8 @@ export function PasswordSection({ email }: { email: string }) {
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  // `loading` is shared by every request this hook makes, so it cannot say which one is running.
+  const [sendingCode, setSendingCode] = useState(false);
 
   const close = () => {
     setMode('idle');
@@ -53,13 +55,16 @@ export function PasswordSection({ email }: { email: string }) {
   const canSubmit =
     newPasswordReady && (mode === 'change' ? currentPassword !== '' : code.trim() !== '');
 
+  // A failure is reported by the inline `error`, which carries the server's reason; a toast
+  // beside it would repeat it.
   const sendCode = async () => {
     setError(null);
-    if (await forgotPassword(email)) {
-      return true;
+    setSendingCode(true);
+    try {
+      return await forgotPassword(email);
+    } finally {
+      setSendingCode(false);
     }
-    toast.error(t.auth.reset.sendFailed);
-    return false;
   };
 
   const startReset = async () => {
@@ -254,10 +259,10 @@ export function PasswordSection({ email }: { email: string }) {
         </Button>
         <Button type="submit" size="sm" disabled={!canSubmit || loading}>
           {mode === 'change'
-            ? loading
+            ? loading && !sendingCode
               ? t.changePassword.submitting
               : t.changePassword.submit
-            : loading
+            : loading && !sendingCode
               ? t.auth.reset.saving
               : t.auth.reset.setNewPassword}
         </Button>
