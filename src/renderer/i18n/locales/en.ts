@@ -787,6 +787,20 @@ export const en = {
 
   permissionGate: {
     title: 'Permissions Required',
+  contextReminder: {
+    title: 'No interview context set',
+    description:
+      'Suggestions will be written from your profile alone, without knowing the role you are interviewing for.',
+    hint: 'Add the job description, notes from earlier rounds, a cover letter, or anything else about this interview for answers tailored to it.',
+    edit: 'Add context',
+    proceed: 'Start anyway',
+    setTitle: 'Is your context up to date?',
+    setDescription:
+      'Suggestions are tailored to the context saved on your account. If it still describes an earlier interview, answers will be written for the wrong role.',
+    review: 'Review context',
+    confirm: 'It is up to date',
+  },
+
     microphone: 'Microphone',
     micChecking: 'Checking…',
     micGranted: 'Access granted',

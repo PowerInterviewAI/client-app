@@ -777,6 +777,20 @@ export const de: Translation = {
 
   permissionGate: {
     title: 'Berechtigungen erforderlich',
+  contextReminder: {
+    title: 'Kein Interviewkontext hinterlegt',
+    description:
+      'Vorschläge entstehen dann nur aus deinem Profil, ohne die Stelle zu kennen, für die du dich bewirbst.',
+    hint: 'Füge die Stellenbeschreibung, Notizen aus früheren Runden, ein Anschreiben oder andere Infos zu diesem Interview hinzu, damit die Antworten darauf zugeschnitten sind.',
+    edit: 'Kontext hinzufügen',
+    proceed: 'Trotzdem starten',
+    setTitle: 'Ist dein Kontext aktuell?',
+    setDescription:
+      'Vorschläge richten sich nach dem Kontext in deinem Konto. Beschreibt er noch ein früheres Interview, passen die Antworten zur falschen Stelle.',
+    review: 'Kontext prüfen',
+    confirm: 'Er ist aktuell',
+  },
+
     microphone: 'Mikrofon',
     micChecking: 'Wird geprüft…',
     micGranted: 'Zugriff erlaubt',

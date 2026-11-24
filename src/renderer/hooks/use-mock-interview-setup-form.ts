@@ -36,6 +36,7 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
   const [questionCount, setQuestionCount] = useState(8);
   const [starting, setStarting] = useState(false);
   const [headphoneNoticeOpen, setHeadphoneNoticeOpen] = useState(false);
+  const [contextReminderOpen, setContextReminderOpen] = useState(false);
 
   const credits = appState?.credits;
   const creditsPerMinute = appState?.creditsPerMinute;
@@ -109,8 +110,14 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
 
   const handleStartClick = () => {
     if (!checkCanStart()) return;
-    setHeadphoneNoticeOpen(true);
+    // The questions and the scoring are framed by the account's job context, which may still
+    // describe the last application rather than this one.
+    setContextReminderOpen(true);
   };
+
+  const confirmContext = () => setHeadphoneNoticeOpen(true);
+
+  const editContext = () => navigate('/account');
 
   return {
     seniority,
@@ -125,6 +132,11 @@ export function useMockInterviewSetupForm(onStart: (setup: MockInterviewSetup) =
     starting,
     headphoneNoticeOpen,
     setHeadphoneNoticeOpen,
+    hasContext: appState?.interviewConfig?.hasContextData ?? false,
+    contextReminderOpen,
+    setContextReminderOpen,
+    confirmContext,
+    editContext,
     handleStartClick,
     startAfterNotice,
   };

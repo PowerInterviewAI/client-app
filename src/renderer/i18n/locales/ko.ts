@@ -747,6 +747,19 @@ export const ko: Translation = {
 
   permissionGate: {
     title: '권한이 필요합니다',
+  contextReminder: {
+    title: '면접 컨텍스트가 설정되지 않았습니다',
+    description: '지원하는 직무를 모른 채 프로필만으로 제안이 작성됩니다.',
+    hint: '채용 공고, 이전 면접 메모, 자기소개서 등 이번 면접에 관한 정보를 추가하면 더 잘 맞는 답변을 받을 수 있습니다.',
+    edit: '컨텍스트 추가',
+    proceed: '그냥 시작',
+    setTitle: '컨텍스트가 최신인가요?',
+    setDescription:
+      '제안은 계정에 저장된 컨텍스트에 맞춰 작성됩니다. 이전 면접 내용이 그대로라면 다른 직무에 맞는 답변이 나옵니다.',
+    review: '컨텍스트 확인',
+    confirm: '최신입니다',
+  },
+
     microphone: '마이크',
     micChecking: '확인 중…',
     micGranted: '허용됨',

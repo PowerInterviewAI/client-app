@@ -774,6 +774,20 @@ export const es: Translation = {
   permissionGate: {
     title: 'Permisos necesarios',
     microphone: 'Micrófono',
+  contextReminder: {
+    title: 'No has añadido contexto de la entrevista',
+    description:
+      'Las sugerencias se basarán solo en tu perfil, sin conocer el puesto al que aspiras.',
+    hint: 'Añade la descripción del puesto, notas de rondas anteriores, una carta de presentación o cualquier otro dato de esta entrevista para recibir respuestas adaptadas.',
+    edit: 'Añadir contexto',
+    proceed: 'Empezar igualmente',
+    setTitle: '¿Tu contexto está actualizado?',
+    setDescription:
+      'Las sugerencias se adaptan al contexto guardado en tu cuenta. Si aún describe una entrevista anterior, las respuestas apuntarán al puesto equivocado.',
+    review: 'Revisar contexto',
+    confirm: 'Está actualizado',
+  },
+
     micChecking: 'Comprobando…',
     micGranted: 'Acceso concedido',
     micBlocked: 'Actívalo en Ajustes del Sistema y pulsa Comprobar de nuevo',

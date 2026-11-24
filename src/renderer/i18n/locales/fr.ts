@@ -778,6 +778,20 @@ export const fr: Translation = {
 
   permissionGate: {
     title: 'Autorisations requises',
+  contextReminder: {
+    title: 'Aucun contexte d’entretien',
+    description:
+      'Les suggestions seront rédigées à partir de votre profil seul, sans connaître le poste visé.',
+    hint: 'Ajoutez l’offre d’emploi, des notes des tours précédents, une lettre de motivation ou tout autre élément sur cet entretien pour des réponses adaptées.',
+    edit: 'Ajouter un contexte',
+    proceed: 'Démarrer quand même',
+    setTitle: 'Votre contexte est-il à jour ?',
+    setDescription:
+      'Les suggestions s’appuient sur le contexte enregistré dans votre compte. S’il décrit encore un entretien précédent, les réponses viseront le mauvais poste.',
+    review: 'Vérifier le contexte',
+    confirm: 'Il est à jour',
+  },
+
     microphone: 'Micro',
     micChecking: 'Vérification…',
     micGranted: 'Accès autorisé',

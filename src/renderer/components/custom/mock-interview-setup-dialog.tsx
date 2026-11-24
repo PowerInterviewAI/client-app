@@ -1,3 +1,4 @@
+import ContextReminderDialog from '@/components/custom/context-reminder-dialog';
 import HeadphoneNoticeDialog from '@/components/custom/headphone-notice-dialog';
 import { MockInterviewSetupFields } from '@/components/custom/mock-interview-setup-fields';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,11 @@ export function MockInterviewSetupDialog({
     starting,
     headphoneNoticeOpen,
     setHeadphoneNoticeOpen,
+    hasContext,
+    contextReminderOpen,
+    setContextReminderOpen,
+    confirmContext,
+    editContext,
     handleStartClick,
     startAfterNotice,
   } = form;
@@ -54,7 +60,10 @@ export function MockInterviewSetupDialog({
 
           Only `open` is computed; this component stays mounted either way, so the form state
           lives through the notice and comes back untouched if the candidate cancels out of it. */}
-      <Dialog open={open && !headphoneNoticeOpen} onOpenChange={onOpenChange}>
+      <Dialog
+        open={open && !headphoneNoticeOpen && !contextReminderOpen}
+        onOpenChange={onOpenChange}
+      >
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t.mock.setup.title}</DialogTitle>
@@ -73,6 +82,19 @@ export function MockInterviewSetupDialog({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* No onCancel: backing out returns to the setup form, which stays mounted underneath. */}
+      <ContextReminderDialog
+        open={contextReminderOpen}
+        onOpenChange={setContextReminderOpen}
+        hasContext={hasContext}
+        onProceed={confirmContext}
+        // The setup dialog is closed with it, or it would reopen in the commit that leaves home.
+        onEditContext={() => {
+          onOpenChange(false);
+          editContext();
+        }}
+      />
 
       <HeadphoneNoticeDialog
         open={headphoneNoticeOpen}

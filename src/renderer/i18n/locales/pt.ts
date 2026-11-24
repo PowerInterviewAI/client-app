@@ -759,6 +759,20 @@ export const pt: Translation = {
 
   permissionGate: {
     title: 'Permissões necessárias',
+  contextReminder: {
+    title: 'Nenhum contexto da entrevista',
+    description:
+      'As sugestões serão escritas só a partir do seu perfil, sem saber a vaga para a qual você está concorrendo.',
+    hint: 'Adicione a descrição da vaga, anotações de etapas anteriores, uma carta de apresentação ou qualquer outra informação sobre esta entrevista para respostas sob medida.',
+    edit: 'Adicionar contexto',
+    proceed: 'Começar assim mesmo',
+    setTitle: 'Seu contexto está atualizado?',
+    setDescription:
+      'As sugestões seguem o contexto salvo na sua conta. Se ele ainda descreve uma entrevista anterior, as respostas serão escritas para a vaga errada.',
+    review: 'Revisar contexto',
+    confirm: 'Está atualizado',
+  },
+
     microphone: 'Microfone',
     micChecking: 'Verificando…',
     micGranted: 'Acesso concedido',

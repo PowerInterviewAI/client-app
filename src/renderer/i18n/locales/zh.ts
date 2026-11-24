@@ -727,6 +727,19 @@ export const zh: Translation = {
 
   permissionGate: {
     title: '需要权限',
+  contextReminder: {
+    title: '尚未设置面试背景',
+    description: '建议将仅根据你的个人资料生成，而不了解你应聘的职位。',
+    hint: '添加职位描述、之前轮次的笔记、求职信或与本次面试相关的其他信息，以获得更有针对性的回答。',
+    edit: '添加背景',
+    proceed: '仍然开始',
+    setTitle: '面试背景是最新的吗？',
+    setDescription:
+      '建议会根据账户中保存的背景生成。如果它仍是上一场面试的内容，回答将针对错误的职位。',
+    review: '检查背景',
+    confirm: '已是最新',
+  },
+
     microphone: '麦克风',
     micChecking: '检查中…',
     micGranted: '已授权',

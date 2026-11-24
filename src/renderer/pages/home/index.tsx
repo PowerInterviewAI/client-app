@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AmbientBackground } from '@/components/custom/ambient-background';
+import ContextReminderDialog from '@/components/custom/context-reminder-dialog';
 import { MockInterviewSetupDialog } from '@/components/custom/mock-interview-setup-dialog';
 import { useAppState } from '@/hooks/use-app-state';
 import { useCommandPaletteStore } from '@/hooks/use-command-palette';
@@ -151,6 +152,7 @@ export default function HomePage() {
   );
 
   const [mockSetupOpen, setMockSetupOpen] = useState(false);
+  const [liveContextOpen, setLiveContextOpen] = useState(false);
 
   // "Practise again" on the mock report has nowhere of its own to configure the next session, so
   // it comes back here with a flag rather than making the candidate find the card again. Guarded
@@ -158,14 +160,21 @@ export default function HomePage() {
   // `/main`: a Back to this entry then finds nothing to reopen.
   const consumedNavKey = useRef<string | null>(null);
   useEffect(() => {
-    const navState = location.state as { openMockSetup?: boolean } | null;
-    if (!navState?.openMockSetup) return;
+    const navState = location.state as { openMockSetup?: boolean; openLiveStart?: boolean } | null;
+    if (!navState?.openMockSetup && !navState?.openLiveStart) return;
     if (consumedNavKey.current === location.key) return;
 
     // Consumed before the checks below, not after: the flag is spent either way, so that clearing
     // the router state cannot leave a stale request to reopen this dialog on a later Back.
     consumedNavKey.current = location.key;
     navigate(location.pathname, { replace: true, state: null });
+
+    // The command palette's live start, sent here so the context is confirmed before `/main`.
+    if (navState.openLiveStart) {
+      if (liveSessionActive) navigate('/main');
+      else if (!mockSessionActive) setLiveContextOpen(true);
+      return;
+    }
 
     if (liveSessionActive) return;
     // "Practise again" sits on a report the candidate is still reading when the backend can be
@@ -200,8 +209,10 @@ export default function HomePage() {
     // `/main`'s control panel runs the start sequence on arrival. Handed through router state
     // rather than started here so there is exactly one implementation of it. Already running,
     // this is just the way back to the interview.
+    // Asked here rather than on `/main`, so reviewing the context is a step to the account page
+    // and not a start abandoned halfway through on the live console.
     if (liveSessionActive) navigate('/main');
-    else navigate('/main', { state: { autoStartLive: true } });
+    else setLiveContextOpen(true);
   };
 
   // The dialog has already validated and shown its own headphone notice by the time this runs.
@@ -309,6 +320,14 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      <ContextReminderDialog
+        open={liveContextOpen}
+        onOpenChange={setLiveContextOpen}
+        hasContext={appState?.interviewConfig?.hasContextData ?? false}
+        onProceed={() => navigate('/main', { state: { autoStartLive: true } })}
+        onEditContext={() => navigate('/account')}
+      />
 
       <MockInterviewSetupDialog
         open={mockSetupOpen}

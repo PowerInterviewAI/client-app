@@ -759,6 +759,19 @@ export const ja: Translation = {
 
   permissionGate: {
     title: '権限が必要です',
+  contextReminder: {
+    title: '面接のコンテキストが未設定です',
+    description: '応募する職種がわからないまま、プロフィールだけを元に提案が作成されます。',
+    hint: '求人票、これまでの面接のメモ、カバーレターなど、この面接に関する情報を追加すると、より的確な回答になります。',
+    edit: 'コンテキストを追加',
+    proceed: 'このまま開始',
+    setTitle: 'コンテキストは最新ですか？',
+    setDescription:
+      '提案はアカウントに保存されたコンテキストに合わせて作成されます。以前の面接の内容のままだと、別の職種向けの回答になります。',
+    review: 'コンテキストを確認',
+    confirm: '最新です',
+  },
+
     microphone: 'マイク',
     micChecking: '確認中…',
     micGranted: '許可されています',
