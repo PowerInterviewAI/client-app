@@ -46,6 +46,7 @@ export async function run() {
   const view = appStateService.getRendererState();
   check('renderer view exposes fullName', view.interviewConfig.fullName === 'Jane');
   check('renderer view exposes hasProfileData', view.interviewConfig.hasProfileData === true);
+  check('renderer view exposes hasContextData', view.interviewConfig.hasContextData === true);
   check('renderer view drops profileData', !('profileData' in view.interviewConfig));
   check('renderer view drops context', !('context' in view.interviewConfig));
   check('renderer view keeps the loaded flag', view.interviewConfigLoaded === true);
@@ -88,6 +89,17 @@ export async function run() {
   check(
     'whitespace-only profile is not reported as set',
     appStateService.getRendererState().interviewConfig.hasProfileData === false
+  );
+  check(
+    'empty context is reported as unset',
+    appStateService.getRendererState().interviewConfig.hasContextData === false
+  );
+  appStateService.updateState({
+    interviewConfig: { fullName: 'Jane', profileData: 'cv', context: ' \n\t ' },
+  });
+  check(
+    'whitespace-only context is not reported as set',
+    appStateService.getRendererState().interviewConfig.hasContextData === false
   );
 
   // Clear resets the state through setPlaceholderState. It is the one mutator that used to skip
@@ -165,10 +177,7 @@ export async function run() {
   );
 
   appStateService.updateState({ creditsPerMinute: 12 });
-  check(
-    'creditsPerMinute is applied',
-    appStateService.getState().creditsPerMinute === 12
-  );
+  check('creditsPerMinute is applied', appStateService.getState().creditsPerMinute === 12);
   check(
     'creditsPerMinute reaches the renderer view',
     appStateService.getRendererState().creditsPerMinute === 12
@@ -178,10 +187,7 @@ export async function run() {
   const beforeRepeatedPing = sent.length;
   appStateService.updateState({ creditsPerMinute: 12 });
   appStateService.flushRenderer();
-  check(
-    'an unchanged creditsPerMinute does not rebroadcast',
-    sent.length === beforeRepeatedPing
-  );
+  check('an unchanged creditsPerMinute does not rebroadcast', sent.length === beforeRepeatedPing);
 
   return failures;
 }

@@ -86,6 +86,7 @@ export interface InterviewConfig {
 export interface InterviewConfigSummary {
   fullName: string;
   hasProfileData: boolean;
+  hasContextData: boolean;
 }
 
 export interface AppState {
