@@ -85,7 +85,14 @@
   --chart-3: #2a78d6;
   --chart-4: #4a3aa7;
   --chart-5: #e34948;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
+  /* Raised surfaces separate by a hairline ring and a soft drop, not by a border. */
+  --surface-shadow:
+    0 0 0 1px oklch(0 0 0 / 0.05), 0 1px 2px oklch(0 0 0 / 0.04),
+    0 10px 28px -14px oklch(0 0 0 / 0.16);
+  --overlay-shadow:
+    0 0 0 1px oklch(0 0 0 / 0.06), 0 12px 32px -8px oklch(0 0 0 / 0.22),
+    0 4px 10px -4px oklch(0 0 0 / 0.1);
   --sidebar: oklch(0.96 0.003 286);
   --sidebar-foreground: oklch(0.21 0.006 286);
   --sidebar-primary: oklch(0.56 0.144 51.2);
@@ -166,6 +173,12 @@
   --border: oklch(1 0 0 / 0.08);
   --input: oklch(1 0 0 / 0.11);
   --ring: oklch(0.762 0.162 60.9);
+  --surface-shadow:
+    0 0 0 1px oklch(1 0 0 / 0.06), inset 0 1px 0 oklch(1 0 0 / 0.04),
+    0 10px 28px -14px oklch(0 0 0 / 0.6);
+  --overlay-shadow:
+    0 0 0 1px oklch(1 0 0 / 0.08), inset 0 1px 0 oklch(1 0 0 / 0.05),
+    0 16px 40px -8px oklch(0 0 0 / 0.65);
   --chart-1: #d95926;
   --chart-2: #199e70;
   --chart-3: #256abf;
@@ -362,4 +375,16 @@
   .ambient-blob {
     animation: none;
   }
+}
+
+/* Cards, settings groups and panels: a filled, borderless raised surface. */
+@utility surface {
+  background-color: var(--card);
+  box-shadow: var(--surface-shadow);
+}
+
+/* Dialogs, menus, popovers and tooltips: one step above `surface`. */
+@utility surface-overlay {
+  background-color: var(--popover);
+  box-shadow: var(--overlay-shadow);
 }

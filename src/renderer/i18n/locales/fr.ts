@@ -248,11 +248,6 @@ export const fr: Translation = {
 
   account: {
     title: 'Compte',
-    completeness: {
-      title: (done: number, total: number) => `Profil complété : ${done} sur ${total}`,
-      complete: 'Profil complet',
-      hint: 'Les suggestions s’appuient sur votre profil et le poste. Plus vous en dites, plus elles vous ressemblent.',
-    },
     signedInAs: 'Connecté en tant que',
     password: {
       title: 'Mot de passe',

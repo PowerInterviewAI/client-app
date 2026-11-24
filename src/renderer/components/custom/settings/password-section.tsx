@@ -99,8 +99,11 @@ export function PasswordSection({ email }: { email: string }) {
 
   if (mode === 'idle') {
     return (
-      <div className="flex items-center justify-between gap-4 p-4">
-        <div className="min-w-0">
+      <div className="flex items-center gap-4 px-5 py-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground dark:bg-white/[0.07]">
+          <KeyRound className="h-4 w-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">{t.account.password.title}</p>
           <p className="text-xs text-muted-foreground">{t.account.password.description}</p>
         </div>
@@ -113,7 +116,6 @@ export function PasswordSection({ email }: { email: string }) {
             setMode('change');
           }}
         >
-          <KeyRound aria-hidden="true" />
           {t.account.password.action}
         </Button>
       </div>
@@ -121,12 +123,20 @@ export function PasswordSection({ email }: { email: string }) {
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-4 p-4">
-      <div>
-        <p className="text-sm font-medium">{t.changePassword.title}</p>
-        <p className="text-xs text-muted-foreground">
-          {mode === 'change' ? t.changePassword.description : t.account.password.codeSent(email)}
-        </p>
+    <form
+      onSubmit={submit}
+      className="grid gap-4 px-5 py-4 animate-in fade-in-0 slide-in-from-top-1 duration-200"
+    >
+      <div className="flex items-start gap-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          <KeyRound className="h-4 w-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium">{t.changePassword.title}</p>
+          <p className="text-xs text-muted-foreground">
+            {mode === 'change' ? t.changePassword.description : t.account.password.codeSent(email)}
+          </p>
+        </div>
       </div>
 
       {mode === 'change' ? (
@@ -137,7 +147,7 @@ export function PasswordSection({ email }: { email: string }) {
             </label>
             <button
               type="button"
-              className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground disabled:opacity-50"
+              className="text-xs font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
               onClick={startReset}
               disabled={loading || !email}
             >
@@ -164,7 +174,7 @@ export function PasswordSection({ email }: { email: string }) {
             </label>
             <button
               type="button"
-              className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground disabled:opacity-50"
+              className="text-xs font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
               disabled={loading}
               onClick={async () => {
                 if (await sendCode()) toast.success(t.auth.reset.codeResent);
@@ -186,7 +196,7 @@ export function PasswordSection({ email }: { email: string }) {
         </div>
       )}
 
-      <div className="grid gap-2 border-t pt-4">
+      <div className="grid gap-2 border-t border-border/60 pt-4">
         <label htmlFor="new-password" className="text-sm font-medium">
           {t.changePassword.next}
         </label>
@@ -232,7 +242,7 @@ export function PasswordSection({ email }: { email: string }) {
       {error && (
         <div
           role="alert"
-          className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {error}
         </div>

@@ -236,11 +236,6 @@ export const ja: Translation = {
 
   account: {
     title: 'アカウント',
-    completeness: {
-      title: (done: number, total: number) => `プロフィール入力 ${done}/${total}`,
-      complete: 'プロフィール入力完了',
-      hint: '提案はプロフィールと応募職種をもとに作成されます。詳しく書くほど、あなたらしい回答になります。',
-    },
     signedInAs: 'ログイン中のアカウント',
     password: {
       title: 'パスワード',

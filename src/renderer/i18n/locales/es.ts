@@ -244,11 +244,6 @@ export const es: Translation = {
 
   account: {
     title: 'Cuenta',
-    completeness: {
-      title: (done: number, total: number) => `Perfil completado: ${done} de ${total}`,
-      complete: 'Perfil completo',
-      hint: 'Las sugerencias se escriben a partir de tu perfil y del puesto. Cuanto más añadas, más sonarán como tú.',
-    },
     signedInAs: 'Sesión iniciada como',
     password: {
       title: 'Contraseña',

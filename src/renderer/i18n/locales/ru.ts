@@ -261,11 +261,6 @@ export const ru: Translation = {
 
   account: {
     title: 'Учётная запись',
-    completeness: {
-      title: (done: number, total: number) => `Профиль заполнен: ${done} из ${total}`,
-      complete: 'Профиль заполнен полностью',
-      hint: 'Подсказки строятся на вашем профиле и описании вакансии. Чем больше вы добавите, тем больше они будут похожи на вас.',
-    },
     signedInAs: 'Вы вошли как',
     password: {
       title: 'Пароль',

@@ -235,11 +235,6 @@ export const ko: Translation = {
 
   account: {
     title: '계정',
-    completeness: {
-      title: (done: number, total: number) => `프로필 ${done}/${total} 완료`,
-      complete: '프로필 작성 완료',
-      hint: '제안은 프로필과 지원 직무를 바탕으로 작성됩니다. 많이 입력할수록 더 나다운 답변이 됩니다.',
-    },
     signedInAs: '로그인 계정',
     password: {
       title: '비밀번호',

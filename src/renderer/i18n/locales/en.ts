@@ -255,11 +255,6 @@ export const en = {
 
   account: {
     title: 'Account',
-    completeness: {
-      title: (done: number, total: number) => `Profile ${done} of ${total} complete`,
-      complete: 'Profile complete',
-      hint: 'Suggestions are written from your profile and the role. The more you add, the more they sound like you.',
-    },
     signedInAs: 'Signed in as',
     password: {
       title: 'Password',

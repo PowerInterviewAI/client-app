@@ -242,11 +242,6 @@ export const de: Translation = {
 
   account: {
     title: 'Konto',
-    completeness: {
-      title: (done: number, total: number) => `Profil: ${done} von ${total} ausgefüllt`,
-      complete: 'Profil vollständig',
-      hint: 'Vorschläge basieren auf deinem Profil und der Stelle. Je mehr du angibst, desto mehr klingen sie nach dir.',
-    },
     signedInAs: 'Angemeldet als',
     password: {
       title: 'Passwort',

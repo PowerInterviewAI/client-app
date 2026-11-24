@@ -229,11 +229,6 @@ export const zh: Translation = {
 
   account: {
     title: '账户',
-    completeness: {
-      title: (done: number, total: number) => `资料完成度 ${done}/${total}`,
-      complete: '资料已完善',
-      hint: '建议根据你的资料和应聘职位生成。填写得越详细，回答就越像你。',
-    },
     signedInAs: '当前登录',
     password: {
       title: '密码',
