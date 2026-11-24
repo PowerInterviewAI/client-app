@@ -789,6 +789,7 @@ export const de: Translation = {
       'Vorschläge richten sich nach dem Kontext in deinem Konto. Beschreibt er noch ein früheres Interview, passen die Antworten zur falschen Stelle.',
     review: 'Kontext prüfen',
     confirm: 'Er ist aktuell',
+    notSet: 'Nicht hinterlegt',
   },
 
   permissionGate: {

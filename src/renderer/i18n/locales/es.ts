@@ -786,6 +786,7 @@ export const es: Translation = {
       'Las sugerencias se adaptan al contexto guardado en tu cuenta. Si aún describe una entrevista anterior, las respuestas apuntarán al puesto equivocado.',
     review: 'Revisar contexto',
     confirm: 'Está actualizado',
+    notSet: 'Sin definir',
   },
 
   permissionGate: {

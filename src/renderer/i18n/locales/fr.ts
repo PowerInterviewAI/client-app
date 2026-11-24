@@ -790,6 +790,7 @@ export const fr: Translation = {
       'Les suggestions s’appuient sur le contexte enregistré dans votre compte. S’il décrit encore un entretien précédent, les réponses viseront le mauvais poste.',
     review: 'Vérifier le contexte',
     confirm: 'Il est à jour',
+    notSet: 'Non renseigné',
   },
 
   permissionGate: {

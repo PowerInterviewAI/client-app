@@ -738,6 +738,7 @@ export const zh: Translation = {
       '建议会根据账户中保存的背景生成。如果它仍是上一场面试的内容，回答将针对错误的职位。',
     review: '检查背景',
     confirm: '已是最新',
+    notSet: '未设置',
   },
 
   permissionGate: {

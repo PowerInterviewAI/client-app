@@ -771,6 +771,7 @@ export const pt: Translation = {
       'As sugestões seguem o contexto salvo na sua conta. Se ele ainda descreve uma entrevista anterior, as respostas serão escritas para a vaga errada.',
     review: 'Revisar contexto',
     confirm: 'Está atualizado',
+    notSet: 'Não definido',
   },
 
   permissionGate: {

@@ -758,6 +758,7 @@ export const ko: Translation = {
       '제안은 계정에 저장된 컨텍스트에 맞춰 작성됩니다. 이전 면접 내용이 그대로라면 다른 직무에 맞는 답변이 나옵니다.',
     review: '컨텍스트 확인',
     confirm: '최신입니다',
+    notSet: '설정 안 됨',
   },
 
   permissionGate: {

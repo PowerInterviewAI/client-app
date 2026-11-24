@@ -799,6 +799,7 @@ export const en = {
       'Suggestions are tailored to the context saved on your account. If it still describes an earlier interview, answers will be written for the wrong role.',
     review: 'Review context',
     confirm: 'It is up to date',
+    notSet: 'Not set',
   },
 
   permissionGate: {

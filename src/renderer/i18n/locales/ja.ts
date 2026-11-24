@@ -770,6 +770,7 @@ export const ja: Translation = {
       '提案はアカウントに保存されたコンテキストに合わせて作成されます。以前の面接の内容のままだと、別の職種向けの回答になります。',
     review: 'コンテキストを確認',
     confirm: '最新です',
+    notSet: '未設定',
   },
 
   permissionGate: {
