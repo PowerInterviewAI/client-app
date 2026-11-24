@@ -257,9 +257,11 @@ export const ko: Translation = {
     fullName: '이름',
     fullNamePlaceholder: '면접에서 사용하는 이름',
     profile: '프로필',
+    profileKinds: '이력서, 경력기술서, LinkedIn 등',
     profilePlaceholder:
       '이력서, 링크드인 프로필 또는 짧은 자기소개를 붙여 넣으세요. 제안은 이 내용을 바탕으로 작성되므로 자세할수록 회원님다운 답변이 나옵니다.',
     context: '배경 정보',
+    contextKinds: '채용 공고, 대화 기록, 자기소개서 등',
     contextPlaceholder: '채용 공고, 직무 요건 등 준비 중인 면접에 관한 내용을 붙여 넣으세요.',
     limitReached: (max: number) =>
       `글자 수 제한(${max.toLocaleString('ko-KR')}자)에 도달했습니다. 초과한 내용은 추가되지 않았습니다.`,
@@ -745,8 +747,6 @@ export const ko: Translation = {
     proceed: '헤드폰을 착용했습니다',
   },
 
-  permissionGate: {
-    title: '권한이 필요합니다',
   contextReminder: {
     title: '면접 컨텍스트가 설정되지 않았습니다',
     description: '지원하는 직무를 모른 채 프로필만으로 제안이 작성됩니다.',
@@ -760,6 +760,8 @@ export const ko: Translation = {
     confirm: '최신입니다',
   },
 
+  permissionGate: {
+    title: '권한이 필요합니다',
     microphone: '마이크',
     micChecking: '확인 중…',
     micGranted: '허용됨',

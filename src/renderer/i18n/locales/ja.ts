@@ -258,9 +258,11 @@ export const ja: Translation = {
     fullName: 'フルネーム',
     fullNamePlaceholder: '面接で名乗る名前',
     profile: 'プロフィール',
+    profileKinds: '履歴書、職務経歴書、LinkedIn など',
     profilePlaceholder:
       '履歴書・職務経歴書、LinkedIn のプロフィール、または簡単な自己紹介を貼り付けてください。提案はこれをもとに作成されるので、詳しいほどあなたらしい回答になります。',
     context: '背景情報',
+    contextKinds: '求人票、これまでのやり取り、カバーレターなど',
     contextPlaceholder:
       '求人票、ポジションの要件など、準備中の面接に関する情報を貼り付けてください。',
     limitReached: (max: number) =>
@@ -757,8 +759,6 @@ export const ja: Translation = {
     proceed: 'ヘッドホンを装着しました',
   },
 
-  permissionGate: {
-    title: '権限が必要です',
   contextReminder: {
     title: '面接のコンテキストが未設定です',
     description: '応募する職種がわからないまま、プロフィールだけを元に提案が作成されます。',
@@ -772,6 +772,8 @@ export const ja: Translation = {
     confirm: '最新です',
   },
 
+  permissionGate: {
+    title: '権限が必要です',
     microphone: 'マイク',
     micChecking: '確認中…',
     micGranted: '許可されています',

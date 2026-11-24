@@ -259,9 +259,11 @@ export const pt: Translation = {
     fullName: 'Nome completo',
     fullNamePlaceholder: 'O nome que você usa na entrevista',
     profile: 'Perfil',
+    profileKinds: 'currículo, LinkedIn etc.',
     profilePlaceholder:
       'Cole seu currículo, seu perfil do LinkedIn ou uma breve biografia. As sugestões são escritas a partir disso, então quanto mais detalhes, mais as respostas soam como você.',
     context: 'Contexto',
+    contextKinds: 'descrição da vaga, histórico de conversas, carta de apresentação etc.',
     contextPlaceholder:
       'Cole a descrição da vaga, os requisitos do cargo ou qualquer outra coisa sobre a entrevista que você está preparando.',
     limitReached: (max: number) =>
@@ -757,8 +759,6 @@ export const pt: Translation = {
     proceed: 'Estou de fones',
   },
 
-  permissionGate: {
-    title: 'Permissões necessárias',
   contextReminder: {
     title: 'Nenhum contexto da entrevista',
     description:
@@ -773,6 +773,8 @@ export const pt: Translation = {
     confirm: 'Está atualizado',
   },
 
+  permissionGate: {
+    title: 'Permissões necessárias',
     microphone: 'Microfone',
     micChecking: 'Verificando…',
     micGranted: 'Acesso concedido',

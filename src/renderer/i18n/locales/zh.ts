@@ -251,9 +251,11 @@ export const zh: Translation = {
     fullName: '全名',
     fullNamePlaceholder: '你在面试中使用的名字',
     profile: '个人资料',
+    profileKinds: '简历、LinkedIn 等',
     profilePlaceholder:
       '粘贴你的简历、领英资料或简短的个人介绍。建议内容据此生成，细节越多，回答就越像你本人。',
     context: '背景信息',
+    contextKinds: '职位描述、沟通记录、求职信等',
     contextPlaceholder: '粘贴职位描述、岗位要求，或与你准备的面试相关的任何信息。',
     limitReached: (max: number) =>
       `已达到字数上限（${max.toLocaleString('zh-CN')}），超出的文字未添加。`,
@@ -725,8 +727,6 @@ export const zh: Translation = {
     proceed: '我已戴好耳机',
   },
 
-  permissionGate: {
-    title: '需要权限',
   contextReminder: {
     title: '尚未设置面试背景',
     description: '建议将仅根据你的个人资料生成，而不了解你应聘的职位。',
@@ -740,6 +740,8 @@ export const zh: Translation = {
     confirm: '已是最新',
   },
 
+  permissionGate: {
+    title: '需要权限',
     microphone: '麦克风',
     micChecking: '检查中…',
     micGranted: '已授权',

@@ -271,9 +271,11 @@ export const fr: Translation = {
     fullName: 'Nom complet',
     fullNamePlaceholder: 'Le nom que vous utilisez pendant l’entretien',
     profile: 'Profil',
+    profileKinds: 'CV, profil LinkedIn, etc.',
     profilePlaceholder:
       'Collez votre CV, votre profil LinkedIn ou une courte biographie. Les suggestions s’en inspirent : plus il y a de détails, plus les réponses vous ressemblent.',
     context: 'Contexte',
+    contextKinds: 'offre d’emploi, historique des échanges, lettre de motivation, etc.',
     contextPlaceholder:
       'Collez l’offre d’emploi, les exigences du poste ou toute autre information sur l’entretien que vous préparez.',
     limitReached: (max: number) =>
@@ -776,8 +778,6 @@ export const fr: Translation = {
     proceed: 'J’ai mis mon casque',
   },
 
-  permissionGate: {
-    title: 'Autorisations requises',
   contextReminder: {
     title: 'Aucun contexte d’entretien',
     description:
@@ -792,6 +792,8 @@ export const fr: Translation = {
     confirm: 'Il est à jour',
   },
 
+  permissionGate: {
+    title: 'Autorisations requises',
     microphone: 'Micro',
     micChecking: 'Vérification…',
     micGranted: 'Accès autorisé',

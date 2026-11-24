@@ -277,9 +277,11 @@ export const en = {
     fullName: 'Full name',
     fullNamePlaceholder: 'The name you go by in the interview',
     profile: 'Profile',
+    profileKinds: 'CV, resume, LinkedIn, etc.',
     profilePlaceholder:
       'Paste your CV/resume, LinkedIn profile, or a short bio. Suggestions are written from this, so more detail means answers that sound like you.',
     context: 'Context',
+    contextKinds: 'job description, conversation history, cover letter, etc.',
     contextPlaceholder:
       'Paste the job description, the role requirements, or anything else about the interview you are preparing for.',
     limitReached: (max: number) =>
@@ -785,8 +787,6 @@ export const en = {
     proceed: 'My headphones are on',
   },
 
-  permissionGate: {
-    title: 'Permissions Required',
   contextReminder: {
     title: 'No interview context set',
     description:
@@ -801,6 +801,8 @@ export const en = {
     confirm: 'It is up to date',
   },
 
+  permissionGate: {
+    title: 'Permissions Required',
     microphone: 'Microphone',
     micChecking: 'Checking…',
     micGranted: 'Access granted',

@@ -284,9 +284,11 @@ export const ru: Translation = {
     fullName: 'Полное имя',
     fullNamePlaceholder: 'Имя, которым вы называетесь на собеседовании',
     profile: 'Профиль',
+    profileKinds: 'резюме, профиль LinkedIn и т. п.',
     profilePlaceholder:
       'Вставьте резюме, профиль LinkedIn или короткую биографию. Подсказки пишутся на основе этого, поэтому чем больше деталей, тем больше ответы будут похожи на ваши.',
     context: 'Контекст',
+    contextKinds: 'описание вакансии, история переписки, сопроводительное письмо и т. п.',
     contextPlaceholder:
       'Вставьте описание вакансии, требования к роли или что-то ещё о собеседовании, к которому вы готовитесь.',
     limitReached: (max: number) =>
@@ -799,8 +801,6 @@ export const ru: Translation = {
     proceed: 'Наушники надеты',
   },
 
-  permissionGate: {
-    title: 'Нужны разрешения',
   contextReminder: {
     title: 'Контекст интервью не задан',
     description:
@@ -815,6 +815,8 @@ export const ru: Translation = {
     confirm: 'Он актуален',
   },
 
+  permissionGate: {
+    title: 'Нужны разрешения',
     microphone: 'Микрофон',
     micChecking: 'Проверяем…',
     micGranted: 'Доступ разрешён',

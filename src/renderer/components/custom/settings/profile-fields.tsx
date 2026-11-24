@@ -38,6 +38,11 @@ function FieldLimitNotice({ value, max }: { value: string; max: number }) {
   );
 }
 
+/** What belongs in a field, beside its name rather than in it, so the short name still reads alone. */
+function FieldKinds({ text }: { text: string }) {
+  return <span className="font-normal text-muted-foreground"> ({text})</span>;
+}
+
 function RequiredMark() {
   return (
     <span className="text-destructive" aria-hidden="true">
@@ -89,6 +94,7 @@ export function ProfileField({ form }: { form: AccountForm }) {
       <div className="flex items-baseline justify-between gap-2">
         <Label htmlFor="account-profile">
           {t.profileFields.profile}
+          <FieldKinds text={t.profileFields.profileKinds} />
           <RequiredMark />
         </Label>
         <FieldLimitNotice value={form.profileData} max={MAX_FIELD_LENGTH} />
@@ -100,7 +106,7 @@ export function ProfileField({ form }: { form: AccountForm }) {
         onChange={(e) => form.setProfileData(e.target.value)}
         disabled={form.loading}
         placeholder={t.profileFields.profilePlaceholder}
-        className="min-h-40 max-h-80 overflow-auto text-sm"
+        className="min-h-16 max-h-40 overflow-auto text-sm"
         maxLength={MAX_FIELD_LENGTH}
       />
     </div>
@@ -113,7 +119,10 @@ export function ContextField({ form }: { form: AccountForm }) {
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-2">
-        <Label htmlFor="account-context">{t.profileFields.context}</Label>
+        <Label htmlFor="account-context">
+          {t.profileFields.context}
+          <FieldKinds text={t.profileFields.contextKinds} />
+        </Label>
         <FieldLimitNotice value={form.context} max={MAX_FIELD_LENGTH} />
       </div>
       <Textarea
@@ -122,7 +131,7 @@ export function ContextField({ form }: { form: AccountForm }) {
         onChange={(e) => form.setContext(e.target.value)}
         disabled={form.loading}
         placeholder={t.profileFields.contextPlaceholder}
-        className="min-h-40 max-h-80 overflow-auto text-sm"
+        className="min-h-16 max-h-40 overflow-auto text-sm"
         maxLength={MAX_FIELD_LENGTH}
       />
     </div>

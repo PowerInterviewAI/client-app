@@ -265,9 +265,11 @@ export const de: Translation = {
     fullName: 'Vollständiger Name',
     fullNamePlaceholder: 'Der Name, unter dem du im Interview auftrittst',
     profile: 'Profil',
+    profileKinds: 'Lebenslauf, LinkedIn-Profil usw.',
     profilePlaceholder:
       'Füge deinen Lebenslauf, dein LinkedIn-Profil oder eine kurze Vorstellung ein. Die Vorschläge entstehen daraus - je mehr Details, desto mehr klingen die Antworten nach dir.',
     context: 'Kontext',
+    contextKinds: 'Stellenbeschreibung, Gesprächsverlauf, Anschreiben usw.',
     contextPlaceholder:
       'Füge die Stellenbeschreibung, die Anforderungen der Rolle oder alles andere zum Interview ein, auf das du dich vorbereitest.',
     limitReached: (max: number) =>
@@ -775,8 +777,6 @@ export const de: Translation = {
     proceed: 'Meine Kopfhörer sind auf',
   },
 
-  permissionGate: {
-    title: 'Berechtigungen erforderlich',
   contextReminder: {
     title: 'Kein Interviewkontext hinterlegt',
     description:
@@ -791,6 +791,8 @@ export const de: Translation = {
     confirm: 'Er ist aktuell',
   },
 
+  permissionGate: {
+    title: 'Berechtigungen erforderlich',
     microphone: 'Mikrofon',
     micChecking: 'Wird geprüft…',
     micGranted: 'Zugriff erlaubt',
