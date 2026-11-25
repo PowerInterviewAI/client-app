@@ -218,7 +218,7 @@ export default function SubscriptionTab({
                   className={cn(
                     'relative flex flex-col gap-3 py-4 transition-all duration-150',
                     isPopular
-                      ? 'border-primary/60 bg-gradient-to-b from-primary/[0.10] to-card shadow-lg hover:shadow-xl'
+                      ? 'border-primary/60 bg-linear-to-b from-primary/10 to-card shadow-lg hover:shadow-xl'
                       : 'shadow-sm hover:shadow-lg',
                     isSelected
                       ? 'ring-2 ring-primary bg-primary/5 shadow-xl -translate-y-0.5'
