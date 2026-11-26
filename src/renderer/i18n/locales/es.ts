@@ -600,7 +600,6 @@ export const es: Translation = {
     transcriptionHidden: (combo: string) => `Transcripción: oculta (${combo})`,
     showHotkeys: 'Ver atajos',
     showHotkeysLabel: 'Ver los atajos de teclado',
-    showHotkeysTitle: 'Ver los atajos de teclado (?)',
   },
 
   runningIndicator: {

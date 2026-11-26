@@ -557,7 +557,6 @@ export const zh: Translation = {
     transcriptionHidden: (combo: string) => `转录：隐藏（${combo}）`,
     showHotkeys: '显示快捷键',
     showHotkeysLabel: '显示键盘快捷键',
-    showHotkeysTitle: '显示键盘快捷键（?）',
   },
 
   runningIndicator: {

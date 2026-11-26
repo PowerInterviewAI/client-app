@@ -604,7 +604,6 @@ export const fr: Translation = {
     transcriptionHidden: (combo: string) => `Transcription : masquée (${combo})`,
     showHotkeys: 'Raccourcis',
     showHotkeysLabel: 'Afficher les raccourcis clavier',
-    showHotkeysTitle: 'Afficher les raccourcis clavier (?)',
   },
 
   runningIndicator: {

@@ -585,7 +585,6 @@ export const pt: Translation = {
     transcriptionHidden: (combo: string) => `Transcrição: oculta (${combo})`,
     showHotkeys: 'Ver atalhos',
     showHotkeysLabel: 'Ver os atalhos de teclado',
-    showHotkeysTitle: 'Ver os atalhos de teclado (?)',
   },
 
   runningIndicator: {

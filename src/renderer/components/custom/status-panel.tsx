@@ -1,5 +1,6 @@
 import { Captions, CaptionsOff, Keyboard, ListChecks, Route } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import CreditsDisplay from '@/components/custom/credits-display';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -11,27 +12,8 @@ import type { SubscriptionSummary } from '@/lib/subscription';
 import { cn } from '@/lib/utils';
 import { RunningState } from '@/types/app-state';
 
-import { HotkeyCheatsheetDialog } from './hotkey-cheatsheet';
+import { CompactHotkeyCheatsheet } from './hotkey-cheatsheet';
 import { RunningIndicator } from './running-indicator';
-
-/**
- * Renderer-local, not a registered Hotkey: it only needs to work while this window has focus,
- * unlike the globalShortcut-backed ones in lib/hotkeys.ts that must also fire in stealth mode.
- */
-function useHotkeyCheatsheetShortcut(onOpen: () => void) {
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key !== '?' || e.metaKey || e.ctrlKey || e.altKey) return;
-      const target = e.target as HTMLElement | null;
-      const tag = target?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return;
-      e.preventDefault();
-      onOpen();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onOpen]);
-}
 
 interface StatusPanelProps {
   runningState: RunningState;
@@ -61,7 +43,6 @@ export default function StatusPanel({
   const { hintOnly } = useSuggestionMode();
   const { visible: transcriptVisible } = useTranscriptPanel();
   const [hotkeysOpen, setHotkeysOpen] = useState(false);
-  useHotkeyCheatsheetShortcut(() => setHotkeysOpen(true));
 
   return (
     <div id="status-panel" className="flex items-center justify-between text-muted-foreground p-1">
@@ -116,15 +97,28 @@ export default function StatusPanel({
         </TooltipContent>
       </Tooltip>
       <div className="flex-1" />
-      <button
+      {/* Opened by hover, not click. This panel only renders in stealth, where the window ignores
+          clicks and cannot take focus - only forwarded mouse moves reach it. The overlay is
+          pointer-events-none so the trigger keeps its hover underneath it; a real modal overlay
+          would take the hover, close the panel, and reopen it on the next mouse move. */}
+      <div
         className="h-6 flex items-center justify-center rounded hover:bg-muted text-xs font-medium gap-1 px-2"
         aria-label={t.statusPanel.showHotkeysLabel}
-        title={t.statusPanel.showHotkeysTitle}
-        onClick={() => setHotkeysOpen(true)}
+        onMouseEnter={() => setHotkeysOpen(true)}
+        onMouseLeave={() => setHotkeysOpen(false)}
       >
         <Keyboard className="h-4 w-4" /> {t.statusPanel.showHotkeys}
-      </button>
-      <HotkeyCheatsheetDialog open={hotkeysOpen} onOpenChange={setHotkeysOpen} />
+      </div>
+      {hotkeysOpen &&
+        createPortal(
+          <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 animate-in fade-in-0">
+            <div className="surface-overlay text-popover-foreground w-full max-w-2xl max-h-full overflow-hidden rounded-xl p-3 animate-in zoom-in-95">
+              <h3 className="mb-2 text-sm font-semibold">{t.hotkeys.dialogTitle}</h3>
+              <CompactHotkeyCheatsheet />
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

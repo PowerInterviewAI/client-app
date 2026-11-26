@@ -587,7 +587,6 @@ export const ja: Translation = {
     transcriptionHidden: (combo: string) => `文字起こし：非表示（${combo}）`,
     showHotkeys: 'ショートカット',
     showHotkeysLabel: 'キーボードショートカットを表示',
-    showHotkeysTitle: 'キーボードショートカットを表示（?）',
   },
 
   runningIndicator: {

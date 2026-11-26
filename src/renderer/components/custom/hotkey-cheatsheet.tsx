@@ -22,8 +22,8 @@ const comboClass = (hk: Hotkey) =>
   );
 
 /**
- * The full hotkey reference, grouped and described. Shared so the control bar's status panel and
- * the documentation dialog can't drift out of sync the way the two independent copies they
+ * The full hotkey reference, grouped and described. Shared so the stealth status panel's hover
+ * card and the documentation dialog can't drift out of sync the way the two independent copies they
  * replace already had.
  *
  * One grid for the whole sheet rather than a stack of rows per group, and that is the point of
@@ -68,6 +68,38 @@ export function HotkeyCheatsheet() {
   );
 }
 
+/**
+ * Titles only, in two columns of groups where the window allows. For the stealth status panel,
+ * which cannot scroll - wheel events do not reach a click-through window - so the full sheet's
+ * descriptions ran off the bottom of a stealth-sized window with no way to reach them.
+ */
+export function CompactHotkeyCheatsheet() {
+  const t = useT();
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2">
+      {HOTKEY_GROUPS.map((group) => (
+        <div
+          key={group.id}
+          className="grid grid-cols-[max-content_minmax(0,1fr)] content-start items-center gap-x-2 gap-y-1"
+        >
+          <h4 className="col-span-2 text-[10px] font-semibold uppercase text-muted-foreground">
+            {t.hotkeys.groups[group.id]}
+          </h4>
+          {group.keys.map((hk) => (
+            <Fragment key={hk}>
+              <div className={cn(comboClass(hk), 'px-1.5 py-0.5 text-[10px]')}>
+                {HOTKEYS[hk].combo}
+              </div>
+              <p className="text-xs leading-tight truncate">{t.hotkeys.keys[hk].title}</p>
+            </Fragment>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 interface HotkeyCheatsheetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -81,10 +113,8 @@ export function HotkeyCheatsheetDialog({ open, onOpenChange }: HotkeyCheatsheetD
       <DialogContent className="max-w-lg w-full max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t.hotkeys.dialogTitle}</DialogTitle>
-          {/* Deliberately does not promise a `?` shortcut. That one is registered by
-              `StatusPanel`, which only renders in stealth mode - so "press ? anytime" was untrue
-              everywhere else this dialog is opened from: the configuration page and the command
-              palette. The status panel's own button carries the hint where it does work. */}
+          {/* Deliberately does not promise a `?` shortcut: no screen that opens this dialog
+              registers one. */}
           <DialogDescription>{t.hotkeys.dialogDescription}</DialogDescription>
         </DialogHeader>
         <div className="overflow-auto flex-1">

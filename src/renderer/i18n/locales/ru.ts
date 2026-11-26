@@ -625,7 +625,6 @@ export const ru: Translation = {
     transcriptionHidden: (combo: string) => `Расшифровка: скрыта (${combo})`,
     showHotkeys: 'Горячие клавиши',
     showHotkeysLabel: 'Показать горячие клавиши',
-    showHotkeysTitle: 'Показать горячие клавиши (?)',
   },
 
   runningIndicator: {

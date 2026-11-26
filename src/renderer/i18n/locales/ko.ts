@@ -575,7 +575,6 @@ export const ko: Translation = {
     transcriptionHidden: (combo: string) => `전사: 숨김 (${combo})`,
     showHotkeys: '단축키 보기',
     showHotkeysLabel: '키보드 단축키 보기',
-    showHotkeysTitle: '키보드 단축키 보기 (?)',
   },
 
   runningIndicator: {

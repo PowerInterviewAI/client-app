@@ -604,7 +604,6 @@ export const de: Translation = {
     transcriptionHidden: (combo: string) => `Transkription: ausgeblendet (${combo})`,
     showHotkeys: 'Kürzel anzeigen',
     showHotkeysLabel: 'Tastenkürzel anzeigen',
-    showHotkeysTitle: 'Tastenkürzel anzeigen (?)',
   },
 
   runningIndicator: {
