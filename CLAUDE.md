@@ -577,8 +577,8 @@ The ref is seeded from whatever is on the session at mount, which is an earlier 
 `start()` clears it, but this route mounts before it runs.
 
 **Stealth mode lives on the live control bar and nowhere else.** It was in the titlebar menu and
-the command palette, both reachable from the login screen and the payment page, where hiding the
-window from a screen capture answers a question nobody is asking - the screen share it exists for
+the command palette, both reachable from the login screen and the payment page, where pulling the
+window off the taskbar and making it click-through answers a question nobody is asking - the screen share it exists for
 only happens during a real call. Entering is a click; leaving is the global hotkey, because that
 bar does not render in stealth mode, which is the point of it.
 
@@ -606,7 +606,7 @@ second one at the end of every session.
 **And a session that ends takes stealth with it.** `refreshWindowSurfaces()` drops it when the
 running state leaves `Running`, which is the one place in main every start and end passes through.
 The renderer's stop path already asked for that, but it is one of several ways a session ends, and
-any of the others missing it leaves the window click-through, invisible to a screen capture and
+any of the others missing it leaves the window click-through, off the taskbar and
 unfocusable, with no interview on screen to explain why.
 
 ### The mock interview turn
@@ -786,7 +786,11 @@ The Dock half has a failure mode of its own: **macOS drops a Dock call made with
 
 Whether the *shell* actually acts on `setSkipTaskbar` is not something a unit test can reach, and it fails without an error. `test/manual/taskbar-probe.mjs` drives the real service in a real Electron process and reads the taskbar back through UI Automation - Windows only, run by hand (`pnpm exec electron test/manual/taskbar-probe.mjs`), deliberately not in `test/run.mjs`.
 
-Stealth mode hides the window from screen capture via `setContentProtection`. The main process emits `stealth-changed`; the preload script toggles a `stealth` CSS class on `document.body`. Content protection is on by default. The `allowScreenCapture` setting (Configuration, off by default) lifts it outside stealth mode, and so does `--disable-content-protection` at launch (dev/testing only). Stealth always protects, whatever either says: a window made capturable for a demo must not stay capturable on the screen share stealth exists for. `applyContentProtection()` runs inside `applySurfaceVisibility()` so the setting applies live and every stealth toggle re-evaluates it, and it skips no-op calls like the z-order does. The app's own action-suggestion screenshot goes through `withContentProtection()`, which protects the window for the capture and waits `CAPTURE_PROTECTION_SETTLE_MS` when it had to switch: the setting is about other apps seeing the window, and that screenshot exists to show the model what is behind it - with the window in it, it can cover the question and feed the model its own earlier answers. `test/content-protection.test.mjs` pins it.
+Stealth mode does **not** decide screen capture. The main process emits `stealth-changed`; the preload script toggles a `stealth` CSS class on `document.body`, and stealth means taskbar/Dock hiding, the on-top pin and click-through - nothing about capture. Whether other apps can capture the window is the `allowScreenCapture` setting alone (Configuration, off by default), applied through `setContentProtection` by `applyContentProtection()` inside `applySurfaceVisibility()`, so the setting applies live and skips no-op calls like the z-order does. Stealth used to force protection on, which implied a promise the OS does not keep: on macOS `setContentProtection` sets `NSWindowSharingNone`, and apps built on ScreenCaptureKit (newer recorders, several meeting apps) capture the window anyway, by design. The old `--disable-content-protection` launch flag is gone with it.
+
+The app is honest about it instead. `useScreenCaptureStatus()` reports `capturable` (setting on), `protected` (setting off on Windows) or `limited` (setting off anywhere else - macOS for the ScreenCaptureKit reason, Linux because Electron has no protection there at all). Anything but `protected` raises `ScreenCaptureNoticeDialog` before a live start - after the headphone notice, before the save prompt, with Cancel going home the same way - offering *Hide and start* (turns the setting off) beside *Start anyway*. During the session `ScreenCaptureBadge` sits on the control bar and in the stealth `StatusPanel` and shows all three states - red, amber, and a green "Invisible to capture" - so protection can be confirmed at a glance rather than inferred from a missing warning. Green is only ever shown where the OS honours the protection, which is why macOS reads as amber. `test/screen-capture-notice.test.mjs` pins the ordering and both badges.
+
+The app's own action-suggestion screenshot still goes through `withContentProtection()`, which protects the window for the capture and waits `CAPTURE_PROTECTION_SETTLE_MS` when it had to switch: the setting is about other apps seeing the window, and that screenshot exists to show the model what is behind it - with the window in it, it can cover the question and feed the model its own earlier answers. `test/content-protection.test.mjs` pins that stealth leaves protection alone and that the own capture still protects.
 
 Background throttling is disabled globally (via `app.commandLine` switches and `backgroundThrottling: false` in `webPreferences`) so audio keeps running when the window is occluded.
 

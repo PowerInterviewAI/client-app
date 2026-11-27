@@ -329,7 +329,7 @@ export const de: Translation = {
   allowScreenCaptureField: {
     label: 'Bildschirmaufnahme erlauben',
     description:
-      'Lässt Bildschirmfreigaben und Aufnahmen das App-Fenster sehen. Der Tarnmodus verbirgt es immer.',
+      'Lässt Bildschirmfreigaben und Aufnahmen das App-Fenster sehen. Gilt auch im Tarnmodus.',
   },
   mockHintsField: {
     label: 'Hinweise in Probeinterviews anzeigen',
@@ -380,7 +380,7 @@ export const de: Translation = {
       ToggleStealth: {
         title: 'Tarnmodus',
         description:
-          'Verbirgt die App während eines Live-Interviews vor der Bildschirmaufnahme. Dieselben Tasten holen sie zurück.',
+          'Macht das Fenster während eines Live-Interviews zu einem durchklickbaren Overlay ohne Taskleistensymbol. Dieselben Tasten holen es zurück.',
       },
       Opacity: {
         title: 'Deckkraft',
@@ -575,7 +575,7 @@ export const de: Translation = {
     stealthUnavailable:
       'Verfügbar, sobald das Live-Interview läuft - noch gibt es nichts zu verbergen.',
     stealthAvailable:
-      'Verbirgt die App vor der Bildschirmaufnahme. Dasselbe Kürzel holt sie zurück.',
+      'Macht das Fenster zu einem durchklickbaren Overlay ohne Taskleistensymbol. Dasselbe Kürzel holt es zurück.',
     captureScreenshot: 'Screenshot aufnehmen',
     captureScreenshotTooltip: 'Screenshot aufnehmen',
     captureFailed: 'Screenshot konnte nicht aufgenommen werden',
@@ -755,6 +755,26 @@ export const de: Translation = {
         discard: 'Verwerfen und zur Startseite',
       },
     },
+  },
+
+  screenCapture: {
+    capturableLabel: 'Aufnahme sichtbar',
+    capturableHint:
+      'Bildschirmfreigaben und Aufnahmen sehen dieses Fenster. Deaktiviere „Bildschirmaufnahme erlauben“ in den Einstellungen, um es zu verbergen.',
+    limitedLabel: 'Schutz begrenzt',
+    limitedHint:
+      'Vor den meisten Aufnahmen verborgen, aber unter macOS können neuere Rekorder und manche Meeting-Apps dieses Fenster trotzdem sehen.',
+    protectedLabel: 'Für Aufnahmen unsichtbar',
+    protectedHint: 'Bildschirmfreigaben und Aufnahmen können dieses Fenster nicht sehen.',
+    capturableTitle: 'Bildschirmfreigaben sehen dieses Fenster',
+    capturableDescription:
+      'Die Bildschirmaufnahme ist erlaubt. Wer deine Freigabe oder Aufnahme sieht, sieht auch die App - auch im Tarnmodus.',
+    limitedTitle: 'Verbergen ist unter macOS begrenzt',
+    limitedDescription:
+      'Das Fenster ist vor Aufnahmen geschützt, aber macOS lässt neuere Rekorder und manche Meeting-Apps es trotzdem aufnehmen. Rechne damit, dass ein geteilter Bildschirm es zeigt.',
+    startAnyway: 'Trotzdem starten',
+    hideAndStart: 'Verbergen und starten',
+    start: 'Starten',
   },
 
   headphoneNotice: {

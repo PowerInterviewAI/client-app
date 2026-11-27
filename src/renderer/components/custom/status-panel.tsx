@@ -14,6 +14,7 @@ import { RunningState } from '@/types/app-state';
 
 import { CompactHotkeyCheatsheet } from './hotkey-cheatsheet';
 import { RunningIndicator } from './running-indicator';
+import { ScreenCaptureBadge } from './screen-capture-badge';
 
 interface StatusPanelProps {
   runningState: RunningState;
@@ -96,6 +97,7 @@ export default function StatusPanel({
           </p>
         </TooltipContent>
       </Tooltip>
+      <ScreenCaptureBadge variant="status" className="ml-1" />
       <div className="flex-1" />
       {/* Opened by hover, not click. This panel only renders in stealth, where the window ignores
           clicks and cannot take focus - only forwarded mouse moves reach it. The overlay is

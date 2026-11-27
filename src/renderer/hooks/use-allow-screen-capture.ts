@@ -5,7 +5,7 @@ import { currentTranslation } from '@/i18n';
 
 import { useConfigStore } from './use-config-store';
 
-/** Whether the main window may appear in screen capture outside stealth, plus a persisting setter. */
+/** Whether the main window may appear in screen capture, plus a persisting setter. */
 export function useAllowScreenCapture() {
   const { config } = useConfigStore();
 

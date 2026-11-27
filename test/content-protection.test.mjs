@@ -1,7 +1,7 @@
 /**
- * Content protection follows the `allowScreenCapture` setting, and stealth overrides it. The
- * override is the half a later change could quietly drop: a window the user made capturable for
- * a demo would then stay capturable in stealth mode, on the screen share stealth exists for.
+ * Content protection follows the `allowScreenCapture` setting and nothing else. Stealth used to
+ * override it, which implied a promise the OS does not keep (macOS ScreenCaptureKit ignores the
+ * protection), so the renderer now warns about a capturable window instead of stealth hiding it.
  */
 import { createChecker, loadMainAs } from './helpers.mjs';
 
@@ -38,10 +38,10 @@ export async function run() {
   check('an unchanged setting is not re-applied', protection.length === calls);
 
   windowControl.enableStealth();
-  check('stealth protects a capturable window', protection.at(-1) === true);
+  check('stealth leaves a capturable window capturable', protection.at(-1) === false);
 
   windowControl.disableStealth();
-  check('leaving stealth returns to the setting', protection.at(-1) === false);
+  check('leaving stealth leaves the setting in charge', protection.at(-1) === false);
 
   // The app's own screenshot is of what is behind the window, so it protects the window for the
   // capture even when the user allowed other apps to see it, and settles before capturing.

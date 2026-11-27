@@ -10,6 +10,7 @@ import { useEndLiveSession } from '@/hooks/use-end-live-session';
 import useIsStealthMode from '@/hooks/use-is-stealth-mode';
 import { useLowBalanceWarning } from '@/hooks/use-low-balance-warning';
 import { useSaveHistoryGuard } from '@/hooks/use-save-history-guard';
+import { useScreenCaptureStatus } from '@/hooks/use-screen-capture-status';
 import { useT } from '@/i18n';
 import { isMac } from '@/lib/consts';
 import { canStartSession } from '@/lib/credit-gate';
@@ -19,6 +20,8 @@ import { RunningState } from '@/types/app-state';
 
 import HeadphoneNoticeDialog from '../headphone-notice-dialog';
 import PermissionGateDialog from '../permission-gate-dialog';
+import { ScreenCaptureBadge } from '../screen-capture-badge';
+import ScreenCaptureNoticeDialog from '../screen-capture-notice-dialog';
 import ZoomControl from '../zoom-control';
 import { AudioGroup } from './audio-group';
 import { LanguageGroup } from './language-group';
@@ -39,6 +42,8 @@ export default function ControlPanel() {
   const { confirmDiscard } = useSaveHistoryGuard();
   const [permGateOpen, setPermGateOpen] = useState(false);
   const [headphoneNoticeOpen, setHeadphoneNoticeOpen] = useState(false);
+  const [captureNoticeOpen, setCaptureNoticeOpen] = useState(false);
+  const captureStatus = useScreenCaptureStatus();
   const [returnHomePending, setReturnHomePending] = useState(false);
 
   const { devices: audioInputDevices, ready: audioDevicesReady } = useAudioInputDevices();
@@ -225,8 +230,18 @@ export default function ControlPanel() {
     if (returnHomePending && runningState === RunningState.Idle) navigate('/');
   }, [returnHomePending, runningState, navigate]);
 
-  // Everything after the headphone notice. Split out so the notice can hand the start back once
-  // the user acknowledges it, without duplicating what follows.
+  // Second notice, after headphones: a screen share is the other thing that can go wrong
+  // silently, and it is decided by a setting the user may have turned on and forgotten.
+  const handleHeadphonesConfirmed = () => {
+    if (captureStatus === 'protected') {
+      void startAfterNotice();
+      return;
+    }
+    setCaptureNoticeOpen(true);
+  };
+
+  // Everything after the notices. Split out so they can hand the start back once the user
+  // acknowledges them, without duplicating what follows.
   const startAfterNotice = async () => {
     // `startAssistant` opens with `clearAll()`, so the previous interview is gone the moment
     // this goes ahead. Asked before the permission gate rather than after: a user who is about
@@ -348,6 +363,7 @@ export default function ControlPanel() {
         {/* Status, then view: whether the session can hear sits beside zoom at the right edge,
             apart from the controls, because it is something to glance at rather than press. */}
         <div className="ml-auto flex items-center gap-2">
+          {runningState === RunningState.Running && <ScreenCaptureBadge variant="bar" />}
           <LiveSignal />
           <ZoomControl />
         </div>
@@ -356,9 +372,19 @@ export default function ControlPanel() {
       <HeadphoneNoticeDialog
         open={headphoneNoticeOpen}
         onOpenChange={setHeadphoneNoticeOpen}
-        onProceed={() => void startAfterNotice()}
+        onProceed={handleHeadphonesConfirmed}
         onCancel={handleStartCancelled}
       />
+
+      {captureStatus !== 'protected' && (
+        <ScreenCaptureNoticeDialog
+          open={captureNoticeOpen}
+          status={captureStatus}
+          onOpenChange={setCaptureNoticeOpen}
+          onProceed={() => void startAfterNotice()}
+          onCancel={handleStartCancelled}
+        />
+      )}
 
       {isMac && (
         <PermissionGateDialog

@@ -34,10 +34,6 @@ let _stealth = configStore.getStealth();
 let _hideTaskbarWhileRunning = readHideTaskbarSetting();
 let _allowScreenCapture = readAllowScreenCaptureSetting();
 
-// Dev/testing override, kept from before the setting existed: launching with it allows capture
-// outside stealth whatever the setting says.
-const captureForcedByFlag = process.argv.includes('--disable-content-protection');
-
 // While surfaces are hidden the window is re-raised on this interval, since something else
 // (a call app, a fullscreen share) can still end up above it.
 let raiseTimer: NodeJS.Timeout | null = null;
@@ -200,11 +196,13 @@ export function canMinimize(): boolean {
 }
 
 /**
- * Whether the window is hidden from screen capture. Stealth always protects: it is the explicit
- * request to be invisible, and a capture setting chosen for an ordinary window must not undo it.
+ * Whether the window is hidden from other apps' screen capture. The setting alone decides it -
+ * stealth does not, because protection is not something the app can promise: on macOS,
+ * ScreenCaptureKit recorders ignore it by design. The renderer warns before a live session and
+ * shows the state during one instead of implying stealth makes the window invisible.
  */
 function shouldProtectContent(): boolean {
-  return _stealth || ownCaptures > 0 || !(_allowScreenCapture || captureForcedByFlag);
+  return ownCaptures > 0 || !_allowScreenCapture;
 }
 
 /**
@@ -399,7 +397,7 @@ export function refreshWindowSurfaces(): void {
   // `stealthUnavailableReason()` - so a run that ends takes it with it, and this is the one place
   // every ending passes through. Left to the renderer's stop path alone it would be one of
   // several: the stop hotkey, a teardown decided in main, a session that ends while the window is
-  // hidden. Any of those missing it leaves the app click-through, invisible to a screen capture
+  // hidden. Any of those missing it leaves the app click-through, off the taskbar
   // and unfocusable, with no interview on screen to explain why and only a global hotkey out.
   if (_stealth && !isAssistantRunning()) {
     // Applies the surfaces itself, so returning here is not skipping that.
@@ -741,8 +739,9 @@ export function disableStealth(): void {
  * Why entering stealth is refused right now, or `null` when it is available.
  *
  * **Stealth is a live-interview control, and this is where that is enforced.** What it does is
- * hide the window from a screen capture and pin it over the call; the screen share it hides from
- * only exists during a real interview. Everywhere else it is a mode with nothing to hide that
+ * take the window off the taskbar and pin it over the call; the screen share it stays out of
+ * the way of only exists during a real interview. Everywhere else it is a mode with nothing to
+ * hide that
  * takes the taskbar button, the Dock icon, the traffic lights and mouse input away - so a hotkey
  * pressed on the home screen, on the account page or on the login form left the app apparently
  * gone, with the same hotkey as the only way back. The button on the control bar was already

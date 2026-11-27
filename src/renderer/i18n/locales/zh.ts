@@ -307,7 +307,7 @@ export const zh: Translation = {
   },
   allowScreenCaptureField: {
     label: '允许屏幕捕获',
-    description: '允许屏幕共享和录屏看到应用窗口。隐身模式下始终会隐藏。',
+    description: '允许屏幕共享和录屏看到应用窗口。隐身模式下同样适用。',
   },
   mockHintsField: {
     label: '模拟面试中显示提示',
@@ -352,7 +352,8 @@ export const zh: Translation = {
       StopAll: { title: '全部停止', description: '停止助手并退出隐身模式' },
       ToggleStealth: {
         title: '切换隐身',
-        description: '实时面试期间对屏幕捕获隐藏应用。再按一次相同按键即可恢复。',
+        description:
+          '实时面试期间将窗口变为可点击穿透的悬浮层，并从任务栏隐藏。再按一次相同按键即可恢复。',
       },
       Opacity: { title: '切换透明度', description: '在隐身模式下切换窗口透明度' },
       ToggleTranscript: {
@@ -529,7 +530,7 @@ export const zh: Translation = {
     enterStealth: '进入隐身模式',
     stealthMode: '隐身模式',
     stealthUnavailable: '实时面试开始后才可用 - 现在还没有需要隐藏的内容。',
-    stealthAvailable: '对屏幕捕获隐藏应用。再按相同快捷键即可恢复。',
+    stealthAvailable: '将窗口变为可点击穿透的悬浮层，并从任务栏隐藏。再按相同快捷键即可恢复。',
     captureScreenshot: '截取屏幕截图',
     captureScreenshotTooltip: '截取屏幕',
     captureFailed: '截图失败',
@@ -708,6 +709,25 @@ export const zh: Translation = {
         discard: '放弃并返回首页',
       },
     },
+  },
+
+  screenCapture: {
+    capturableLabel: '可被捕获',
+    capturableHint: '屏幕共享和录屏可以看到此窗口。要隐藏它，请在设置中关闭“允许屏幕捕获”。',
+    limitedLabel: '保护有限',
+    limitedHint:
+      '对大多数捕获方式隐藏，但在 macOS 上，较新的录屏软件和部分会议应用仍可看到此窗口。',
+    protectedLabel: '捕获不可见',
+    protectedHint: '屏幕共享和录屏无法看到此窗口。',
+    capturableTitle: '屏幕共享可以看到此窗口',
+    capturableDescription:
+      '已允许屏幕捕获，观看你屏幕共享或录屏的人都会看到本应用，隐身模式下也一样。',
+    limitedTitle: 'macOS 上的隐藏能力有限',
+    limitedDescription:
+      '窗口已受捕获保护，但 macOS 仍允许较新的录屏软件和部分会议应用捕获它。请假设共享的屏幕可能会显示它。',
+    startAnyway: '仍然开始',
+    hideAndStart: '隐藏并开始',
+    start: '开始',
   },
 
   headphoneNotice: {
