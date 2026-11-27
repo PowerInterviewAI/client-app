@@ -51,7 +51,7 @@ export interface RuntimeConfig {
   hideTaskbarWhileRunning: boolean;
 
   // Let screen capture see the main window. Off by default: content protection is on unless the
-  // user opts out here, and stealth mode protects the window whatever this says.
+  // user opts out here. This is the only input - stealth mode does not override it.
   allowScreenCapture: boolean;
 }
 

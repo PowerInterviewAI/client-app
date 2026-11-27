@@ -8,7 +8,9 @@ import { cn } from '@/lib/utils';
 interface ScreenCaptureBadgeProps {
   /**
    * `bar` is icon-only, because the control bar is already full at the 840px minimum width.
-   * `status` carries a label, sized for the stealth status panel's badge row.
+   * `status` adds a label from 1000px up, sized for the stealth status panel's badge row. That row
+   * is already full at the 840px minimum in German and Russian, so below it the icon and the
+   * tooltip carry the state.
    */
   variant: 'bar' | 'status';
   className?: string;
@@ -45,7 +47,7 @@ export function ScreenCaptureBadge({ variant, className }: ScreenCaptureBadgePro
           )}
         >
           <Icon className="h-3.5 w-3.5 shrink-0" />
-          {variant === 'status' && <span>{label}</span>}
+          {variant === 'status' && <span className="hidden min-[1000px]:inline">{label}</span>}
         </div>
       </TooltipTrigger>
       <TooltipContent sideOffset={4} className="max-w-xs">
