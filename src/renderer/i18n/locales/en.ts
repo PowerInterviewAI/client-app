@@ -338,7 +338,7 @@ export const en = {
   allowScreenCaptureField: {
     label: 'Allow screen capture',
     description:
-      'Lets screen shares and recordings see the app window. Stealth mode always hides it.',
+      'Lets screen shares and recordings see the app window. Applies in stealth mode too.',
   },
   mockHintsField: {
     label: 'Show hints in mock interviews',
@@ -392,7 +392,7 @@ export const en = {
       ToggleStealth: {
         title: 'Toggle Stealth',
         description:
-          'Hide from screen capture during a live interview. The same keys bring it back.',
+          'Make the window a click-through overlay with no taskbar button during a live interview. The same keys bring it back.',
       },
       Opacity: { title: 'Toggle Opacity', description: 'Toggle window opacity in stealth mode' },
       ToggleTranscript: {
@@ -575,7 +575,8 @@ export const en = {
     stealthMode: 'Stealth Mode',
     stealthUnavailable:
       'Available once the live interview is running - there is nothing to hide from yet.',
-    stealthAvailable: 'Hides the app from screen capture. The same shortcut brings it back.',
+    stealthAvailable:
+      'Makes the window a click-through overlay with no taskbar button. The same shortcut brings it back.',
     captureScreenshot: 'Capture screenshot',
     captureScreenshotTooltip: 'Capture Screenshot',
     captureFailed: 'Failed to capture screenshot',
@@ -764,6 +765,24 @@ export const en = {
         discard: 'Discard and go home',
       },
     },
+  },
+
+  screenCapture: {
+    capturableLabel: 'Visible to capture',
+    capturableHint:
+      'Screen shares and recordings can see this window. Turn off "Allow screen capture" in Configuration to hide it.',
+    limitedLabel: 'Capture limited',
+    limitedHint:
+      'Hidden from most capture, but on macOS newer recorders and some meeting apps can still see this window.',
+    capturableTitle: 'Screen shares can see this window',
+    capturableDescription:
+      'Screen capture is allowed, so anyone watching your screen share or recording will see the app - in stealth mode too.',
+    limitedTitle: 'Hiding is limited on macOS',
+    limitedDescription:
+      'The window is protected from capture, but macOS lets newer recorders and some meeting apps capture it anyway. Assume a shared screen may show it.',
+    startAnyway: 'Start anyway',
+    hideAndStart: 'Hide and start',
+    start: 'Start',
   },
 
   headphoneNotice: {

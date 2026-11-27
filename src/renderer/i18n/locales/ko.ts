@@ -315,7 +315,7 @@ export const ko: Translation = {
   },
   allowScreenCaptureField: {
     label: '화면 캡처 허용',
-    description: '화면 공유와 녹화에서 앱 창이 보이도록 합니다. 스텔스 모드에서는 항상 숨겨집니다.',
+    description: '화면 공유와 녹화에서 앱 창이 보이도록 합니다. 스텔스 모드에도 적용됩니다.',
   },
   mockHintsField: {
     label: '모의 면접에서 힌트 표시',
@@ -366,7 +366,7 @@ export const ko: Translation = {
       ToggleStealth: {
         title: '스텔스 전환',
         description:
-          '실시간 면접 중 화면 캡처에서 앱을 숨깁니다. 같은 키를 누르면 다시 나타납니다.',
+          '실시간 면접 중 창을 클릭이 통과하는 오버레이로 바꾸고 작업 표시줄에서 숨깁니다. 같은 키를 누르면 다시 나타납니다.',
       },
       Opacity: { title: '투명도 전환', description: '스텔스 모드에서 창 투명도를 전환합니다' },
       ToggleTranscript: {
@@ -547,7 +547,8 @@ export const ko: Translation = {
     enterStealth: '스텔스 모드 시작',
     stealthMode: '스텔스 모드',
     stealthUnavailable: '실시간 면접이 실행되면 사용할 수 있습니다 - 아직은 숨길 것이 없습니다.',
-    stealthAvailable: '화면 캡처에서 앱을 숨깁니다. 같은 단축키를 누르면 다시 나타납니다.',
+    stealthAvailable:
+      '창을 클릭이 통과하는 오버레이로 바꾸고 작업 표시줄에서 숨깁니다. 같은 단축키를 누르면 다시 나타납니다.',
     captureScreenshot: '스크린샷 찍기',
     captureScreenshotTooltip: '화면 캡처',
     captureFailed: '스크린샷을 찍지 못했습니다',
@@ -726,6 +727,24 @@ export const ko: Translation = {
         discard: '버리고 홈으로',
       },
     },
+  },
+
+  screenCapture: {
+    capturableLabel: '캡처에 보임',
+    capturableHint:
+      '화면 공유와 녹화에서 이 창이 보입니다. 숨기려면 설정에서 "화면 캡처 허용"을 끄세요.',
+    limitedLabel: '보호 제한됨',
+    limitedHint:
+      '대부분의 캡처에서는 숨겨지지만, macOS에서는 최신 녹화 앱과 일부 회의 앱에서 이 창이 보일 수 있습니다.',
+    capturableTitle: '화면 공유에서 이 창이 보입니다',
+    capturableDescription:
+      '화면 캡처가 허용되어 있어 화면 공유나 녹화를 보는 사람에게 앱이 보입니다. 스텔스 모드에서도 마찬가지입니다.',
+    limitedTitle: 'macOS에서는 숨기기가 제한됩니다',
+    limitedDescription:
+      '창은 캡처로부터 보호되지만, macOS에서는 최신 녹화 앱과 일부 회의 앱이 그래도 캡처할 수 있습니다. 공유 화면에 보일 수 있다고 생각하세요.',
+    startAnyway: '그냥 시작',
+    hideAndStart: '숨기고 시작',
+    start: '시작',
   },
 
   headphoneNotice: {

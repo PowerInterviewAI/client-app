@@ -321,7 +321,7 @@ export const ja: Translation = {
   allowScreenCaptureField: {
     label: '画面キャプチャを許可',
     description:
-      '画面共有や録画でアプリのウィンドウが映るようにします。ステルスモードでは常に隠れます。',
+      '画面共有や録画でアプリのウィンドウが映るようにします。ステルスモードでも同じです。',
   },
   mockHintsField: {
     label: '模擬面接でヒントを表示',
@@ -371,7 +371,8 @@ export const ja: Translation = {
       },
       ToggleStealth: {
         title: 'ステルス切り替え',
-        description: 'ライブ面接中、画面キャプチャからアプリを隠します。同じキーで元に戻ります。',
+        description:
+          'ライブ面接中、ウィンドウをクリックが透過するオーバーレイにし、タスクバーから隠します。同じキーで元に戻ります。',
       },
       Opacity: {
         title: '透明度の切り替え',
@@ -558,7 +559,8 @@ export const ja: Translation = {
     enterStealth: 'ステルスモードに入る',
     stealthMode: 'ステルスモード',
     stealthUnavailable: 'ライブ面接の実行中に使用できます - 今はまだ隠すものがありません。',
-    stealthAvailable: '画面キャプチャからアプリを隠します。同じショートカットで元に戻ります。',
+    stealthAvailable:
+      'ウィンドウをクリックが透過するオーバーレイにし、タスクバーから隠します。同じショートカットで元に戻ります。',
     captureScreenshot: 'スクリーンショットを撮る',
     captureScreenshotTooltip: '画面をキャプチャ',
     captureFailed: 'スクリーンショットを撮れませんでした',
@@ -738,6 +740,24 @@ export const ja: Translation = {
         discard: '破棄してホームへ',
       },
     },
+  },
+
+  screenCapture: {
+    capturableLabel: 'キャプチャに映ります',
+    capturableHint:
+      '画面共有や録画にこのウィンドウが映ります。隠すには設定で「画面キャプチャを許可」をオフにしてください。',
+    limitedLabel: '保護は限定的',
+    limitedHint:
+      'ほとんどのキャプチャからは隠れますが、macOS では新しい録画アプリや一部の会議アプリにこのウィンドウが映ることがあります。',
+    capturableTitle: '画面共有にこのウィンドウが映ります',
+    capturableDescription:
+      '画面キャプチャが許可されているため、画面共有や録画を見ている人にアプリが見えます。ステルスモードでも同様です。',
+    limitedTitle: 'macOS では隠す機能が限定的です',
+    limitedDescription:
+      'ウィンドウはキャプチャから保護されていますが、macOS では新しい録画アプリや一部の会議アプリがそれでもキャプチャできます。共有画面に映る可能性があると考えてください。',
+    startAnyway: 'このまま開始',
+    hideAndStart: '隠して開始',
+    start: '開始',
   },
 
   headphoneNotice: {

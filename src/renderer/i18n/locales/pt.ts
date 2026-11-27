@@ -323,7 +323,7 @@ export const pt: Translation = {
   allowScreenCaptureField: {
     label: 'Permitir captura de tela',
     description:
-      'Deixa compartilhamentos de tela e gravações verem a janela do app. O modo furtivo sempre a esconde.',
+      'Deixa compartilhamentos de tela e gravações verem a janela do app. Vale também no modo furtivo.',
   },
   mockHintsField: {
     label: 'Mostrar dicas nas entrevistas simuladas',
@@ -372,7 +372,7 @@ export const pt: Translation = {
       ToggleStealth: {
         title: 'Modo furtivo',
         description:
-          'Esconde o app da captura de tela durante uma entrevista ao vivo. As mesmas teclas o trazem de volta.',
+          'Durante uma entrevista ao vivo, transforma a janela numa sobreposição que deixa passar cliques, sem botão na barra de tarefas. As mesmas teclas a trazem de volta.',
       },
       Opacity: { title: 'Opacidade', description: 'Alterna a opacidade da janela no modo furtivo' },
       ToggleTranscript: {
@@ -556,7 +556,8 @@ export const pt: Translation = {
     stealthMode: 'Modo furtivo',
     stealthUnavailable:
       'Disponível quando a entrevista ao vivo estiver em execução: ainda não há nada a esconder.',
-    stealthAvailable: 'Esconde o app da captura de tela. O mesmo atalho o traz de volta.',
+    stealthAvailable:
+      'Transforma a janela numa sobreposição que deixa passar cliques, sem botão na barra de tarefas. O mesmo atalho a traz de volta.',
     captureScreenshot: 'Tirar captura de tela',
     captureScreenshotTooltip: 'Capturar tela',
     captureFailed: 'Não foi possível tirar a captura de tela',
@@ -737,6 +738,24 @@ export const pt: Translation = {
         discard: 'Descartar e ir ao início',
       },
     },
+  },
+
+  screenCapture: {
+    capturableLabel: 'Visível na captura',
+    capturableHint:
+      'Compartilhamentos de tela e gravações veem esta janela. Desative "Permitir captura de tela" nas configurações para escondê-la.',
+    limitedLabel: 'Proteção limitada',
+    limitedHint:
+      'Escondida da maioria das capturas, mas no macOS gravadores mais novos e alguns apps de reunião ainda podem vê-la.',
+    capturableTitle: 'Compartilhamentos de tela veem esta janela',
+    capturableDescription:
+      'A captura de tela está permitida, então quem vir seu compartilhamento ou gravação verá o app, inclusive no modo furtivo.',
+    limitedTitle: 'Esconder é limitado no macOS',
+    limitedDescription:
+      'A janela está protegida, mas o macOS deixa gravadores mais novos e alguns apps de reunião capturá-la mesmo assim. Conte com a possibilidade de uma tela compartilhada mostrá-la.',
+    startAnyway: 'Começar assim mesmo',
+    hideAndStart: 'Esconder e começar',
+    start: 'Começar',
   },
 
   headphoneNotice: {

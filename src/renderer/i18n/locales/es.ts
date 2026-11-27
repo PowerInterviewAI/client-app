@@ -331,7 +331,7 @@ export const es: Translation = {
   allowScreenCaptureField: {
     label: 'Permitir la captura de pantalla',
     description:
-      'Permite que al compartir pantalla o grabar se vea la ventana de la aplicación. El modo sigiloso siempre la oculta.',
+      'Permite que al compartir pantalla o grabar se vea la ventana de la aplicación. También en modo sigiloso.',
   },
   mockHintsField: {
     label: 'Mostrar pistas en las entrevistas de práctica',
@@ -383,7 +383,7 @@ export const es: Translation = {
       ToggleStealth: {
         title: 'Modo sigiloso',
         description:
-          'Oculta la aplicación de la captura de pantalla durante una entrevista. Las mismas teclas la vuelven a mostrar.',
+          'Durante una entrevista, convierte la ventana en una capa que deja pasar los clics, sin botón en la barra de tareas. Las mismas teclas la vuelven a mostrar.',
       },
       Opacity: {
         title: 'Opacidad',
@@ -571,7 +571,7 @@ export const es: Translation = {
     stealthUnavailable:
       'Disponible cuando la entrevista en directo esté en marcha: todavía no hay nada que ocultar.',
     stealthAvailable:
-      'Oculta la aplicación de la captura de pantalla. El mismo atajo la vuelve a mostrar.',
+      'Convierte la ventana en una capa que deja pasar los clics, sin botón en la barra de tareas. El mismo atajo la vuelve a mostrar.',
     captureScreenshot: 'Hacer captura de pantalla',
     captureScreenshotTooltip: 'Capturar pantalla',
     captureFailed: 'No se pudo hacer la captura de pantalla',
@@ -752,6 +752,24 @@ export const es: Translation = {
         discard: 'Descartar e ir al inicio',
       },
     },
+  },
+
+  screenCapture: {
+    capturableLabel: 'Visible en capturas',
+    capturableHint:
+      'Al compartir pantalla o grabar se ve esta ventana. Desactiva «Permitir la captura de pantalla» en Configuración para ocultarla.',
+    limitedLabel: 'Protección limitada',
+    limitedHint:
+      'Oculta de la mayoría de capturas, pero en macOS las grabadoras más recientes y algunas apps de reuniones aún pueden verla.',
+    capturableTitle: 'Al compartir pantalla se ve esta ventana',
+    capturableDescription:
+      'La captura de pantalla está permitida, así que quien vea lo que compartes o grabas verá la aplicación, también en modo sigiloso.',
+    limitedTitle: 'En macOS la ocultación es limitada',
+    limitedDescription:
+      'La ventana está protegida, pero macOS permite que las grabadoras más recientes y algunas apps de reuniones la capturen igualmente. Cuenta con que una pantalla compartida puede mostrarla.',
+    startAnyway: 'Empezar igualmente',
+    hideAndStart: 'Ocultar y empezar',
+    start: 'Empezar',
   },
 
   headphoneNotice: {

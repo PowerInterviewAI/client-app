@@ -335,7 +335,7 @@ export const fr: Translation = {
   allowScreenCaptureField: {
     label: 'Autoriser la capture d’écran',
     description:
-      'Laisse les partages d’écran et les enregistrements voir la fenêtre de l’application. Le mode furtif la masque toujours.',
+      'Laisse les partages d’écran et les enregistrements voir la fenêtre de l’application. S’applique aussi en mode furtif.',
   },
   mockHintsField: {
     label: 'Afficher des indices pendant les entretiens d’entraînement',
@@ -388,7 +388,7 @@ export const fr: Translation = {
       ToggleStealth: {
         title: 'Mode furtif',
         description:
-          'Masque l’application des captures d’écran pendant un entretien en direct. Les mêmes touches la font revenir.',
+          'Pendant un entretien en direct, transforme la fenêtre en calque traversable par les clics, sans bouton dans la barre des tâches. Les mêmes touches la font revenir.',
       },
       Opacity: { title: 'Opacité', description: 'Bascule l’opacité de la fenêtre en mode furtif' },
       ToggleTranscript: {
@@ -575,7 +575,7 @@ export const fr: Translation = {
     stealthUnavailable:
       'Disponible une fois l’entretien en direct lancé : il n’y a encore rien à masquer.',
     stealthAvailable:
-      'Masque l’application des captures d’écran. Le même raccourci la fait revenir.',
+      'Transforme la fenêtre en calque traversable par les clics, sans bouton dans la barre des tâches. Le même raccourci la fait revenir.',
     captureScreenshot: 'Prendre une capture d’écran',
     captureScreenshotTooltip: 'Capture d’écran',
     captureFailed: 'Impossible de prendre la capture d’écran',
@@ -756,6 +756,24 @@ export const fr: Translation = {
         discard: 'Abandonner et revenir à l’accueil',
       },
     },
+  },
+
+  screenCapture: {
+    capturableLabel: 'Visible en capture',
+    capturableHint:
+      'Les partages d’écran et les enregistrements voient cette fenêtre. Désactivez « Autoriser la capture d’écran » dans la configuration pour la masquer.',
+    limitedLabel: 'Protection limitée',
+    limitedHint:
+      'Masquée de la plupart des captures, mais sur macOS les enregistreurs récents et certaines applications de réunion peuvent encore la voir.',
+    capturableTitle: 'Les partages d’écran voient cette fenêtre',
+    capturableDescription:
+      'La capture d’écran est autorisée : quiconque regarde votre partage ou votre enregistrement verra l’application, y compris en mode furtif.',
+    limitedTitle: 'Le masquage est limité sur macOS',
+    limitedDescription:
+      'La fenêtre est protégée, mais macOS laisse les enregistreurs récents et certaines applications de réunion la capturer quand même. Partez du principe qu’un écran partagé peut la montrer.',
+    startAnyway: 'Démarrer quand même',
+    hideAndStart: 'Masquer et démarrer',
+    start: 'Démarrer',
   },
 
   headphoneNotice: {
