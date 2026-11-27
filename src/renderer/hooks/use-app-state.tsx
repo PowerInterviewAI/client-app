@@ -43,7 +43,6 @@ class AppStateManager {
       subscriptionExpiresAt: raw.subscriptionExpiresAt,
       subscriptionPlan: raw.subscriptionPlan,
       userRole: raw.userRole,
-      providedLLMModel: raw.providedLLMModel,
       creditsPerMinute: raw.creditsPerMinute,
       interviewConfig: raw.interviewConfig ?? { fullName: '', hasProfileData: false, hasContextData: false },
       interviewConfigLoaded: raw.interviewConfigLoaded ?? false,

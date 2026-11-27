@@ -593,6 +593,9 @@ export const ko: Translation = {
 
   creditsDisplay: {
     freePlan: '무료',
+    /** The model tier, shown instead of the backend's exact model name. */
+    freeModel: '무료 모델',
+    sotaModel: '최신 모델',
     planNames: {
       monthly: '월간',
       quarterly: '3개월',

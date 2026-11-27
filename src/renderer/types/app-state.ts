@@ -52,7 +52,6 @@ export interface AppState {
   /** The last pass applied (`monthly` / `quarterly` / `yearly`), for display; null when unknown. */
   subscriptionPlan?: string | null;
   userRole?: UserRole;
-  providedLLMModel?: string;
   interviewConfig: InterviewConfigSummary;
   interviewConfigLoaded: boolean;
   /**

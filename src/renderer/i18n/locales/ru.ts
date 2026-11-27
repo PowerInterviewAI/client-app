@@ -643,6 +643,9 @@ export const ru: Translation = {
 
   creditsDisplay: {
     freePlan: 'Бесплатно',
+    /** The model tier, shown instead of the backend's exact model name. */
+    freeModel: 'Базовая модель',
+    sotaModel: 'Передовая модель',
     planNames: {
       monthly: 'Месячная',
       quarterly: 'Квартальная',

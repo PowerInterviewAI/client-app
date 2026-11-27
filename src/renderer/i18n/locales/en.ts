@@ -622,6 +622,9 @@ export const en = {
 
   creditsDisplay: {
     freePlan: 'Free',
+    /** The model tier, shown instead of the backend's exact model name. */
+    freeModel: 'Free model',
+    sotaModel: 'SOTA model',
     /** The plan an active subscription was bought as; `other` when the backend did not say. */
     planNames: {
       monthly: 'Monthly',

@@ -69,6 +69,10 @@ export async function run() {
   // No-op updates must not even schedule a broadcast, so flushing produces nothing.
   appStateService.flushRenderer();
   check('identical updates do not broadcast', sent.length === baseline);
+  check(
+    'the exact model name is never broadcast',
+    sent.every(({ payload }) => typeof payload !== 'object' || !('providedLLMModel' in payload))
+  );
 
   appStateService.updateState({ isBackendLive: false });
   appStateService.flushRenderer();

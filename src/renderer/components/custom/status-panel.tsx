@@ -20,7 +20,6 @@ interface StatusPanelProps {
   runningState: RunningState;
   credits: number;
   subscription: SubscriptionSummary;
-  llmModel: string;
   creditsPerMinute?: number;
 }
 
@@ -34,7 +33,6 @@ const badgeClass = (active: boolean) =>
 
 export default function StatusPanel({
   runningState,
-  llmModel,
   credits,
   subscription,
   creditsPerMinute,
@@ -51,7 +49,6 @@ export default function StatusPanel({
       <CreditsDisplay
         credits={credits}
         subscription={subscription}
-        llmModel={llmModel}
         creditsPerMinute={creditsPerMinute}
         className="ml-2"
       />

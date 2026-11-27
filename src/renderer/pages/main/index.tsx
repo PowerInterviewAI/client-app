@@ -402,7 +402,6 @@ export default function MainPage() {
           runningState={appState?.runningState ?? RunningState.Idle}
           credits={appState?.credits ?? 0}
           subscription={subscriptionOf(appState)}
-          llmModel={appState?.providedLLMModel ?? ''}
           creditsPerMinute={appState?.creditsPerMinute}
         />
       )}

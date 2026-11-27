@@ -17,7 +17,6 @@ interface CreditsDisplayProps {
   /** The free-tier balance, in credits. */
   credits: number;
   subscription: SubscriptionSummary;
-  llmModel?: string;
   /** From the backend ping; falls back to the compiled-in mirror while that has not arrived. */
   creditsPerMinute?: number;
   className?: string;
@@ -27,16 +26,17 @@ interface CreditsDisplayProps {
 export default function CreditsDisplay({
   credits,
   subscription,
-  llmModel,
   creditsPerMinute,
   className,
   style,
 }: CreditsDisplayProps) {
+  const t = useT();
   const now = useNow();
+  const subscribed = isSubscriptionActive(subscription, now);
 
   return (
     <div className={cn('flex text-xs font-bold gap-2', className)} style={style}>
-      {isSubscriptionActive(subscription, now) && subscription.expiresAt !== null ? (
+      {subscribed && subscription.expiresAt !== null ? (
         <SubscribedSummary
           subscription={subscription}
           expiresAt={subscription.expiresAt}
@@ -45,12 +45,11 @@ export default function CreditsDisplay({
       ) : (
         <FreeSummary credits={credits} creditsPerMinute={creditsPerMinute} />
       )}
-      {llmModel && (
-        <>
-          <hr className="h-4 border border-border" />
-          <span className="text-muted-foreground">{llmModel}</span>
-        </>
-      )}
+      {/* The tier, never the backend's exact model name. */}
+      <hr className="h-4 border border-border" />
+      <span className="text-muted-foreground">
+        {subscribed ? t.creditsDisplay.sotaModel : t.creditsDisplay.freeModel}
+      </span>
     </div>
   );
 }

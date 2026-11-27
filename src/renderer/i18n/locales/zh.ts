@@ -575,6 +575,9 @@ export const zh: Translation = {
 
   creditsDisplay: {
     freePlan: '免费',
+    /** The model tier, shown instead of the backend's exact model name. */
+    freeModel: '免费模型',
+    sotaModel: '最先进模型',
     planNames: {
       monthly: '月度',
       quarterly: '季度',

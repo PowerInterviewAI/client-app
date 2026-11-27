@@ -603,6 +603,9 @@ export const pt: Translation = {
 
   creditsDisplay: {
     freePlan: 'Grátis',
+    /** The model tier, shown instead of the backend's exact model name. */
+    freeModel: 'Modelo grátis',
+    sotaModel: 'Modelo SOTA',
     planNames: {
       monthly: 'Mensal',
       quarterly: 'Trimestral',

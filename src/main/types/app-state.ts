@@ -204,6 +204,8 @@ export interface AppState {
 }
 
 /** The app state as sent to the renderer, with the interview config reduced to a summary. */
-export type RendererAppState = Omit<AppState, 'interviewConfig'> & {
+// `providedLLMModel` stays in main: the app shows a generic "free model" / "SOTA model" label, and
+// the exact backend model name is not something to put on screen.
+export type RendererAppState = Omit<AppState, 'interviewConfig' | 'providedLLMModel'> & {
   interviewConfig: InterviewConfigSummary;
 };
