@@ -736,6 +736,8 @@ export const ko: Translation = {
     limitedLabel: '보호 제한됨',
     limitedHint:
       '대부분의 캡처에서는 숨겨지지만, macOS에서는 최신 녹화 앱과 일부 회의 앱에서 이 창이 보일 수 있습니다.',
+    protectedLabel: '캡처에 안 보임',
+    protectedHint: '화면 공유와 녹화에서 이 창이 보이지 않습니다.',
     capturableTitle: '화면 공유에서 이 창이 보입니다',
     capturableDescription:
       '화면 캡처가 허용되어 있어 화면 공유나 녹화를 보는 사람에게 앱이 보입니다. 스텔스 모드에서도 마찬가지입니다.',

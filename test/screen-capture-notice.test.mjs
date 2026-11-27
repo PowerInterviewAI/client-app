@@ -19,7 +19,7 @@ export async function run() {
     'the status is capturable whenever capture is allowed',
     /if \(enabled\) return 'capturable'/.test(hook)
   );
-  check('macOS is reported as limited, not protected', /isMac \? 'limited'/.test(hook));
+  check('only Windows is reported as protected', /isWindows \? 'protected' : 'limited'/.test(hook));
 
   const confirmed = panel.indexOf('const handleHeadphonesConfirmed');
   const confirmedBody = panel.slice(confirmed, panel.indexOf('const startAfterNotice'));
@@ -36,6 +36,12 @@ export async function run() {
   check(
     'cancelling the capture notice backs out of the start',
     /<ScreenCaptureNoticeDialog[\s\S]*?onCancel=\{handleStartCancelled\}/.test(panel)
+  );
+
+  const badge = read('../src/renderer/components/custom/screen-capture-badge.tsx');
+  check(
+    'the badge renders the protected state rather than nothing',
+    !/status === 'protected'\) return null/.test(badge) && badge.includes('protectedLabel')
   );
 
   check('the control bar shows the capture badge', panel.includes('<ScreenCaptureBadge'));

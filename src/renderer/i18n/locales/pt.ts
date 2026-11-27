@@ -747,6 +747,8 @@ export const pt: Translation = {
     limitedLabel: 'Proteção limitada',
     limitedHint:
       'Escondida da maioria das capturas, mas no macOS gravadores mais novos e alguns apps de reunião ainda podem vê-la.',
+    protectedLabel: 'Invisível na captura',
+    protectedHint: 'Compartilhamentos de tela e gravações não veem esta janela.',
     capturableTitle: 'Compartilhamentos de tela veem esta janela',
     capturableDescription:
       'A captura de tela está permitida, então quem vir seu compartilhamento ou gravação verá o app, inclusive no modo furtivo.',

@@ -717,6 +717,8 @@ export const zh: Translation = {
     limitedLabel: '保护有限',
     limitedHint:
       '对大多数捕获方式隐藏，但在 macOS 上，较新的录屏软件和部分会议应用仍可看到此窗口。',
+    protectedLabel: '捕获不可见',
+    protectedHint: '屏幕共享和录屏无法看到此窗口。',
     capturableTitle: '屏幕共享可以看到此窗口',
     capturableDescription:
       '已允许屏幕捕获，观看你屏幕共享或录屏的人都会看到本应用，隐身模式下也一样。',

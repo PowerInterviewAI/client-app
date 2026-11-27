@@ -1,6 +1,7 @@
 export const APP_NAME = 'Power Interview AI';
 
 export const isMac = navigator.platform.toUpperCase().includes('MAC');
+export const isWindows = navigator.platform.toUpperCase().startsWith('WIN');
 
 /**
  * Fallback only, for while `AppState.creditsPerMinute` is `undefined` - before the first ping

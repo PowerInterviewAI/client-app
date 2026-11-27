@@ -764,6 +764,8 @@ export const de: Translation = {
     limitedLabel: 'Schutz begrenzt',
     limitedHint:
       'Vor den meisten Aufnahmen verborgen, aber unter macOS können neuere Rekorder und manche Meeting-Apps dieses Fenster trotzdem sehen.',
+    protectedLabel: 'Für Aufnahmen unsichtbar',
+    protectedHint: 'Bildschirmfreigaben und Aufnahmen können dieses Fenster nicht sehen.',
     capturableTitle: 'Bildschirmfreigaben sehen dieses Fenster',
     capturableDescription:
       'Die Bildschirmaufnahme ist erlaubt. Wer deine Freigabe oder Aufnahme sieht, sieht auch die App - auch im Tarnmodus.',

@@ -1,4 +1,4 @@
-import { ScreenShare, ShieldAlert } from 'lucide-react';
+import { ScreenShare, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useScreenCaptureStatus } from '@/hooks/use-screen-capture-status';
@@ -17,19 +17,33 @@ interface ScreenCaptureBadgeProps {
 }
 
 /**
- * Says when a screen share or recording can see the window. Nothing renders while the window is
- * protected - the warning is the state worth noticing, and a permanent "hidden" badge would
- * read as the guarantee the OS does not give.
+ * Says whether a screen share or recording can see the window. All three states render, so the
+ * candidate can confirm protection at a glance rather than inferring it from an absent warning.
+ * `protected` is only reported where the OS honours it; macOS reads as `limited`.
  */
 export function ScreenCaptureBadge({ variant, className }: ScreenCaptureBadgeProps) {
   const t = useT();
   const status = useScreenCaptureStatus();
-  if (status === 'protected') return null;
-
-  const capturable = status === 'capturable';
-  const label = capturable ? t.screenCapture.capturableLabel : t.screenCapture.limitedLabel;
-  const hint = capturable ? t.screenCapture.capturableHint : t.screenCapture.limitedHint;
-  const Icon = capturable ? ScreenShare : ShieldAlert;
+  const { label, hint, Icon, tone } = {
+    capturable: {
+      label: t.screenCapture.capturableLabel,
+      hint: t.screenCapture.capturableHint,
+      Icon: ScreenShare,
+      tone: 'border-destructive/40 bg-destructive/15 text-destructive',
+    },
+    limited: {
+      label: t.screenCapture.limitedLabel,
+      hint: t.screenCapture.limitedHint,
+      Icon: ShieldAlert,
+      tone: 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400',
+    },
+    protected: {
+      label: t.screenCapture.protectedLabel,
+      hint: t.screenCapture.protectedHint,
+      Icon: ShieldCheck,
+      tone: 'border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
+    },
+  }[status];
 
   return (
     <Tooltip>
@@ -40,9 +54,7 @@ export function ScreenCaptureBadge({ variant, className }: ScreenCaptureBadgePro
           className={cn(
             'flex items-center gap-1 font-medium',
             variant === 'bar' ? 'h-8 rounded-lg border px-2' : 'h-6 rounded px-2 text-xs',
-            capturable
-              ? 'border-destructive/40 bg-destructive/15 text-destructive'
-              : 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400',
+            tone,
             className
           )}
         >

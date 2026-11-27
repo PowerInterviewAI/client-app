@@ -740,7 +740,8 @@ export function disableStealth(): void {
  *
  * **Stealth is a live-interview control, and this is where that is enforced.** What it does is
  * take the window off the taskbar and pin it over the call; the screen share it stays out of
- * the way of only exists during a real interview. Everywhere else it is a mode with nothing to hide that
+ * the way of only exists during a real interview. Everywhere else it is a mode with nothing to
+ * hide that
  * takes the taskbar button, the Dock icon, the traffic lights and mouse input away - so a hotkey
  * pressed on the home screen, on the account page or on the login form left the app apparently
  * gone, with the same hotkey as the only way back. The button on the control bar was already

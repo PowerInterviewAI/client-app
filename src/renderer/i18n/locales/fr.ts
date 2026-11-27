@@ -765,6 +765,8 @@ export const fr: Translation = {
     limitedLabel: 'Protection limitée',
     limitedHint:
       'Masquée de la plupart des captures, mais sur macOS les enregistreurs récents et certaines applications de réunion peuvent encore la voir.',
+    protectedLabel: 'Invisible en capture',
+    protectedHint: 'Les partages d’écran et les enregistrements ne voient pas cette fenêtre.',
     capturableTitle: 'Les partages d’écran voient cette fenêtre',
     capturableDescription:
       'La capture d’écran est autorisée : quiconque regarde votre partage ou votre enregistrement verra l’application, y compris en mode furtif.',

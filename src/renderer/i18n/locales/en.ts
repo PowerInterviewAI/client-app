@@ -774,6 +774,8 @@ export const en = {
     limitedLabel: 'Capture limited',
     limitedHint:
       'Hidden from most capture, but on macOS newer recorders and some meeting apps can still see this window.',
+    protectedLabel: 'Invisible to capture',
+    protectedHint: 'Screen shares and recordings cannot see this window.',
     capturableTitle: 'Screen shares can see this window',
     capturableDescription:
       'Screen capture is allowed, so anyone watching your screen share or recording will see the app - in stealth mode too.',

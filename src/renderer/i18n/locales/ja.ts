@@ -749,6 +749,8 @@ export const ja: Translation = {
     limitedLabel: '保護は限定的',
     limitedHint:
       'ほとんどのキャプチャからは隠れますが、macOS では新しい録画アプリや一部の会議アプリにこのウィンドウが映ることがあります。',
+    protectedLabel: 'キャプチャに映りません',
+    protectedHint: '画面共有や録画にこのウィンドウは映りません。',
     capturableTitle: '画面共有にこのウィンドウが映ります',
     capturableDescription:
       '画面キャプチャが許可されているため、画面共有や録画を見ている人にアプリが見えます。ステルスモードでも同様です。',
