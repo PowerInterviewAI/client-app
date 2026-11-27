@@ -201,8 +201,12 @@ export default function HomePage() {
   // second one - both need to settle before "no data" is trustworthy.
   const accountReady = !configLoading && config !== undefined && appState !== null;
   const subscribed = isSubscriptionActive(subscription, now);
-  const firstName =
-    appState?.interviewConfig?.fullName?.trim().split(' ')[0] || email?.split('@')[0];
+  // Held until the account has been read. The email is known well before the name, so falling
+  // back to it straight away greeted every user by their address for a moment and then swapped
+  // it for their name. Until then the greeting carries no name at all.
+  const firstName = appState?.interviewConfigLoaded
+    ? appState.interviewConfig?.fullName?.trim().split(' ')[0] || email?.split('@')[0]
+    : undefined;
   const planText = accountReady ? (planSummary ?? t.home.planUnavailable) : t.common.loading;
 
   const handleStartLive = () => {
