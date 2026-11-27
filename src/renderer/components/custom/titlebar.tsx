@@ -90,7 +90,6 @@ export default function Titlebar() {
           <CreditsDisplay
             credits={appState.credits ?? 0}
             subscription={subscriptionOf(appState)}
-            llmModel={appState.providedLLMModel ?? ''}
             creditsPerMinute={appState.creditsPerMinute}
             style={DRAG}
           />

@@ -153,7 +153,8 @@ export class AppStateService {
    * run to hundreds of KB and every state change broadcasts the whole object.
    */
   getRendererState(): RendererAppState {
-    const { interviewConfig, ...rest } = this.state;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { interviewConfig, providedLLMModel, ...rest } = this.state;
     return {
       ...rest,
       interviewConfig: {

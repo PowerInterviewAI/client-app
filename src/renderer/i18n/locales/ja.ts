@@ -606,6 +606,9 @@ export const ja: Translation = {
 
   creditsDisplay: {
     freePlan: '無料',
+    /** The model tier, shown instead of the backend's exact model name. */
+    freeModel: '無料モデル',
+    sotaModel: '最先端モデル',
     planNames: {
       monthly: '月額',
       quarterly: '3 か月',
